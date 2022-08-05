@@ -1,0 +1,6 @@
+README.md
+setup.py
+ipyvasp.egg-info/PKG-INFO
+ipyvasp.egg-info/SOURCES.txt
+ipyvasp.egg-info/dependency_links.txt
+ipyvasp.egg-info/top_level.txt
