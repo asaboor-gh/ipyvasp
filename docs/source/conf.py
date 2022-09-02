@@ -24,5 +24,7 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'furo'
+import furo
+html_theme = "furo"
+html_theme_path = [furo.get_html_theme_path()]
 html_static_path = ['docs/source/_static']
