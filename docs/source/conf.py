@@ -26,5 +26,6 @@ exclude_patterns = []
 
 import furo
 html_theme = "furo"
-html_theme_path = [furo.get_html_theme_path()]
+html_theme_path = [furo.__path__]
+
 html_static_path = ['docs/source/_static']
