@@ -1,3 +1,4 @@
+ipyvasp
 furo
 ipywidgets==8.0.2
 matplotlib==3.5.3

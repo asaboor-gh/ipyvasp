@@ -9,7 +9,7 @@
 project = 'ipyvasp'
 copyright = '2022, Abdul Saboor'
 author = 'Abdul Saboor'
-release = '0.0.1'
+release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
