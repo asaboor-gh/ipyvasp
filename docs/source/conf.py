@@ -14,7 +14,9 @@ release = '0.0.1'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = [
+    "sphinx.ext.autodoc"
+]
 
 templates_path = ['docs/source/_templates']
 exclude_patterns = []
@@ -29,3 +31,5 @@ html_theme = "furo"
 html_theme_path = furo.__path__ # Unfortunately this is a list itself
 
 html_static_path = ['docs/source/_static']
+
+autodoc_member_order = 'bysource'

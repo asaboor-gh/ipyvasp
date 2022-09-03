@@ -11,7 +11,7 @@ Welcome to ipyvasp's Documentation!
    :caption: Contents:
 
 
-Module and documentation will be available soon!
+Complete Module and documentation will be available soon!
 
 Indices and tables
 ==================
@@ -19,3 +19,15 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. automodule:: ipyvasp.utils
+   :members:
+
+.. automodule:: ipyvasp.serializer
+   :members:
+
+.. automodule:: ipyvasp.iplots
+   :members:
+
+.. automodule:: ipyvasp.widgets
+   :members:
