@@ -65,7 +65,7 @@ def _collect_spin_data(exported_spin_data, bands = [0], elements = [[0],], orbs 
 # Cell
 class SpinDataFrame(pd.DataFrame):
     """Spin data from vasprun.xml is converted to a dataframe.
-    - **Parameters**:
+    Args::
         - path: path to `vasprun.xml` or auto picks in current directory.
         - bands: list of band indices [zero based here], In output data frame you will see corresponding band number based on full data.
         - elements: list of elements to plot. inner list contains ions indices. Can leave empty to discard projection data.
@@ -301,7 +301,7 @@ class SpinDataFrame(pd.DataFrame):
 
     def splot(self,*args, arrows = [], every=1, norm = 1, marker='H', ax = None, quiver_kws = {}, shift = 0, **kwargs):
         """Plot energy in 2D with/without arrows.
-        - **Parameters**:
+        Args::
             - *args: 3 or 4 names of columns, representing [X,Y,Energy,[Anything]], from given args, last one is colormapped. If kwargs has color, that takes precedence.
             - arrows: 2 or 3 names of columns, representing [U,V,[color]]. If quiver_kws has color, that takes precedence.
             - every: every nth point is plotted as arrow.
@@ -357,7 +357,7 @@ class SpinDataFrame(pd.DataFrame):
 
     def splot3d(self,*args, arrows = [], every=1,norm = 1, marker='H', ax = None, quiver_kws = {'arrowstyle':'-|>','size':1}, shift = 0, **kwargs):
         """Plot energy in 3D with/without arrows.
-        - **Parameters**:
+        Args::
             - *args: 3, 4 or 5 names of columns, representing [X,Y,[Z or Energy],Energy, [Anything]], out of given args, last one is color mapped. if kwargs has color, that takes precedence.
             - arrows: 3 or 4 names of columns, representing [U,V,W,[color]]. If color is not given, magnitude of arrows is color mapped. If quiver_kws has color, that takes precedence.
             - every: every nth point is plotted as arrow.

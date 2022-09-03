@@ -125,7 +125,7 @@ class Arrow3D(FancyArrowPatch):
 
 def fancy_quiver3d(X,Y,Z,U,V,W,ax=None,C = 'r',L = 0.7,mutation_scale=10,**kwargs):
     """Plots 3D arrows on a given ax. See [FancyArrowPatch](https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.patches.FancyArrowPatch.html).
-    - **Parameters**
+    Args:
         - X, Y, Z : 1D arrays of coordinates of arrows' tail point.
         - U, V, W : 1D arrays of dx,dy,dz of arrows.
         - ax: 3D axes, if not given, auto created.
@@ -151,7 +151,7 @@ def fancy_quiver3d(X,Y,Z,U,V,W,ax=None,C = 'r',L = 0.7,mutation_scale=10,**kwarg
 # Cell
 def get_selective_dynamics(poscar_data, *, a = None, b = None, c = None) -> np.ndarray:
     """Returns selective dynamics array for a given POSCAR or None if no inputb given. By default, if a direction is not given, it turns ON with others.
-    - **Parameters**
+    Args:
         - poscar_data: POSCAR data.
         - a, b, c: Arrays of shape (N,2) that contain ranges in fractional coordinates to turn selective dynamics on.
 
@@ -197,7 +197,7 @@ def get_selective_dynamics(poscar_data, *, a = None, b = None, c = None) -> np.n
 
 def write_poscar(poscar_data, outfile = None, selective_dynamics = None, overwrite = False):
     """Writes poscar data object to a file or returns string
-    - **Parameters**
+    Args:
         - poscar_data: Output of `export_poscar`,`join_poscars` etc.
         - outfile  : str,file path to write on.
         - selective_dynamics  : A list ['T T T','F F F',...] strings to turn on selective dynamics at required sites. Use `get_selective_dynamics` to build this list precisely.
@@ -239,7 +239,7 @@ def write_poscar(poscar_data, outfile = None, selective_dynamics = None, overwri
 
 def export_poscar(path = None,content = None):
     """Export POSCAR file to python objects. Only Direct POSCAR supported.
-    - **Parameters**
+    Args:
         - path: Path/to/POSCAR file. Auto picks in CWD.
         - content: POSCAR content as string, This takes precedence to path.
     """
@@ -312,7 +312,7 @@ def _save_mp_API(api_key):
 def _load_mp_data(formula,api_key=None,mp_id=None,max_sites = None, min_sites = None):
     """
     - Returns fetched data using request api of python form materials project website.
-    - **Parameters**
+    Args:
         - formula  : Material formula such as 'NaCl'.
         - api_key  : API key for your account from material project site. Auto picks if you already used `_save_mp_API` function.
         - mp_id     : Optional, you can specify material ID to filter results.
@@ -389,7 +389,7 @@ class InvokeMaterialsProject:
     @lru_cache(maxsize=2) #cache for 2 calls
     def request(self,formula,mp_id=None,max_sites = None,min_sites=None):
         """Fetch data using request api of python form materials project website. After request, you can access `cifs` and `poscars`.
-        - **Parameters**
+        Args:
             - formula  : Material formula such as 'NaCl'.
             - mp_id     : Optional, you can specify material ID to filter results.
             - max_sites : Maximum number of sites. If None, sets `min_sites + 1`, if `min_sites = None`, gets all data.
@@ -486,7 +486,8 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
     Generate list of kpoints along high symmetry path. Options are write to file or return KPOINTS list.
     It generates uniformly spaced point with input `n` as just a scale factor of number of points per unit length.
     You can also specify custom number of kpoints in an interval by putting number of kpoints as 4th entry in left kpoint.
-    - **Parameters**
+    Parameters   
+    ----------
         - *ptaches : Any number of disconnected patches where a single patch is a dictionary like {'label': (x,y,z,[N]), ...} where x,y,z is high symmetry point and
                     N (optional) is number of points in current inteval, points in a connected path patch are at least two i.e. `{'p1':[x1,y1,z1],'p2':[x2,y2,z2]}`.
                     A key of a patch should be string reperenting the label of the high symmetry point. A key that starts with '_' is ignored, so you can add points without high symmetry points as well.
@@ -602,7 +603,7 @@ def read_ticks(kpoints_file_path):
 # Cell
 def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec_basis = None):
     """Get Kpath from a string of kpoints (Line-Mode like). Useful in Terminal.
-    - **Parameters**
+    Args:
         - kpath_str: str, a multiline string similiar to line mode of KPOINTS, initial 4 lines are not required.
             - If you do not want to label a point, label it as 'skip' and it will be removed.
             - You can add an interger at end of a line to customize number of points in a given patch.
@@ -667,7 +668,7 @@ def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec
 # Cell
 def _get_basis(path_pos):
     """Returns given(computed) and inverted basis as tuple(given,inverted).
-    - **Parameters**
+    Args:
         - path_pos: path/to/POSCAR or 3 given vectors as rows of a matrix."""
     if isinstance(path_pos,(list,tuple,np.ndarray)) and np.ndim(path_pos) ==2:
         basis = np.array(path_pos)
@@ -684,7 +685,7 @@ def _get_basis(path_pos):
 def get_kmesh(poscar_data, *args, shift = 0, weight = None, cartesian = False, ibzkpt= None, outfile=None, endpoint = True):
     """**Note**: Use `ipyvasp.POSCAR.get_kmesh` to get k-mesh based on current POSCAR.
     - Generates uniform mesh of kpoints. Options are write to file, or return KPOINTS list.
-    - **Parameters**
+    Args:
         - poscar_data: export_poscar() or export_vasprun().poscar().
         - *args: 1 or 3 integers which decide shape of mesh. If 1, mesh points equally spaced based on data from POSCAR.
         - shift  : Only works if cartesian = False. Defualt is 0. Could be a number or list of three numbers to add to interval [0,1].
@@ -767,7 +768,7 @@ def get_kmesh(poscar_data, *args, shift = 0, weight = None, cartesian = False, i
 def _tan_inv(vy,vx):
     """
     - Returns full angle from x-axis counter clockwise.
-    - **Parameters**
+    Args:
         - vy : Perpendicular componet of vector including sign.
         - vx : Base compoent of vector including sign.
     """
@@ -797,7 +798,7 @@ def _tan_inv(vy,vx):
 def order(points,loop=True):
     """
     - Returns indices of counterclockwise ordered vertices of a plane in 3D.
-    - **Parameters**
+    Args:
         - points: numpy array of shape (N,3) or List[List(len=3)].
         - loop  : Default is True and appends start point at end to make a loop.
     - **Example**
@@ -842,7 +843,7 @@ def order(points,loop=True):
 def _out_bz_plane(test_point,plane):
     """
     - Returns True if test_point is between plane and origin. Could be used to sample BZ mesh in place of ConvexHull.
-    - **Parameters**
+    Args:
         - test_points: 3D point.
         - plane      : List of at least three coplanar 3D points.
     """
@@ -859,7 +860,7 @@ def _out_bz_plane(test_point,plane):
 def _rad_angle(v1,v2):
     """
     - Returns interier angle between two vectors.
-    - **Parameters**
+    Args:
         - v1,v2 : Two vectors/points in 3D.
     """
     v1 = np.array(v1)
@@ -885,7 +886,7 @@ def rotation(angle_deg,axis_vec):
 def get_bz(path_pos = None,loop = True,digits=8,primitive=False):
     """
     - Return required information to construct first Brillouin zone in form of tuple (basis, normals, vertices, faces).
-    - **Parameters**
+    Args:
         - path_pos : POSCAR file path or list of 3 Real space vectors in 3D as list[list,list,list].
         - loop   : If True, joins the last vertex of a BZ plane to starting vertex in order to complete loop.
         - digits : int, rounding off decimal places, no effect on intermediate calculations, just for pretty final results.
@@ -982,7 +983,7 @@ def get_bz(path_pos = None,loop = True,digits=8,primitive=False):
 def splot_bz(bz_data, ax = None, plane=None,color='blue',fill=True,vectors=True,v3=False,vname='b',colormap='plasma',light_from=(1,1,1),alpha=0.4):
     """
     - Plots matplotlib's static figure.
-    - **Parameters**
+    Args:
         - bz_data    : Output of `get_bz`.
         - fill       : True by defult, determines whether to fill surface of BZ or not.
         - color      : color to fill surface and stroke color.
@@ -1090,7 +1091,7 @@ def splot_bz(bz_data, ax = None, plane=None,color='blue',fill=True,vectors=True,
 def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)',background = 'rgb(255,255,255)',vname = 'b', special_kpoints = True, alpha=0.4,ortho3d=True,fig=None):
     """
     - Plots interactive figure showing axes,BZ surface, special points and basis, each of which could be hidden or shown.
-    - **Parameters**
+    Args:
         - bz_data    : Output of `get_bz`.
         - fill       : True by defult, determines whether to fill surface of BZ or not.
         - color      : color to fill surface 'rgba(168,204,216,0.4)` by default.
@@ -1188,7 +1189,7 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)',background = 'r
 # Cell
 def to_R3(basis,points):
     """Transforms coordinates of points (relative to non-othogonal basis) into orthogonal space.
-    - **Parameters**
+    Args:
         - basis : Non-orthogonal basis of real or reciprocal space.
         - points: 3D points relative to basis, such as KPOINTS and Lattice Points.
 
@@ -1204,7 +1205,7 @@ def to_R3(basis,points):
 
 def to_basis(basis,coords):
     """Transforms coordinates of points (relative to othogonal basis) into basis space.
-    - **Parameters**
+    Args:
         - basis : Non-orthogonal basis of real or reciprocal space.
         - points: 3D points relative to cartesian axes, such as KPOINTS and Lattice Points.
     """
@@ -1213,7 +1214,7 @@ def to_basis(basis,coords):
 # Cell
 def kpoints2bz(bz_data,kpoints,sys_info = None, primitive=False, shift = 0):
     """Brings KPOINTS inside BZ. Applies `to_R3` only if `primitive=True`.
-    - **Parameters**
+    Args:
         - bz_data  : Output of get_bz(), make sure use same value of `primitive` there and here.
         - kpoints  : List or array of KPOINTS to transorm into BZ or R3.
         - sys_info : If given, returns kpoints using that information. Useful If kpoints are cartesian and you need to scale those.
@@ -1260,7 +1261,7 @@ def kpoints2bz(bz_data,kpoints,sys_info = None, primitive=False, shift = 0):
 # Cell
 def fix_sites(poscar_data,tol=1e-2,eqv_sites=False,translate=None):
     """Add equivalent sites to make a full data shape of lattice. Returns same data after fixing.
-    - **Parameters**
+    Args:
         - poscar_data: Output of `export_poscar` or `export_vasprun().poscar`.
         - tol   : Tolerance value. Default is 0.01.
         - eqv_sites: If True, add sites on edges and faces. If False, just fix coordinates, i.e. `pos > 1 - tol -> pos - 1`, useful for merging poscars to make slabs.
@@ -1304,7 +1305,7 @@ def fix_sites(poscar_data,tol=1e-2,eqv_sites=False,translate=None):
 
 def translate_poscar(poscar_data, offset):
     """ Translate sites of a PPSCAR. Usully a farction of integarers like 1/2,1/4 etc.
-    - **Parameters**
+    Args:
         - poscar_data: Output of `export_poscar` or `export_vasprun().poscar`.
         - offset: A number(+/-) or list of three numbers to translate in a,b,c directions.
     """
@@ -1312,7 +1313,7 @@ def translate_poscar(poscar_data, offset):
 
 def get_pairs(poscar_data, positions, r, tol=1e-3):
     """Returns a tuple of Lattice (coords,pairs), so coords[pairs] given nearest site bonds.
-    - **Parameters**
+    Args:
         - poscar_data: Output of `export_poscar` or `export_vasprun().poscar`.
         - positions: Array(N,3) of fractional positions of lattice sites. If coordinates positions, provide unity basis.
         - r        : Cartesian distance between the pairs in units of Angstrom e.g. 1.2 -> 1.2E-10.
@@ -1501,7 +1502,7 @@ def splot_lat(poscar_data,plane = None, sizes=50,colors=None,colormap=None,
 # Cell
 def join_poscars(poscar1,poscar2,direction='c',tol=1e-2, system = None):
     """Joins two POSCARs in a given direction. In-plane lattice parameters are kept from `poscar1` and basis of `poscar2` parallel to `direction` is modified while volume is kept same.
-    - **Parameters**
+    Args:
         - poscar1, poscar2:  Base and secondary POSCARs respectivly. Output of `export_poscar` or similar object from other functions.
         - direction: The joining direction. It is general and can join in any direction along basis. Expect one of ['a','b','c'].
         - tol: Default is 0.01. It is used to bring sites near 1 to near zero in order to complete sites in plane. Vasp relaxation could move a point, say at 0.00100 to 0.99800 which is not useful while merging sites.
@@ -1575,7 +1576,7 @@ def join_poscars(poscar1,poscar2,direction='c',tol=1e-2, system = None):
 # Cell
 def repeat_poscar(poscar_data, n, direction):
     """Repeat a given POSCAR.
-    - **Parameters**
+    Args:
         - path_poscar: Path/to/POSCAR or `poscar` data object.
         - n: Number of repetitions.
         - direction: Direction of repetition. Can be 'a', 'b' or 'c'.
@@ -1589,7 +1590,7 @@ def repeat_poscar(poscar_data, n, direction):
 
 def scale_poscar(poscar_data,scale = (1,1,1),tol=1e-2):
     """Create larger/smaller cell from a given POSCAR. Can be used to repeat a POSCAR with integer scale values.
-    - **Parameters**
+    Args:
         - poscar_data: `poscar` data object.
         - scale: Tuple of three values along (a,b,c) vectors. int or float values. If number of sites are not as expected in output, tweak `tol` instead of `scale`. You can put a minus sign with `tol` to get more sites and plus sign to reduce sites.
         - tol: It is used such that site positions are blow `1 - tol`, as 1 belongs to next cell, not previous one.
@@ -1648,7 +1649,7 @@ def scale_poscar(poscar_data,scale = (1,1,1),tol=1e-2):
 
 def rotate_poscar(poscar_data,angle_deg,axis_vec):
     """Rotate a given POSCAR.
-    - **Parameters**
+    Args:
         - path_poscar: Path/to/POSCAR or `poscar` data object.
         - angle_deg: Rotation angle in degrees.
         - axis_vec : (x,y,z) of axis about which rotation takes place. Axis passes through origin.
@@ -1743,7 +1744,7 @@ def transform_poscar(poscar_data, transform_matrix, repeat_given = [2,2,2],tol =
 
 def add_vaccum(poscar_data, thickness, direction, left = False):
     """Add vacuum to a POSCAR.
-    - **Parameters**
+    Args:
         - poscar_data: `poscar` data object.
         - thickness: Thickness of vacuum in Angstrom.
         - direction: Direction of vacuum. Can be 'a', 'b' or 'c'.

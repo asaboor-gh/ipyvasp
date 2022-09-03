@@ -1,0 +1,1152 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="Welcome to ipyvasp’s Documentation!" href="index.html" />
+
+    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
+        <title>API - ipyvasp 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">ipyvasp 0.1.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">ipyvasp 0.1.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">API</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this heading">#</a></h1>
+<section id="module-ipyvasp.serializer">
+<span id="data-serialization"></span><h2>Data Serialization<a class="headerlink" href="#module-ipyvasp.serializer" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.serializer.dict2tuple">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.serializer.</span></span><span class="sig-name descname"><span class="pre">dict2tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#dict2tuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.dict2tuple" title="Permalink to this definition">#</a></dt>
+<dd><p>Converts a dictionary (nested as well) to namedtuple, accessible via index and dot notation as well as by unpacking.
+:param name: Name of the tuple.
+:type name: str
+:param d: Dictionary, nested works as well.
+:type d: dict</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.serializer.Dict2Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.serializer.</span></span><span class="sig-name descname"><span class="pre">Dict2Data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#Dict2Data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.Dict2Data" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Creates a <code class="docutils literal notranslate"><span class="pre">Data</span></code> object with dictionary keys as attributes of Data accessible by dot notation or by key.
+Once an attribute is created, it can not be changed from outside.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – Python dictionary (nested as well) containing any python data types.</p>
+</dd>
+</dl>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text"><strong>Usage Example</strong></span><a class="headerlink" href="#id1" title="Permalink to this code">#</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">x</span> <span class="o">=</span> <span class="n">Dict2Data</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;B&#39;</span><span class="p">:{</span><span class="s1">&#39;C&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">}})</span>
+<span class="linenos"> 2</span><span class="n">x</span>
+<span class="linenos"> 3</span><span class="n">Data</span><span class="p">(</span>
+<span class="linenos"> 4</span>    <span class="n">A</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="linenos"> 5</span>    <span class="n">B</span> <span class="o">=</span> <span class="n">Data</span><span class="p">(</span>
+<span class="linenos"> 6</span>        <span class="n">C</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="linenos"> 7</span>        <span class="p">)</span>
+<span class="linenos"> 8</span>    <span class="p">)</span>
+<span class="linenos"> 9</span><span class="n">x</span><span class="o">.</span><span class="n">B</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+<span class="linenos">10</span> <span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.Dict2Data.validated">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#Dict2Data.validated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.Dict2Data.validated" title="Permalink to this definition">#</a></dt>
+<dd><p>Validate data like it’s own or from json/pickle file/string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.Dict2Data.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#Dict2Data.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.Dict2Data.to_dict" title="Permalink to this definition">#</a></dt>
+<dd><p>Converts a <cite>Dict2Data</cite> object (root or nested level) to a dictionary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.Dict2Data.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#Dict2Data.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.Dict2Data.copy" title="Permalink to this definition">#</a></dt>
+<dd><p>Copy of self to avoid changes during inplace operations on numpy arrays.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.Dict2Data.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#Dict2Data.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.Dict2Data.to_json" title="Permalink to this definition">#</a></dt>
+<dd><p>Dumps a <cite>Dict2Data</cite> object (root or nested level) to json.
+:param - outfile: Default is None and returns string. If given, writes to file.
+:param - indent: Json indent. Default is 1.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.Dict2Data.to_pickle">
+<span class="sig-name descname"><span class="pre">to_pickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#Dict2Data.to_pickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.Dict2Data.to_pickle" title="Permalink to this definition">#</a></dt>
+<dd><p>Dumps a <cite>Dict2Data</cite> or subclass object (root or nested level) to pickle.
+:param - outfile: Default is None and returns string. If given, writes to file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.Dict2Data.to_tuple">
+<span class="sig-name descname"><span class="pre">to_tuple</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#Dict2Data.to_tuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.Dict2Data.to_tuple" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a namedtuple.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.Dict2Data.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#Dict2Data.keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.Dict2Data.keys" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.Dict2Data.values">
+<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#Dict2Data.values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.Dict2Data.values" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.Dict2Data.items">
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#Dict2Data.items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.Dict2Data.items" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.serializer.VasprunData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.serializer.</span></span><span class="sig-name descname"><span class="pre">VasprunData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#VasprunData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.VasprunData" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ipyvasp.serializer.Dict2Data" title="ipyvasp.serializer.Dict2Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict2Data</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.VasprunData.get_fermi">
+<span class="sig-name descname"><span class="pre">get_fermi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#VasprunData.get_fermi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.VasprunData.get_fermi" title="Permalink to this definition">#</a></dt>
+<dd><p>Fermi energy based on occupancy. Returns <cite>self.Fermi</cite> if occupancies cannot be resolved. <cite>tol</cite> is the value of occupnacy to ignore as filled.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.VasprunData.fermi">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fermi</span></span><a class="headerlink" href="#ipyvasp.serializer.VasprunData.fermi" title="Permalink to this definition">#</a></dt>
+<dd><p>Fermi energy based on occupancy. Use .get_fermi() if you want to limit the occupancy tolerance.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.VasprunData.Fermi">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Fermi</span></span><a class="headerlink" href="#ipyvasp.serializer.VasprunData.Fermi" title="Permalink to this definition">#</a></dt>
+<dd><p>Fermi energy given in vasprun.xml.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.serializer.SpinData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.serializer.</span></span><span class="sig-name descname"><span class="pre">SpinData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#SpinData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.SpinData" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ipyvasp.serializer.Dict2Data" title="ipyvasp.serializer.Dict2Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict2Data</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.SpinData.get_fermi">
+<span class="sig-name descname"><span class="pre">get_fermi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#SpinData.get_fermi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.SpinData.get_fermi" title="Permalink to this definition">#</a></dt>
+<dd><p>Fermi energy based on occupancy. Returns <cite>self.Fermi</cite> if occupancies cannot be resolved. <cite>tol</cite> is the value of occupnacy to ignore as filled.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.SpinData.fermi">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fermi</span></span><a class="headerlink" href="#ipyvasp.serializer.SpinData.fermi" title="Permalink to this definition">#</a></dt>
+<dd><p>Fermi energy based on occupancy. Use .get_fermi() if you want to limit the occupancy tolerance.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.SpinData.Fermi">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Fermi</span></span><a class="headerlink" href="#ipyvasp.serializer.SpinData.Fermi" title="Permalink to this definition">#</a></dt>
+<dd><p>Fermi energy given in vasprun.xml.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.serializer.PoscarData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.serializer.</span></span><span class="sig-name descname"><span class="pre">PoscarData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#PoscarData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.PoscarData" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ipyvasp.serializer.Dict2Data" title="ipyvasp.serializer.Dict2Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict2Data</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.PoscarData.coords">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coords</span></span><a class="headerlink" href="#ipyvasp.serializer.PoscarData.coords" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the lattice coordinates in cartesian space of the atoms in the poscar data.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.PoscarData.rec_basis">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rec_basis</span></span><a class="headerlink" href="#ipyvasp.serializer.PoscarData.rec_basis" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the reciprocal lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.PoscarData.norms">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">norms</span></span><a class="headerlink" href="#ipyvasp.serializer.PoscarData.norms" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the norm of the lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.PoscarData.rec_norms">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rec_norms</span></span><a class="headerlink" href="#ipyvasp.serializer.PoscarData.rec_norms" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the norm of the reciprocal lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.PoscarData.angles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">angles</span></span><a class="headerlink" href="#ipyvasp.serializer.PoscarData.angles" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the angles of the lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.PoscarData.rec_angles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rec_angles</span></span><a class="headerlink" href="#ipyvasp.serializer.PoscarData.rec_angles" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the angles of reciprocal lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.PoscarData.volume">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">volume</span></span><a class="headerlink" href="#ipyvasp.serializer.PoscarData.volume" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the volume of the lattice.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.PoscarData.rec_volume">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rec_volume</span></span><a class="headerlink" href="#ipyvasp.serializer.PoscarData.rec_volume" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the volume of the reciprocal lattice.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.PoscarData.labels">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#ipyvasp.serializer.PoscarData.labels" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the labels of the atoms in the poscar data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.PoscarData.get_bond_length">
+<span class="sig-name descname"><span class="pre">get_bond_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#PoscarData.get_bond_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.PoscarData.get_bond_length" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the bond length between two atoms names should be as ‘Ga’, ‘As’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.PoscarData.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#PoscarData.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.PoscarData.write" title="Permalink to this definition">#</a></dt>
+<dd><p>Writes the poscar data to a file.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.serializer.GridData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.serializer.</span></span><span class="sig-name descname"><span class="pre">GridData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#GridData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.GridData" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ipyvasp.serializer.Dict2Data" title="ipyvasp.serializer.Dict2Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict2Data</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.serializer.GridData.coords">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coords</span></span><a class="headerlink" href="#ipyvasp.serializer.GridData.coords" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns coordinates of the grid points in shape (3,Nx, Ny,Nz) given by equation</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[(x,y,z) = \frac{i}{N_x}a + \frac{j}{N_y}b + \frac{k}{N_z}c\]</div>
+</div>
+<p>where (a,b,c) are lattice vectors. and i,j,k are the grid indices as in intervals [0, Nx-1], [0, Ny-1], [0, Nz-1].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.serializer.OutcarData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.serializer.</span></span><span class="sig-name descname"><span class="pre">OutcarData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#OutcarData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.OutcarData" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ipyvasp.serializer.Dict2Data" title="ipyvasp.serializer.Dict2Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict2Data</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.serializer.EncodeFromNumpy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.serializer.</span></span><span class="sig-name descname"><span class="pre">EncodeFromNumpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipkeys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensure_ascii</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_circular</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#EncodeFromNumpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.EncodeFromNumpy" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">JSONEncoder</span></code></p>
+<p>Serializes python/Numpy objects via customizing json encoder.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text"><strong>Usage Example</strong></span><a class="headerlink" href="#id2" title="Permalink to this code">#</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">python_dict</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">EncodeFromNumpy</span><span class="p">)</span> <span class="c1"># to get json string.</span>
+<span class="linenos">2</span><span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">EncodeFromNumpy</span><span class="p">)</span> <span class="c1"># to create a file.json.</span>
+</pre></div>
+</div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.EncodeFromNumpy.default">
+<span class="sig-name descname"><span class="pre">default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#EncodeFromNumpy.default"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.EncodeFromNumpy.default" title="Permalink to this definition">#</a></dt>
+<dd><p>Implement this method in a subclass such that it returns
+a serializable object for <code class="docutils literal notranslate"><span class="pre">o</span></code>, or calls the base implementation
+(to raise a <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>).</p>
+<p>For example, to support arbitrary iterators, you could
+implement default like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">iterable</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>
+    <span class="c1"># Let the base class default method raise the TypeError</span>
+    <span class="k">return</span> <span class="n">JSONEncoder</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.serializer.DecodeToNumpy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.serializer.</span></span><span class="sig-name descname"><span class="pre">DecodeToNumpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#DecodeToNumpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.DecodeToNumpy" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">JSONDecoder</span></code></p>
+<p>Deserilizes JSON object to Python/Numpy’s objects.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text"><strong>Usage Example</strong></span><a class="headerlink" href="#id3" title="Permalink to this code">#</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_string</span><span class="p">,</span><span class="bp">cls</span><span class="o">=</span><span class="n">DecodeToNumpy</span><span class="p">)</span> <span class="c1">#  from string</span>
+<span class="linenos">2</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="c1"># from file.</span>
+</pre></div>
+</div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.serializer.DecodeToNumpy.object_hook">
+<span class="sig-name descname"><span class="pre">object_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#DecodeToNumpy.object_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.DecodeToNumpy.object_hook" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.serializer.dump">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.serializer.</span></span><span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_to</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pickle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/ipyvasp/serializer.html#dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.dump" title="Permalink to this definition">#</a></dt>
+<dd><p>Dump <code class="docutils literal notranslate"><span class="pre">Dict2Data</span></code> or subclass object or any dictionary to json or pickle string/file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dict_data</strong> (<em>dict</em><em> or </em><a class="reference internal" href="#ipyvasp.serializer.Dict2Data" title="ipyvasp.serializer.Dict2Data"><em>Dict2Data</em></a><em> or </em><em>its subclass</em>) – Any dictionary/Dict2Data(or subclass Data) object containg numpy arrays, like <code class="docutils literal notranslate"><span class="pre">export_vasprun</span></code> output.</p></li>
+<li><p><strong>dump_to</strong> (<em>str</em>) – Defualt is <code class="docutils literal notranslate"><span class="pre">pickle</span></code> or <code class="docutils literal notranslate"><span class="pre">json</span></code>.</p></li>
+<li><p><strong>outfile</strong> (<em>str</em>) – Defualt is None and return string. File name does not require extension.</p></li>
+<li><p><strong>indent</strong> (<em>int</em>) – Defualt is 1. Only works for json.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.serializer.load">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.serializer.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_or_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/serializer.html#load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.serializer.load" title="Permalink to this definition">#</a></dt>
+<dd><p>Loads a json/pickle dumped file or string by auto detecting it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_or_str</strong> (<em>str</em>) – Filename of pickl/json or their string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ipyvasp.parser">
+<span id="parsers"></span><h2>Parsers<a class="headerlink" href="#module-ipyvasp.parser" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.dict2tuple">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">dict2tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#dict2tuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.dict2tuple" title="Permalink to this definition">#</a></dt>
+<dd><p>Converts a dictionary (nested as well) to namedtuple, accessible via index and dot notation as well as by unpacking.
+:param name: Name of the tuple.
+:type name: str
+:param d: Dictionary, nested works as well.
+:type d: dict</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.read_asxml">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">read_asxml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#read_asxml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.read_asxml" title="Permalink to this definition">#</a></dt>
+<dd><p>Reads a big vasprun.xml file into memory once and then apply commands. If current folder contains <code class="docutils literal notranslate"><span class="pre">vasprun.xml</span></code> file, it automatically picks it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path/To/vasprun.xml</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><p><code class="docutils literal notranslate"><span class="pre">XML</span> <span class="pre">element</span> <span class="pre">tree</span></code> to use in other functions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.xml2dict">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">xml2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xmlnode_or_filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#xml2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.xml2dict" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert xml node or xml file content to dictionary. All output text is in string format, so further processing is required to convert into data types/split etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xmlnode_or_filepath</strong> – It is either a path to an xml file or an <code class="docutils literal notranslate"><span class="pre">xml.etree.ElementTree.Element</span></code> object.</p>
+</dd>
+</dl>
+<p>Each node has <code class="docutils literal notranslate"><span class="pre">tag,text,attr,nodes</span></code> attributes. Every text element can be accessed via
+<code class="docutils literal notranslate"><span class="pre">xml2dict()['nodes'][index]['nodes'][index]...</span></code> tree which makes it simple.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.exclude_kpts">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">exclude_kpts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#exclude_kpts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.exclude_kpts" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.get_ispin">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">get_ispin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#get_ispin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.get_ispin" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.get_force">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">get_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#get_force"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.get_force" title="Permalink to this definition">#</a></dt>
+<dd><p>Reads force on each ion from vasprun.xml</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.get_scsteps">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">get_scsteps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#get_scsteps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.get_scsteps" title="Permalink to this definition">#</a></dt>
+<dd><p>Reads scsteps energies from vasprun.xml</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.get_space_info">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">get_space_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#get_space_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.get_space_info" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.get_summary">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">get_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#get_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.get_summary" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.join_ksegments">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">join_ksegments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kseg_inds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#join_ksegments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.join_ksegments" title="Permalink to this definition">#</a></dt>
+<dd><p>Joins a broken kpath’s next segment to previous. <cite>kseg_inds</cite> should be list of first index of next segment</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.get_kpts">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">get_kpts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#get_kpts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.get_kpts" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.get_tdos">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">get_tdos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#get_tdos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.get_tdos" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.get_evals">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">get_evals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#get_evals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.get_evals" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.get_bands_pro_set">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">get_bands_pro_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipk</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bands_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">range</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#get_bands_pro_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.get_bands_pro_set" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns bands projection of a spin_set(default 1). If spin-polarized calculations, gives SpinUp and SpinDown keys as well.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xml_data</strong> – From <code class="docutils literal notranslate"><span class="pre">read_asxml</span></code> function’s output.</p></li>
+<li><p><strong>skipk</strong> (<em>int</em>) – Number of initil kpoints to skip (Default 0).</p></li>
+<li><p><strong>spin_set</strong> (<em>int</em>) – Spin set to get, default is 1.</p></li>
+<li><p><strong>bands_range</strong> (<em>range</em>) – If elim used in <code class="docutils literal notranslate"><span class="pre">get_evals</span></code>,that will return <code class="docutils literal notranslate"><span class="pre">bands_range</span></code> to use here. Note that range(0,2) will give 2 bands 0,1 but tuple (0,2) will give 3 bands 0,1,2.</p></li>
+<li><p><strong>set_path</strong> (<em>str</em>) – path/to/_set[1,2,3,4].txt, works if <code class="docutils literal notranslate"><span class="pre">split_vasprun</span></code> is used before.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">ipyvasp.Dict2Data</span></code> with attibutes of bands projections and related parameters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ipyvasp.serializer.Dict2Data" title="ipyvasp.serializer.Dict2Data">Dict2Data</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.get_dos_pro_set">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">get_dos_pro_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dos_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">range</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#get_dos_pro_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.get_dos_pro_set" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns dos projection of a spin_set(default 1) as numpy array. If spin-polarized calculations, gives SpinUp and SpinDown keys as well.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xml_data</strong> – From <code class="docutils literal notranslate"><span class="pre">read_asxml</span></code> function</p></li>
+<li><p><strong>spin_set</strong> (<em>int</em>) – Spin set to get, default 1.</p></li>
+<li><p><strong>dos_range</strong> (<em>range</em>) – If elim used in <code class="docutils literal notranslate"><span class="pre">get_tdos</span></code>,that will return dos_range to use here..</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">ipyvasp.Dict2Data</span></code> with attibutes of dos projections and related parameters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ipyvasp.serializer.Dict2Data" title="ipyvasp.serializer.Dict2Data">Dict2Data</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.get_structure">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">get_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#get_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.get_structure" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.export_vasprun">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">export_vasprun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipk</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dos_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#export_vasprun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.export_vasprun" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a full dictionary of all objects from <code class="docutils literal notranslate"><span class="pre">vasprun.xml</span></code> file. It first try to load the data exported by powershell’s <cite>Export-VR(Vasprun)</cite>, which is very fast for large files. It is recommended to export large files in powershell first.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Path to <code class="docutils literal notranslate"><span class="pre">vasprun.xml</span></code> file. Default is <code class="docutils literal notranslate"><span class="pre">'./vasprun.xml'</span></code>.</p></li>
+<li><p><strong>skipk</strong> (<em>int</em>) – Default is None. Automatically detects kpoints to skip.</p></li>
+<li><p><strong>elim</strong> (<em>list</em>) – List [min,max] of energy interval. Default is [], covers all bands.</p></li>
+<li><p><strong>dos_only</strong> (<em>bool</em>) – If True, only returns dos data with minimal other data. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">ipyvasp.serializer.VasprunData</span></code> object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ipyvasp.serializer.VasprunData" title="ipyvasp.serializer.VasprunData">VasprunData</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.islice2array">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">islice2array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_islice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'float'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'\\s+'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include:</span> <span class="pre">~typing.Optional[str]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'#'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_format:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlines:</span> <span class="pre">~typing.Optional[int]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols:</span> <span class="pre">~typing.Optional[tuple]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_shape:</span> <span class="pre">~typing.Optional[tuple]</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#islice2array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.islice2array" title="Permalink to this definition">#</a></dt>
+<dd><p>Reads a sliced array from txt,csv type files and return to array. Also manages if columns lengths are not equal and return 1D array.
+It is faster than loading  whole file into memory. This single function could be used to parse EIGENVAL, PROCAR, DOCAR and similar files
+with just a combination of <code class="docutils literal notranslate"><span class="pre">exclude,</span> <span class="pre">include,start,stop,step</span></code> arguments. See code of <code class="docutils literal notranslate"><span class="pre">ipyvasp.parser.export_locpot</span></code> for example.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_or_islice</strong> – Path/to/file or <code class="docutils literal notranslate"><span class="pre">itertools.islice(file_object)</span></code>. islice is interesting when you want to read different slices of
+an opened file and do not want to open it again.</p></li>
+<li><p><strong>dtype</strong> (<em>conversion function</em>) – float by default. Data type of output array, it is must have argument.</p></li>
+<li><p><strong>start</strong> (<em>int</em>) – Starting line number. Default is 0. It could be a list to read slices from file provided that nlines is int.
+The spacing between adjacent indices in start should be equal to or greater than nlines as pointer in file do not go back on its own.
+<code class="docutils literal notranslate"><span class="pre">start</span></code> should count comments if <code class="docutils literal notranslate"><span class="pre">exclude</span></code> is None. You can use <code class="docutils literal notranslate"><span class="pre">slice_data</span></code> function to get a dictionary of
+<code class="docutils literal notranslate"><span class="pre">start,nlines,</span> <span class="pre">count,</span> <span class="pre">cols,</span> <span class="pre">new_shape</span></code> and unpack in argument instead of thinking too much.</p></li>
+<li><p><strong>nlines</strong> (<em>int</em>) – Number of lines after start respectively. Only work if <code class="docutils literal notranslate"><span class="pre">path_or_islice</span></code> is a file path. could be None or int.</p></li>
+<li><p><strong>count</strong> (<em>int</em>) – Default is -1. <code class="docutils literal notranslate"><span class="pre">count</span> <span class="pre">=</span> <span class="pre">np.size(output_array)</span> <span class="pre">=</span> <span class="pre">nrows</span> <span class="pre">x</span> <span class="pre">ncols</span></code>, if it is known before execution, performance is increased. This parameter is in output of <code class="docutils literal notranslate"><span class="pre">slice_data</span></code>.</p></li>
+<li><p><strong>delimiter</strong> (<em>str</em>) – Default is <cite>s+</cite>. Could be any kind of delimiter valid in numpy and in the file.</p></li>
+<li><p><strong>cols</strong> (<em>tuple</em>) – Tuple of indices of columns to pick. Useful when reading a file like PROCAR which e.g. has text and numbers inline. This parameter is in output of <code class="docutils literal notranslate"><span class="pre">slice_data</span></code>.</p></li>
+<li><p><strong>include</strong> (<em>str</em>) – Default is None and includes everything. String of patterns separated by | to keep, could be a regular expression.</p></li>
+<li><p><strong>exclude</strong> (<em>str</em>) – Default is ‘#’ to remove comments. String of patterns separated by | to drop,could be a regular expression.</p></li>
+<li><p><strong>raw</strong> (<em>bool</em>) – Default is False, if True, returns list of raw strings. Useful to select <code class="docutils literal notranslate"><span class="pre">cols</span></code>.</p></li>
+<li><p><strong>fix_format</strong> (<em>bool</em>) – Default is True, it sepearates numbers with poor formatting like <code class="docutils literal notranslate"><span class="pre">1.000-2.000</span></code> to <code class="docutils literal notranslate"><span class="pre">1.000</span> <span class="pre">-2.000</span></code> which is useful in PROCAR. Keep it False if want to read string literally.</p></li>
+<li><p><strong>new_shape</strong> (<em>tuple</em>) – Tuple of shape Default is None. Will try to reshape in this shape, if fails fallbacks to 2D or 1D. This parameter is in output of <code class="docutils literal notranslate"><span class="pre">slice_data</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1D or 2D array of dtype. If raw is True, returns raw data.</p>
+</dd>
+</dl>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text"><strong>Example</strong></span><a class="headerlink" href="#id4" title="Permalink to this code">#</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">islice2array</span><span class="p">(</span><span class="s1">&#39;path/to/PROCAR&#39;</span><span class="p">,</span><span class="n">start</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">include</span><span class="o">=</span><span class="s1">&#39;k-point&#39;</span><span class="p">,</span><span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">])[:</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">array</span><span class="p">([[</span> <span class="mf">0.125</span><span class="p">,</span>  <span class="mf">0.125</span><span class="p">,</span>  <span class="mf">0.125</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mf">0.375</span><span class="p">,</span>  <span class="mf">0.125</span><span class="p">,</span>  <span class="mf">0.125</span><span class="p">]])</span>
+<span class="n">islice2array</span><span class="p">(</span><span class="s1">&#39;path/to/EIGENVAL&#39;</span><span class="p">,</span><span class="n">start</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span><span class="n">exclude</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span><span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])[:</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">11.476913</span><span class="p">,</span>   <span class="mf">1.</span>      <span class="p">],</span>
+       <span class="p">[</span>  <span class="mf">0.283532</span><span class="p">,</span>   <span class="mf">1.</span>      <span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Slicing a dimension to 100% of its data is faster than let say 80% for inner dimensions, so if you have to slice more than 50% of an inner dimension, then just load full data and slice after it.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.slice_data">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">slice_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_inds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#slice_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.slice_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a dictionary that can be unpacked in arguments of isclice2array function. This function works only for regular txt/csv/tsv data files which have rectangular data written.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim_inds</strong> (<em>list</em>) – List of indices array or range to pick from each dimension. Inner dimensions are more towards right. Last itmes in dim_inds is considered to be columns. If you want to include all values in a dimension, you can put -1 in that dimension. Note that negative indexing does not work in file readig, -1 is s special case to fetch all items.</p></li>
+<li><p><strong>old_shape</strong> (<em>tuple</em>) – Shape of data set including the columns length in right most place.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Suppose You have data as 3D arry where third dimension is along column.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">data.txt</span><a class="headerlink" href="#id5" title="Permalink to this code">#</a></div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="m">0</span> <span class="m">0</span>
+<span class="m">0</span> <span class="m">2</span>
+<span class="m">1</span> <span class="m">0</span>
+<span class="m">1</span> <span class="m">2</span>
+</pre></div>
+</div>
+</div>
+<p>To pick [[0,2], [1,2]], i.e. second and fourth row, you need to run</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">slicing data</span><a class="headerlink" href="#id6" title="Permalink to this code">#</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">slice_data</span><span class="p">(</span><span class="n">dim_inds</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">],</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">old_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="p">{</span><span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span> <span class="s1">&#39;nlines&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Unpack above dictionary in <code class="docutils literal notranslate"><span class="pre">islice2array</span></code> and you will get output array.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The dimensions are packed from right to left, like 0,2 is repeating in 2nd column.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.split_vasprun">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">split_vasprun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#split_vasprun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.split_vasprun" title="Permalink to this definition">#</a></dt>
+<dd><p>Splits a given vasprun.xml file into a smaller _vasprun.xml file plus _set[1,2,3,4].txt files which contain projected data for each spin set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – path/to/vasprun.xml file.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Output:</dt><dd><ul class="simple">
+<li><p>_vasprun.xml file with projected data.</p></li>
+<li><p>_set1.txt for projected data of colinear calculation.</p></li>
+<li><p>_set1.txt for spin up data and _set2.txt for spin-polarized case.</p></li>
+<li><p>_set[1,2,3,4].txt for each spin set of non-colinear calculations.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.export_spin_data">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">export_spin_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'s'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#export_spin_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.export_spin_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns Data with selected spin sets. For spin polarized calculations, it returns spin up and down data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Path to <code class="docutils literal notranslate"><span class="pre">vasprun.xml</span></code> file. Default is <cite>‘./vasprun.xml’</cite>.</p></li>
+<li><p><strong>skipk</strong> (<em>int</em>) – Default is None. Automatically detects kpoints to skip.</p></li>
+<li><p><strong>elim</strong> (<em>list</em>) – List [min,max] of energy interval. Default is [], covers all bands.</p></li>
+<li><p><strong>spins</strong> (<em>str</em>) – Spin components to include from ‘sxyz’, e.g. ‘sx’ will pick &lt;S&gt; and &lt;S_x&gt; if present.</p></li>
+<li><p><strong>1</strong> (<em>Only works if ISPIN ==</em>) – </p></li>
+<li><p><strong>down.</strong> (<em>otherwise it will be two sets for spin up and</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">ipyvasp.serializer.SpinData</span></code> object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ipyvasp.serializer.SpinData" title="ipyvasp.serializer.SpinData">SpinData</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.export_outcar">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">export_outcar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#export_outcar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.export_outcar" title="Permalink to this definition">#</a></dt>
+<dd><p>Read potential at ionic sites from OUTCAR file.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.parser.export_locpot">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.parser.</span></span><span class="sig-name descname"><span class="pre">export_locpot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/parser.html#export_locpot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.parser.export_locpot" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns Data from LOCPOT and similar structure files like CHG/PARCHG etc. Loads only single set based on what is given in data_set argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>locpot</strong> (<em>str</em>) – path/to/LOCPOT or similar stuructured file like CHG. LOCPOT is auto picked in CWD.</p></li>
+<li><p><strong>data_set</strong> (<em>int</em>) – 0 for electrostatic data, 1 for magnetization data if ISPIN = 2. If non-colinear calculations, 1,2,3 will pick Mx,My,Mz data sets respectively. Only one data set is loaded, so you should know what you are loading.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">ipyvasp.serializer.GridData</span></code> object with 3D volumetric data set loaded as attribute ‘values’.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ipyvasp.serializer.GridData" title="ipyvasp.serializer.GridData">GridData</a></p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Exceptions:</dt><dd><p>Would raise index error if magnetization density set is not present in case <code class="docutils literal notranslate"><span class="pre">data_set</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Read <a class="reference external" href="https://www.vasp.at/wiki/index.php/CHGCAR">vaspwiki-CHGCAR</a> for more info on what data sets are available corresponding to different calculations.</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-ipyvasp.utils">
+<span id="utilities"></span><h2>Utilities<a class="headerlink" href="#module-ipyvasp.utils" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.utils.get_file_size">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.utils.</span></span><span class="sig-name descname"><span class="pre">get_file_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/utils.html#get_file_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.get_file_size" title="Permalink to this definition">#</a></dt>
+<dd><p>Return file size</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.utils.set_dir">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.utils.</span></span><span class="sig-name descname"><span class="pre">set_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/utils.html#set_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.set_dir" title="Permalink to this definition">#</a></dt>
+<dd><p>Context manager to work in some directory and come back</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.utils.interpolate_data">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.utils.</span></span><span class="sig-name descname"><span class="pre">interpolate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/ipyvasp/utils.html#interpolate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.interpolate_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns interpolated xnew,ynew. If two points are same, it will add 0.1*min(dx&gt;0) to compensate it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>ndarry</em>) – 1D array of size p,</p></li>
+<li><p><strong>y</strong> (<em>ndarray</em>) – ndarray of size p*q*r,….</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – Number of points to add between two given points.</p></li>
+<li><p><strong>k</strong> (<em>int</em>) – Polynomial order to interpolate.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">K(p),E(p,q)</span></code> input from bandstructure, do <code class="docutils literal notranslate"><span class="pre">Knew,</span> <span class="pre">Enew</span> <span class="pre">=</span> <span class="pre">interpolate_data(K,E,n=10,k=3)</span></code> for cubic interploation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(xnew, ynew) after interpolation.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only axis 0 will be interpolated. If you want general interploation, use <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scipy.interpolate</span> <span class="pre">import</span> <span class="pre">make_interp_spline,</span> <span class="pre">BSpline</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.utils.rolling_mean">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.utils.</span></span><span class="sig-name descname"><span class="pre">rolling_mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interface</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'wrap'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/ipyvasp/utils.html#rolling_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.rolling_mean" title="Permalink to this definition">#</a></dt>
+<dd><p>Caluate rolling mean of array X using scipy.ndimage.filters.convolve1d.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>ndarray</em>) – 1D numpy array.</p></li>
+<li><p><strong>period</strong> (<em>float</em>) – In range [0,1]. Period of rolling mean. Applies left side of X from center if period_right is given.</p></li>
+<li><p><strong>period_right</strong> (<em>float</em>) – In range [0,1]. Period of rolling mean on right side of X from center.</p></li>
+<li><p><strong>interface</strong> (<em>float</em>) – In range [0,1]. The point that divides X into left and right, like in a slab calculation.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – Mode of convolution. Default is wrap to keep periodcity of crystal in slab caluation. Read scipy.ndimage.filters.convolve1d for more info.</p></li>
+<li><p><strong>smoothness</strong> (<em>int</em>) – Default is 2. Order of making the output smoother. Larger is better but can’t be too large as there will be points lost at each convolution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>convolved array of same size as X if mode is ‘wrap’. May be smaller if mode is something else.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.utils.ps2py">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.utils.</span></span><span class="sig-name descname"><span class="pre">ps2py</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps_command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Get-ChildItem'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exec_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'-Command'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_ps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'powershell.exe'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/ipyvasp/utils.html#ps2py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.ps2py" title="Permalink to this definition">#</a></dt>
+<dd><p>Captures powershell output in python.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ps_command</strong> (<em>str</em>) – enclose ps_command in ‘ ‘ or “ “.</p></li>
+<li><p><strong>exec_type</strong> (<em>str</em>) – type of execution, default ‘-Command’, could be ‘-File’.</p></li>
+<li><p><strong>path_to_ps</strong> (<em>str</em>) – path to powerhell.exe if not added to PATH variables.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of lines of output.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.utils.ps2std">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.utils.</span></span><span class="sig-name descname"><span class="pre">ps2std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps_command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Get-ChildItem'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exec_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'-Command'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_ps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'powershell.exe'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/ipyvasp/utils.html#ps2std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.ps2std" title="Permalink to this definition">#</a></dt>
+<dd><p>Prints powershell output in python std.
+:param ps_command: enclose ps_command in ‘ ‘ or “ “.
+:type ps_command: str
+:param exec_type: type of execution, default ‘-Command’, could be ‘-File’.
+:type exec_type: str
+:param path_to_ps: path to powerhell.exe if not added to PATH variables.
+:type path_to_ps: str</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.utils.get_child_items">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.utils.</span></span><span class="sig-name descname"><span class="pre">get_child_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'E:\\Research\\ipyvasp\\docs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirs_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/ipyvasp/utils.html#get_child_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.get_child_items" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns selected directories/files recursively from a parent directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – path to a parent directory, default is <cite>“.”</cite></p></li>
+<li><p><strong>depth</strong> (<em>int</em>) – subdirectories depth to get recursively, default is None to list all down.</p></li>
+<li><p><strong>recursive</strong> (<em>bool</em>) – If False, only list current directory items, if True,list all items recursively down the file system.</p></li>
+<li><p><strong>include</strong> (<em>str</em>) – Default is None and includes everything. String of patterns separated by | to keep, could be a regular expression.</p></li>
+<li><p><strong>exclude</strong> (<em>str</em>) – Default is None and removes nothing. String of patterns separated by | to drop,could be a regular expression.</p></li>
+<li><p><strong>files_only</strong> (<em>bool</em>) – Boolean, if True, returns only files.</p></li>
+<li><p><strong>dirs_only</strong> (<em>bool</em>) – Boolean, if True, returns only directories.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(children,parent), children is list of selected directories/files and parent is given path. Access by index of by <cite>get_child_items().{children,path}</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.utils.prevent_overwrite">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.utils.</span></span><span class="sig-name descname"><span class="pre">prevent_overwrite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/ipyvasp/utils.html#prevent_overwrite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.prevent_overwrite" title="Permalink to this definition">#</a></dt>
+<dd><p>Prevents overwiting as file/directory by adding numbers in given file/directory path.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.utils.color">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.utils.</span></span><span class="sig-name descname"><span class="pre">color</span></span><a class="reference internal" href="_modules/ipyvasp/utils.html#color"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.color" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.bg">
+<span class="sig-name descname"><span class="pre">bg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/utils.html#color.bg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.color.bg" title="Permalink to this definition">#</a></dt>
+<dd><p>Provide r,g,b component in range 0-255</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.fg">
+<span class="sig-name descname"><span class="pre">fg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/utils.html#color.fg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.color.fg" title="Permalink to this definition">#</a></dt>
+<dd><p>Provide r,g,b component in range 0-255</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.r">
+<span class="sig-name descname"><span class="pre">r</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.utils.color.r" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.rb">
+<span class="sig-name descname"><span class="pre">rb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.utils.color.rb" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.g">
+<span class="sig-name descname"><span class="pre">g</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.utils.color.g" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.gb">
+<span class="sig-name descname"><span class="pre">gb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.utils.color.gb" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.b">
+<span class="sig-name descname"><span class="pre">b</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.utils.color.b" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.bb">
+<span class="sig-name descname"><span class="pre">bb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.utils.color.bb" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.y">
+<span class="sig-name descname"><span class="pre">y</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.utils.color.y" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.yb">
+<span class="sig-name descname"><span class="pre">yb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.utils.color.yb" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.m">
+<span class="sig-name descname"><span class="pre">m</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.utils.color.m" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.mb">
+<span class="sig-name descname"><span class="pre">mb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.utils.color.mb" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.c">
+<span class="sig-name descname"><span class="pre">c</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.utils.color.c" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.utils.color.cb">
+<span class="sig-name descname"><span class="pre">cb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.utils.color.cb" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.utils.transform_color">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.utils.</span></span><span class="sig-name descname"><span class="pre">transform_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixing_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/ipyvasp/utils.html#transform_color"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.transform_color" title="Permalink to this definition">#</a></dt>
+<dd><p>Color transformation such as brightness, contrast, saturation and mixing of an input color array. <code class="docutils literal notranslate"><span class="pre">c</span> <span class="pre">=</span> <span class="pre">-1</span></code> would invert color,keeping everything else same.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arr</strong> (<em>ndarray</em>) – input array, a single RGB/RGBA color or an array with inner most dimension equal to 3 or 4. e.g. [[[0,1,0,1],[0,0,1,1]]].</p></li>
+<li><p><strong>c</strong> (<em>float</em>) – contrast, default is 1. Can be a float in [-1,1].</p></li>
+<li><p><strong>s</strong> (<em>float</em>) – saturation, default is 1. Can be a float in [-1,1]. If s = 0, you get a gray scale image.</p></li>
+<li><p><strong>b</strong> (<em>float</em>) – brightness, default is 0. Can be a float in [-1,1] or list of three brightnesses for RGB components.</p></li>
+<li><p><strong>mixing_matrix</strong> (<em>ndarray</em>) – A 3x3 matrix to mix RGB values, such as <cite>pp.color_matrix</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Transformed color array of same shape as input array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+<p><a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-recoloring-use?redirectedfrom=MSDN">Recoloring</a></p>
+<p><a class="reference external" href="https://docs.rainmeter.net/tips/colormatrix-guide/">Rainmeter</a></p>
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="index.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Home</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Abdul Saboor
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            Contents
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">API</a><ul>
+<li><a class="reference internal" href="#module-ipyvasp.serializer">Data Serialization</a></li>
+<li><a class="reference internal" href="#module-ipyvasp.parser">Parsers</a></li>
+<li><a class="reference internal" href="#module-ipyvasp.utils">Utilities</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>

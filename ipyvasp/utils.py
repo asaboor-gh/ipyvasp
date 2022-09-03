@@ -11,7 +11,7 @@ from scipy.interpolate import make_interp_spline
 from scipy.ndimage.filters import convolve1d
 
 
-def get_file_size(path):
+def get_file_size(path:str):
     """Return file size"""
     if os.path.isfile(path):
         size = os.stat(path).st_size
@@ -23,8 +23,8 @@ def get_file_size(path):
         return ''
 
 @contextmanager
-def set_dir(path):
-    "work in some directory and come back"
+def set_dir(path:str):
+    "Context manager to work in some directory and come back"
     current = os.getcwd()
     try:
         os.chdir(path)
@@ -32,19 +32,24 @@ def set_dir(path):
     finally:
         os.chdir(current)
 
-def interpolate_data(x,y,n=10,k=3):
-    """
-    - Returns interpolated xnew,ynew. If two points are same, it will add 0.1*min(dx>0) to compensate it.
-    - **Parameters**
-        - x: 1D array of size p,
-        - y: ndarray of size p*q*r,....
-        - n: Number of points to add between two given points.
-        - k: Polynomial order to interpolate.
+def interpolate_data(x:np.ndarray,y:np.ndarray,n:int=10,k:int=3) -> tuple:
+    """Returns interpolated xnew,ynew. If two points are same, it will add 0.1*min(dx>0) to compensate it.
+    
+    Args:
+        x (ndarry): 1D array of size p,
+        y (ndarray): ndarray of size p*q*r,....
+        n (int): Number of points to add between two given points.
+        k (int): Polynomial order to interpolate.
 
-    - Only axis 0 will be interpolated. If you want general interploation, use `from scipy.interpolate import make_interp_spline, BSpline`
 
-    - **General Usage**: K(p),E(p,q) input from bandstructure.
-        - `Knew,Enew= interpolate_data(K,E,n=10,k=3)`. cubic interploation
+    Example: 
+        For ``K(p),E(p,q)`` input from bandstructure, do ``Knew, Enew = interpolate_data(K,E,n=10,k=3)`` for cubic interploation.
+    
+    Returns:
+        tuple: (xnew, ynew) after interpolation.
+        
+    .. note::
+        Only axis 0 will be interpolated. If you want general interploation, use ``from scipy.interpolate import make_interp_spline, BSpline``.
     """
     #Add very small values at simliar points to make interpolation work.
     ind=[i for i in range(0,len(x)) if x[i-1]==x[i]] #Duplicate indices
@@ -63,15 +68,16 @@ def interpolate_data(x,y,n=10,k=3):
 def rolling_mean(X:np.ndarray, period:float, period_right:float = None, interface:float = None, mode:str = 'wrap', smoothness:int = 2) -> np.ndarray:
     """Caluate rolling mean of array X using scipy.ndimage.filters.convolve1d.
     
-    - **Parameters**
-        - X: 1D numpy array.
-        - period: float in range [0,1]. Period of rolling mean. Applies left side of X from center if period_right is given.
-        - period_right: float in range [0,1]. Period of rolling mean on right side of X from center.
-        - interface: float in range [0,1]. The point that divides X into left and right, like in a slab calculation.
-        - mode: string. Mode of convolution. Default is wrap to keep periodcity of crystal in slab caluation. Read scipy.ndimage.filters.convolve1d for more info.
-        - smoothness: int. Default is 2. Order of making the output smoother. Larger is better but can't be too large as there will be points lost at each convolution.
+    Args:
+        X (ndarray): 1D numpy array.
+        period (float): In range [0,1]. Period of rolling mean. Applies left side of X from center if period_right is given.
+        period_right (float): In range [0,1]. Period of rolling mean on right side of X from center.
+        interface (float): In range [0,1]. The point that divides X into left and right, like in a slab calculation.
+        mode (string): Mode of convolution. Default is wrap to keep periodcity of crystal in slab caluation. Read scipy.ndimage.filters.convolve1d for more info.
+        smoothness (int): Default is 2. Order of making the output smoother. Larger is better but can't be too large as there will be points lost at each convolution.
     
-    Returns convolved array of same size as X if mode is 'wrap'. May be smaller if mode is something else.
+    Returns:
+        ndarray: convolved array of same size as X if mode is 'wrap'. May be smaller if mode is something else.
     """
     if period_right is None:
         period_right = period
@@ -122,13 +128,16 @@ def rolling_mean(X:np.ndarray, period:float, period_right:float = None, interfac
     
     return mean_all
 
-def ps2py(ps_command='Get-ChildItem', exec_type='-Command', path_to_ps='powershell.exe'):
-    """
-    - Captures powershell output in python.
-    - **Parameters**
-        - ps_command: enclose ps_command in ' ' or " ".
-        - exec_type : type of execution, default '-Command', could be '-File'.
-        - path_to_ps: path to powerhell.exe if not added to PATH variables.
+def ps2py(ps_command :str ='Get-ChildItem', exec_type :str='-Command', path_to_ps:str='powershell.exe') -> list:
+    """Captures powershell output in python.
+    
+    Args:
+        ps_command (str): enclose ps_command in ' ' or " ".
+        exec_type  (str): type of execution, default '-Command', could be '-File'.
+        path_to_ps (str): path to powerhell.exe if not added to PATH variables.
+    
+    Returns:
+        list: list of lines of output.
     """
     try: # Works on Linux and Windows if PS version > 5.
         cmd = ['pwsh', '-ExecutionPolicy', 'Bypass', exec_type, ps_command]
@@ -154,13 +163,12 @@ def ps2py(ps_command='Get-ChildItem', exec_type='-Command', path_to_ps='powershe
     out=[item for item in out if item!=''] #filter out empty lines
     return out
 
-def ps2std(ps_command='Get-ChildItem', exec_type='-Command', path_to_ps='powershell.exe'):
-    """
-    - Prints powershell output in python std.
-    - **Parameters**
-        - ps_command: enclose ps_command in ' ' or " ".
-        - exec_type: type of execution, default '-Command', could be '-File'.
-        - path_to_ps: path to powerhell.exe if not added to PATH variables.
+def ps2std(ps_command :str='Get-ChildItem', exec_type:str='-Command', path_to_ps:str='powershell.exe') -> None:
+    """Prints powershell output in python std.
+    Args:
+        ps_command (str): enclose ps_command in ' ' or " ".
+        exec_type  (str): type of execution, default '-Command', could be '-File'.
+        path_to_ps (str): path to powerhell.exe if not added to PATH variables.
     """
     out = ps2py(path_to_ps=path_to_ps,exec_type=exec_type,ps_command=ps_command)
     for item in out:
@@ -168,19 +176,21 @@ def ps2std(ps_command='Get-ChildItem', exec_type='-Command', path_to_ps='powersh
     return None
 
 
-def get_child_items(path = os.getcwd(),depth=None,recursive=True,include=None,exclude=None,filesOnly=False,dirsOnly= False):
-    """
-    - Returns selected directories/files recursively from a parent directory.
-    - **Parameters**
-        - path    : path to a parent directory, default is `"."`
-        - depth   : int, subdirectories depth to get recursively, default is None to list all down.
-        - recursive : If False, only list current directory items, if True,list all items recursively down the file system.
-        - include: Default is None and includes everything. String of patterns separated by | to keep, could be a regular expression.
-        - exclude: Default is None and removes nothing. String of patterns separated by | to drop,could be a regular expression.
-        - filesOnly : Boolean, if True, returns only files.
-        - dirsOnly  : Boolean, if True, returns only directories.
-    - **Returns**
-        - GLOB : Tuple (children,parent), children is list of selected directories/files and parent is given path. Access by index of by `get_child_items().{children,path}`.
+def get_child_items(path:str = os.getcwd(),depth:int = None,recursive:bool=True,include:str=None,exclude:str=None,files_only:bool=False,dirs_only:bool= False) -> tuple:
+    """Returns selected directories/files recursively from a parent directory.
+    
+    Args:
+        path (str): path to a parent directory, default is `"."`
+        depth (int): subdirectories depth to get recursively, default is None to list all down.
+        recursive (bool): If False, only list current directory items, if True,list all items recursively down the file system.
+        include (str): Default is None and includes everything. String of patterns separated by | to keep, could be a regular expression.
+        exclude (str): Default is None and removes nothing. String of patterns separated by | to drop,could be a regular expression.
+        files_only (bool): Boolean, if True, returns only files.
+        dirs_only  (bool): Boolean, if True, returns only directories.
+    
+    Returns:
+        tuple: (children,parent), children is list of selected directories/files and parent is given path. Access by index of by `get_child_items().{children,path}`.
+    
     """
     path = os.path.abspath(path) # important
     pattern = path + '**/**' # Default pattern
@@ -189,9 +199,9 @@ def get_child_items(path = os.getcwd(),depth=None,recursive=True,include=None,ex
         if glob.glob(pattern) == []: #If given depth is more, fall back.
             pattern = path + '**/**' # Fallback to default pattern if more depth to cover all.
     glob_files = glob.iglob(pattern, recursive=recursive)
-    if dirsOnly == True:
+    if dirs_only == True:
         glob_files = filter(lambda f: os.path.isdir(f),glob_files)
-    if filesOnly == True:
+    if files_only == True:
         glob_files = filter(lambda f: os.path.isfile(f),glob_files)
     list_dirs=[]
     for g_f in glob_files:
@@ -207,7 +217,7 @@ def get_child_items(path = os.getcwd(),depth=None,recursive=True,include=None,ex
     out_files = namedtuple('GLOB',['children','parent'])
     return out_files(req_dirs,os.path.abspath(path))
 
-def prevent_overwrite(path):
+def prevent_overwrite(path: str) -> str:
     """Prevents overwiting as file/directory by adding numbers in given file/directory path."""
     if os.path.exists(path):
         name, ext = os.path.splitext(path)
@@ -242,46 +252,22 @@ class color:
      c  = lambda text: f"\033[0;96m {text}\033[00m"
      cb = lambda text: f"\033[1;96m {text}\033[00m"
 
-def nav_links(current_index=0,
-            doc_url = r"https://massgh.github.io/ipyvasp/",
-            items   = ["Index",
-                       "Example",
-                       "StaticPlots",
-                       "InteractivePlots",
-                       "SpinProjectedSurfaces",
-                       "StructureIO",
-                       "Widgets",
-                       "MainAPI",
-                       ],
-            horizontal = False,
-            out_string = False):
-    from IPython.display import Markdown
-    links   = [doc_url+item if not 'Index' in item else doc_url for item in items]
-    style = """<style>a{text-decoration: none !important;color:lightkblue;font-weight:bold;}
-                a:focus,a:active,a:hover{color:hotpink !important;}</style>\n"""
-    md_str = style
-    for i,(link,item) in enumerate(zip(links,items)):
-        if current_index == i: item = "{}●".format(item)
-        if not horizontal:
-            md_str += "> [&nbsp;`▶` {}&nbsp;]({})  \n".format(item,link)
-        else:
-            md_str += "> [&nbsp;`▶` {}&nbsp;]({})\n".format(item,link)
-    if out_string:
-        return md_str
-    return Markdown(md_str)
 
-def transform_color(arr,s=1,c=1,b=0,mixing_matrix=None):
-    """
-    - Color transformation such as brightness, contrast, saturation and mixing of an input color array. `c = -1` would invert color,keeping everything else same.
-    - **Parameters**
-        - arr: input array, a single RGB/RGBA color or an array with inner most dimension equal to 3 or 4. e.g. [[[0,1,0,1],[0,0,1,1]]].
-        - c  : contrast, default is 1. Can be a float in [-1,1].
-        - s  : saturation, default is 1. Can be a float in [-1,1]. If s = 0, you get a gray scale image.
-        - b  : brightness, default is 0. Can be a float in [-1,1] or list of three brightnesses for RGB components.
-        - mixing_matrix: A 3x3 matrix to mix RGB values, such as `pp.color_matrix`.
+def transform_color(arr: np.ndarray,s:float=1,c:float=1,b:float=0,mixing_matrix:np.ndarray=None) -> np.ndarray:
+    """Color transformation such as brightness, contrast, saturation and mixing of an input color array. ``c = -1`` would invert color,keeping everything else same.
+    
+    Args:
+        arr (ndarray): input array, a single RGB/RGBA color or an array with inner most dimension equal to 3 or 4. e.g. [[[0,1,0,1],[0,0,1,1]]].
+        c (float): contrast, default is 1. Can be a float in [-1,1].
+        s (float): saturation, default is 1. Can be a float in [-1,1]. If s = 0, you get a gray scale image.
+        b (float): brightness, default is 0. Can be a float in [-1,1] or list of three brightnesses for RGB components.
+        mixing_matrix (ndarray): A 3x3 matrix to mix RGB values, such as `pp.color_matrix`.
 
-    [Recoloring](https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-recoloring-use?redirectedfrom=MSDN)
-    [Rainmeter](https://docs.rainmeter.net/tips/colormatrix-guide/)
+    Returns:
+        ndarray: Transformed color array of same shape as input array.
+    `Recoloring <https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-recoloring-use?redirectedfrom=MSDN>`_
+    
+    `Rainmeter <https://docs.rainmeter.net/tips/colormatrix-guide/>`_
     """
     arr = np.array(arr) # Must
     t = (1-c)/2 # For fixing gray scale when contrast is 0.

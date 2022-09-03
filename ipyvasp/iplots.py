@@ -32,7 +32,7 @@ def _get_rgb_data(
     ):
     """
     - Returns a formatted RGB colored data to pass into `_rgb2plotly` function. Two arguments, `elements` and `orbs` should be in one-to-one correspondence. Returned item has transpose data shape, so that main iteration is over bands.
-    - **Parameters**
+    Args:
         - kapath   : `export_vasprun`().kpath or `get_kpts`().kpath.
         - evals_set: `export_vasprun`().bands.evals or `get_evals`().evals. If calculations are spin-polarized, it will be `...evals.SpinUp/SpinDown` for both. You need to apply twice for SpinUp and SpinDown separately.
         - pros_set : `export_vasprun().pro_bands.pros` or `get_bands_pro_set`().pros. If calculations are spin-polarized, it will be `...pros.SpinUp/SpinDown` for both. You need to create collections twice for SpinUp and SpinDown separately.
@@ -95,7 +95,7 @@ def _get_rgb_data(
 def _flip_even_patches(array_1d, patch_length):
     """
     - When you reshape bands data to 1D array, you may need to draw lines which do not link ends of plot, for that, it is required to flip patches, so that next band start from where 1st end and so one.
-    - **Parameters**
+    Args:
         - array_1d     : Numpy 1d array or list.
         - patch_length : length of xaxis patches, e.g NKPTS.
     - **Returns**
@@ -187,7 +187,7 @@ def _rgb2plotly(rgb_data=None,mode='markers',max_width=None,showlegend=False,nam
 def iplot2html(fig,filename=None,out_string=False,modebar=True):
     """
     - Writes plotly's figure as HTML file or display in IPython which is accessible when online. It is different than plotly's `fig.to_html` as it is minimal in memory. If you need to have offline working file, just use `fig.write_html('file.html')` which will be larger in size.
-    - **Parameters**
+    Args:
         - fig      : A plotly's figure object.
         - filename : Name of file to save fig. Defualt is None and show plot in Colab/Online or return hrml string.
         - out_string: If True, returns HTML string, if False displays graph if possible.
@@ -256,7 +256,7 @@ def iplot_rgb_lines(
     ):
     """
     - Returns plotly's figure object, takes care of spin-polarized calculations automatically. `elements`,`orbs` and `labels` are required to be one-to-one lists of size 3 where each item in list could be another list or integer.
-    - **Parameters**
+    Args:
         - path_evr  : Path/to/vasprun.xml or xml output of `read_asxml`.
         - elements   : List of size 3 of list of indices of ions. If not given, picks all ions for each orbital.
         - orbs       : List of size 3 of list of orbital indices, if not gievn, s,p,d plotted.
@@ -377,7 +377,7 @@ def iplot_dos_lines(
     ):
         """
         - Returns plotly's figure. If given,elements,orbs colors, and labels must have same length. If not given, zeroth ions is plotted with s-orbital.
-        - **Parameters**)
+        Args:)
             - path_evr   : Path/to/vasprun.xml or output of `export_vasprun`. Auto picks in CWD.
             - elements   : List [[0,],] of ions indices, by defualt plot first ion's projections.
             - orbs       : List [[0,],] lists of indices of orbitals, could be empty.

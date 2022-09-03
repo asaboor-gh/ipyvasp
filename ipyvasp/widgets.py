@@ -223,9 +223,9 @@ def get_files_gui(auto_fill = 'vasprun.xml', theme_colors = None, height=320):
         gci = serializer.Dict2Data({'children':[],'parent':path})
 
         if 'Files' in item_w.value:
-            file_type = dict(filesOnly=True)
+            file_type = dict(files_only=True)
         elif 'Folders' in item_w.value:
-            file_type = dict(dirsOnly=True)
+            file_type = dict(dirs_only=True)
         else:
             file_type = {}
         try:

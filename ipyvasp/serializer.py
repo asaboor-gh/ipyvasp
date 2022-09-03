@@ -8,40 +8,42 @@ from copy import deepcopy
 import numpy as np
 
 
-def dict2tuple(name,d):
+def dict2tuple(name:str,d:dict):
     """Converts a dictionary (nested as well) to namedtuple, accessible via index and dot notation as well as by unpacking.
-    - **Parameters**
-        - name: Name of the tuple.
-        - d   : Dictionary, nested works as well.
+    Args:
+        name (str): Name of the tuple.
+        d (dict): Dictionary, nested works as well.
     """
     return namedtuple(name,d.keys())(
            *(dict2tuple(k.upper(),v) if isinstance(v,dict) else v for k,v in d.items())
            )
 
 class Dict2Data:
+    """Creates a ``Data`` object with dictionary keys as attributes of Data accessible by dot notation or by key. 
+    Once an attribute is created, it can not be changed from outside.
+    
+    Args:
+        d (dict): Python dictionary (nested as well) containing any python data types.
+    
+    .. code-block:: python
+        :caption: **Usage Example**
+        :linenos:
+        
+        x = Dict2Data({'A':1,'B':{'C':2}})
+        x
+        Data(
+            A = 1
+            B = Data(
+                C = 2
+                )
+            )
+        x.B.to_dict()
+         {'C': 2}
+    """
     _req_keys = ()
     _subclasses = ()
-    """
-    - Returns a Data object with dictionary keys as attributes of Data accessible by dot notation or by key. Once an attribute is created, it can not be changed from outside.
-    - **Parmeters**
-        - dict : Python dictionary (nested as well) containing any python data types.
-    - **Methods**
-        - to_dict  : Converts a Data object to dictionary if it could be made a dictionary, otherwise throws relevant error.
-        - to_json  : Converts to json str or save to file if `outfil` given. Accepts `indent` as parameter.
-        - to_pickle: Converts to bytes str or save to file if `outfile` given.
-        - to_tuple : Converts to a named tuple.
-    - **Example**
-        > x = Dict2Data({'A':1,'B':{'C':2}})
-        > x
-        > Data(
-        >     A = 1
-        >     B = Data(
-        >         C = 2
-        >         )
-        >     )
-        > x.B.to_dict()
-        > {'C': 2}
-    """
+    
+    
     def __init__(self,d):
         if not hasattr(self.__class__,'_req_keys'):
             raise AttributeError("Derived class of `Dict2Data` should have attribute '_req_keys'")
@@ -100,7 +102,7 @@ class Dict2Data:
     
     def to_json(self,outfile:str = None,indent:int = 1):
         """Dumps a `Dict2Data` object (root or nested level) to json.
-        - **Parameters**
+        Args:
             - outfile : Default is None and returns string. If given, writes to file.
             - indent  : Json indent. Default is 1.
         """
@@ -108,7 +110,7 @@ class Dict2Data:
 
     def to_pickle(self,outfile:str=None):
         """Dumps a `Dict2Data` or subclass object (root or nested level) to pickle.
-        - **Parameters**
+        Args:
             - outfile : Default is None and returns string. If given, writes to file.
         """
         return dump(self,dump_to='pickle',outfile=outfile)
@@ -315,7 +317,12 @@ class GridData(Dict2Data):
     
     @property
     def coords(self):
-        "Returns coordinates of the grid points in shape (3,Nx, Ny,Nz). (x,y,z) = i/Nx*a + j/Ny*b + k/Nz*c, where (a,b,c) is the lattice vector. and i,j,k are the grid indices. as 0-Nx-1, 0-Ny-1, 0-Nz-1."
+        """Returns coordinates of the grid points in shape (3,Nx, Ny,Nz) given by equation
+        
+        .. math::
+            (x,y,z) = \\frac{i}{N_x}a + \\frac{j}{N_y}b + \\frac{k}{N_z}c
+        
+        where (a,b,c) are lattice vectors. and i,j,k are the grid indices as in intervals [0, Nx-1], [0, Ny-1], [0, Nz-1]."""
         shape = self.values.shape
         Nx, Ny, Nz = shape
         ix,iy,iz = np.indices(shape)
@@ -337,11 +344,14 @@ class OutcarData(Dict2Data):
 
 
 class EncodeFromNumpy(json.JSONEncoder):
-    """
-    - Serializes python/Numpy objects via customizing json encoder.
-    - **Usage**
-        - `json.dumps(python_dict, cls=EncodeFromNumpy)` to get json string.
-        - `json.dump(*args, cls=EncodeFromNumpy)` to create a file.json.
+    """Serializes python/Numpy objects via customizing json encoder.
+    
+    .. code-block:: python
+        :caption: **Usage Example**
+        :linenos:
+        
+        json.dumps(python_dict, cls=EncodeFromNumpy) # to get json string.
+        json.dump(*args, cls=EncodeFromNumpy) # to create a file.json.
     """
     def default(self, obj):
         if isinstance(obj, np.ndarray):
@@ -364,10 +374,14 @@ class EncodeFromNumpy(json.JSONEncoder):
 
 
 class DecodeToNumpy(json.JSONDecoder):
-    """
-    - Deserilizes JSON object to Python/Numpy's objects.
-    - **Usage**
-        - `json.loads(json_string,cls=DecodeToNumpy)` from string, use `json.load()` for file.
+    """Deserilizes JSON object to Python/Numpy's objects.
+    
+    .. code-block:: python
+        :caption: **Usage Example**
+        :linenos:
+        
+        json.loads(json_string,cls=DecodeToNumpy) #  from string
+        json.load(path) # from file.
     """
     def __init__(self, *args, **kwargs):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
@@ -384,14 +398,14 @@ class DecodeToNumpy(json.JSONDecoder):
         return obj
 
     
-def dump(dict_data = None, dump_to = 'pickle',outfile = None,indent=1):
-    """
-    - Dump an `export_vasprun` or `load_export`'s `Data` object or any dictionary to json or pickle string/file. It convert `Dict2Data` to dictionary before serializing to json/pickle, so json/pickle.loads() of converted Data would be a simple dictionary, pass that to `Dict2Data` to again make accessible via dot notation.
-    - **Parameters**
-        - dict_data: Any dictionary/Dict2Data(or subclass Data) object containg numpy arrays, including `export_vasprun` or `load_export` output.
-        - dump_to  : Defualt is `pickle` or `json`.
-        - outfile  : Defualt is None and return string. File name does not require extension.
-        - indent   : Defualt is 1. Only works for json.
+def dump(dict_data, dump_to:str = 'pickle',outfile:str = None,indent:int=1) -> None:
+    """Dump ``Dict2Data`` or subclass object or any dictionary to json or pickle string/file.
+    
+    Args:
+        dict_data (dict or Dict2Data or its subclass): Any dictionary/Dict2Data(or subclass Data) object containg numpy arrays, like ``export_vasprun`` output.
+        dump_to (str): Defualt is ``pickle`` or ``json``.
+        outfile (str): Defualt is None and return string. File name does not require extension.
+        indent (int): Defualt is 1. Only works for json.
     """
     if dump_to not in ['pickle','json']:
         raise ValueError("`dump_to` expects 'pickle' or 'json', got '{}'".format(dump_to))
@@ -415,11 +429,11 @@ def dump(dict_data = None, dump_to = 'pickle',outfile = None,indent=1):
     return None
 
 
-def load(file_or_str):
-    """
-    - Loads a json/pickle dumped file or string by auto detecting it.
-    - **Parameters**
-        - file_or_str : Filename of pickl/json or their string. 
+def load(file_or_str:str):
+    """Loads a json/pickle dumped file or string by auto detecting it.
+    
+    Args:
+        file_or_str (str): Filename of pickl/json or their string. 
     """
     out = {}
     if not isinstance(file_or_str,bytes):

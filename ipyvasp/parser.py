@@ -14,23 +14,22 @@ from . import utils, serializer
 
 def dict2tuple(name,d):
     """Converts a dictionary (nested as well) to namedtuple, accessible via index and dot notation as well as by unpacking.
-    - **Parameters**
-        - name: Name of the tuple.
-        - d   : Dictionary, nested works as well.
+    Args:
+        name (str): Name of the tuple.
+        d (dict): Dictionary, nested works as well.
     """
     return namedtuple(name,d.keys())(
            *(dict2tuple(k.upper(),v) if isinstance(v,dict) else v for k,v in d.items())
            )
 
-def read_asxml(path = None):
-    """
-    - Reads a big vasprun.xml file into memory once and then apply commands. If current folder contains `vasprun.xml` file, it automatically picks it.
+def read_asxml(path :str = None):
+    """Reads a big vasprun.xml file into memory once and then apply commands. If current folder contains ``vasprun.xml`` file, it automatically picks it.
 
-    - **Parameters**
-        - path : Path/To/vasprun.xml
+    Args:
+        path (str): Path/To/vasprun.xml
 
-    - **Returns**
-        - xml_data : Xml object to use in other functions
+    Returns
+        ``XML element tree`` to use in other functions
     """
     path = path or './vasprun.xml'
     if not os.path.isfile(path):
@@ -57,9 +56,12 @@ def read_asxml(path = None):
 
 def xml2dict(xmlnode_or_filepath):
     """Convert xml node or xml file content to dictionary. All output text is in string format, so further processing is required to convert into data types/split etc.
-    - The only paramenter `xmlnode_or_filepath` is either a path to an xml file or an `xml.etree.ElementTree.Element` object.
-    - Each node has `tag,text,attr,nodes` attributes. Every text element can be accessed via
-    `xml2dict()['nodes'][index]['nodes'][index]...` tree which makes it simple.
+    
+    Args:
+        xmlnode_or_filepath: It is either a path to an xml file or an ``xml.etree.ElementTree.Element`` object.
+        
+    Each node has ``tag,text,attr,nodes`` attributes. Every text element can be accessed via
+    ``xml2dict()['nodes'][index]['nodes'][index]...`` tree which makes it simple.
     """
     if isinstance(xmlnode_or_filepath,str):
         node = read_asxml(xmlnode_or_filepath)
@@ -288,16 +290,18 @@ def get_evals(xml_data, skipk = None, elim = []):
         
     return serializer.Dict2Data(evals_dic)
 
-def get_bands_pro_set(xml_data, spin_set=1, skipk=0, bands_range=None, set_path=None):
+def get_bands_pro_set(xml_data, spin_set:int=1, skipk:int=0, bands_range:range=None, set_path:str=None):
     """Returns bands projection of a spin_set(default 1). If spin-polarized calculations, gives SpinUp and SpinDown keys as well.
-    - **Parameters**
-        - xml_data    : From `read_asxml` function
-        - skipk       : Number of initil kpoints to skip (Default 0).
-        - spin_set    : Spin set to get, default is 1.
-        - bands_range : If elim used in `get_evals`,that will return bands_range to use here. Note that range(0,2) will give 2 bands 0,1 but tuple (0,2) will give 3 bands 0,1,2.
-        - set_path    : path/to/_set[1,2,3,4].txt, works if `split_vasprun` is used before.
-    - **Returns**
-        - Data     : ipyvasp.Dict2Data with attibutes of bands projections and related parameters.
+    
+    Args:
+        xml_data    : From ``read_asxml`` function's output.
+        skipk (int): Number of initil kpoints to skip (Default 0).
+        spin_set (int): Spin set to get, default is 1.
+        bands_range (range): If elim used in ``get_evals``,that will return ``bands_range`` to use here. Note that range(0,2) will give 2 bands 0,1 but tuple (0,2) will give 3 bands 0,1,2.
+        set_path (str): path/to/_set[1,2,3,4].txt, works if ``split_vasprun`` is used before.
+    
+    Returns:
+        Dict2Data: ``ipyvasp.Dict2Data`` with attibutes of bands projections and related parameters.
     """
     if bands_range != None:
         check_list = list(bands_range)
@@ -372,14 +376,16 @@ def get_bands_pro_set(xml_data, spin_set=1, skipk=0, bands_range=None, set_path=
     data = data.reshape((NKPTS,NBANDS,NIONS,NORBS)).transpose((2,0,1,3))
     return serializer.Dict2Data({'labels':fields,'pros':data})
 
-def get_dos_pro_set(xml_data,spin_set=1,dos_range=None):
+def get_dos_pro_set(xml_data,spin_set:int=1,dos_range:range=None):
     """Returns dos projection of a spin_set(default 1) as numpy array. If spin-polarized calculations, gives SpinUp and SpinDown keys as well.
-    - **Parameters**
-        - xml_data    : From `read_asxml` function
-        - spin_set    : Spin set to get, default 1.
-        - dos_range   : If elim used in `get_tdos`,that will return dos_range to use here..
-    - **Returns**
-        - Data     : ipyvasp.Dict2Data with attibutes of dos projections and related parameters.
+    
+    Args:
+        xml_data : From ``read_asxml`` function
+        spin_set (int): Spin set to get, default 1.
+        dos_range (range): If elim used in ``get_tdos``,that will return dos_range to use here..
+    
+    Returns:
+        Dict2Data : ``ipyvasp.Dict2Data`` with attibutes of dos projections and related parameters.
     """
     if dos_range != None:
         check_list = list(dos_range)
@@ -435,15 +441,17 @@ def get_structure(xml_data):
             'positions': np.array(positions),'unique': unique_d}
     return serializer.PoscarData(st_dic)
 
-def export_vasprun(path = None, skipk = None, elim = [], dos_only = False):
-    """
-    - Returns a full dictionary of all objects from `vasprun.xml` file. It first try to load the data exported by powershell's `Export-VR(Vasprun)`, which is very fast for large files. It is recommended to export large files in powershell first.
-    - **Parameters**
-        - path       : Path to `vasprun.xml` file. Default is `'./vasprun.xml'`.
-        - skipk      : Default is None. Automatically detects kpoints to skip.
-        - elim       : List [min,max] of energy interval. Default is [], covers all bands.
+def export_vasprun(path:str = None, skipk:int = None, elim:list = [], dos_only:bool = False):
+    """Returns a full dictionary of all objects from ``vasprun.xml`` file. It first try to load the data exported by powershell's `Export-VR(Vasprun)`, which is very fast for large files. It is recommended to export large files in powershell first.
+    
+    Args:
+        path  (str): Path to ``vasprun.xml`` file. Default is ``'./vasprun.xml'``.
+        skipk (int): Default is None. Automatically detects kpoints to skip.
+        elim  (list): List [min,max] of energy interval. Default is [], covers all bands.
+        dos_only (bool): If True, only returns dos data with minimal other data. Default is False.
         
-    **Returns**: `ipyvasp.serializer.VasprunData` object.
+    Returns:
+        VasprunData: ``ipyvasp.serializer.VasprunData`` object.
     """
     path = path or './vasprun.xml'
 
@@ -519,33 +527,47 @@ def _validate_evr(path_evr=None,**kwargs):
     # Other things are not valid.
     raise ValueError('path_evr must be a path string or output of export_vasprun function.')
 
-def islice2array(path_or_islice,dtype=float,delimiter='\s+',
-                include=None,exclude='#',raw=False,fix_format = True,
-                start=0,nlines=None,count=-1,cols=None,new_shape=None
+def islice2array(path_or_islice,dtype = float,delimiter:str = '\s+',
+                include:str=None,exclude:str='#',raw:bool=False,fix_format:bool = True,
+                start:int=0,nlines:int=None,count:int=-1,cols: tuple =None,new_shape : tuple=None
                 ):
-    """
-    - Reads a sliced array from txt,csv type files and return to array. Also manages if columns lengths are not equal and return 1D array. It is faster than loading  whole file into memory. This single function could be used to parse EIGENVAL, PROCAR, DOCAR and similar files with just a combination of `exclude, include,start,stop,step` arguments.
-    - **Parameters**
-        - path_or_islice: Path/to/file or `itertools.islice(file_object)`. islice is interesting when you want to read different slices of an opened file and do not want to open it again and again. For reference on how to use it just execute `ipyvasp.export_locpot??` in a notebook cell or ipython terminal to see how islice is used extensively.
-        - dtype: float by default. Data type of output array, it is must have argument.
-        - start,nlines: The indices of lines to start reading from and number of lines after start respectively. Only work if `path_or_islice` is a file path. both could be None or int, while start could be a list to read slices from file provided that nlines is int. The spacing between adjacent indices in start should be equal to or greater than nlines as pointer in file do not go back on its own.  These parameters are in output of `slice_data`
-        > Note: `start` should count comments if `exclude` is None. You can use `slice_data` function to get a dictionary of `start,nlines, count, cols, new_shape` and unpack in argument instead of thinking too much.
-        - count: `np.size(output_array) = nrows x ncols`, if it is known before execution, performance is increased. This parameter is in output of `slice_data`.
-        - delimiter:  Default is `\s+`. Could be any kind of delimiter valid in numpy and in the file.
-        - cols: List of indices of columns to pick. Useful when reading a file like PROCAR which e.g. has text and numbers inline. This parameter is in output of `slice_data`.
-        - include: Default is None and includes everything. String of patterns separated by | to keep, could be a regular expression.
-        - exclude: Default is '#' to remove comments. String of patterns separated by | to drop,could be a regular expression.
-        - raw    : Default is False, if True, returns list of raw strings. Useful to select `cols`.
-        - fix_format: Default is True, it sepearates numbers with poor formatting like 1.000-2.000 to 1.000 2.000 which is useful in PROCAR. Keep it False if want to read string literally.
-        - new_shape : Tuple of shape Default is None. Will try to reshape in this shape, if fails fallbacks to 2D or 1D. This parameter is in output of `slice_data`.
-    - **Examples**
-        > `islice2array('path/to/PROCAR',start=3,include='k-point',cols=[3,4,5])[:2]`
-        > array([[ 0.125,  0.125,  0.125],
-        >        [ 0.375,  0.125,  0.125]])
-        > `islice2array('path/to/EIGENVAL',start=7,exclude='E',cols=[1,2])[:2]`
-        > array([[-11.476913,   1.      ],
-        >        [  0.283532,   1.      ]])
-    > Note: Slicing a dimension to 100% of its data is faster than let say 80% for inner dimensions, so if you have to slice more than 50% of an inner dimension, then just load full data and slice after it.
+    """Reads a sliced array from txt,csv type files and return to array. Also manages if columns lengths are not equal and return 1D array. 
+    It is faster than loading  whole file into memory. This single function could be used to parse EIGENVAL, PROCAR, DOCAR and similar files 
+    with just a combination of ``exclude, include,start,stop,step`` arguments. See code of ``ipyvasp.parser.export_locpot`` for example.
+    
+    Args:
+        path_or_islice: Path/to/file or ``itertools.islice(file_object)``. islice is interesting when you want to read different slices of 
+            an opened file and do not want to open it again. 
+        dtype (conversion function): float by default. Data type of output array, it is must have argument.
+        start (int): Starting line number. Default is 0. It could be a list to read slices from file provided that nlines is int. 
+            The spacing between adjacent indices in start should be equal to or greater than nlines as pointer in file do not go back on its own.
+            ``start`` should count comments if ``exclude`` is None. You can use ``slice_data`` function to get a dictionary of 
+            ``start,nlines, count, cols, new_shape`` and unpack in argument instead of thinking too much.
+        nlines (int): Number of lines after start respectively. Only work if ``path_or_islice`` is a file path. could be None or int.
+        count (int): Default is -1. ``count = np.size(output_array) = nrows x ncols``, if it is known before execution, performance is increased. This parameter is in output of ``slice_data``.
+        delimiter (str):  Default is `\s+`. Could be any kind of delimiter valid in numpy and in the file.
+        cols (tuple): Tuple of indices of columns to pick. Useful when reading a file like PROCAR which e.g. has text and numbers inline. This parameter is in output of ``slice_data``.
+        include (str): Default is None and includes everything. String of patterns separated by | to keep, could be a regular expression.
+        exclude (str): Default is '#' to remove comments. String of patterns separated by | to drop,could be a regular expression.
+        raw (bool): Default is False, if True, returns list of raw strings. Useful to select ``cols``.
+        fix_format (bool): Default is True, it sepearates numbers with poor formatting like ``1.000-2.000`` to ``1.000 -2.000`` which is useful in PROCAR. Keep it False if want to read string literally.
+        new_shape (tuple): Tuple of shape Default is None. Will try to reshape in this shape, if fails fallbacks to 2D or 1D. This parameter is in output of ``slice_data``.
+    
+    Returns:
+        1D or 2D array of dtype. If raw is True, returns raw data.
+        
+    .. code-block:: python
+        :caption: **Example**
+        
+        islice2array('path/to/PROCAR',start=3,include='k-point',cols=[3,4,5])[:2]
+        array([[ 0.125,  0.125,  0.125],
+               [ 0.375,  0.125,  0.125]])
+        islice2array('path/to/EIGENVAL',start=7,exclude='E',cols=[1,2])[:2]
+        array([[-11.476913,   1.      ],
+               [  0.283532,   1.      ]])
+    
+    .. note::
+        Slicing a dimension to 100% of its data is faster than let say 80% for inner dimensions, so if you have to slice more than 50% of an inner dimension, then just load full data and slice after it.
     """
     if nlines is None and isinstance(start,(list,np.ndarray)):
         print("`nlines = None` with `start = array/list` is useless combination.")
@@ -607,23 +629,35 @@ def islice2array(path_or_islice,dtype=float,delimiter='\s+',
         except: pass
     return data
 
-def slice_data(dim_inds,old_shape):
-    """
-    - Returns a dictionary that can be unpacked in arguments of isclice2array function. This function works only for regular txt/csv/tsv data files which have rectangular data written.
-    - **Parameters**
-        - dim_inds : List of indices array or range to pick from each dimension. Inner dimensions are more towards right. Last itmes in dim_inds is considered to be columns. If you want to include all values in a dimension, you can put -1 in that dimension. Note that negative indexing does not work in file readig, -1 is s special case to fetch all items.
-        - old_shape: Shape of data set including the columns length in right most place.
-    - **Example**
-        - You have data as 3D arry where third dimension is along column.
-        > 0 0
-        > 0 2
-        > 1 0
-        > 1 2
-        - To pick [[0,2], [1,2]], you need to give
-        > slice_data(dim_inds = [[0,1],[1],-1], old_shape=(2,2,2))
-        > {'start': array([1, 3]), 'nlines': 1, 'count': 2}
-        - Unpack above dictionary in `islice2array` and you will get output array.
-    - Note that dimensions are packed from right to left, like 0,2 is repeating in 2nd column.
+def slice_data(dim_inds:list,old_shape:tuple):
+    """Returns a dictionary that can be unpacked in arguments of isclice2array function. This function works only for regular txt/csv/tsv data files which have rectangular data written.
+    
+    Args:
+        dim_inds (list): List of indices array or range to pick from each dimension. Inner dimensions are more towards right. Last itmes in dim_inds is considered to be columns. If you want to include all values in a dimension, you can put -1 in that dimension. Note that negative indexing does not work in file readig, -1 is s special case to fetch all items.
+        old_shape (tuple): Shape of data set including the columns length in right most place.
+    
+    Suppose You have data as 3D arry where third dimension is along column.
+    
+    .. code-block:: shell
+        :caption: data.txt
+        
+        0 0
+        0 2
+        1 0
+        1 2
+        
+    To pick [[0,2], [1,2]], i.e. second and fourth row, you need to run
+    
+    .. code-block:: python
+        :caption: slicing data
+        
+        slice_data(dim_inds = [[0,1],[1],-1], old_shape=(2,2,2))
+        {'start': array([1, 3]), 'nlines': 1, 'count': 2}
+        
+    Unpack above dictionary in ``islice2array`` and you will get output array.
+    
+    .. note::
+        The dimensions are packed from right to left, like 0,2 is repeating in 2nd column.
     """
     # Columns are treated diffiernetly.
     if dim_inds[-1] == -1:
@@ -656,12 +690,13 @@ def slice_data(dim_inds,old_shape):
     new_shape.append(old_shape[-1])
     return {'start':_out_,'nlines':nlines,'count': nlines*len(_out_),'cols':cols,'new_shape':tuple(new_shape)}
 
-def split_vasprun(path=None):
-    """
-    - Splits a given vasprun.xml file into a smaller _vasprun.xml file plus _set[1,2,3,4].txt files which contain projected data for each spin set.
-    - **Parameters**
-        - path: path/to/vasprun.xml file.
-    - **Output**
+def split_vasprun(path:str = None):
+    """Splits a given vasprun.xml file into a smaller _vasprun.xml file plus _set[1,2,3,4].txt files which contain projected data for each spin set.
+    
+    Args:
+        path (str): path/to/vasprun.xml file.
+    
+    Output:
         - _vasprun.xml file with projected data.
         - _set1.txt for projected data of colinear calculation.
         - _set1.txt for spin up data and _set2.txt for spin-polarized case.
@@ -714,16 +749,17 @@ def split_vasprun(path=None):
                 print('Done')
 
 def export_spin_data(path = None, spins = 's', skipk = None, elim = None):
-    """
-    - Returns Data with selected spin sets. For spin polarized calculations, it returns spin up and down data.
-    - **Parameters**
-        - path   : Path to `vasprun.xml` file. Default is `'./vasprun.xml'`.
-        - skipk  : Default is None. Automatically detects kpoints to skip.
-        - elim   : List [min,max] of energy interval. Default is [], covers all bands.
-        - spins  : Spin components to include from 'sxyz', e.g. 'sx' will pick <S> and <S_x> if present.
-                   Only works if ISPIN == 1, otherwise it will be two sets for spin up and down.
+    """Returns Data with selected spin sets. For spin polarized calculations, it returns spin up and down data.
     
-    **Returns**: `ipyvasp.serializer.SpinData` object.
+    Args:
+        path  (str): Path to ``vasprun.xml`` file. Default is `'./vasprun.xml'`.
+        skipk (int): Default is None. Automatically detects kpoints to skip.
+        elim  (list): List [min,max] of energy interval. Default is [], covers all bands.
+        spins (str): Spin components to include from 'sxyz', e.g. 'sx' will pick <S> and <S_x> if present.
+        Only works if ISPIN == 1, otherwise it will be two sets for spin up and down.
+    
+    Returns:
+        SpinData: ``ipyvasp.serializer.SpinData`` object.
     """
     if not isinstance(spins,str):
         raise TypeError(f"`spins` must be a string from 'sxyz', got {spins}!")
@@ -821,20 +857,21 @@ def export_outcar(path=None):
     final_dict = {'ion_pot':pot_arr,'positions':pos_arr,'site_pot':pos_pot,'basis':basis[:,:3],'rec_basis':basis[:,3:],'n_kbi':n_kbi}
     return serializer.OutcarData(final_dict)
 
-def export_locpot(path = None,data_set = 0):
-    """
-    - Returns Data from LOCPOT and similar structure files like CHG/PARCHG etc. Loads only single set based on what is given in data_set argument.
-    - **Parameters**
-        - locpot: path/to/LOCPOT or similar stuructured file like CHG. LOCPOT is auto picked in CWD.
-        - data_set: 0 for electrostatic data, 1 for magnetization data if ISPIN = 2. If non-colinear calculations, 1,2,3 will pick Mx,My,Mz data sets respectively. Only one data set is loaded, so you should know what you are loading.
+def export_locpot(path:str = None,data_set:str = 0):
+    """Returns Data from LOCPOT and similar structure files like CHG/PARCHG etc. Loads only single set based on what is given in data_set argument.
     
-    - **Returns**
-        - Data: serializer.GridData object with 3D volumetric data set loaded as attribute 'values'.
+    Args:
+        locpot (str): path/to/LOCPOT or similar stuructured file like CHG. LOCPOT is auto picked in CWD.
+        data_set (int): 0 for electrostatic data, 1 for magnetization data if ISPIN = 2. If non-colinear calculations, 1,2,3 will pick Mx,My,Mz data sets respectively. Only one data set is loaded, so you should know what you are loading.
+    
+    Returns:
+        GridData: ``ipyvasp.serializer.GridData`` object with 3D volumetric data set loaded as attribute 'values'.
         
-    - **Exceptions**
-        - Would raise index error if magnetization density set is not present in case data_set > 0.
+    Exceptions:
+        Would raise index error if magnetization density set is not present in case ``data_set > 0``.
     
-    **Note**: Read [vaspwiki-CHGCAR](https://www.vasp.at/wiki/index.php/CHGCAR) for more info on what data sets are available corresponding to different calculations.
+    .. note::
+        Read `vaspwiki-CHGCAR <https://www.vasp.at/wiki/index.php/CHGCAR>`_ for more info on what data sets are available corresponding to different calculations.
     """
     path = path or './LOCPOT'
     if not os.path.isfile(path):

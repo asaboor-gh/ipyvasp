@@ -1,32 +1,8 @@
 """ipyvasp is a processing tool for VASP DFT input/output processing.
 Author: Abdul Saboor
 Licence: Apache License Version 2.0, January 2004 #See file
-
-Modules:
--------
-    ipyvasp.api:      # API for general use
-    ipyvasp.vr_parser # Parser for vasprun.xml
-    ipyvasp.utils     # general functions
-    ipyvasp.splots    # Matplotlib's plotting functions
-    ipyvasp.iplots    # Plotly's interactive plotting functions
-    ipyvasp.sio       # Functions for BZ, POSCAR, KPath etc.
-    ipyvasp.widgets   # Jupyter widgets apps for output analysis/kpath selection. Very useful in big projectes. 
-    ipyvasp.surfaces  # Functions for surface and spin texture analysis
     
-Usage:
------
-    All modules are imported under a single namespace, you could do
-    >>> import ipyvasp as pp 
-    ... pp.docs() #See online docs
-    ... pp.example_notebook() #Opens Colab notebook
-    ... pp.__all__ #To see what is available, only exposes common functionality
-    ... pp.generate_summary(paths)  # Get a dataframe for whole project after you used pp.VasprunApp
-    
-    If you want to acess private functions/varaiables, you need to import a submodule itself, e.g.
-    >>> import ipyvasp.splots as sp 
-    ... sp._plot_bands() #This is a private function, (see leading underscore)
-    
-Links:
+Links
 -----
     [github](https://github.com/massgh/ipyvasp)            
     [docs](https://massgh.github.io/ipyvasp/)     
@@ -47,7 +23,6 @@ __all__.extend(api_all)
 
 # Access all functions through root modile ipyvasp
 from .api import *
-from .utils import nav_links # For use in Jupyter Notebooks
     
 from matplotlib.pyplot import show as _show,savefig as _savefig
 

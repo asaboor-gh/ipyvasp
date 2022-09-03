@@ -40,7 +40,7 @@ def _sub_doc(from_func,skip_param=None,replace={}):
 # Cell
 def download_structure(formula, mp_id=None, max_sites=None,min_sites=None, api_key=None,save_key = False):
     """Download structure data from Materials project website.
-    - **Parameters**
+    Args:
         - formula: chemical formula of the material.
         - mp_id: Materials project id of material.
         - max_sites: maximum number of sites in structure to download.
@@ -115,7 +115,7 @@ def parse_text(path,
         It is faster than loading  whole file into memory. This single function could be used
         to parse EIGENVAL, PROCAR, DOCAR and similar files with just a
         combination of `exclude, include,start,stop,step` arguments.
-    - **Parameters**
+    Args:
         - path: Path/to/file to be parsed.
         - dtype: float by default. Data type of output array, it is must have argument.
         - start,nlines: The indices of lines to start reading from and number of lines after start respectively.
@@ -173,7 +173,7 @@ class POSCAR:
     "POSACR class to contain data and related methods, data is PoscarData, json/tuple file/string."
     def __init__(self,path = None,content = None,data = None):
         """Do not use `data` yourself, it's for operations on poscar.
-        - **Parameters**
+        Args:
             - content: string of POSCAR content
             - path: path to file
             - data: PoscarData object.
@@ -281,7 +281,7 @@ class POSCAR:
 
     def splot_kpath(self,vertex = 0, knn_inds = None, labels = None, color='k', line_width = 0.8,marker_size = 10,marker_style = '.',**labels_kwargs):
         """Plot k-path over existing BZ.
-        - **Parameters**
+        Args:
             - vertex: vertex index nearby which to plot path. There are as many vertices as there are in BZ's shape.
             - knn_inds: list of indices of k nearest points e.g. [2,3,1] will trace path linking as 2-3-1.
                 0 is Gamma point and 1 is the selected vertex itself. Points are taken internally from BZ, you can see from `self.bz.specials`.
@@ -403,7 +403,7 @@ class POSCAR:
 
     def add_selective_dynamics(self, a = None, b = None, c = None, show_plot = True):
         """Returns selective dynamics included POSCAR if input is given. By default, if a direction is not given, it turns ON with others.
-        - **Parameters**
+        Args:
             - a, b, c: Arrays of shape (N,2) that contain ranges in fractional coordinates to turn selective dynamics on.
             - show_plot: Plots the selective dynamics included sites in fractional orthogonal space to have an idea quickly.
 
@@ -478,7 +478,7 @@ class POSCAR:
 class LOCPOT:
     """
     - Returns Data from LOCPOT and similar structure files. Loads only single set out of 2/4 magnetization data to avoid performance/memory cost while can load electrostatic and one set of magnetization together.
-    - **Parameters**
+    Args:
         - path: path/to/LOCPOT. LOCPOT is auto picked in CWD.
         - data_set: 0 for electrostatic data, 1 for magnetization data if ISPIN = 2. If non-colinear calculations, 1,2,3 will pick Mx,My,Mz data sets respectively. Only one data set is loaded, so you should know what you are loading.
     - **Exceptions**
