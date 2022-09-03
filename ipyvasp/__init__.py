@@ -35,7 +35,7 @@ Links:
 links = """[github](https://github.com/massgh/ipyvasp)             
 [docs](https://massgh.github.io/ipyvasp/)"""
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 
 __all__ = []
 

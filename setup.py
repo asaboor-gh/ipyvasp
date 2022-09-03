@@ -1,5 +1,6 @@
 import setuptools
 
 setuptools.setup(
-	name = "ipyvasp"
+	name = "ipyvasp",
+	version = "0.1.0",
 )
