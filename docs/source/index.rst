@@ -3,6 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+`Edit on Github <https://github.com/massgh/ipyvasp>`_
+
 Welcome to ipyvasp's Documentation!
 ===================================
 

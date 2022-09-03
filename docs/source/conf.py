@@ -18,7 +18,7 @@ extensions = [
     "sphinx.ext.autodoc"
 ]
 
-templates_path = []
+templates_path = ['_templates']
 exclude_patterns = []
 
 
@@ -30,6 +30,7 @@ import furo
 html_theme = "furo"
 html_theme_path = furo.__path__ # Unfortunately this is a list itself
 
-html_static_path = []
+
+html_static_path = ['_static']
 
 autodoc_member_order = 'bysource'

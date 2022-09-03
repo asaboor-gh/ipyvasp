@@ -22,7 +22,7 @@ __pycache__/
 # C extensions
 *.so
 
-# Distribution / packaging
+# Distribution / packaging/ Make sure docs/build remains there, just ipyvasp/build removed
 .Python
 env/
 ipyvasp/build
