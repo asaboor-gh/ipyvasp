@@ -14,9 +14,13 @@ from . import utils, serializer
 
 def dict2tuple(name,d):
     """Converts a dictionary (nested as well) to namedtuple, accessible via index and dot notation as well as by unpacking.
-    Args:
-        name (str): Name of the tuple.
-        d (dict): Dictionary, nested works as well.
+    
+    Parameters
+    ----------
+    name : str
+        Name of the namedtuple
+    d : dict
+        Dictionary to be converted to namedtuple. It can be nested as well.
     """
     return namedtuple(name,d.keys())(
            *(dict2tuple(k.upper(),v) if isinstance(v,dict) else v for k,v in d.items())
@@ -186,11 +190,13 @@ def get_summary(xml_data):
 
 def join_ksegments(kpath,kseg_inds=[]):
     """Joins a broken kpath's next segment to previous. `kseg_inds` should be list of first index of next segment"""
-    path_list = np.array(kpath)
+    path_arr = np.array(kpath)
+    path_max = path_arr.max()
     if kseg_inds:
         for ind in kseg_inds:
-            path_list[ind:] -= path_list[ind] - path_list[ind-1]
-    return list(path_list)
+            path_arr[ind:] -= path_arr[ind] - path_arr[ind-1]
+        path_arr = path_max * path_arr/path_arr[-1] # Normalize to max value back
+    return list(path_arr)
 
 def get_kpts(xml_data, skipk = 0):
     for kpts in xml_data.root.iter('varray'):

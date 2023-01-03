@@ -206,9 +206,13 @@
 
 <div class="viewcode-block" id="dict2tuple"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.parser.dict2tuple">[docs]</a><span class="k">def</span> <span class="nf">dict2tuple</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">d</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Converts a dictionary (nested as well) to namedtuple, accessible via index and dot notation as well as by unpacking.</span>
-<span class="sd">    Args:</span>
-<span class="sd">        name (str): Name of the tuple.</span>
-<span class="sd">        d (dict): Dictionary, nested works as well.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of the namedtuple</span>
+<span class="sd">    d : dict</span>
+<span class="sd">        Dictionary to be converted to namedtuple. It can be nested as well.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">namedtuple</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">())(</span>
            <span class="o">*</span><span class="p">(</span><span class="n">dict2tuple</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>

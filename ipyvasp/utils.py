@@ -54,7 +54,7 @@ def interpolate_data(x:np.ndarray,y:np.ndarray,n:int=10,k:int=3) -> tuple:
     #Add very small values at simliar points to make interpolation work.
     ind=[i for i in range(0,len(x)) if x[i-1]==x[i]] #Duplicate indices
     xa=np.unique(x)
-    dx=0.1*np.min(xa[1:]-xa[:-1])
+    dx=0.001*np.min(xa[1:]-xa[:-1]) #Very small value to add to duplicate points.
     if(ind):
         for pt in ind:
             x[pt:]=x[pt:]-x[pt]+x[pt-1]+dx
