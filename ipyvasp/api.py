@@ -8,17 +8,17 @@ import os
 import numpy as np
 import plotly.graph_objects as go
 try:
-    from ipyvasp import parser as vp
-    from ipyvasp import splots as sp
-    from ipyvasp import iplots as ip
-    from ipyvasp import sio as sio
-    from ipyvasp import widgets as wdg
-    from ipyvasp import utils as gu
-    from ipyvasp import serializer
-    from ipyvasp import surfaces as srf
+    from . import parsers as vp
+    from . import splots as sp
+    from . import iplots as ip
+    from . import sio as sio
+    from . import widgets as wdg
+    from . import utils as gu
+    from . import serializer
+    from . import surfaces as srf
 
 except:
-    import ipyvasp.parser as vp
+    import ipyvasp.parsers as vp
     import ipyvasp.splots as sp
     import ipyvasp.iplots as ip
     import ipyvasp.sio as sio

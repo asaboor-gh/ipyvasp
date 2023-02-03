@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 
 from . import utils, serializer
-#from ipyvasp import utils, serializer
+#from . import utils, serializer
 
 
 def dict2tuple(name,d):
@@ -539,7 +539,7 @@ def islice2array(path_or_islice,dtype = float,delimiter:str = '\s+',
                 ):
     """Reads a sliced array from txt,csv type files and return to array. Also manages if columns lengths are not equal and return 1D array. 
     It is faster than loading  whole file into memory. This single function could be used to parse EIGENVAL, PROCAR, DOCAR and similar files 
-    with just a combination of ``exclude, include,start,stop,step`` arguments. See code of ``ipyvasp.parser.export_locpot`` for example.
+    with just a combination of ``exclude, include,start,stop,step`` arguments. See code of ``ipyvasp.parsers.export_locpot`` for example.
     
     Args:
         path_or_islice: Path/to/file or ``itertools.islice(file_object)``. islice is interesting when you want to read different slices of 

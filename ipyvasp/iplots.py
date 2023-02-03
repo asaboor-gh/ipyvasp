@@ -11,11 +11,11 @@ import plotly.graph_objects as go
 
 # Inside packages import to work both with package and jupyter notebook.
 try:
-    from ipyvasp import parser as vp
-    from ipyvasp import splots as sp
-    from ipyvasp import utils as gu
+    from . import parsers as vp
+    from . import splots as sp
+    from . import utils as gu
 except:
-    import ipyvasp.parser as vp
+    import ipyvasp.parsers as vp
     import ipyvasp.splots as sp
     import ipyvasp.utils as gu
 
@@ -64,7 +64,7 @@ def _get_rgb_data(
        b = np.take(pros_set,orbs[2],axis=3).sum(axis=3)
        b = np.take(b,list(elements[2]),axis=0).sum(axis=0)
        if interp_nk:
-           from ipyvasp import utils as gu
+           from . import utils as gu
            knew,evals = gu.interpolate_data(kpath,evals_set,**interp_nk)
            _,occs = gu.interpolate_data(kpath,occs_set,**interp_nk)
            _, kpoints = gu.interpolate_data(kpath,kpoints,**interp_nk)

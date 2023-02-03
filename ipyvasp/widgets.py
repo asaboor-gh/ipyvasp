@@ -22,15 +22,15 @@ import plotly.graph_objects as go
 
 # Inside packages import to work both with package and jupyter notebook.
 try:
-    from ipyvasp import utils as gu
-    from ipyvasp import parser as vp
-    from ipyvasp import iplots as ip
-    from ipyvasp import splots as sp
-    from ipyvasp import sio
-    from ipyvasp import serializer
+    from . import utils as gu
+    from . import parsers as vp
+    from . import iplots as ip
+    from . import splots as sp
+    from . import sio
+    from . import serializer
 except:
     import ipyvasp.utils as gu
-    import ipyvasp.parser as vp
+    import ipyvasp.parsers as vp
     import ipyvasp.iplots as ip
     import ipyvasp.splots as sp
     import ipyvasp.sio as sio
@@ -1362,7 +1362,7 @@ class KPathApp:
 
     def get_kpath(self,n=5,weight=None,ibzkpt=None,outfile=None):
         "See Docs of pp.str2kpath for details."
-        from ipyvasp import POSCAR
+        from . import POSCAR
         kws = dict(n=n,weight=weight,ibzkpt=ibzkpt,outfile=outfile)
         _, k_str = self.get_data()
         return POSCAR(self.path).str2kpath(k_str,**kws)

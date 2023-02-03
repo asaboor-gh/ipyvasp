@@ -25,11 +25,11 @@ from mpl_toolkits import mplot3d
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 # Inside packages import to work both with package and jupyter notebook.
 try:
-    from ipyvasp import parser as vp, serializer
-    from ipyvasp import splots as sp
-    from ipyvasp import utils
+    from . import parsers as vp, serializer
+    from . import splots as sp
+    from . import utils
 except:
-    import ipyvasp.parser as vp
+    import ipyvasp.parsers as vp
     import ipyvasp.splots as sp
     import ipyvasp.serializer as serializer
     import ipyvasp.utils as utils
@@ -370,7 +370,7 @@ class InvokeMaterialsProject:
     """Connect to materials project and get data using `api_key` from their site.
     Usage:
     ```python
-    from ipyvaspr.sio import InvokeMaterialsProject # or import ipyvasp.InvokeMaterialsProject as InvokeMaterialsProject
+    from .r.sio import InvokeMaterialsProject # or import ipyvasp.InvokeMaterialsProject as InvokeMaterialsProject
     mp = InvokeMaterialsProject(api_key='your_api_key')
     outputs = mp.request(formula='NaCl') #returns list of structures from response
     outupts[0].export_poscar() #returns poscar data

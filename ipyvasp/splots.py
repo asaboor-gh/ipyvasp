@@ -22,11 +22,11 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # Inside packages import to work both with package and jupyter notebook.
 try:
-    from ipyvasp import parser as vp
-    from ipyvasp import utils as gu
-    from ipyvasp import serializer
+    from . import parsers as vp
+    from . import utils as gu
+    from . import serializer
 except:
-    import ipyvasp.parser as vp
+    import ipyvasp.parsers as vp
     import ipyvasp.utils as gu
     import ipyvasp.serializer as serializer
 
@@ -618,7 +618,7 @@ def _get_pros_data(
 
     if interp_nk:
         min_d, max_d = np.min(_colors),np.max(_colors) # For cliping
-        from ipyvasp import utils as gu
+        from . import utils as gu
         knew, evals = gu.interpolate_data(kpath,evals_set,**interp_nk)
         _colors     = gu.interpolate_data(kpath,_colors,**interp_nk)[1].clip(min=min_d,max=max_d)
         return {'kpath':knew,'evals': evals,'pros': _colors}
@@ -1227,7 +1227,7 @@ def _select_pdos(
     pros = np.take(pdos_set[:,:,1:],list(ions),axis=0).sum(axis=0)
     p_dos = np.take(pros,orbs,axis=1).sum(axis=1)
     if interp_nk:
-        from ipyvasp import utils as gu
+        from . import utils as gu
         _en,_tdos=gu.interpolate_data(en,t_dos,**interp_nk)
         _tdos = _tdos.clip(min=0)
         _pdos = gu.interpolate_data(en,p_dos,**interp_nk)[1].clip(min=0)

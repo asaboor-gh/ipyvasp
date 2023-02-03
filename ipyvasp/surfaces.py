@@ -9,11 +9,11 @@ from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 # Inside packages import to work both with package and jupyter notebook.
 try:
-    from ipyvasp import parser as vp
-    from ipyvasp import api, serializer, splots
+    from . import parsers as vp
+    from . import api, serializer, splots
     from .splots import _validate_input
 except:
-    import ipyvasp.parser as vp
+    import ipyvasp.parsers as vp
     import ipyvasp.api as api
     import ipyvasp.serializer as serializer
     import ipyvasp.splots as splots
