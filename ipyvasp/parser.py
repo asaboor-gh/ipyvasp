@@ -275,7 +275,7 @@ def get_evals(xml_data, skipk = None, elim = []):
 
     for i in xml_data.root.iter('i'): #efermi for condition required.
         if i.attrib == {'name': 'efermi'}:
-            efermi=float(i.text)
+            efermi = float(i.text)
     evals_dic={'Fermi':efermi,'ISPIN':ISPIN,'NBANDS':NBANDS,'evals':evals,'indices': range(NBANDS),'occs':occs}
     if elim: #check if elim not empty
         if ISPIN == 1:

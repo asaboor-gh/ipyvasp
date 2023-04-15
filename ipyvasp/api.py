@@ -27,10 +27,16 @@ except:
     import ipyvasp.serializer as serializer
     import ipyvasp.surfaces as srf
 
-def _sub_doc(from_func,skip_param=None,replace={}):
+def _sub_doc(from_func,skip_param = None, replace={}):
     """Assing __doc__ from other function. Replace words in docs where need."""
     def wrapper(func):
-        docs = '\n'.join(line for line in from_func.__doc__.splitlines() if skip_param not in line)
+        docs = from_func.__doc__.splitlines()
+        if isinstance(skip_param, (list, tuple)):
+            for param in skip_param:
+                docs = [line for line in docs if param not in line]
+        elif isinstance(skip_param, str):
+            docs = [line for line in docs if skip_param not in line]
+        docs = '\n'.join(docs)
         for k,v in replace.items():
             docs = docs.replace(k,v)
         func.__doc__ = docs
@@ -724,6 +730,13 @@ class Vasprun:
     def Fermi(self):
         "Fermi energy given in vasprun.xml."
         return self._data.Fermi
+    
+    # def pick_bands(self, kpoints = -1, bands = -1, spin = 0,  query = {'s':[]}):
+        
+    #     pass
+    
+    # def pick_dos(self, tdos = True, spin = 0, query = {'s':[]}):
+    #     pass
 
 
     def select(self,kpoints_inds = None, bands_inds = None):
@@ -771,10 +784,66 @@ class Vasprun:
 
         return self.__class__(data = serializer.VasprunData(d).to_json())
 
-    @_sub_doc(sp.splot_bands,'- path_evr')
-    def splot_bands(self,ax = None,**kwargs):
-        kwargs = self.__handle_kwargs(kwargs)
-        return sp.splot_bands(self._data,ax = ax, **kwargs)
+    @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': "spin : spin set to pick if spin-polarized calulations\n    ax :"})
+    def splot_bands(self, spin = 'up', ax = None, elim = None, kseg_inds = None, ktick_inds = None, ktick_vals = None, interp_nk = {}, **kwargs):
+        if spin not in ['up','down']:
+            raise ValueError('spin should be either "up" or "down"')
+        
+        plot_kws = self.__handle_kwargs({k:v for k,v in locals().items() if k not in ['self','spin','kwargs']})
+        
+        if spin == 'down' and self.data.sys_info.ISPIN == 2:
+            E = self._data.bands.evals.SpinDown - self._efermi
+        elif self.data.sys_info.ISPIN == 2:
+            E = self._data.bands.evals.SpinUp - self._efermi
+        else:
+            E = self._data.bands.evals - self._efermi
+        
+        plot_kws.pop('Fermi',None) # Patch now, will be removed in future with other fixings
+            
+        return sp.splot_bands(self.data.kpath, E, **plot_kws, **kwargs)
+
+    @_sub_doc(sp.splot_rgb_lines1,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': "query_data : {'label': [atoms, orbitals], ...}\n    spin : spin set to pick if spin-polarized calulations\n    ax :"})
+    def splot_rgb_lines1(self,query_data = {'1-s':[range(1),range(1)]}, spin = 'up', 
+        ax         = None, 
+        elim       = None, 
+        kseg_inds  = None, 
+        ktick_inds = None, 
+        ktick_vals = None, 
+        interp_nk  = None, 
+        max_width  = None,
+        scale_data = False,
+        colormap   = None,
+        colorbar   = True,
+        N          = 9,
+        shadow     = True):
+        if spin not in ['up','down']:
+            raise ValueError('spin should be either "up" or "down"')
+        
+        plot_kws = self.__handle_kwargs({k:v for k,v in locals().items() if k not in ['self','spin','query_data']})
+        
+        if spin == 'down' and self.data.sys_info.ISPIN == 2:
+            E = self._data.bands.evals.SpinDown - self._efermi
+            pros = self._data.pro_bands.pros.SpinDown
+        elif self.data.sys_info.ISPIN == 2:
+            E = self._data.bands.evals.SpinUp - self._efermi
+            pros = self._data.pro_bands.pros.SpinUp
+        else:
+            E = self._data.bands.evals - self._efermi
+            pros = self._data.pro_bands.pros
+        
+        plot_kws.pop('Fermi',None) # Patch now, will be removed in future with other fixings
+        
+        elements, orbs, labels = sp._format_input(query_data, rgb = True)
+        elements, orbs, labels = sp._validate_input(elements, orbs, labels, self.data.sys_info, rgb = True)
+        
+        arrays = []
+        for elem,orb in zip(elements,orbs):
+            _pros  = np.take(pros,elem,axis=0).sum(axis=0)
+            _pros = np.take(_pros,orb,axis=2).sum(axis=2)
+            arrays.append(_pros)
+        
+        return sp.splot_rgb_lines1(self.data.kpath, E, arrays, labels, **plot_kws)
+
 
     @_sub_doc(sp.splot_dos_lines,'- path_evr')
     def splot_dos_lines(self, query_data= {}, *, ax = None, **kwargs):

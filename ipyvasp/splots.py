@@ -58,10 +58,10 @@ def modify_axes(ax=None,xticks=[],xt_labels=[],xlim=[],\
         - (xt,yt)_labels : List of labels on (x,y) ticks points.
         - (x,y)lim : [min, max] of (x,y) axes.
         - (x,y)label : axes labels.
-        - vlines : If true, drawn when `ylim` is not empty.
+        - vlines : If true, draw vertical lines at points of xticks.
         - zeroline : If True, drawn when `xlim` is not empty.
     """
-    if ax==None:
+    if ax is None:
         raise ValueError("Matplotlib axes (ax) is not given.")
     else:
         if xticks:
@@ -76,8 +76,10 @@ def modify_axes(ax=None,xticks=[],xt_labels=[],xlim=[],\
                 ax.hlines(0,min(xlim),max(xlim),color=(0,0,0,0.6), linestyle='dashed',lw=0.3)
         if ylim:
             ax.set_ylim(ylim)
-            if vlines:
-                ax.xaxis.grid(color=(0,0,0,0.6), linestyle='dashed',lw=0.3)
+            
+        if vlines:
+            ax.xaxis.grid(color=(0,0,0,0.6), linestyle='dashed',lw=0.3)
+            
         if xlabel!=None:
             ax.set_xlabel(xlabel)
         if ylabel!=None:
@@ -233,73 +235,6 @@ def break_spines(ax,spines,symbol=u'\u2571',**kwargs):
         ax.text(1,1,symbol,**kwargs)
         ax.text(1,0,symbol,**kwargs)
 
-# Cell
-def _plot_bands(ax=None,kpath=None,bands=None,showlegend=False,Fermi=None,interp_nk = {},**kwargs):
-    """
-    - Returns axes object and plot on which all matplotlib allowed actions could be performed.
-    Args:
-        - ax         : Matplotlib axes object, if not given, one is created.
-        - kpath      : 1D array from `get_kpts`().kpath or `export_vasprun`().kpath.
-        - bands      : Dictionary Object from `get_evals` or `export_vasprun`().bands.
-        - showlegend : Boolean, default is False, if true, gives legend for spin-polarized calculations.
-        - Fermi    : If not given, automatically picked from bands object.
-        - interp_nk  : Dictionary with keys 'n' and 'k' for interpolation.
-
-    Additional kwargs are passed to matplotlib.lines.Lin2D. For passing a keyword to spindown channel, append an underscore, e.g 'lw' goes to SpinUp and 'lw_' goes to SpinDown.
-    - **Returns**
-        - ax : matplotlib axes object with plotted bands.
-    """
-    # Fixing ax argument
-    ax = get_axes() if ax == None else ax
-    # Fixing kpath argument
-    if kpath == None:
-        raise ValueError("kpath is not provided. Use get_kpath() or export_vasprun().kpath to generate it.")
-    # Fixing bands arguement
-    if bands==None:
-        raise ValueError("bands object is not provided. Use get_evals() or export_vasprun().bands to generate it.")
-    if Fermi==None:
-       Fermi = bands.Fermi
-
-    # Plotting
-    kws_u = {k:v for k,v in kwargs.items() if not k.endswith('_')}
-    kws_d = {k.rstrip('_'):v for k,v in kwargs.items() if k.endswith('_')}
-    kws_u = {'label':'SpinUp',**kws_u} #Update label if not given
-    kws_d = {'label':'SpinDown',**kws_d}
-    # Set color and linewidth if not provided
-    ax.set_prop_cycle(color = [((0,0,0.8)),], linewidth = [1.5,]) #For spinup and simple if not given
-
-    if bands.ISPIN == 1:
-        if not bands.evals.any():
-            raise ValueError("Can not plot an empty eigenvalues object.\n"
-                            "Try with large energy range.")
-
-        en = bands.evals-Fermi
-        if interp_nk:
-            kpath,en = gu.interpolate_data(kpath,en,**interp_nk)
-
-        lines = ax.plot(kpath,en,**kws_u)
-        _ = [line.set_label(None) for line in lines[1:]]
-    if bands.ISPIN == 2:
-        if not bands.evals.SpinUp.any():
-            raise ValueError("Can not plot an empty eigenvalues object.\n"
-                             "Try with large energy range.")
-        enUp = bands.evals.SpinUp-Fermi
-        enDown = bands.evals.SpinDown-Fermi
-        if interp_nk:
-            _, enUp = gu.interpolate_data(kpath,enUp,**interp_nk)
-            #Do not reassign kpath in first line, it will throw error in next
-            kpath,enDown = gu.interpolate_data(kpath,enDown,**interp_nk)
-
-        lines_u = ax.plot(kpath,enUp,**kws_u)
-        _ = [line.set_label(None) for line in lines_u[1:]]
-        ax.set_prop_cycle(color = ['red',], linewidth = [1.2,],linestyle =['dashed',]) #For spindown if not given
-        lines_d = ax.plot(kpath,enDown,**kws_d)
-        _ = [line.set_label(None) for line in lines_d[1:]]
-
-        # Legend only for spin polarized
-        if showlegend:
-            ax.legend(fontsize='small',frameon=False,ncol=2, bbox_to_anchor=(0, 1), loc='lower left');
-    return ax
 
 # Cell
 def add_text(ax=None,xs=0.25,ys=0.9,txts='[List]',colors='r',transform=True,**kwargs):
@@ -331,46 +266,70 @@ def add_text(ax=None,xs=0.25,ys=0.9,txts='[List]',colors='r',transform=True,**kw
                     ax.text(x,y,txt,color=colors[i],**args_dict,**kwargs)
                 except:
                     ax.text(x,y,txt,color=colors,**args_dict,**kwargs)
+                    
+# This is to verify things together and make sure they are working as expected.
+def _validate_data(K, E,  elim, kseg_inds, ktick_inds, ktick_vals, interp_nk):
+    if np.ndim(E) != 2:
+        raise ValueError("E must be a 2D array.")
+    
+    if np.shape(E)[0] != len(K):
+        raise ValueError("Length of first dimension of E must be equal to length of K.")
+    
+    if isinstance(kseg_inds, (list, tuple)):
+        K = vp.join_ksegments(K, kseg_inds)
+    elif kseg_inds is not None:
+        raise ValueError("kseg_inds must be a list or tuple.")   
+    
+    if elim and len(elim) != 2:
+        raise ValueError("elim must be a list or tuple of length 2.")
+    
+    xticks = [K[i] for i in ktick_inds] if ktick_inds else None
+    xticklabels = [str(v) for v in ktick_vals] if ktick_vals else None
+    
+    if interp_nk and not isinstance(interp_nk, dict):
+        raise ValueError("interp_nk must be a dictionary with keys n and k.")
+    
+    return K, E, xticks, xticklabels
 
-# Cell
-def splot_bands(path_evr=None,ax=None,skipk=None,kseg_inds=[],elim=[],ktick_inds=[],ktick_vals=[],Fermi=None,txt=None,xytxt=[0.2,0.9],ctxt='black',interp_nk = {}, **kwargs):
+                    
+def splot_bands(K, E, ax = None, elim = None, kseg_inds = None, ktick_inds = None, ktick_vals = None, interp_nk = None, **kwargs):
     """
-    - Returns axes object and plot on which all matplotlib allowed actions could be performed.
-    Args:
-        - path_evr   : path/to/vasprun.xml or output of `export_vasprun`. Auto picks in CWD.
-        - ax         : Matplotlib axes object, if not given, one is created.
-        - skipk      : Number of kpoints to skip, default will be from IBZKPT.
-        - kseg_inds : Points where kpath is broken.
-        - elim       : [min,max] of energy range.
-        - Fermi    : If not given, automatically picked from `export_vasprun`.
-        - ktick_inds : High symmetry kpoints indices.abs
-        - ktick_vals  : High Symmetry kpoints labels.
-        - txt,xytxt and ctxt are extra arguments for text on figure.
-        - interp_nk   : Dictionary with keys 'n' and 'k' for interpolation.
-
-    Additional kwargs are passed to matplotlib.lines.Lin2D. For passing a keyword to spindown channel, append an underscore, e.g 'lw' goes to SpinUp and 'lw_' goes to SpinDown.
-    - **Returns**
-        - ax : matplotlib axes object with plotted bands.
+    Plot band structure for a single spin channel and return the matplotlib axes which can be used to add other channel if spin polarized.
+    
+    Parameters
+    ----------
+    K : array-like of shape (nkpts,)
+    E : array-like of shape (nkpts, nbands)
+    ax : matplotlib axes 
+    kseg_inds : list Indices where the k-path segments are broken 
+    elim : list of length 2 
+    ktick_inds : list of indices where the k-path ticks are placed 
+    ktick_vals : list of values for kticks with same length as ktick_inds 
+    interp_nk : dict of interpolation parameters with keys 'n' and 'k' 
+    
+    kwargs are passed to matplotlib's command `ax.plot`.
+    
+    Returns
+    -------
+    ax : matplotlib axes
     """
-    vr = vp._validate_evr(path_evr=path_evr,skipk=skipk,elim=elim)
+    K, E, xticks, xticklabels = _validate_data(K, E, elim, kseg_inds, ktick_inds, ktick_vals, interp_nk)
+    
+    if interp_nk:
+        K,E = gu.interpolate_data(K,E,**interp_nk)
 
-    # Main working here.
-    K = vp.join_ksegments(vr.kpath,kseg_inds=kseg_inds)
-    xticks = [K[i] for i in ktick_inds]
-    xlim = [min(K),max(K)]
-    if elim:
-        ylim=[min(elim),max(elim)]
-    else:
-        ylim=[]
-    if ax==None:
-        ax = get_axes()
-    if Fermi is None:
-        Fermi = vr.fermi
-
-    modify_axes(ax=ax,ylabel='Energy (eV)',xticks=xticks,xt_labels=ktick_vals,xlim=xlim,ylim=ylim,vlines=True)
-    _plot_bands(ax=ax,kpath=K,bands=vr.bands,showlegend=True,interp_nk = interp_nk, Fermi=Fermi,**kwargs)
-    text = txt if txt else vr.sys_info.SYSTEM
-    add_text(ax,*xytxt,text,colors=ctxt)
+    ax = get_axes() if ax is None else ax
+    if 'color' not in kwargs and 'c' not in kwargs:
+        kwargs['color'] = 'blue' # default color
+    
+    if 'linewidth' not in kwargs and 'lw' not in kwargs:
+        kwargs['linewidth'] = 0.9 # default linewidth to make it look good
+    
+    lines = ax.plot(K,E,**kwargs)
+    _ = [line.set_label(None) for line in lines[1:]]
+    
+    modify_axes(ax = ax,ylabel = 'Energy (eV)', xticks = xticks, xt_labels = xticklabels,
+                xlim = [min(K),max(K)], ylim = elim, vlines=True)
     return ax
 
 # Cell
@@ -690,7 +649,7 @@ def _make_line_collection(max_width   = None,
 
 # Cell
 def _validate_input(elements,orbs,labels,sys_info,rgb=False):
-    "Fix input elements, orbs and labels according to given sys_info. Returns (Bool, elements, orbs,labels)."
+    "Fix input elements, orbs and labels according to given sys_info. Returns (elements, orbs,labels)."
     if len(elements) != len(orbs) or len(elements) != len(labels):
         raise ValueError("`elements`, `orbs` and `labels` expect same length, even if empty.")
 
@@ -850,6 +809,163 @@ def color_cube(ax, colormap = 'brg', loc = (1,0.4), size = 0.2,
     cax.text(0, 9/8,f'{labels[2]}  ',color=color,fontsize=fontsize,va='bottom',ha='center',rotation=-90)
 
     return cax
+
+# Further fix data for all cases which have projections
+def _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False):
+    "Input pros must be [m,nk,nb], output is [nk,nb, m]"
+    
+    if np.shape(pros)[-2:] != np.shape(E):
+        raise ValueError("last two dimensions of `pros` must have same shape as `E`")
+    
+    if np.ndim(pros) == 2:
+        pros = np.expand_dims(pros,0) # still as [m,nk,nb]
+        
+    if rgb and len(pros) > 3:
+        raise ValueError("In rgb mode, `pros` must be at most 3")
+    
+    # Should be after exapnding dims but before transposing
+    if labels and len(labels) != len(pros):
+        raise ValueError("labels must be same length as pros")
+    
+    pros = np.transpose(pros,(1,2,0)) # [nk,nb,m] now
+    
+    if scale_data: # Normalize overall data
+        c_max = np.max(pros)
+        if c_max > 0.0000001: # Avoid division error
+            pros = pros/c_max
+            
+    if interp_nk:
+        min_d, max_d = np.min(pros),np.max(pros) # For cliping
+        _K, E = gu.interpolate_data(K,E,**interp_nk)
+        pros = gu.interpolate_data(K,pros,**interp_nk)[1].clip(min=min_d,max=max_d) 
+        return {'kpath':_K, 'evals':E, 'pros':pros}
+    
+    return {'kpath':K, 'evals':E, 'pros':pros} 
+
+def splot_rgb_lines1(K, E, pros, labels, 
+    ax         = None, 
+    elim       = None, 
+    kseg_inds  = None, 
+    ktick_inds = None, 
+    ktick_vals = None, 
+    interp_nk  = None, 
+    max_width  = None,
+    scale_data = False,
+    colormap   = None,
+    colorbar   = True,
+    N          = 9,
+    shadow     = True
+    ):
+    """
+    Plot projected band structure for a given `pros` matrix of shape [m,nk,nb] where m is the number of projections.
+    
+    Parameters
+    ----------
+    K : array-like, shape (nk,)
+    E : array-like, shape (nk,nb)
+    pros : array-like, shape (m,nk,nb)
+    labels : list of str, length m
+    ax : matplotlib.axes.Axes 
+    elim : tuple of min and max values    
+    kseg_inds : list/tuple of indices which separate different segments of the kpath 
+    ktick_inds : list/tuple of indices which are ticked on the kpath 
+    ktick_vals : list/tuple of values which are ticked on the kpath
+    interp_nk : dict of interpolation parameters with keys 'n' and 'k' 
+    max_width : float, maximum linewidth
+    scale_data : bool, if True, scale projection data to be between 0 and 1
+    colormap : str, name of a matplotlib colormap
+    colorbar : bool, if True, add colorbar, otherwise add attribute to ax to add colorbar or color cube later
+    N : int, number of colors in colormap
+    shadow : bool, if True, add shadow to lines
+    
+    Returns
+    ------- 
+    ax : matplotlib.axes.Axes which has additional attributes:
+        .add_colorbar() : Add colorbar that represents most recent plot
+        .color_cube()   : Add color cube that represents most recent plot if `pros` is 3 components
+    """
+    K, E, xticks, xticklabels = _validate_data(K,E,elim,kseg_inds,ktick_inds,ktick_vals, interp_nk)
+    
+    ax  = get_axes() if ax is None else ax
+    
+    #=====================================================
+    pros_data = _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = True) # (nk,), (nk, nb), (nk, nb, m) at this point
+    _lws_ = 0.1 + 2.5*np.sum(pros_data['pros'],axis=2) # Before changing color, get linewidths
+    ax._min_max_c = [(np.min(_lws_) -0.1)/2.5,(np.max(_lws_) - 0.1)/2.5] # Save for later use.
+    pros_data['lws']  = np.transpose(_lws_[:-1,:]/2 + _lws_[1:,:]/2).ravel() # NBANDS[NKPTS-1] repeatition.
+    # These 'lws' are passed in to _make_line_collection to keep true linwidths even color changes
+
+    colors = pros_data['pros']
+    how_many = np.shape(colors)[-1]
+
+    if how_many == 1:
+        percent_colors = colors[:,:,0]
+        percent_colors = percent_colors/np.max(percent_colors)
+        pros_data['pros'] = plt.cm.get_cmap(colormap or 'copper',N)(percent_colors)[:,:,:3] # Get colors in RGB space.
+
+    elif how_many == 2:
+        _sum = np.sum(colors,axis=2)
+        _sum[_sum == 0] = 1 # Avoid division error
+        percent_colors = colors[:,:,1]/_sum # second one is on top
+        pros_data['pros'] = plt.cm.get_cmap(colormap or 'coolwarm',N)(percent_colors)[:,:,:3] # Get colors in RGB space.
+
+    else:
+        # Normalize color at each point only for 3 projections.
+        c_max = np.max(colors,axis=2, keepdims =True)
+        c_max[c_max == 0] = 1 #Avoid division error:
+        colors = colors/c_max # Weights to be used for color interpolation.
+
+        nsegs = np.linspace(0,1,N,endpoint = True)
+        for low,high in zip(nsegs[:-1],nsegs[1:]):
+            colors[(colors >= low) & (colors < high)] = (low + high)/2 # Center of squre is taken in color_cube
+
+        A, B, C = plt.cm.get_cmap(colormap or 'brg',N)([0,0.5,1])[:,:3]
+        pros_data['pros'] = np.array([
+            [(r*A + g*B + b*C)/((r + g + b) or 1) for r,g,b in _cols]
+            for _cols in colors
+        ])
+
+        # Normalize after picking colors from colormap as well to match the color_cube.
+        c_max = np.max(pros_data['pros'],axis=2, keepdims= True)
+        c_max[c_max == 0] = 1 #Avoid division error:
+
+        pros_data['pros'] = pros_data['pros']/c_max
+
+    line_coll, = _make_line_collection(**pros_data,rgb=True,colors_list= None, max_width=max_width, shadow = shadow)
+    ax.add_collection(line_coll)
+    ax.autoscale_view()
+    modify_axes(ax,xticks = xticks,xt_labels = xticklabels,xlim = [min(K), max(K)], ylim = elim, vlines = True)
+    #====================================================
+    
+    # Add colorbar/legend etc.
+    cmap = colormap or ('copper' if how_many == 1 else 'brg' if how_many == 3 else 'coolwarm')
+    ticks = np.linspace(*ax._min_max_c,5, endpoint=True) if how_many == 1 else None if how_many == 3 else [0,1]
+    ticklabels = [f'{t:4.2f}' for t in ticks] if how_many == 1 else labels
+    
+    if colorbar:
+        if how_many < 3:
+            cax = add_colorbar(ax, N = N, vertical=True,ticklabels = ticklabels, ticks=ticks,cmap_or_clist = cmap)
+            if how_many == 1:
+                cax.set_title(labels[0])
+        else:
+            color_cube(ax,colormap = colormap or 'brg', labels = labels, N = N)
+    else:
+        # MAKE PARTIAL COLOR CUBE AND COLORBAR HERE FOR LATER USE.
+        def recent_colorbar(cax=None,tickloc='right',vertical=True,digits=2,fontsize=8):
+            return add_colorbar(ax = ax, cax=cax, cmap_or_clist = cmap, N = N,
+                    ticks = ticks, ticklabels = ticklabels, tickloc = tickloc,
+                    vertical=vertical,digits=digits,fontsize=fontsize)
+
+        ax.add_colorbar = recent_colorbar
+
+        def recent_color_cube(loc = (0.67,0.67), size=0.3 ,color='k',fontsize = 10):
+            return color_cube(ax = ax,colormap = cmap, labels = labels, N = N,
+                    loc =loc, size = size, color = color, fontsize = fontsize)
+
+        ax.color_cube = recent_color_cube
+
+    return ax
+
 
 # Cell
 def splot_rgb_lines(
@@ -1243,7 +1359,7 @@ def _collect_dos(
     elements      = [[0],],
     orbs          = [[0],],
     labels        = ['s',],
-    Fermi       = None,
+    Fermi         = None,
     spin          = 'both',
     interp_nk     = {}
     ):
