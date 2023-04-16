@@ -201,7 +201,7 @@ class POSCAR:
         self._ax = None # Get defualt axis, changed with splot_bz
 
     def __repr__(self):
-        atoms = ', '.join([f'{k}={len(v)}' for k,v in self._data.unique.items()])
+        atoms = ', '.join([f'{k}={len(v)}' for k,v in self._data.elems.items()])
         lat = ', '.join([f'{k}={v}' for k,v in zip('abcαβγ',(*self._data.norms.round(3), *self._data.angles))])
         return f"{self.__class__.__name__}({atoms}, {lat})"
 
@@ -662,7 +662,7 @@ class Vasprun:
             self._data = vp.export_vasprun(path=path,skipk=skipk,elim=elim,dos_only=dos_only)
 
         self.elim = elim
-        self._kpath = self._data.kpath  # For info only, get updated with plot commands
+        self._kpath = self._data.bands.kpath  # For info only, get updated with plot commands
         self._efermi = self._data.fermi   # For info only, get updated with plot commands
 
         if path == None:
@@ -689,8 +689,9 @@ class Vasprun:
 
     def __handle_kwargs(self, kwargs,dos=False):
         kwargs = {'elim': self.elim, **kwargs}
-        if kwargs.get('Fermi',None) is None:
-            kwargs['Fermi'] = self.fermi # Calculated from occupancy
+        f = kwargs.pop('efermi', None)
+        self._efermi = f if isinstance(f,(int,float)) else self._efermi # Keep zero by instance check
+            
         if dos:
             return kwargs
         ticks = {k:self.kticks[k] for k in ['ktick_inds','ktick_vals','kseg_inds']}
@@ -698,9 +699,7 @@ class Vasprun:
 
         # Set for info only in case of bandstructure
         if  'kseg_inds' in kwargs and kwargs['kseg_inds']:
-            self._kpath =  vp.join_ksegments(self._data.kpath,kwargs['kseg_inds'])
-        if 'Fermi' in kwargs and kwargs['Fermi'] != None: #None is important to pick 0 as fermi as well
-            self._efermi = kwargs['Fermi']
+            self._kpath =  vp.join_ksegments(self._data.bands.kpath,kwargs['kseg_inds'])
         return kwargs
 
     @_sub_doc(serializer.Dict2Data.to_json,'')
@@ -731,81 +730,63 @@ class Vasprun:
         "Fermi energy given in vasprun.xml."
         return self._data.Fermi
     
-    # def pick_bands(self, kpoints = -1, bands = -1, spin = 0,  query = {'s':[]}):
+    def pick_bands(self, spin = 0, kpoints = -1, bands = -1,  query = None):
+        if spin not in [0,1]:
+            raise ValueError('spin must be 0 or 1')
         
-    #     pass
+        output = {}
+        
+        if kpoints == -1:
+            output['K'] = self.data.bands.kpath
+            output['kpoints'] = self.data.bands.kpoints
+        elif isinstance(kpoints, (list,tuple, range)):
+            old_kpath = self.data.bands.kpath # Safe array
+            rel_dist = [np.abs(d1-d2) for d1,d2 in zip(old_kpath[kpoints][1:], old_kpath[kpoints][:-1])]
+            rel_dist = [old_kpath[0], *rel_dist]
+            all_dist = np.cumsum(rel_dist).round(6)
+            all_dist = all_dist - all_dist[0]  #Shift to start from 0
+            output['K'] = all_dist/all_dist[-1] #Normalize to [0,1] for plotting on shared axes
+            output['kpoints'] = self.data.bands.kpoints[kpoints]
+        else:
+            raise ValueError('kpoints must be -1 or a list of indices.')
+        
+        pk = range(len(self.data.bands.kpath)) if kpoints == -1 else kpoints
+        pb = range(self.data.bands.evals.shape[-1]) if bands == -1 else bands
+        output['E'] = self.data.bands.evals[spin][pk][:,pb] # 2D array
+        output['occs'] = self.data.bands.occs[spin][pk][:,pb] # 2D array
+        
+        if query:
+            elements, orbs, labels = sp._format_input(query, self.data.sys_info)
+            output['labels'] = labels
+            pros = self.data.bands.pros[spin][pk][:,pb,:,:] # 4D array
+
+            arrays = []
+            for elem,orb in zip(elements,orbs):
+                _pros  = np.take(pros,elem,axis=2).sum(axis=2) # Sum over elements leaves 3D array
+                _pros = np.take(_pros,orb,axis=2).sum(axis=2) # Sum over orbitals leaves 2D array
+                arrays.append(_pros)
+
+            output['pros'] = np.array(arrays)
+        
+        return output
     
-    # def pick_dos(self, tdos = True, spin = 0, query = {'s':[]}):
+    # def pick_dos(self, tdos = True, spin = 'up', query = {'s':[]}):
     #     pass
 
 
-    def select(self,kpoints_inds = None, bands_inds = None):
-        """Seletc data based on kpoints and bands indices.
-        This is useful to select only a subset of data and even reorder kpoints after calculations.
-        Both `kpoints_inds` and `bands_inds` are based on current data and should be based on zero indexing.
-
-        **Returns** `Vasprun` object with selected data that can be plotted using `splot_[...]` or `iplot_[...]` functions.
-
-        New in version 1.1.4
-        """
-        if kpoints_inds is None and bands_inds is None:
-            return self
-
-        assert isinstance(kpoints_inds,(list,tuple,range)) if kpoints_inds is not None else True
-        assert isinstance(bands_inds,(list,tuple,range)) if bands_inds is not None else True
-
-        d = self.data.to_dict()
-        kpoints_inds = range(len(d['kpoints'])) if kpoints_inds is None else kpoints_inds
-        bands_inds = range(len(d['bands']['indices'])) if bands_inds is None else bands_inds
-
-        d['kpoints'] = d['kpoints'][kpoints_inds]
-        old_kpath = np.array(d['kpath']) # Safe array
-        rel_dist = [np.abs(d1-d2) for d1,d2 in zip(old_kpath[kpoints_inds][1:], old_kpath[kpoints_inds][:-1])]
-        rel_dist = [old_kpath[0], *rel_dist]
-        all_dist = np.cumsum(rel_dist).round(6)
-        all_dist = all_dist - all_dist[0]  #Shift to start from 0
-
-        d['kpath'] = all_dist/all_dist[-1] #Normalize to [0,1] for plotting on shared axes
-        d['bands']['indices'] = tuple([d['bands']['indices'].start + b for b in bands_inds]) # It is range in original data
-
-        if self.data.sys_info.ISPIN == 1:
-            d['bands']['evals'] = d['bands']['evals'][kpoints_inds][:,bands_inds]
-            d['bands']['occs'] = d['bands']['occs'][kpoints_inds][:,bands_inds]
-            d['pro_bands']['pros'] = d['pro_bands']['pros'][:,kpoints_inds][:,:,bands_inds,...]
-        else:
-            d['bands']['evals']['SpinUp'] = d['bands']['evals']['SpinUp'][kpoints_inds][:,bands_inds]
-            d['bands']['evals']['SpinDown'] = d['bands']['evals']['SpinDown'][kpoints_inds][:,bands_inds]
-
-            ['bands']['occs']['SpinUp'] = d['bands']['occs']['SpinUp'][kpoints_inds][:,bands_inds]
-            d['bands']['occs']['SpinDown'] = d['bands']['occs']['SpinDown'][kpoints_inds][:,bands_inds]
-
-            d['pro_bands']['pros']['SpinUp'] = d['pro_bands']['pros']['SpinUp'][:,kpoints_inds][:,:,bands_inds,...]
-            d['pro_bands']['pros']['SpinDown'] = d['pro_bands']['pros']['SpinDown'][:,kpoints_inds][:,:,bands_inds,...]
-
-        return self.__class__(data = serializer.VasprunData(d).to_json())
-
-    @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': "spin : spin set to pick if spin-polarized calulations\n    ax :"})
-    def splot_bands(self, spin = 'up', ax = None, elim = None, kseg_inds = None, ktick_inds = None, ktick_vals = None, interp_nk = {}, **kwargs):
-        if spin not in ['up','down']:
-            raise ValueError('spin should be either "up" or "down"')
+    @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': "data : output of self.pick_bands function here\n    ax :"})
+    def splot_bands(self, data, ax = None, elim = None, efermi = None, kseg_inds = None, ktick_inds = None, ktick_vals = None, interp_nk = {}, **kwargs):
+        if 'K' not in data and 'E' not in data:
+            raise ValueError('data must be output of self.pick_bands function.')
         
-        plot_kws = self.__handle_kwargs({k:v for k,v in locals().items() if k not in ['self','spin','kwargs']})
-        
-        if spin == 'down' and self.data.sys_info.ISPIN == 2:
-            E = self._data.bands.evals.SpinDown - self._efermi
-        elif self.data.sys_info.ISPIN == 2:
-            E = self._data.bands.evals.SpinUp - self._efermi
-        else:
-            E = self._data.bands.evals - self._efermi
-        
-        plot_kws.pop('Fermi',None) # Patch now, will be removed in future with other fixings
-            
-        return sp.splot_bands(self.data.kpath, E, **plot_kws, **kwargs)
+        plot_kws = self.__handle_kwargs({k:v for k,v in locals().items() if k not in ['self','data','kwargs']})
+        return sp.splot_bands(data['K'], data['E'] - self._efermi, **plot_kws, **kwargs)
 
-    @_sub_doc(sp.splot_rgb_lines1,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': "query_data : {'label': [atoms, orbitals], ...}\n    spin : spin set to pick if spin-polarized calulations\n    ax :"})
-    def splot_rgb_lines1(self,query_data = {'1-s':[range(1),range(1)]}, spin = 'up', 
+    @_sub_doc(sp.splot_rgb_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': "data : output of self.pick_bands with query used.\n    ax :"})
+    def splot_rgb_lines(self,data, 
         ax         = None, 
         elim       = None, 
+        efermi     = None,
         kseg_inds  = None, 
         ktick_inds = None, 
         ktick_vals = None, 
@@ -816,59 +797,33 @@ class Vasprun:
         colorbar   = True,
         N          = 9,
         shadow     = True):
-        if spin not in ['up','down']:
-            raise ValueError('spin should be either "up" or "down"')
+        if 'K' not in data and 'E' not in data and 'pros' not in data:
+            raise ValueError('data must be output of self.pick_bands function with query used.')
         
-        plot_kws = self.__handle_kwargs({k:v for k,v in locals().items() if k not in ['self','spin','query_data']})
+        plot_kws = self.__handle_kwargs({k:v for k,v in locals().items() if k not in ['self','data']})
         
-        if spin == 'down' and self.data.sys_info.ISPIN == 2:
-            E = self._data.bands.evals.SpinDown - self._efermi
-            pros = self._data.pro_bands.pros.SpinDown
-        elif self.data.sys_info.ISPIN == 2:
-            E = self._data.bands.evals.SpinUp - self._efermi
-            pros = self._data.pro_bands.pros.SpinUp
-        else:
-            E = self._data.bands.evals - self._efermi
-            pros = self._data.pro_bands.pros
-        
-        plot_kws.pop('Fermi',None) # Patch now, will be removed in future with other fixings
-        
-        elements, orbs, labels = sp._format_input(query_data, rgb = True)
-        elements, orbs, labels = sp._validate_input(elements, orbs, labels, self.data.sys_info, rgb = True)
-        
-        arrays = []
-        for elem,orb in zip(elements,orbs):
-            _pros  = np.take(pros,elem,axis=0).sum(axis=0)
-            _pros = np.take(_pros,orb,axis=2).sum(axis=2)
-            arrays.append(_pros)
-        
-        return sp.splot_rgb_lines1(self.data.kpath, E, arrays, labels, **plot_kws)
+        return sp.splot_rgb_lines(data['K'], data['E'] - self._efermi, data['pros'], data['labels'], **plot_kws)
 
 
     @_sub_doc(sp.splot_dos_lines,'- path_evr')
-    def splot_dos_lines(self, query_data= {}, *, ax = None, **kwargs):
+    def splot_dos_lines(self, query= {}, *, ax = None, **kwargs):
         kwargs = self.__handle_kwargs(kwargs,dos=True)
-        return sp.splot_dos_lines(self._data, ax = ax, query_data = query_data,**kwargs)
-
-    @_sub_doc(sp.splot_rgb_lines,'- path_evr')
-    def splot_rgb_lines(self,query_data= {},*, ax = None,  **kwargs):
-        kwargs = self.__handle_kwargs(kwargs)
-        return sp.splot_rgb_lines(self._data, ax = ax, query_data = query_data,**kwargs)
+        return sp.splot_dos_lines(self._data, ax = ax, query = query,**kwargs)
 
     @_sub_doc(sp.splot_color_lines,'- path_evr')
-    def splot_color_lines(self,query_data= {},*,axes = None, **kwargs):
+    def splot_color_lines(self,query= {},*,axes = None, **kwargs):
         kwargs = self.__handle_kwargs(kwargs)
-        return sp.splot_color_lines(self._data, axes = axes, query_data = query_data,**kwargs)
+        return sp.splot_color_lines(self._data, axes = axes, query = query,**kwargs)
 
     @_sub_doc(ip.iplot_dos_lines,'- path_evr')
-    def iplot_dos_lines(self,query_data= {}, **kwargs):
+    def iplot_dos_lines(self,query= {}, **kwargs):
         kwargs = self.__handle_kwargs(kwargs, dos=True)
-        return ip.iplot_dos_lines(self._data, query_data = query_data,**kwargs)
+        return ip.iplot_dos_lines(self._data, query = query,**kwargs)
 
     @_sub_doc(ip.iplot_rgb_lines,'- path_evr')
-    def iplot_rgb_lines(self, query_data = {}, **kwargs):
+    def iplot_rgb_lines(self, query = {}, **kwargs):
         kwargs = self.__handle_kwargs(kwargs)
-        return ip.iplot_rgb_lines(self._data, query_data = query_data,**kwargs)
+        return ip.iplot_rgb_lines(self._data, query = query,**kwargs)
 
     def get_band_info(self,b_i,k_i=None):
         """Get band information for given band index `b_i`. If `k_i` is given, returns info at that point
@@ -879,12 +834,12 @@ class Vasprun:
             if isinstance(k_i,int):
                 extrema = _bands_[k_i]
                 k = float(self._kpath[k_i])
-                kp = self._data.kpoints[k_i]
+                kp = self._data.bands.kpoints[k_i]
                 pros = _pros[:,k_i,:].sum(axis=0).flatten()
             else:
                 extrema = func(_bands_)
                 where, = np.where(_bands_ == extrema) # unpack singelton
-                k, kp = [float(self._kpath[w]) for w in where], self._data.kpoints[where]
+                k, kp = [float(self._kpath[w]) for w in where], self._data.bands.kpoints[where]
                 pros = _pros[:,where[0],:].sum(axis=0).flatten()
             return serializer.Dict2Data({'e':float(extrema),'k':k,'kp':kp.tolist(),
                     'pros':{l.replace('-',''):float(p) for p,l in zip(pros,self._data.pro_bands.labels)}})

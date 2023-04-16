@@ -648,18 +648,20 @@ def _make_line_collection(max_width   = None,
         return tuple(lcs)
 
 # Cell
-def _validate_input(elements,orbs,labels,sys_info,rgb=False):
+def _validate_input(elements,orbs,labels,sys_info):
     "Fix input elements, orbs and labels according to given sys_info. Returns (elements, orbs,labels)."
     if len(elements) != len(orbs) or len(elements) != len(labels):
         raise ValueError("`elements`, `orbs` and `labels` expect same length, even if empty.")
 
-    elem_inds = sys_info.ElemIndex
-    max_ind   = elem_inds[-1]-1 # Last index is used for range in ElemIndex, not python index.
+    # Fix elements
+    ranges = list(sys_info.elems.values())
+    names = list(sys_info.elems.keys())
+    max_ind   =  np.max(ranges)
     for i,elem in enumerate(elements.copy()):
         if type(elem) == int:
             try:
-                elements[i] = range(elem_inds[elem],elem_inds[elem+1])
-                info = f"Given {elem} at position {i+1} of sequence => {sys_info.ElemName[elem]!r}: {elements[i]}. "
+                elements[i] = ranges[elem]
+                info = f"Given {elem} at position {i+1} of sequence => {names[elem]!r}: {elements[i]}. "
                 print(gu.color.g(info + f"To just pick one ion, write it as [{elem}]."))
             except:
                 raise IndexError(f"Wrap {elem} at position {i+1} of sequence in []. You have only {len(sys_info.ElemName)} types of ions.")
@@ -675,60 +677,28 @@ def _validate_input(elements,orbs,labels,sys_info,rgb=False):
     if  _os and max(_os) >= nfields:
         raise IndexError("index {} is out of bound for {} orbs".format(max(_os),nfields))
 
-    while rgb and len(elements) < 3: # < 3 as it appends to make it 3.
-        elements.append([])
-        orbs.append([])
-        labels.append('')
-
-    if rgb and len(elements) > 3:
-        print('Only keeping first 3 entries in elements/orbs/labels in RGB plots.')
-        elements, orbs, labels = elements[:3], orbs[:3], labels[:3]
-
-    # If elements not given, get whole system in case of RGB_Lines
-    if rgb and not _es:
-        elements = [range(0,max_ind+1),range(0,max_ind+1),range(0,max_ind+1)]
-    if rgb and not _os:
-        orbs=[[0],[1],[2]] if nfields == 3 else [[0],[1,2,3],[4,5,6,7,8]]
-    if rgb and not _es and not _os:
-        labels=[sys_info.SYSTEM + v for v in ['-s','-p','-d']]
-
     return elements,orbs,labels
 
-def _format_input(query_data,rgb=False):
+def _format_input(query, sys_info):
     """
-    Format input elements, orbs and labels according to query_data.
-    query_data = {'Ga-s':(0,[1]),'Ga-p':(0,[1,2,3]),'Ga-d':(0,[4,5,6,7,8])} #for Ga in GaAs, to pick Ga-1, use [0] instead of 0 at first place
+    Format input elements, orbs and labels according to query.
+    query = {'Ga-s':(0,[1]),'Ga-p':(0,[1,2,3]),'Ga-d':(0,[4,5,6,7,8])} #for Ga in GaAs, to pick Ga-1, use [0] instead of 0 at first place
     """
-    if not isinstance(query_data,dict):
-        raise TypeError("`query_data` must be a dictionary, with keys as labels and values from picked projection indices.")
+    if not isinstance(query,dict):
+        raise TypeError("`query` must be a dictionary, with keys as labels and values from picked projection indices.")
 
     # Set default values for different situations
-    if rgb:
-        elements, orbs, labels = [[],[],[]], [[],[],[]], ['','','']
-    else:
-        elements, orbs, labels = [[0],], [[0],], ['Element0-s',]
+    elements, orbs, labels = [], [], []
 
-    for i, (k, v) in enumerate(query_data.items()):
+    for i, (k, v) in enumerate(query.items()):
         if len(v) != 2:
             raise ValueError(f"{k!r}: {v} expects 2 items (elements, orbs), got {len(v)}.")
-
-        if rgb and i <= 2:
-            labels[i] = k
-            elements[i], orbs[i] = v[-2:]
-        elif rgb and i > 2:
-            print("RGB plots can only have 3 items, skipping {}.".format(k))
-        elif rgb == False:
-            if i == 0:
-                labels[0] = k
-                elements[0], orbs[0] = v[-2:]
-            else:
-                labels.append(k)
-                elements.append(v[-2])
-                orbs.append(v[-1])
-
-    else:
-        nt = namedtuple('Selection',['elements','orbs','labels'])
-        return nt(elements, orbs, labels)
+        
+        labels.append(k)
+        elements.append(v[-2])
+        orbs.append(v[-1])
+        
+    return _validate_input(elements,orbs,labels,sys_info)
 
 # Cell
 from matplotlib import tri
@@ -821,7 +791,7 @@ def _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False):
         pros = np.expand_dims(pros,0) # still as [m,nk,nb]
         
     if rgb and len(pros) > 3:
-        raise ValueError("In rgb mode, `pros` must be at most 3")
+        raise ValueError("In RGB lines mode, pros.shape[-1] <= 3 should hold")
     
     # Should be after exapnding dims but before transposing
     if labels and len(labels) != len(pros):
@@ -842,7 +812,7 @@ def _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False):
     
     return {'kpath':K, 'evals':E, 'pros':pros} 
 
-def splot_rgb_lines1(K, E, pros, labels, 
+def splot_rgb_lines(K, E, pros, labels, 
     ax         = None, 
     elim       = None, 
     kseg_inds  = None, 
@@ -968,214 +938,6 @@ def splot_rgb_lines1(K, E, pros, labels,
 
 
 # Cell
-def splot_rgb_lines(
-    path_evr    = None,
-    elements    = [[],[],[]],
-    orbs        = [[],[],[]],
-    labels      = ['','',''],
-    ax          = None,
-    skipk       = None,
-    elim        = [],
-    max_width   = None,
-    ktick_inds  = [0,-1],
-    ktick_vals  = [r'$\Gamma$','M'],
-    kseg_inds   = [],
-    Fermi       = None,
-    txt         = None,
-    xytxt       = [0.2,0.9],
-    ctxt        = 'black',
-    spin        = 'both',
-    interp_nk   = {},
-    scale_data  = False,
-    colorbar    = True,
-    colormap    = None,
-    N           = 9,
-    shadow      = True,
-    query_data  = {}
-    ):
-    """
-    - Returns axes object and plot on which all matplotlib allowed actions could be performed. In this function,orbs,labels,elements all have list of length 3. Inside list, sublists or strings could be any length but should be there even if empty.
-    Args:
-        - path_evr   : path/to/vasprun.xml or output of `export_vasprun`. Auto picks in CWD.
-        - elements   : List [[],[],[]] by default and plots s,p,d orbital of system.
-        - orbs       : List [[r],[g],[b]] of indices of orbitals, could be empty, but shape should be same.
-        - labels     : List [str,str,str] of projection labels. empty string should exist to maintain shape. Auto adds `↑`,`↓` for ISPIN=2. If a label is empty i.e. '', it will not show up in colorbar ticks or legend.
-        - ax         : Matplotlib axes object, if not given, one is created.
-        - skipk      : Number of kpoints to skip, default will be from IBZKPT.
-        - kseg_inds  : Points where kpath is broken.
-        - elim       : [min,max] of energy range.
-        - Fermi    : If not given, automatically picked from `export_vasprun`.
-        - ktick_inds : High symmetry kpoints indices.abs
-        - ktick_vals : High Symmetry kpoints labels.
-        - max_width  : Default is None and linewidth at any point = 2.5*sum(ions+orbitals projection of all three input at that point). Linewidth is scaled to max_width if an int or float is given.
-        - txt        : Text on figure, if None, SYSTEM's name is printed.
-        - xytxt      : [x_coord,y_coord] of text relative to axes.
-        - ctxt       : color of text.
-        - spin       : Plot spin-polarized for spin {'up','down','both'}. Default is both.
-        - interp_nk  : Dictionary with keys 'n' and 'k' for interpolation.
-        - scale_data : Default is False. If True, normalizes projection data to 1.
-        - colorbar   : Default is True. Displays a vertical RGB colorbar. Forfine control, set it False and use `plot_handle.add_colorbar` and `plot_handle.color_cube` just afer plotting.
-        - colormap   : 1.2.7+, Default is None and picks suitable for each case. For all three projections given, only first, middle and last colors are used to interpolate between them.
-        - N          : Number of distinct colors in colormap. For given three non-zero projections, even number will be rounded up to greater odd number, so 4 and 5 are same in that case.
-        - query_data : Dictionary with keys as label and values as list of length 2. Should be <= 3 for RGB plots. If given, used in place of elements, orbs and labels arguments.
-                        Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
-    - **Returns**
-        - ax : matplotlib axes object with plotted projected bands.
-
-    > Note: Two figures made by this function could be comapred quantitatively only if `scale_data=False, max_width=None` as these parameters act internally on data.
-    """
-    # Fix input data
-    vr = vp._validate_evr(path_evr=path_evr,skipk=skipk,elim=elim)
-
-    # Fix orbitals, elements and labels lengths very early.
-    if query_data:
-        elements,orbs,labels = _format_input(query_data,rgb=True) # Preferred over elements,orbs,labels
-
-    elements,orbs,labels = _validate_input(elements,orbs,labels,vr.sys_info,rgb=True)
-
-    # Main working here.
-    if vr.pro_bands == None:
-        raise ValueError("Can not plot an empty eigenvalues object.\n"
-                         "Try with large energy range.")
-    if not spin in ('up','down','both'):
-        raise ValueError("spin can take any of ['up','down'. 'both'] only.")
-
-    # Small things
-    if Fermi == None:
-        Fermi = vr.fermi
-    K = vp.join_ksegments(vr.kpath,kseg_inds = kseg_inds)
-    xticks = [K[i] for i in ktick_inds]
-    xlim = [min(K),max(K)]
-    if elim:
-        ylim = [min(elim),max(elim)]
-    else:
-        ylim = []
-
-    # Make axes if not given.
-    if not np.any([ax]):
-        ax = get_axes()
-
-
-
-    non_zero_inds = [i for i,e in enumerate(elements) if e]
-    if N % 2 == 0 and len(non_zero_inds) == 3:
-        N += 1 # N should be odd because even numbers mess up color mapping in 3.
-    #=====================================================
-    def _add_collection(gpd_args,mlc_args,ax):
-        pros_data = _get_pros_data(**gpd_args)
-        _lws_ = 0.1 + 2.5*np.sum(pros_data['pros'],axis=2) # Before changing color, get linewidths
-        ax._min_max_c = [(np.min(_lws_) -0.1)/2.5,(np.max(_lws_) - 0.1)/2.5] # Save for later use.
-        pros_data['lws']  = np.transpose(_lws_[:-1,:]/2 + _lws_[1:,:]/2).ravel() # NBANDS[NKPTS-1] repeatition.
-        # These 'lws' are passed in to _make_line_collection to keep true linwidths even color changes
-
-        colors = pros_data['pros']
-
-        if len(non_zero_inds) == 1:
-            percent_colors = colors[:,:,non_zero_inds[0]]
-            percent_colors = percent_colors/np.max(percent_colors)
-            pros_data['pros'] = plt.cm.get_cmap(colormap or 'copper',N)(percent_colors)[:,:,:3] # Get colors in RGB space.
-
-        elif len(non_zero_inds) == 2:
-            d2_colors = colors[:,:,non_zero_inds]
-            _sum = np.sum(d2_colors,axis=2)
-            _sum[_sum == 0] = 1
-            percent_colors = d2_colors[:,:,1]/_sum # second one is on top
-            pros_data['pros'] = plt.cm.get_cmap(colormap or 'coolwarm',N)(percent_colors)[:,:,:3] # Get colors in RGB space.
-
-        else:
-            # Normalize color at each point only for 3 projections.
-            c_max = np.max(colors,axis=2, keepdims =True)
-            c_max[c_max == 0] = 1 #Avoid division error:
-            colors = colors/c_max # Weights to be used for color interpolation.
-
-            nsegs = np.linspace(0,1,N,endpoint = True)
-            for low,high in zip(nsegs[:-1],nsegs[1:]):
-                colors[(colors >= low) & (colors < high)] = (low + high)/2 # Center of squre is taken in color_cube
-
-            A, B, C = plt.cm.get_cmap(colormap or 'brg',N)([0,0.5,1])[:,:3]
-            pros_data['pros'] = np.array([
-                [(r*A + g*B + b*C)/((r + g + b) or 1) for r,g,b in _cols]
-                for _cols in colors
-            ])
-
-            # Normalize after picking colors from colormap as well to match the color_cube.
-            c_max = np.max(pros_data['pros'],axis=2, keepdims= True)
-            c_max[c_max == 0] = 1 #Avoid division error:
-
-            pros_data['pros'] = pros_data['pros']/c_max
-
-        line_coll, = _make_line_collection(**pros_data,**mlc_args)
-        ax.add_collection(line_coll)
-        ax.autoscale_view()
-    #====================================================
-
-    # After All Fixing
-    ISPIN=vr.sys_info.ISPIN
-    # Arguments for _get_pros_data and _make_line_collection
-    gpd_args = dict(elements=elements,orbs=orbs,interp_nk=interp_nk,scale_data=scale_data)
-    mlc_args = dict(rgb=True,colors_list= None, max_width=max_width, shadow = shadow)
-
-    if ISPIN == 1:
-        gpd_args.update(dict(kpath=K, evals_set=vr.bands.evals-Fermi, pros_set=vr.pro_bands.pros))
-        _add_collection(gpd_args,mlc_args,ax=ax)
-    if ISPIN == 2:
-        gpd_args1 = dict(kpath=K,evals_set=vr.bands.evals.SpinUp-Fermi,
-                        pros_set=vr.pro_bands.pros.SpinUp,**gpd_args)
-        gpd_args2 = dict(kpath=K,evals_set=vr.bands.evals.SpinDown-Fermi,
-                        pros_set=vr.pro_bands.pros.SpinDown,**gpd_args)
-        if spin in ['up','both']:
-            _add_collection(gpd_args1,mlc_args,ax=ax)
-        if spin in ['down','both']:
-            _add_collection(gpd_args2,mlc_args,ax=ax)
-
-    # Aethetcis of plot.
-    text = txt if txt else vr.sys_info.SYSTEM
-    add_text(ax=ax,xs=xytxt[0],ys=xytxt[1],txts=text,colors=ctxt)
-    modify_axes(ax = ax, xticks=xticks,xt_labels=ktick_vals,xlim=xlim,ylim=ylim,vlines=True)
-
-    _tls_ = [l for l in labels] # To avoid side effects, new labels array.
-    for i,label in enumerate(labels):
-        if label and ISPIN==2:
-            _tls_[i] = (label+'$^↑$' if spin=='up' else label+'$^↓$' if spin=='down' else label+'$^{↑↓}$')
-
-    if len(non_zero_inds) ==  1:
-        ticks = np.linspace(*ax._min_max_c,5, endpoint=True)
-        ticklabels = [f'{t:4.2f}' for t in ticks]
-        cmap = colormap or 'copper'
-    elif len(non_zero_inds) == 2:
-        ticks = [0,1]
-        ticklabels = [_tls_[i] for i in non_zero_inds]
-        cmap = colormap or 'coolwarm'
-    else:
-        ticks = None
-        ticklabels = _tls_
-        cmap = colormap or 'brg'
-
-    if colorbar:
-        if len(non_zero_inds) < 3:
-            cax = add_colorbar(ax=ax,N = N, vertical=True,ticklabels = ticklabels,ticks=ticks,cmap_or_clist = cmap)
-            if len(non_zero_inds) ==  1:
-                cax.set_title(_tls_[non_zero_inds[0]])
-        else:
-            color_cube(ax,colormap = colormap or 'brg', labels = _tls_, N = N)
-    else:
-        # MAKE PARTIAL COLOR CUBE AND COLORBAR HERE FOR LATER USE.
-        def recent_colorbar(cax=None,tickloc='right',vertical=True,digits=2,fontsize=8):
-            return add_colorbar(ax = ax, cax=cax, cmap_or_clist = cmap, N = N,
-                    ticks = ticks, ticklabels = ticklabels, tickloc = tickloc,
-                    vertical=vertical,digits=digits,fontsize=fontsize)
-
-        ax.add_colorbar = recent_colorbar
-
-        def recent_color_cube(loc = (0.67,0.67), size=0.3 ,color='k',fontsize = 10):
-            return color_cube(ax = ax,colormap = cmap, labels = ticklabels, N = N,
-                    loc =loc, size = size, color = color, fontsize = fontsize)
-
-        ax.color_cube = recent_color_cube
-
-    return ax
-
-# Cell
 def splot_color_lines(
     path_evr      = None,
     elements      = [[0]],
@@ -1200,7 +962,7 @@ def splot_color_lines(
     legend_kwargs = {'ncol': 4, 'anchor': (0, 1.05),
                    'handletextpad': 0.5, 'handlelength': 1,
                    'fontsize': 'small', 'frameon': False},
-    query_data    = {},
+    query    = {},
      **subplots_adjust_kwargs):
     """
     - Returns axes object and plot on which all matplotlib allowed actions could be performed. If given, elements, orbs, and labels must have same length. If not given, zeroth ion is plotted with s-orbital.
@@ -1225,7 +987,7 @@ def splot_color_lines(
         - spin       : Plot spin-polarized for spin {'up','down','both'}. Default is both.
         - interp_nk   : Dictionary with keys 'n' and 'k' for interpolation.
         - legend_kwargs: Dictionary containing legend arguments.
-        - query_data : Dictionary with keys as label and values as list of length 2. If given, used in place of elements, orbs and labels arguments.
+        - query : Dictionary with keys as label and values as list of length 2. If given, used in place of elements, orbs and labels arguments.
                         Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
         - **subplots_adjust_kwargs : plt.subplots_adjust parameters.
     - **Returns**
@@ -1235,8 +997,8 @@ def splot_color_lines(
     # Fix data input
     vr = vp._validate_evr(path_evr=path_evr,skipk=skipk,elim=elim)
     # Fix orbitals, elements and labels lengths very early.
-    if query_data:
-        elements, orbs, labels = _format_input(query_data=query_data,rgb=False)# preferred over elements, orbs, labels
+    if query:
+        elements, orbs, labels = _format_input(query=query,rgb=False)# preferred over elements, orbs, labels
 
     elements,orbs,labels = _validate_input(elements,orbs,labels,vr.sys_info)
 
@@ -1329,7 +1091,7 @@ def _select_pdos(
     """
     - Returns (interpolated/orginal) enrgy(N,), tdos(N,), and pdos(N,) of selected ions/orbitals.
     Args:
-        - tdos     : `export_vasprun`().tdos or `get_tdos`().tdos. If calculations are spin-polarized, it will be `..tdos.SpinUp/SpinDown` for both. You need to apply this function twice for SpinUp and SpinDown separately.
+        - tdos     : `export_vasprun`().tdos or `get_tdos`().tdos. 
         - pdos_set : `export_vasprun().pro_dos.pros` or `get_dos_pro_set`().pros. If calculations are spin-polarized, it will be `...pros.SpinUp/SpinDown` for both.
         - ions     : List of ions to project on, could be `range(start,stop,step)` as well, remember that `stop` is not included in python. so `range(0,2)` will generate 0 and 1 indices.
         - orbs     : List of orbitals indices to pick.
@@ -1405,15 +1167,15 @@ def _collect_dos(
     for elem,orb,label in zip(elements,orbs,labels):
         args_dict=dict(ions=elem,orbs=orb,interp_nk=interp_nk,Fermi=Fermi)
         if ISPIN==1:
-            tdos=vr.tdos.tdos
+            tdos=vr.tdos.tdos[0]
             pdos_set=vr.pro_dos.pros
             e,t,p = _select_pdos(tdos=tdos,pdos_set=pdos_set, **args_dict)
             ps.append(p)
             ls.append(label)
             ts = t
         if ISPIN==2:
-            tdos1=vr.tdos.tdos.SpinUp
-            tdos2=vr.tdos.tdos.SpinDown
+            tdos1=vr.tdos.tdos[0]
+            tdos2=vr.tdos.tdos[1]
             pdos_set1=vr.pro_dos.pros.SpinUp
             pdos_set2=vr.pro_dos.pros.SpinDown
             if spin=='up':
@@ -1461,7 +1223,7 @@ def splot_dos_lines(
                    'fontsize'       : 'small',
                    'frameon'        : False
                    },
-    query_data    = {}
+    query    = {}
     ):
         """
         - Returns ax object (if ax!=False) and plot on which all matplotlib allowed actions could be performed, returns lists of energy,tdos and pdos and labels. If given,elements,orbs colors, and labels must have same length. If not given, zeroth ions is plotted with s-orbital.
@@ -1481,7 +1243,7 @@ def splot_dos_lines(
             - spin       : Plot spin-polarized for spin {'up','down','both'}. Default is both.
             - interp_nk   : Dictionary with keys 'n' and 'k' for interpolation.
             - legend_kwargs: Dictionary to contain legend arguments to fix.
-            - query_data : Dictionary with keys as label and values as list of length 2. If given, used in place of elements, orbs and labels arguments.
+            - query : Dictionary with keys as label and values as list of length 2. If given, used in place of elements, orbs and labels arguments.
                         Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
         - **Returns**
             - ax         : Matplotlib axes.
@@ -1489,8 +1251,8 @@ def splot_dos_lines(
         if include_dos not in ('both','pdos','tdos'):
             raise ValueError("`include_dos` expects one of ['both','pdos','tdos'], got {}.".format(include_dos))
 
-        if query_data:
-            elements,orbs,labels=_format_input(query_data,rgb=False) # prefer query_data over elements,orbs,labels
+        if query:
+            elements,orbs,labels=_format_input(query,rgb=False) # prefer query over elements,orbs,labels
 
         en,tdos,pdos,vr=None,None,None,None # Placeholders for defining. must be here.
         cl_dos=_collect_dos(path_evr=path_evr,

@@ -157,7 +157,7 @@ class Dict2Data:
 
     
 class VasprunData(Dict2Data):
-    _req_keys = ('kpath','bands','poscar')
+    _req_keys = ('bands','dos','poscar')
     def __init__(self,d):
         super().__init__(d)
     
@@ -167,14 +167,7 @@ class VasprunData(Dict2Data):
     def get_fermi(self,tol=1e-3):
         "Fermi energy based on occupancy. Returns `self.Fermi` if occupancies cannot be resolved. `tol` is the value of occupnacy to ignore as filled."
         try:
-            if self.sys_info.ISPIN == 1:
-                return float(self.bands.evals[self.bands.occs > 0].max())
-                
-            else: # ISPIN 2
-                energies = []
-                for attr in ['SpinUp','SpinDown']:
-                    energies.append(self.bands.evals[attr][self.bands.occs[attr] > 0].max())
-                return float(max(energies))
+            return float(self.bands.evals[self.bands.occs > tol].max())
         except:
             return self.Fermi
     
@@ -223,7 +216,7 @@ class SpinData(Dict2Data):
         return self.evals.Fermi
     
 class PoscarData(Dict2Data):
-    _req_keys = ('basis','unique','extra_info')
+    _req_keys = ('basis','elems','extra_info')
     def __init__(self,d):
         super().__init__(d)
     

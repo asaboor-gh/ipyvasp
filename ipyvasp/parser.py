@@ -164,11 +164,14 @@ def get_summary(xml_data):
     n_ions=[int(atom.text) for atom in xml_data.root.iter('atoms')][0]
     type_ions=[int(atom_types.text) for atom_types in xml_data.root.iter('types')][0]
     elem=[info[0].text.strip() for info in xml_data.root.iter('rc')]
+    
     elem_name=[]; #collect IONS names
     [elem_name.append(item) for item in elem[:-type_ions] if item not in elem_name]
     elem_index=[0]; #start index
     [elem_index.append((int(entry)+elem_index[-1])) for entry in elem[-type_ions:]];
-    ISPIN=get_ispin(xml_data=xml_data)
+    elems = {k: range(elem_index[i],elem_index[i+1]) for i,k in enumerate(elem_name)}
+    
+    ISPIN = get_ispin(xml_data=xml_data)
     NELECT = int([i.text.strip().split('.')[0] for i in xml_data.root.iter('i') if i.attrib['name']=='NELECT'][0])
     # Fields
     try:
@@ -184,7 +187,7 @@ def get_summary(xml_data):
     #Writing information to a dictionary
     space_info = get_space_info(xml_data=xml_data)
     info_dic={'SYSTEM':incar['SYSTEM'],'NION':n_ions,'NELECT':NELECT,'TypeION':type_ions,
-              'ElemName':elem_name,'ElemIndex':elem_index,'Fermi': efermi,'ISPIN':ISPIN,
+              'elems':elems,'Fermi': efermi,'ISPIN':ISPIN,
               'fields':dos_fields,'incar':incar, 'space_info':space_info}
     return serializer.Dict2Data(info_dic)
 
@@ -210,41 +213,30 @@ def get_kpts(xml_data, skipk = 0):
     # Do Not Join KPath if it is broken, leave that to plotting functions
     return serializer.Dict2Data({'NKPTS':len(kpoints),'kpoints':kpoints,'kpath':kpath})
 
-def get_tdos(xml_data,spin_set=1,elim=[]):
+def get_tdos(xml_data,elim = []):
     tdos=[]; #assign for safely exit if wrong spin set entered.
     ISPIN = get_ispin(xml_data=xml_data)
     for neighbor in xml_data.root.iter('dos'):
         for item in neighbor[1].iter('set'):
-            if(ISPIN==1 and spin_set==1):
-                if(item.attrib=={'comment': 'spin 1'}):
-                    tdos=np.array([[float(entry) for entry in arr.text.split()] for arr in item])
-            if(ISPIN==2 and spin_set==1):
-                if(item.attrib=={'comment': 'spin 1'}):
-                    tdos_1=np.array([[float(entry) for entry in arr.text.split()] for arr in item])
-                if(item.attrib=={'comment': 'spin 2'}):
-                    tdos_2=np.array([[float(entry) for entry in arr.text.split()] for arr in item])
-                    tdos = {'SpinUp':tdos_1,'SpinDown':tdos_2}
-            if(spin_set!=1): #can get any
-                if(item.attrib=={'comment': 'spin {}'.format(spin_set)}):
-                    tdos=np.array([[float(entry) for entry in arr.text.split()] for arr in item])
+            if ISPIN == 1:
+                if item.attrib == {'comment': 'spin 1'}:
+                    tdos = np.array([[[float(entry) for entry in arr.text.split()] for arr in item]])
+            if ISPIN == 2:
+                if item.attrib == {'comment': 'spin 1'}:
+                    tdos_1 = [[float(entry) for entry in arr.text.split()] for arr in item]
+                if item.attrib=={'comment': 'spin 2'}:
+                    tdos_2 = [[float(entry) for entry in arr.text.split()] for arr in item]
+                tdos = np.array([tdos_1,tdos_2])
+            
     for i in xml_data.root.iter('i'): #efermi for condition required.
-        if(i.attrib=={'name': 'efermi'}):
-            efermi=float(i.text)
+        if i.attrib == {'name': 'efermi'}:
+            efermi = float(i.text)
     dos_dic= {'Fermi':efermi,'ISPIN':ISPIN,'tdos':tdos}
     #Filtering in energy range.
     if elim: #check if elim not empty
-        if(ISPIN==1 and spin_set==1):
-            up_ind=np.max(np.where(tdos[:,0]-efermi<=np.max(elim)))+1
-            lo_ind=np.min(np.where(tdos[:,0]-efermi>=np.min(elim)))
-            tdos=tdos[lo_ind:up_ind,:]
-        if(ISPIN==2 and spin_set==1):
-            up_ind=np.max(np.where(tdos['SpinUp'][:,0]-efermi<=np.max(elim)))+1
-            lo_ind=np.min(np.where(tdos['SpinUp'][:,0]-efermi>=np.min(elim)))
-            tdos = {'SpinUp':tdos_1[lo_ind:up_ind,:],'SpinDown':tdos_2[lo_ind:up_ind,:]}
-        if(spin_set!=1):
-            up_ind=np.max(np.where(tdos[:,0]-efermi<=np.max(elim)))+1
-            lo_ind=np.min(np.where(tdos[:,0]-efermi>=np.min(elim)))
-            tdos=tdos[lo_ind:up_ind,:]
+        up_ind = np.max(np.where(tdos[:, :, 0] - efermi <= np.max(elim))[1]) + 1
+        lo_ind = np.min(np.where(tdos[:, :, 0] - efermi >= np.min(elim))[1])
+        tdos = tdos[:,lo_ind:up_ind,:]
         dos_dic= {'Fermi':efermi,'ISPIN':ISPIN,'grid_range':range(lo_ind,up_ind),'tdos':tdos}
     return serializer.Dict2Data(dos_dic)
 
@@ -258,51 +250,46 @@ def get_evals(xml_data, skipk = None, elim = []):
     for neighbor in xml_data.root.iter('eigenvalues'):
         for item in neighbor[0].iter('set'):
             if ISPIN == 1:
-                if(item.attrib=={'comment': 'spin 1'}):
+                if item.attrib=={'comment': 'spin 1'}:
                     evals = np.array([[[float(t) for t in th.text.split()] for th in thing] for thing in item])[skipk:]
-                    evals, occs = evals[:,:,0], evals[:,:,1]
+                    evals, occs = np.expand_dims(evals[:,:,0],0), np.expand_dims(evals[:,:,1],0)
                     NBANDS = len(evals[0])
             if ISPIN == 2:
-                if(item.attrib=={'comment': 'spin 1'}):
+                if item.attrib=={'comment': 'spin 1'}:
                     eval_1 = np.array([[[float(t) for t in th.text.split()] for th in thing] for thing in item])[skipk:]
                     eval_1, occs_1 = eval_1[:,:,0], eval_1[:,:,1]
-                if(item.attrib=={'comment': 'spin 2'}):
+                if item.attrib=={'comment': 'spin 2'}:
                     eval_2=np.array([[[float(t) for t in th.text.split()] for th in thing] for thing in item])[skipk:]
                     eval_2, occs_2 = eval_2[:,:,0], eval_2[:,:,1]
-                    evals = {'SpinUp':eval_1,'SpinDown':eval_2}
-                    occs = {'SpinUp':occs_1,'SpinDown':occs_2}
-                    NBANDS=len(eval_1[0])
+                
+                evals = np.array([eval_1,eval_2])
+                occs = np.array([occs_1,occs_2])
+                NBANDS = evals.shape[-1]
 
     for i in xml_data.root.iter('i'): #efermi for condition required.
         if i.attrib == {'name': 'efermi'}:
             efermi = float(i.text)
-    evals_dic={'Fermi':efermi,'ISPIN':ISPIN,'NBANDS':NBANDS,'evals':evals,'indices': range(NBANDS),'occs':occs}
+    evals_dic={'Fermi':efermi,'ISPIN':ISPIN,'NBANDS':NBANDS,'evals':evals,'occs':occs}
     if elim: #check if elim not empty
-        if ISPIN == 1:
-            up_ind = np.max(np.where(evals[:,:]-efermi <= np.max(elim))[1])+1
-            lo_ind = np.min(np.where(evals[:,:]-efermi >= np.min(elim))[1])
-            evals = evals[:,lo_ind:up_ind]
-            occs = occs[:,lo_ind:up_ind]
-        if ISPIN == 2:
-            up_ind=np.max(np.where(eval_1[:,:]-efermi <= np.max(elim))[1])+1
-            lo_ind=np.min(np.where(eval_1[:,:]-efermi >= np.min(elim))[1])
-            evals={'SpinUp':eval_1[:,lo_ind:up_ind],'SpinDown':eval_2[:,lo_ind:up_ind]}
-            occs = {'SpinUp':occs_1[:,lo_ind:up_ind],'SpinDown':occs_2[:,lo_ind:up_ind]}
+        up_ind = np.max(np.where(evals[:,:,:]-efermi <= np.max(elim))[2]) + 1
+        lo_ind = np.min(np.where(evals[:,:,:]-efermi >= np.min(elim))[2])
+        evals = evals[:, :, lo_ind:up_ind]
+        occs = occs[:, :, lo_ind:up_ind]
+        
         NBANDS = int(up_ind - lo_ind) #update Bands
         evals_dic['NBANDS'] = NBANDS
-        evals_dic['indices'] = range(lo_ind,up_ind)
         evals_dic['evals'] = evals
         evals_dic['occs'] = occs
         
     return serializer.Dict2Data(evals_dic)
 
-def get_bands_pro_set(xml_data, spin_set:int=1, skipk:int=0, bands_range:range=None, set_path:str=None):
-    """Returns bands projection of a spin_set(default 1). If spin-polarized calculations, gives SpinUp and SpinDown keys as well.
+def get_bands_pro_set(xml_data, spin = 0, skipk = 0, bands_range:range=None, set_path:str=None):
+    """Returns bands projection of a spin(default 0). If spin-polarized calculations, gives SpinUp and SpinDown keys as well.
     
     Args:
         xml_data    : From ``read_asxml`` function's output.
         skipk (int): Number of initil kpoints to skip (Default 0).
-        spin_set (int): Spin set to get, default is 1.
+        spin (int): Spin set to get, default is 0.
         bands_range (range): If elim used in ``get_evals``,that will return ``bands_range`` to use here. Note that range(0,2) will give 2 bands 0,1 but tuple (0,2) will give 3 bands 0,1,2.
         set_path (str): path/to/_set[1,2,3,4].txt, works if ``split_vasprun`` is used before.
     
@@ -351,9 +338,9 @@ def get_bands_pro_set(xml_data, spin_set:int=1, skipk:int=0, bands_range:range=N
     #Get NIONS for reshaping data
     NIONS=[int(atom.text) for atom in xml_data.root.iter('atoms')][0]
 
-    for spin in xml_data.root.iter('set'):
-        if spin.attrib=={'comment': 'spin{}'.format(spin_set)}:
-            k_sets = [kp for kp in spin.iter('set') if 'kpoint' in kp.attrib['comment']]
+    for sp in xml_data.root.iter('set'):
+        if sp.attrib=={'comment': 'spin{}'.format(spin + 1)}:
+            k_sets = [kp for kp in sp.iter('set') if 'kpoint' in kp.attrib['comment']]
     k_sets = k_sets[skipk:]
     NKPTS = len(k_sets)
     band_sets = []
@@ -379,15 +366,15 @@ def get_bands_pro_set(xml_data, spin_set:int=1, skipk:int=0, bands_range:range=N
         del bands_pro # Release memory
         print("Done.")
 
-    data = data.reshape((NKPTS,NBANDS,NIONS,NORBS)).transpose((2,0,1,3))
+    data = data.reshape((1, NKPTS,NBANDS,NIONS,NORBS)) # extra dim for spin
     return serializer.Dict2Data({'labels':fields,'pros':data})
 
-def get_dos_pro_set(xml_data,spin_set:int=1,dos_range:range=None):
-    """Returns dos projection of a spin_set(default 1) as numpy array. If spin-polarized calculations, gives SpinUp and SpinDown keys as well.
+def get_dos_pro_set(xml_data,spin = 0,dos_range:range=None):
+    """Returns dos projection of a spin(default 0) as numpy array. If spin-polarized calculations, gives SpinUp and SpinDown keys as well.
     
     Args:
         xml_data : From ``read_asxml`` function
-        spin_set (int): Spin set to get, default 1.
+        spin (int): Spin set to get, default 0.
         dos_range (range): If elim used in ``get_tdos``,that will return dos_range to use here..
     
     Returns:
@@ -406,18 +393,18 @@ def get_dos_pro_set(xml_data,spin_set:int=1,dos_range:range=None):
         for ion in range(n_ions):
             for node in pro.iter('set'):
                 if(node.attrib=={'comment': 'ion {}'.format(ion+1)}):
-                    for spin in node.iter('set'):
-                        if(spin.attrib=={'comment': 'spin {}'.format(spin_set)}):
-                            set_pro=[[float(entry) for entry in r.text.split()] for r in spin.iter('r')]
+                    for sp in node.iter('set'):
+                        if(sp.attrib=={'comment': 'spin {}'.format(spin + 1)}):
+                            set_pro=[[float(entry) for entry in r.text.split()] for r in sp.iter('r')]
             dos_pro.append(set_pro)
     if dos_range==None: #full grid computed.
-        dos_pro=np.array(dos_pro) #shape(NION,e_grid,pro_fields)
+        dos_pro=np.array(dos_pro) # shape(NION,e_grid,pro_fields)
     else:
         dos_range=list(dos_range)
         min_ind=dos_range[0]
         max_ind=dos_range[-1]+1
         dos_pro=np.array(dos_pro)[:,min_ind:max_ind,:]
-    final_data=np.array(dos_pro) #shape(NION,e_grid,pro_fields)
+    final_data = np.expand_dims(dos_pro,0).transpose((0,2,1,3)) # shape(1, NE,NIONS, NORBS + 1)
     return serializer.Dict2Data({'labels':dos_fields,'pros':final_data})
 
 
@@ -444,7 +431,7 @@ def get_structure(xml_data):
     cartesian = space_info.cartesian_positions
     st_dic={'SYSTEM':SYSTEM,'basis': np.array(basis),
             'extra_info': {'comment':'Exported from vasprun.xml','cartesian':cartesian,'scale':scale},
-            'positions': np.array(positions),'unique': unique_d}
+            'positions': np.array(positions),'elems': unique_d}
     return serializer.PoscarData(st_dic)
 
 def export_vasprun(path:str = None, skipk:int = None, elim:list = [], dos_only:bool = False):
@@ -476,7 +463,7 @@ def export_vasprun(path:str = None, skipk:int = None, elim:list = [], dos_only:b
     #EIGENVALS
     eigenvals = get_evals(xml_data,skipk=skipk,elim=elim)
     #TDOS
-    tot_dos = get_tdos(xml_data,spin_set=1,elim=elim)
+    tot_dos = get_tdos(xml_data,elim = elim)
     #Bands and DOS Projection
     if elim:
         bands_range = eigenvals.indices #indices in range form.
@@ -490,18 +477,18 @@ def export_vasprun(path:str = None, skipk:int = None, elim:list = [], dos_only:b
         skipk = len(kpts.kpath) + skipk - 2 # Just Single kpoint
         
     if info_dic.ISPIN == 1:
-        pro_bands = get_bands_pro_set(xml_data=xml_data,spin_set=1,skipk=skipk,bands_range=bands_range,set_path=set_paths[0])
-        pro_dos = get_dos_pro_set(xml_data=xml_data,spin_set=1,dos_range=grid_range)
+        pro_bands = get_bands_pro_set(xml_data=xml_data,spin = 0,skipk=skipk,bands_range=bands_range,set_path=set_paths[0])
+        pro_dos = get_dos_pro_set(xml_data=xml_data,spin = 0,dos_range=grid_range)
     if info_dic.ISPIN == 2:
-        pro_1 = get_bands_pro_set(xml_data=xml_data,spin_set=1,skipk=skipk,bands_range=bands_range,set_path=set_paths[0])
-        pro_2 = get_bands_pro_set(xml_data=xml_data,spin_set=2,skipk=skipk,bands_range=bands_range,set_path=set_paths[1])
-        pros={'SpinUp': pro_1.pros,'SpinDown': pro_2.pros}#accessing spins in dictionary after .pro.
-        pro_bands={'labels':pro_1.labels,'pros': pros}
-        pdos_1 = get_dos_pro_set(xml_data=xml_data,spin_set=1,dos_range=grid_range)
-        pdos_2 = get_dos_pro_set(xml_data=xml_data,spin_set=1,dos_range=grid_range)
-        pdos={'SpinUp': pdos_1.pros,'SpinDown': pdos_2.pros}#accessing spins in dictionary after .pro.
-        pro_dos={'labels':pdos_1.labels,'pros': pdos}
-    
+        pro_1 = get_bands_pro_set(xml_data=xml_data,spin =0,skipk=skipk,bands_range=bands_range,set_path=set_paths[0])
+        pro_2 = get_bands_pro_set(xml_data=xml_data,spin =1,skipk=skipk,bands_range=bands_range,set_path=set_paths[1])
+        pros = np.vstack([pro_1.pros,pro_2.pros]) # accessing spins in dictionary after .pro.
+        pro_bands = {'labels':pro_1.labels,'pros': pros}
+        pdos_1 = get_dos_pro_set(xml_data=xml_data,spin =0,dos_range=grid_range)
+        pdos_2 = get_dos_pro_set(xml_data=xml_data,spin=0,dos_range=grid_range)
+        pdos = np.vstack([pdos_1.pros, pdos_2.pros]) # accessing spins in dictionary after .pro.
+        pro_dos = {'labels':pdos_1.labels,'pros': pdos}
+        
     # Forces and steps
     force = get_force(xml_data)
     scsteps = get_scsteps(xml_data)
@@ -510,11 +497,13 @@ def export_vasprun(path:str = None, skipk:int = None, elim:list = [], dos_only:b
     poscar = get_structure(xml_data = xml_data)
     poscar = {'SYSTEM':info_dic.SYSTEM,**poscar.to_dict()}
     #Dimensions dictionary.
-    dim_dic={'kpoints':'(NKPTS,3)','kpath':'(NKPTS,1)','bands':'⇅(NKPTS,NBANDS)','dos':'⇅(grid_size,3)','pro_dos':'⇅(NION,grid_size,en+pro_fields)','pro_bands':'⇅(NION,NKPTS,NBANDS,pro_fields)'}
+    dim_dic={'kpoints':'(NKPTS,3)','kpath':'(NKPTS,1)','evals':'⇅(NSPIN,NKPTS,NBANDS)','dos_total':'⇅(NSPIN, NE,3)','dos_partial':'⇅(NSPIN, NE, NIONS,NORBS+1)','evals_projector':'⇅(NSPIN,NKPTS,NBANDS,NIONS, NORBS)'}
+    # Bands
+    bands = {'kpoints':kpts.kpoints,'kpath':kpts.kpath,'evals':eigenvals.evals,'occs':eigenvals.occs,'labels':pro_bands['labels'],'pros':pro_bands['pros']}
+    # DOS
+    dos = {'total':tot_dos.tdos,'labels':pro_dos['labels'],'partial':pro_dos['pros']}
     #Writing everything to be accessible via dot notation
-    full_dic={'sys_info':info_dic,'dim_info':dim_dic,'kpoints':kpts.kpoints,'kpath':kpts.kpath,'bands':eigenvals,
-             'tdos':tot_dos,'pro_bands':pro_bands,'pro_dos':pro_dos,'poscar': poscar,
-             'force':force,'scsteps':scsteps}
+    full_dic={'sys_info':info_dic,'dim_info':dim_dic,'bands':bands,'dos':dos,'poscar': poscar,'force':force,'scsteps':scsteps}
     return serializer.VasprunData(full_dic)
 
 def _validate_evr(path_evr=None,**kwargs):
@@ -793,7 +782,7 @@ def export_spin_data(path = None, spins = 's', skipk = None, elim = None):
 
     bands = get_evals(xml_data, skipk = skipk,elim = elim).to_dict()
     evals = bands['evals']
-    bands.update({'u': evals['SpinUp'], 'd': evals['SpinDown']} if ISPIN == 2 else {'e': evals})
+    bands.update({'u': evals[0], 'd': evals[1]} if ISPIN == 2 else {'e': evals[0]})
     
     del bands['evals'] # Do not Delete occupancies here
     full_dic['evals'] = bands
@@ -802,15 +791,15 @@ def export_spin_data(path = None, spins = 's', skipk = None, elim = None):
 
     spin_sets = {}
     if ISPIN == 1:
-        for n, s in enumerate('sxyz', start = 1):
+        for n, s in enumerate('sxyz', start = 0): # spins 0,1,2,3 for s,x,y,z
             if s in spins:
-                spin_sets[s] = get_bands_pro_set(xml_data, spin_set = n, skipk = skipk, bands_range = bands_range, set_path = set_paths[n-1]).pros
+                spin_sets[s] = get_bands_pro_set(xml_data, spin = n, skipk = skipk, bands_range = bands_range, set_path = set_paths[n-1]).pros[0] # remove extra dimension
 
     if ISPIN == 2:
         print(utils.color.g(f"Found ISPIN = 2, output data got attributes spins.<u,d> instead of spins.<{','.join(spins)}>"))
-        pro_1 = get_bands_pro_set(xml_data, spin_set = 1, skipk = skipk, bands_range = bands_range, set_path = set_paths[0])
-        pro_2 = get_bands_pro_set(xml_data, spin_set = 2, skipk = skipk, bands_range = bands_range, set_path = set_paths[1])
-        spin_sets = {'u': pro_1.pros,'d': pro_2.pros}
+        pro_1 = get_bands_pro_set(xml_data, spin = 0, skipk = skipk, bands_range = bands_range, set_path = set_paths[0])
+        pro_2 = get_bands_pro_set(xml_data, spin = 1, skipk = skipk, bands_range = bands_range, set_path = set_paths[1])
+        spin_sets = {'u': pro_1.pros[0],'d': pro_2.pros[1]}
 
     full_dic['spins'] = spin_sets
     full_dic['spins']['labels'] = full_dic['sys_info'].fields

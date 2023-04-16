@@ -287,8 +287,7 @@ class InputGui:
             - output: Dictionary that contains kwargs for plot functions.
             - html  : A widget which can be used to bserve change in output, used in `VasprunApp`.
         """
-        self.sys_info = sys_info if sys_info else serializer.Dict2Data({'fields':['s'],
-                                                'ElemIndex':[0,1],'ElemName':['A']})
+        self.sys_info = sys_info if sys_info else serializer.Dict2Data({'fields':['s'], 'elems':{'A': range(1)},})
         self.output = dict(elements = [[],[],[]],orbs = [[],[],[]],labels = ['','',''])
 
         layout = Layout(width='30%')
@@ -342,10 +341,10 @@ class InputGui:
                 orbs_opts = [*orbs_opts,('9-15: f','9-15')]
             max_ind = len(sys_info.fields)-1
             orbs_opts = [('0-{}: All'.format(max_ind), "0-{}".format(max_ind)),*orbs_opts]
-            inds = sys_info.ElemIndex
-            ions_opts = [("{}-{}: {}".format(inds[i],inds[i+1]-1,item),"{}-{}".format(
-                                    inds[i],inds[i+1]-1)) for i,item in enumerate(sys_info.ElemName)]
-            self._dds['elms'].options = [*ions_opts,('0-{}: All'.format(inds[-1]-1),'0-{}'.format(inds[-1]-1))]
+            inds = sorted(np.flatten(list(sys_info.elems.values())))
+            ions_opts = [("{}-{}: {}".format(v[0],v[-1],k),"{}-{}".format(
+                                    v[0],v[-1])) for k,v in sys_info.elems.items()]
+            self._dds['elms'].options = [*ions_opts,('0-{}: All'.format(inds[-1]),'0-{}'.format(inds[-1]))]
             self._dds['orbs'].options = orbs_opts
             self.sys_info = sys_info # Update it as well.
 

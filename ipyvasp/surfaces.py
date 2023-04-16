@@ -23,12 +23,12 @@ except:
 def _collect_spin_data(exported_spin_data, bands = [0], elements = [[0],], orbs = [[0],], scale_data = False):
     if not isinstance(bands,(list,tuple)):
         raise TypeError('`bands` must be list/tuple of integer.')
-    elements, orbs, _ = _validate_input(elements,orbs,[str(i) for i,o in enumerate(orbs)],sys_info = exported_spin_data.sys_info, rgb = False)
+    elements, orbs, _ = _validate_input(elements,orbs,[str(i) for i,o in enumerate(orbs)],sys_info = exported_spin_data.sys_info)
 
     def per_band_data(band):
         kpoints = exported_spin_data.kpoints
-        evals = {k: v[:,band] for k,v in exported_spin_data.evals.items() if k in 'eud'}
-        spins = {k: v[:,:,band,:] for k,v in exported_spin_data.spins.items() if k in 'sxyzud'}
+        evals = {k: v[...,band] for k,v in exported_spin_data.evals.items() if k in 'eud'}
+        spins = {k: v[...,band,:] for k,v in exported_spin_data.spins.items() if k in 'sxyzud'}
 
         df_dict = {f'k{k}':v for k,v in zip('xyz',kpoints.T)}
         df_dict['band'] = [(band + exported_spin_data.evals.indices[0] + 1) for i in range(len(kpoints))]
@@ -113,7 +113,7 @@ class SpinDataFrame(pd.DataFrame):
                 super().__init__(out_dict)
                 self.scale_data = scale_data
                 self.sys_info = spin_data.sys_info
-                elements, orbs, _ = _validate_input(elements,orbs,[str(i) for i,o in enumerate(orbs)],sys_info = self.sys_info, rgb = False)
+                elements, orbs, _ = _validate_input(elements,orbs,[str(i) for i,o in enumerate(orbs)],sys_info = self.sys_info)
                 self.projection = serializer.Dict2Data({f'_{i}': {'ions': e, 'orbs': o} for i,(e,o) in enumerate(zip(elements,orbs))})
                 # Path below is used to get kpoints info
                 self.poscar = api.POSCAR(path = path, data = spin_data.poscar)
@@ -169,7 +169,7 @@ class SpinDataFrame(pd.DataFrame):
         If You need to have kpoints in primitive/regular BZ, first use .poscar.set_bz() to set that kind of BZ."""
         bands = np.unique(self['band'].to_numpy()).astype(int)
         out_dict = {'SYSTEM': self.sys_info.SYSTEM}
-        out_dict['elements'] = self.poscar.data.unique
+        out_dict['elements'] = self.poscar.data.elems
         out_dict['orbitals'] = self.sys_info.fields
         out_dict['projection'] = self.projection
         out_dict['bz'] = self.poscar.bz._asdict()

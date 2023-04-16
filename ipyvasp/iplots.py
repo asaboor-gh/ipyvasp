@@ -252,7 +252,7 @@ def iplot_rgb_lines(
     ktick_vals  = ['Γ','M'],
     figsize     = None,
     interp_nk   = {},
-    query_data  = {}
+    query  = {}
     ):
     """
     - Returns plotly's figure object, takes care of spin-polarized calculations automatically. `elements`,`orbs` and `labels` are required to be one-to-one lists of size 3 where each item in list could be another list or integer.
@@ -268,7 +268,7 @@ def iplot_rgb_lines(
 
         - interp_nk   : Dictionary with keys 'n' and 'k' for interpolation.
         - figsize   : Tuple(width,height) in pixels, e.g. (700,400).
-        - query_data : Dictionary with keys as label and values as list of length 2. len(query_data) <=3 should hold for RGB plots. If given, used in place of elements, orbs and labels arguments.
+        - query : Dictionary with keys as label and values as list of length 2. len(query) <=3 should hold for RGB plots. If given, used in place of elements, orbs and labels arguments.
                         Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
         - **Other Parameters**
             - ktick_inds, ktick_vals,elim,kseg_inds,max_width,title etc.
@@ -279,9 +279,9 @@ def iplot_rgb_lines(
     vr = vp._validate_evr(path_evr=path_evr,skipk=skipk,elim=elim)
 
     # Fix orbitals, elements and labels lengths very early.
-    if query_data:
-        elements, orbs, labels = sp._format_input(query_data,rgb=False) # prefer over elements, orbs and labels
-    elements,orbs,labels = sp._validate_input(elements,orbs,labels,vr.sys_info,rgb=True)
+    if query:
+        elements, orbs, labels = sp._format_input(query,rgb=False) # prefer over elements, orbs and labels
+    elements,orbs,labels = sp._validate_input(elements,orbs,labels,vr.sys_info)
 
     ## Main working here.
     if vr.pro_bands == None:
@@ -373,7 +373,7 @@ def iplot_dos_lines(
     spin          = 'both',
     interp_nk     = {},
     title         = None,
-    query_data    = {}
+    query    = {}
     ):
         """
         - Returns plotly's figure. If given,elements,orbs colors, and labels must have same length. If not given, zeroth ions is plotted with s-orbital.
@@ -389,13 +389,13 @@ def iplot_dos_lines(
             - vertical   : False, If True, plots along y-axis.
             - interp_nk  : Dictionary with keys 'n' and 'k' for interpolation.
             - figsize    : Tuple(width,height) in pixels, e.g. (700,400).
-            - query_data : Dictionary with keys as label and values as list of length 2. If given, used in place of elements, orbs and labels arguments.
+            - query : Dictionary with keys as label and values as list of length 2. If given, used in place of elements, orbs and labels arguments.
                         Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
         - **Returns**
             - fig        : Plotly's figure object.
         """
-        if query_data:
-            elements,orbs,labels = sp._format_input(query_data,rgb=False) # prefer query_data over elements,orbs,labels
+        if query:
+            elements,orbs,labels = sp._format_input(query,rgb=False) # prefer query over elements,orbs,labels
             # These are validated inisde _collect_dos, no need here
         en,tdos,pdos,vr=None,None,None,None # Place holders for defining
         cl_dos = sp._collect_dos(path_evr=path_evr,elim=elim,
