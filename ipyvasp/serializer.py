@@ -194,14 +194,7 @@ class SpinData(Dict2Data):
     def get_fermi(self, tol = 1e-3):
         "Fermi energy based on occupancy. Returns `self.Fermi` if occupancies cannot be resolved. `tol` is the value of occupnacy to ignore as filled."
         try:
-            if self.sys_info.ISPIN == 1:
-                return float(self.evals.e[self.evals.occs > tol].max())
-                
-            else: # ISPIN 2
-                energies = []
-                for a, b in [('u','SpinUp'),('d','SpinDown')]:
-                    energies.append(self.evals[a][self.evals.occs[b] > tol].max())
-                return float(max(energies))
+            return float(self.evals.e[self.evals.occs > tol].max())
         except:
             return self.Fermi
     
@@ -216,7 +209,7 @@ class SpinData(Dict2Data):
         return self.evals.Fermi
     
 class PoscarData(Dict2Data):
-    _req_keys = ('basis','elems','extra_info')
+    _req_keys = ('basis','types','extra_info')
     def __init__(self,d):
         super().__init__(d)
     

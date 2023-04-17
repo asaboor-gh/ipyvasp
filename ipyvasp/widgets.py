@@ -278,7 +278,7 @@ def get_files_gui(auto_fill = 'vasprun.xml', theme_colors = None, height=320):
 class InputGui:
     def __init__(self,sys_info=None,theme_colors = None,height=400):
         """
-        - Creates a GUI interface for input/selection of orbitals/elms projection.
+        - Creates a GUI interface for input/selection of orbitals/atoms projection.
         - **Parmeters**
             - theme_colors : None,Any of ipyvasp.[dark,light,simple]_colors.
             - height     : Height of Grid box, Can set to None for auto-resizing.
@@ -287,8 +287,8 @@ class InputGui:
             - output: Dictionary that contains kwargs for plot functions.
             - html  : A widget which can be used to bserve change in output, used in `VasprunApp`.
         """
-        self.sys_info = sys_info if sys_info else serializer.Dict2Data({'fields':['s'], 'elems':{'A': range(1)},})
-        self.output = dict(elements = [[],[],[]],orbs = [[],[],[]],labels = ['','',''])
+        self.sys_info = sys_info if sys_info else serializer.Dict2Data({'fields':['s'], 'types':{'A': range(1)},})
+        self.output = dict(atoms = [[],[],[]],orbs = [[],[],[]],labels = ['','',''])
 
         layout = Layout(width='30%')
         l_width = Layout(width='20%')
@@ -341,9 +341,9 @@ class InputGui:
                 orbs_opts = [*orbs_opts,('9-15: f','9-15')]
             max_ind = len(sys_info.fields)-1
             orbs_opts = [('0-{}: All'.format(max_ind), "0-{}".format(max_ind)),*orbs_opts]
-            inds = sorted(np.flatten(list(sys_info.elems.values())))
+            inds = sorted(np.flatten(list(sys_info.types.values())))
             ions_opts = [("{}-{}: {}".format(v[0],v[-1],k),"{}-{}".format(
-                                    v[0],v[-1])) for k,v in sys_info.elems.items()]
+                                    v[0],v[-1])) for k,v in sys_info.types.items()]
             self._dds['elms'].options = [*ions_opts,('0-{}: All'.format(inds[-1]),'0-{}'.format(inds[-1]))]
             self._dds['orbs'].options = orbs_opts
             self.sys_info = sys_info # Update it as well.
@@ -360,7 +360,7 @@ class InputGui:
             return _out
 
         index = self._dds['rgb'].value
-        self.output['elements'][index] = read(self._texts['elms'].value)
+        self.output['atoms'][index] = read(self._texts['elms'].value)
         self.output['orbs'][index] = read(self._texts['orbs'].value)
         _text,_ion,_orb = self._texts['label'].value,self._texts['elms'].value,self._texts['orbs'].value
         self.output['labels'][index] = _text if _text else "{}:{}".format(_ion,_orb)
@@ -378,7 +378,7 @@ class InputGui:
 
         # Look up while not observing
         x = self._dds['rgb'].value
-        self._texts['elms'].value = ','.join([str(i) for i in self.output['elements'][x]])
+        self._texts['elms'].value = ','.join([str(i) for i in self.output['atoms'][x]])
         self._texts['orbs'].value = ','.join([str(i) for i in self.output['orbs'][x]])
         self._texts['label'].value = self.output['labels'][x]
         # Observe Back Again
@@ -883,7 +883,7 @@ class VasprunApp:
             print('Cache Loaded')
         except:
             print('Trying Loading from Python ...')
-            elim = self._texts['load_elim'].value.split(',')[:2] # First two elements
+            elim = self._texts['load_elim'].value.split(',')[:2] # First two atoms
             if len(elim) == 2:
                 self._evr_kws['elim'] = [float(e) for e in elim]
             self._data = vp.export_vasprun(self._files_dd.value, **self._evr_kws)
@@ -898,7 +898,7 @@ class VasprunApp:
         _ = self.__read_data(self._data.poscar,sys_info) # Update Table data on load
         self._tab.selected_index = 1
         # Revamp input dropdowns on load  ==========
-        self._InGui.update_options(sys_info=sys_info) #Upadate elements/orbs/labels
+        self._InGui.update_options(sys_info=sys_info) #Upadate atoms/orbs/labels
         #===========================================
         self._buttons['load_data'].description='Load Data'
         self._path = self._files_dd.value # Update in __on_load or graph to make sure data loads once
@@ -1024,7 +1024,7 @@ class VasprunApp:
                     self._data = serializer.load(file)
                 except:
                     print('No cache found. Loading from file {} ...'.format(path))
-                    elim = self._texts['load_elim'].value.split(',')[:2] # First two elements
+                    elim = self._texts['load_elim'].value.split(',')[:2] # First two atoms
                     if len(elim) == 2:
                         self._evr_kws['elim'] = [float(e) for e in elim]
                     self._data = vp.export_vasprun(path, **self._evr_kws)

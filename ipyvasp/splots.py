@@ -18,6 +18,7 @@ from matplotlib.colors import LinearSegmentedColormap as LSC
 from matplotlib.collections import LineCollection
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.patheffects as path_effects
 
 
 # Inside packages import to work both with package and jupyter notebook.
@@ -268,23 +269,28 @@ def add_text(ax=None,xs=0.25,ys=0.9,txts='[List]',colors='r',transform=True,**kw
                     ax.text(x,y,txt,color=colors,**args_dict,**kwargs)
                     
 # This is to verify things together and make sure they are working as expected.
-def _validate_data(K, E,  elim, kseg_inds, ktick_inds, ktick_vals, interp_nk):
+def _validate_data(K, E,  elim, kpath_ticks, interp_nk):
     if np.ndim(E) != 2:
         raise ValueError("E must be a 2D array.")
     
     if np.shape(E)[0] != len(K):
         raise ValueError("Length of first dimension of E must be equal to length of K.")
     
-    if isinstance(kseg_inds, (list, tuple)):
-        K = vp.join_ksegments(K, kseg_inds)
-    elif kseg_inds is not None:
-        raise ValueError("kseg_inds must be a list or tuple.")   
+    if kpath_ticks and not isinstance(kpath_ticks, dict):
+        raise ValueError("kpath_ticks must be a dictionary of int/tuple -> str.")
+    
+    pairs = [k for k in kpath_ticks.keys() if isinstance(k, tuple)] # tuple keys, list is not hashable
+    
+    K = vp.join_ksegments(K, *pairs)
+    
+    inds  = [k[0] if isinstance(k, tuple) else k for k in kpath_ticks.keys()]
+    vals = list(kpath_ticks.values())
+    
+    xticks = [K[i] for i in inds] if inds else None
+    xticklabels = [str(v) for v in vals] if vals else None
     
     if elim and len(elim) != 2:
         raise ValueError("elim must be a list or tuple of length 2.")
-    
-    xticks = [K[i] for i in ktick_inds] if ktick_inds else None
-    xticklabels = [str(v) for v in ktick_vals] if ktick_vals else None
     
     if interp_nk and not isinstance(interp_nk, dict):
         raise ValueError("interp_nk must be a dictionary with keys n and k.")
@@ -292,7 +298,7 @@ def _validate_data(K, E,  elim, kseg_inds, ktick_inds, ktick_vals, interp_nk):
     return K, E, xticks, xticklabels
 
                     
-def splot_bands(K, E, ax = None, elim = None, kseg_inds = None, ktick_inds = None, ktick_vals = None, interp_nk = None, **kwargs):
+def splot_bands(K, E, ax = None, elim = None, kpath_ticks = None, interp_nk = None, **kwargs):
     """
     Plot band structure for a single spin channel and return the matplotlib axes which can be used to add other channel if spin polarized.
     
@@ -301,10 +307,8 @@ def splot_bands(K, E, ax = None, elim = None, kseg_inds = None, ktick_inds = Non
     K : array-like of shape (nkpts,)
     E : array-like of shape (nkpts, nbands)
     ax : matplotlib axes 
-    kseg_inds : list Indices where the k-path segments are broken 
     elim : list of length 2 
-    ktick_inds : list of indices where the k-path ticks are placed 
-    ktick_vals : list of values for kticks with same length as ktick_inds 
+    kpath_ticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
     interp_nk : dict of interpolation parameters with keys 'n' and 'k' 
     
     kwargs are passed to matplotlib's command `ax.plot`.
@@ -313,7 +317,7 @@ def splot_bands(K, E, ax = None, elim = None, kseg_inds = None, ktick_inds = Non
     -------
     ax : matplotlib axes
     """
-    K, E, xticks, xticklabels = _validate_data(K, E, elim, kseg_inds, ktick_inds, ktick_vals, interp_nk)
+    K, E, xticks, xticklabels = _validate_data(K, E, elim, kpath_ticks, interp_nk)
     
     if interp_nk:
         K,E = gu.interpolate_data(K,E,**interp_nk)
@@ -527,73 +531,17 @@ def color_wheel(ax=None,
         cax.set_xticklabels(labels)
     return cax
 
-# Cell
-import matplotlib.patheffects as path_effects
-def _get_pros_data(
-    kpath       = None,
-    evals_set   = None,
-    pros_set    = None,
-    elements    = [[0],],
-    orbs        = [[0],],
-    interp_nk   = {},
-    scale_data  = False,
-    ):
-    """
-    - Returns selected elements/orbitals data.
-    Args:
-        - kapath   : `export_vasprun`().kpath or `get_kpts`().kpath.
-        - evals_set: `export_vasprun`().bands.evals or `get_evals`().evals. If calculations are spin-polarized, it will be `...evals.SpinUp/SpinDown` for both.
-        - pros_set : `export_vasprun().pro_bands.pros` or `get_bands_pro_set`().pros. If calculations are spin-polarized, it will be `...pros.SpinUp/SpinDown` for both.
-        - elements : Lists of list of ions to project on, could be `range(start,stop,step)` as well, remember that `stop` is not included in python. so `range(0,2)` will generate 0 and 1 indices.
-        - orbs     : List of lists of orbitals indices.
-        - scale_data : If True, normalizes projection data to 1.
-        - interp_nk   : Dictionary with keys 'n' and 'k' for interpolation.
-    - **Returns**
-        - A dictionary with keys 'kpath', 'evals', 'colors' that can be unpacked in next function's arguemnet.
-            - 'kpath' : Given or interpolated kpath of shape (NKPTS,).
-            - 'evals' : Given or interpolated evals_set of shape (NKPTS,NBANDS).
-            - 'pros': An array of shape (NKPTS,NBANDS,n) where n is length of input elements list. If scale_data = True, normalizes this array to 1.
-    """
-    if not np.any(pros_set):
-        raise ValueError("Can not process an empty eigenvalues/projection object.\n"
-                         "Try with large `elim` in parent function.")
-    # Empty orbitals/elements are still allowed on purpose for rgb_lines.
-    for elem, orb in zip(elements,orbs):
-        if isinstance(elem,int) or isinstance(orb,int):
-            raise ValueError("Items in elements and orbs should be list, tuple or range, not int.")
 
-    arrays_list = []
-    for elem,orb in zip(elements,orbs):
-        pros  = np.take(pros_set,elem,axis=0).sum(axis=0)
-        _pros = np.take(pros,orb,axis=2).sum(axis=2)
-        arrays_list.append(_pros)
-    _shape  = (len(arrays_list),-1,np.shape(_pros)[1])
-    _colors = np.concatenate(arrays_list).reshape(_shape).transpose((1,2,0))
-
-    if scale_data: # Normalize overall data
-        c_max = np.max(_colors)
-        if c_max > 0.0000001: # Avoid division error
-            _colors = _colors/c_max
-
-    if interp_nk:
-        min_d, max_d = np.min(_colors),np.max(_colors) # For cliping
-        from ipyvasp import utils as gu
-        knew, evals = gu.interpolate_data(kpath,evals_set,**interp_nk)
-        _colors     = gu.interpolate_data(kpath,_colors,**interp_nk)[1].clip(min=min_d,max=max_d)
-        return {'kpath':knew,'evals': evals,'pros': _colors}
-    # Return if no interpolation
-    return {'kpath':kpath,'evals': evals_set,'pros': _colors}
-
-def _make_line_collection(max_width   = None,
+def _make_line_collection(max_width  = 2.5,
                          colors_list = None,
                          rgb         = False,
-                         shadow      = True,
+                         shadow      = False,
                          **pros_data):
     """
-    - Returns a tuple of line collections. If rgb = True (at len(orbs) = 3 in `_get_pros_data`), returns a tuple of two entries, multicolored line collection and RGB maximum values, otherwise return tuple of single colored multiple lines.
+    - Returns a tuple of line collections for each given projection data.
     - **Parametrs**
-        - **pros_data: Output dictionary from `_get_pros_data` containing kpath, evals and colors arrays.
-        - max_width  : Default is None and max linwidth = 2.5. Max inewidth is scaled to max_width if an int of float is given.
+        - **pros_data: Output dictionary from `_fix_data` containing kpath, evals and colors arrays.
+        - max_width  : Default is 2.5. Max linewidth is scaled to max_width if an int of float is given.
         - colors_list: List of colors for multiple lines, length equal to 3rd axis length of colors.
         - rgb        : Default is False. If True and np.shape(colors)[-1] == 3, RGB line collection is returned in a tuple of length 1. Tuple is just to support iteration.
     """
@@ -606,7 +554,7 @@ def _make_line_collection(max_width   = None,
 
     for a,t in zip([kpath, evals, pros],['kpath', 'evals', 'pros']):
         if not np.any(a):
-            raise ValueError("Missing {!r} from output of `_get_pros_data()`".format(t))
+            raise ValueError("Missing {!r} from output of `_fix_data()`".format(t))
 
     # Average pros on two consecutive KPOINTS to get that patch color.
     colors = pros[1:,:,:]/2 + pros[:-1,:,:]/2 # Near kpoints avearge
@@ -621,7 +569,7 @@ def _make_line_collection(max_width   = None,
     else: # For separate lines
         lws = 0.1 + 2.5*colors.T # .T to access in for loop.
 
-    if max_width:
+    if max_width != 2.5: # Scale linewidths to max_width if other than 2.5
         # here division does not fail as min(lws)==0.1
         lws = max_width*lws/(2.5*np.max(lws)) # Only if not None or zero.
 
@@ -648,25 +596,25 @@ def _make_line_collection(max_width   = None,
         return tuple(lcs)
 
 # Cell
-def _validate_input(elements,orbs,labels,sys_info):
-    "Fix input elements, orbs and labels according to given sys_info. Returns (elements, orbs,labels)."
-    if len(elements) != len(orbs) or len(elements) != len(labels):
-        raise ValueError("`elements`, `orbs` and `labels` expect same length, even if empty.")
+def _validate_input(atoms,orbs,labels,sys_info):
+    "Fix input atoms, orbs and labels according to given sys_info. Returns (atoms, orbs,labels)."
+    if len(atoms) != len(orbs) or len(atoms) != len(labels):
+        raise ValueError("`atoms`, `orbs` and `labels` expect same length, even if empty.")
 
-    # Fix elements
-    ranges = list(sys_info.elems.values())
-    names = list(sys_info.elems.keys())
+    # Fix atoms
+    ranges = list(sys_info.types.values())
+    names = list(sys_info.types.keys())
     max_ind   =  np.max(ranges)
-    for i,elem in enumerate(elements.copy()):
+    for i,elem in enumerate(atoms.copy()):
         if type(elem) == int:
             try:
-                elements[i] = ranges[elem]
-                info = f"Given {elem} at position {i+1} of sequence => {names[elem]!r}: {elements[i]}. "
+                atoms[i] = ranges[elem]
+                info = f"Given {elem} at position {i+1} of sequence => {names[elem]!r}: {atoms[i]}. "
                 print(gu.color.g(info + f"To just pick one ion, write it as [{elem}]."))
             except:
                 raise IndexError(f"Wrap {elem} at position {i+1} of sequence in []. You have only {len(sys_info.ElemName)} types of ions.")
 
-    _es = [e for ee in elements for e in (*ee,)] # important if ee is int
+    _es = [e for ee in atoms for e in (*ee,)] # important if ee is int
     if  _es and max(_es) > max_ind:
         raise IndexError("index {} is out of bound for {} ions".format(max(_es),max_ind+1))
 
@@ -677,28 +625,28 @@ def _validate_input(elements,orbs,labels,sys_info):
     if  _os and max(_os) >= nfields:
         raise IndexError("index {} is out of bound for {} orbs".format(max(_os),nfields))
 
-    return elements,orbs,labels
+    return atoms,orbs,labels
 
-def _format_input(query, sys_info):
+def _format_input(atoms_orbs_dict, sys_info):
     """
-    Format input elements, orbs and labels according to query.
-    query = {'Ga-s':(0,[1]),'Ga-p':(0,[1,2,3]),'Ga-d':(0,[4,5,6,7,8])} #for Ga in GaAs, to pick Ga-1, use [0] instead of 0 at first place
+    Format input atoms, orbs and labels according to select projections in atoms_orbs_dict.
+    For example: {'Ga-s':(0,[1]),'Ga-p':(0,[1,2,3]),'Ga-d':(0,[4,5,6,7,8])} #for Ga in GaAs, to pick Ga-1, use [0] instead of 0 at first place
     """
-    if not isinstance(query,dict):
-        raise TypeError("`query` must be a dictionary, with keys as labels and values from picked projection indices.")
+    if not isinstance(atoms_orbs_dict,dict):
+        raise TypeError("`atoms_orbs_dict` must be a dictionary, with keys as labels and values from picked projection indices.")
 
     # Set default values for different situations
-    elements, orbs, labels = [], [], []
+    atoms, orbs, labels = [], [], []
 
-    for i, (k, v) in enumerate(query.items()):
+    for i, (k, v) in enumerate(atoms_orbs_dict.items()):
         if len(v) != 2:
-            raise ValueError(f"{k!r}: {v} expects 2 items (elements, orbs), got {len(v)}.")
+            raise ValueError(f"{k!r}: {v} expects 2 items (atoms, orbs), got {len(v)}.")
         
         labels.append(k)
-        elements.append(v[-2])
+        atoms.append(v[-2])
         orbs.append(v[-1])
         
-    return _validate_input(elements,orbs,labels,sys_info)
+    return _validate_input(atoms,orbs,labels,sys_info)
 
 # Cell
 from matplotlib import tri
@@ -815,33 +763,29 @@ def _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False):
 def splot_rgb_lines(K, E, pros, labels, 
     ax         = None, 
     elim       = None, 
-    kseg_inds  = None, 
-    ktick_inds = None, 
-    ktick_vals = None, 
+    kpath_ticks= None, 
     interp_nk  = None, 
-    max_width  = None,
+    max_width  = 2.5,
     scale_data = False,
     colormap   = None,
     colorbar   = True,
     N          = 9,
-    shadow     = True
+    shadow     = False
     ):
     """
-    Plot projected band structure for a given `pros` matrix of shape [m,nk,nb] where m is the number of projections.
+    Plot projected band structure for a given projections.
     
     Parameters
     ----------
     K : array-like, shape (nk,)
     E : array-like, shape (nk,nb)
-    pros : array-like, shape (m,nk,nb)
+    pros : array-like, shape (m,nk,nb), m is the number of projections <= 3 in rgb case.
     labels : list of str, length m
     ax : matplotlib.axes.Axes 
     elim : tuple of min and max values    
-    kseg_inds : list/tuple of indices which separate different segments of the kpath 
-    ktick_inds : list/tuple of indices which are ticked on the kpath 
-    ktick_vals : list/tuple of values which are ticked on the kpath
+    kpath_ticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
     interp_nk : dict of interpolation parameters with keys 'n' and 'k' 
-    max_width : float, maximum linewidth
+    max_width : float, maximum linewidth, 2.5 by default
     scale_data : bool, if True, scale projection data to be between 0 and 1
     colormap : str, name of a matplotlib colormap
     colorbar : bool, if True, add colorbar, otherwise add attribute to ax to add colorbar or color cube later
@@ -854,7 +798,7 @@ def splot_rgb_lines(K, E, pros, labels,
         .add_colorbar() : Add colorbar that represents most recent plot
         .color_cube()   : Add color cube that represents most recent plot if `pros` is 3 components
     """
-    K, E, xticks, xticklabels = _validate_data(K,E,elim,kseg_inds,ktick_inds,ktick_vals, interp_nk)
+    K, E, xticks, xticklabels = _validate_data(K,E,elim,kpath_ticks, interp_nk)
     
     ax  = get_axes() if ax is None else ax
     
@@ -937,147 +881,80 @@ def splot_rgb_lines(K, E, pros, labels,
     return ax
 
 
-# Cell
-def splot_color_lines(
-    path_evr      = None,
-    elements      = [[0]],
-    orbs          = [[0]],
-    labels        = ['s'],
-    axes          = None,
-    skipk         = None,
-    kseg_inds     = [],
-    elim          = [],
-    colormap      = 'gist_rainbow',
-    shadow        = True,
-    scale_data    = False,
-    max_width     = None,
-    spin          = 'both',
-    ktick_inds    = [0, -1],
-    ktick_vals     = ['$\\Gamma$', 'M'],
-    Fermi       = None,
-    showlegend    = True,
-    xytxt         = [0.2, 0.85],
-    ctxt          = 'black',
-    interp_nk     = {},
-    legend_kwargs = {'ncol': 4, 'anchor': (0, 1.05),
-                   'handletextpad': 0.5, 'handlelength': 1,
-                   'fontsize': 'small', 'frameon': False},
-    query    = {},
-     **subplots_adjust_kwargs):
+def splot_color_lines(K, E, pros, labels, 
+    axes       = None, 
+    elim       = None, 
+    kpath_ticks= None, 
+    interp_nk  = None, 
+    max_width  = 2.5,
+    scale_data = False,
+    colormap   = None,
+    shadow     = False,
+    showlegend = True,
+    xyc_label   = [0.2, 0.85, 'black'], # x, y, color only if showlegend = False
+    **kwargs
+    ):
     """
-    - Returns axes object and plot on which all matplotlib allowed actions could be performed. If given, elements, orbs, and labels must have same length. If not given, zeroth ion is plotted with s-orbital.
-    Args:
-        - path_evr   : Path/to/vasprun.xml or output of `export_vasprun`. Auto picks in CWD.
-        - elements   : List [[0],], by defualt and plot first ion's projections.
-        - orbs       : List [[0],] lists of indices of orbitals, could be empty.
-        - labels     : List [str,] of orbitals labels. len(labels)==len(orbs) must hold.  Auto adds `↑`,`↓` for ISPIN=2. If a label is empty i.e. '', it will not show up in legend.
-        - axes       : Matplotlib axes object with one or many axes, if not given, auto created.
-        - skipk      : Number of kpoints to skip, default will be from IBZKPT.
-        - kseg_inds : Points where kpath is broken.
-        - elim       : [min,max] of energy range.
-        - Fermi    : If not given, automatically picked from `export_vasprun`.
-        - ktick_inds : High symmetry kpoints indices.abs
-        - ktick_vals  : High Symmetry kpoints labels.
-        - colormap  : Matplotlib's standard color maps. Default is 'gist_ranibow'.
-        - showlegend : True by defualt and displays legend relative to axes[0]. If False, it writes text on individual ax.
-        - scale_data : Default is False, If True, normalize projection data to 1.
-        - max_width  : Width to scale whole projections. Default is None and linewidth at any point on a line = 2.5*sum(ions+orbitals projection of the input for that line at that point). Linewidth is scaled to max_width if an int or float is given.
-        - xytxt      : [x_coord,y_coord] of labels relative to axes. Works if showlegend = False.
-        - ctxt       : color of text of labels
-        - spin       : Plot spin-polarized for spin {'up','down','both'}. Default is both.
-        - interp_nk   : Dictionary with keys 'n' and 'k' for interpolation.
-        - legend_kwargs: Dictionary containing legend arguments.
-        - query : Dictionary with keys as label and values as list of length 2. If given, used in place of elements, orbs and labels arguments.
-                        Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
-        - **subplots_adjust_kwargs : plt.subplots_adjust parameters.
-    - **Returns**
-        - axes : matplotlib axes object [one or list of axes] with plotted projected bands.
-    > Note: Two figures made by this function could be comapred quantitatively only if `scale_data=False, max_width=None` as these parameters act internally on data.
+    Plot projected band structure for a given projections.
+    
+    Parameters
+    ----------
+    K : array-like, shape (nk,)
+    E : array-like, shape (nk,nb)
+    pros : array-like, shape (m,nk,nb), m is the number of projections
+    labels : list of str, length m
+    axes : matplotlib.axes.Axes or list of Axes equal to the number of projections to plot separately. If None, create new axes.
+    elim : tuple of min and max values    
+    kpath_ticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
+    interp_nk : dict of interpolation parameters with keys 'n' and 'k' 
+    max_width : float, maximum linewidth, 2.5 by default
+    scale_data : bool, if True, scale projection data to be between 0 and 1
+    colormap : str, name of a matplotlib colormap
+    shadow : bool, if True, add shadow to lines
+    showlegend : bool, if True, add legend, otherwise adds a label to the plot.
+    xyc_label : list of x, y, color for the label. Used only if showlegend = False
+    
+    kwargs are passed to matplotlib's command `ax.legend`.
+    
+    Returns
+    ------- 
+    ax : matplotlib.axes.Axes. Use ax.subplots_adjust to adjust the plot if needed.
     """
-    # Fix data input
-    vr = vp._validate_evr(path_evr=path_evr,skipk=skipk,elim=elim)
-    # Fix orbitals, elements and labels lengths very early.
-    if query:
-        elements, orbs, labels = _format_input(query=query,rgb=False)# preferred over elements, orbs, labels
-
-    elements,orbs,labels = _validate_input(elements,orbs,labels,vr.sys_info)
-
-    # Main working here.
-    if vr.pro_bands == None:
-        raise ValueError("Can not plot an empty eigenvalues object.\n"
-                         "Try with large energy range.")
-    if not spin in ('up','down','both'):
-        raise ValueError("spin can take any of ['up','down'. 'both'] only.")
-
-
-    # Small things
-    if Fermi == None:
-        Fermi = vr.fermi
-    K = vp.join_ksegments(vr.kpath,kseg_inds=kseg_inds)
-    xticks = [K[i] for i in ktick_inds]
-    xlim = [min(K),max(K)]
-    if elim:
-        ylim = [min(elim),max(elim)]
-    else:
-        ylim = []
-
-    # Fix elements and colors length. ISPIN 2 case is done in loop itself
+    K, E, xticks, xticklabels = _validate_data(K, E, elim, kpath_ticks, interp_nk)
+    pros_data = _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False) 
+    
     if colormap not in plt.colormaps():
         c_map = plt.cm.get_cmap('viridis')
         print("colormap = {!r} not exists, falling back to default color map.".format(colormap))
     else:
         c_map = plt.cm.get_cmap(colormap)
-    c_vals = np.linspace(0,1,len(orbs))
+    c_vals = np.linspace(0,1,pros_data['pros'].shape[-1]) # Output pros data has shape (nk, nb, projections)
     colors  = c_map(c_vals)
-
-    # After All Fixing
-    ISPIN=vr.sys_info.ISPIN
-    # Arguments for _get_pros_data and _make_line_collection
-    gpd_args = dict(elements=elements,orbs=orbs,interp_nk=interp_nk,scale_data=scale_data)
-    mlc_args = dict(rgb=False,colors_list= colors, max_width=max_width, shadow = shadow)
-
-    #============================================================
-    def _plot_collection(gpd_args,mlc_args,axes=None):
-        if not np.any([axes]):
-            axes = get_axes()
-        axes = np.array([axes]).ravel() # Safe list any axes size
-        pros_data  = _get_pros_data(**gpd_args)
-        line_coll  = _make_line_collection(**pros_data,**mlc_args)
-        if len(axes) != len(line_coll):
-            axes = [axes[0] for l_c in line_coll]
-        _ = [ax.add_collection(lc) for ax, lc in zip(axes,line_coll)]
-        _ = [ax.autoscale_view() for ax in axes]
-        return axes
-    #============================================================
-
-    if ISPIN == 1:
-        gpd_args.update(dict(kpath=K,evals_set=vr.bands.evals-Fermi,pros_set=vr.pro_bands.pros))
-        axes = _plot_collection(gpd_args,mlc_args,axes=axes)
-    if ISPIN == 2:
-        gpd_args1 = dict(kpath=K,evals_set=vr.bands.evals.SpinUp-Fermi,
-                        pros_set=vr.pro_bands.pros.SpinUp,**gpd_args)
-        gpd_args2 = dict(kpath=K,evals_set=vr.bands.evals.SpinDown-Fermi,
-                        pros_set=vr.pro_bands.pros.SpinDown,**gpd_args)
-        if spin in ['up','both']:
-            axes = _plot_collection(gpd_args1,mlc_args,axes=axes)
-        if spin in ['down','both']:
-            axes = _plot_collection(gpd_args2,mlc_args,axes=axes)
-
-    # Aesthetics
-    _tls_ = [l for l in labels] # To avoid side effects, new labels array.
-    for i,label in enumerate(labels):
-        if label and ISPIN==2:
-            _tls_[i] = (label+'$^↑$' if spin=='up' else label+'$^↓$' if spin=='down' else label+'$^{↑↓}$')
-
+    
+    if not np.any([axes]):
+        axes = get_axes()
+    axes = np.array([axes]).ravel() # Safe list any axes size
+    if len(axes) == 1:
+        axes = [axes[0] for _ in range(pros_data['pros'].shape[-1])] # Make a list of axes for each projection
+    elif len(axes) != pros_data['pros'].shape[-1]:
+        raise ValueError("Number of axes should be 1 or same as number of projections")
+    
+    lcs = _make_line_collection(max_width=max_width, colors_list=colors, rgb = False, shadow=shadow, **pros_data)
+    _ = [ax.add_collection(lc) for ax, lc in zip(axes,lcs)]
+    _ = [ax.autoscale_view() for ax in axes]
+    
     if showlegend:
-        width = (max_width/2 if max_width else 2.5)
-        add_legend(ax=axes[0],colors=colors,labels=_tls_,widths=width,**legend_kwargs)
+        # Default values for legend_kwargs are overwritten by **kwargs
+        legend_kwargs = {'ncol': 4, 'anchor': (0, 1.05), 'handletextpad': 0.5, 'handlelength': 1,'fontsize': 'small', 'frameon': False, **kwargs}
+        add_legend(ax=axes[0],colors = colors,labels = labels,widths = max_width,**legend_kwargs)
+        
     else:
-        x,y=[*xytxt]
-        _ = [add_text(ax=ax,xs=x,ys=y,txts=_tl_,colors=ctxt) for ax,_tl_ in zip(axes,_tls_)]
-    _ = [modify_axes(ax=ax,xticks=xticks,xt_labels=ktick_vals,xlim=xlim,ylim=ylim,vlines=True) for ax in axes]
-    plt.subplots_adjust(**subplots_adjust_kwargs)
+        xs, ys, colors = xyc_label
+        _ = [add_text(ax, xs = xs, ys = ys, colors = colors, txts = lab) for ax, lab in zip(axes, labels)]
+    
+    _ = [modify_axes(ax=ax,xticks=xticks,xt_labels=xticklabels,xlim=[min(K),max(K)],ylim = elim,vlines=True) for ax in axes]
     return axes
+    
 
 # Cell
 def _select_pdos(
@@ -1118,7 +995,7 @@ def _select_pdos(
 def _collect_dos(
     path_evr      = None,
     elim          = [],
-    elements      = [[0],],
+    atoms      = [[0],],
     orbs          = [[0],],
     labels        = ['s',],
     Fermi         = None,
@@ -1126,12 +1003,12 @@ def _collect_dos(
     interp_nk     = {}
     ):
     """
-    - Returns lists of energy,tdos, pdos and labels. If given,elements,orbs and labels must have same length. If not given, zeroth ions is collected with s-orbital.
+    - Returns lists of energy,tdos, pdos and labels. If given,atoms,orbs and labels must have same length. If not given, zeroth ions is collected with s-orbital.
     Args:)
         - path_evr   : Path/to/vasprun.xml or output of `export_vasprun`. Auto picks in CWD.
         - elim       : [min,max] of energy range.
         - Fermi    : If not given, automatically picked from `export_vasprun`.
-        - elements   : List [[0],], by defualt and plot first ion's projections.
+        - atoms   : List [[0],], by defualt and plot first ion's projections.
         - orbs       : List [[0],] lists of indices of orbitals, could be empty.
         - labels     : List [str,] of orbitals labels. len(labels)==len(orbs) must hold.  Auto adds `↑`,`↓` for ISPIN=2.
         - spin       : Plot spin-polarized for spin {'up','down','both'}. Default is both.
@@ -1145,8 +1022,8 @@ def _collect_dos(
     """
     vr = vp._validate_evr(path_evr=path_evr,elim=elim)
 
-    # Fix orbitals, elements and labels lengths very early.
-    elements,orbs,labels = _validate_input(elements,orbs,labels,vr.sys_info)
+    # Fix orbitals, atoms and labels lengths very early.
+    atoms,orbs,labels = _validate_input(atoms,orbs,labels,vr.sys_info)
 
     # Main working here.
     if vr.pro_dos == None:
@@ -1164,7 +1041,7 @@ def _collect_dos(
     # After All Fixing
     ISPIN=vr.sys_info.ISPIN
     e,ts,ps,ls=None,None,[],[] # to collect all total/projected dos.
-    for elem,orb,label in zip(elements,orbs,labels):
+    for elem,orb,label in zip(atoms,orbs,labels):
         args_dict=dict(ions=elem,orbs=orb,interp_nk=interp_nk,Fermi=Fermi)
         if ISPIN==1:
             tdos=vr.tdos.tdos[0]
@@ -1201,7 +1078,7 @@ def _collect_dos(
 # Cell
 def splot_dos_lines(
     path_evr      = None,
-    elements      = [[0],],
+    atoms      = [[0],],
     orbs          = [[0],],
     labels        = ['s',],
     ax            = None,
@@ -1223,13 +1100,13 @@ def splot_dos_lines(
                    'fontsize'       : 'small',
                    'frameon'        : False
                    },
-    query    = {}
+    atoms_orbs_dict    = {}
     ):
         """
-        - Returns ax object (if ax!=False) and plot on which all matplotlib allowed actions could be performed, returns lists of energy,tdos and pdos and labels. If given,elements,orbs colors, and labels must have same length. If not given, zeroth ions is plotted with s-orbital.
+        - Returns ax object (if ax!=False) and plot on which all matplotlib allowed actions could be performed, returns lists of energy,tdos and pdos and labels. If given,atoms,orbs colors, and labels must have same length. If not given, zeroth ions is plotted with s-orbital.
         Args:)
             - path_evr   : Path/to/vasprun.xml or output of `export_vasprun`. Auto picks in CWD.
-            - elements   : List [[0],], by defualt and plot first ion's projections.
+            - atoms      : List [[0],], by defualt and plot first ion's projection.
             - orbs       : List [[0],] lists of indices of orbitals, could be empty.
             - labels     : List [str,] of orbitals labels. len(labels)==len(orbs) must hold.  Auto adds `↑`,`↓` for ISPIN=2.
             - ax         : Matplotlib axes object, if None, one is created. If False, data lists are returned.
@@ -1243,7 +1120,7 @@ def splot_dos_lines(
             - spin       : Plot spin-polarized for spin {'up','down','both'}. Default is both.
             - interp_nk   : Dictionary with keys 'n' and 'k' for interpolation.
             - legend_kwargs: Dictionary to contain legend arguments to fix.
-            - query : Dictionary with keys as label and values as list of length 2. If given, used in place of elements, orbs and labels arguments.
+            - atoms_orbs_dict : Dictionary with keys as label and values as list of length 2. If given, used in place of atoms, orbs and labels arguments.
                         Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
         - **Returns**
             - ax         : Matplotlib axes.
@@ -1251,13 +1128,13 @@ def splot_dos_lines(
         if include_dos not in ('both','pdos','tdos'):
             raise ValueError("`include_dos` expects one of ['both','pdos','tdos'], got {}.".format(include_dos))
 
-        if query:
-            elements,orbs,labels=_format_input(query,rgb=False) # prefer query over elements,orbs,labels
+        if atoms_orbs_dict:
+            atoms,orbs,labels=_format_input(atoms_orbs_dict,rgb=False) # prefer atoms_orbs_dict over atoms,orbs,labels
 
         en,tdos,pdos,vr=None,None,None,None # Placeholders for defining. must be here.
         cl_dos=_collect_dos(path_evr=path_evr,
                             elim=elim,
-                            elements=elements,
+                            atoms=atoms,
                             orbs=orbs,
                             labels=labels,
                             Fermi=Fermi,

@@ -210,7 +210,7 @@ def write_poscar(poscar_data, outfile = None, selective_dynamics = None, overwri
     scale = poscar_data.extra_info.scale
     out_str += "\n  {:<20.14f}\n".format(scale)
     out_str += '\n'.join(["{:>22.16f}{:>22.16f}{:>22.16f}".format(*a) for a in poscar_data.basis/scale])
-    uelems = poscar_data.elems.to_dict()
+    uelems = poscar_data.types.to_dict()
     out_str += "\n  " + '    '.join(uelems.keys())
     out_str += "\n  " + '    '.join([str(len(v)) for v in uelems.values()])
     if selective_dynamics is not None:
@@ -287,7 +287,7 @@ def export_poscar(path = None,content = None):
         for ind in range(inds[i],inds[i+1]):
             elem_labels.append(f"{name} {str(ind - inds[i] + 1)}")
     out_dict.update({'positions':positions,#'labels':elem_labels,
-                     'elems':unique_d})
+                     'types':unique_d})
     return serializer.PoscarData(out_dict)
 
 # Cell
@@ -585,20 +585,21 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
         print(out_str)
 
 def read_ticks(kpoints_file_path):
-    "Reads ticks values and labels in header of kpoint file. Returns dictionary of `ktick_inds`,`ktick_vals`,`kseg_inds` that can be unpacked to plotting functions. If not exist in header, returns empty values(still valid)."
-    out_dict = dict(ktick_inds=[],ktick_vals=[],kseg_inds=[])
+    "Reads ticks values and labels in header of kpoint file. Returns dictionary of `kpath_ticks` that can be used in plotting functions. If not exist in header, returns empty values(still valid)."
+    kinds, klabs, kseg = [],[],[]
     if os.path.isfile(kpoints_file_path):
         head = vp.islice2array(kpoints_file_path,exclude=None,raw=True,nlines=1)
         if 'HSK-INDS' in head:
             hsk = head.split('HSK-INDS')[1].split(']')[0].split('[')[1].split(',')
-            out_dict['ktick_inds'] = [int(h) for h in hsk if h]
+            kinds = [int(h) for h in hsk if h]
         if 'LABELS' in head:
             labs = head.split('LABELS')[1].split(']')[0].split('[')[1].split(',')
-            out_dict['ktick_vals'] = [l.replace("'","").replace('"','').strip() for l in labs if l]
+            klabs = [l.replace("'","").replace('"','').strip() for l in labs if l]
         if 'SEG-INDS' in head:
             segs = head.split('SEG-INDS')[1].split(']')[0].split('[')[1].split(',')
-            out_dict['kseg_inds'] = [int(s) for s in segs if s]
-    return out_dict
+            kseg = [int(s) for s in segs if s]
+    
+    return {(k, k-1) if k in kseg else k : l for k,l in zip(kinds,klabs)} # int/tuple : str
 
 # Cell
 def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec_basis = None):
@@ -1285,7 +1286,7 @@ def fix_sites(poscar_data,tol=1e-2,eqv_sites=False,translate=None):
     # Add equivalent sites on edges and faces if given,handle each sepecies separately
     if eqv_sites:
         new_dict, start = {}, 0
-        for k,v in out_dict['elems'].items():
+        for k,v in out_dict['types'].items():
             vpos = pos[v]
             pos_x = vpos[((vpos[:,0] + 1) < (tol +1))] + [[1,0,0]] # Add 1 to x if within tol
             pos_y = vpos[((vpos[:,1] + 1) < (tol +1))] + [[0,1,0]] # Add 1 to y on modified and if within tol
@@ -1299,7 +1300,7 @@ def fix_sites(poscar_data,tol=1e-2,eqv_sites=False,translate=None):
             start += len(new_dict[k]['pos'])
 
         out_dict['positions'] = np.vstack([new_dict[k]['pos'] for k in new_dict.keys()])
-        out_dict['elems'] = {k:new_dict[k]['range'] for k in new_dict.keys()}
+        out_dict['types'] = {k:new_dict[k]['range'] for k in new_dict.keys()}
 
     return serializer.PoscarData(out_dict)
 
@@ -1357,12 +1358,12 @@ def iplot_lat(poscar_data,sizes=10,colors = None,
     if not fig:
         fig = go.Figure()
 
-    uelems = poscar_data.elems.to_dict()
+    uelems = poscar_data.types.to_dict()
     if not isinstance(sizes,(list,tuple,np.ndarray)):
         sizes = [sizes for elem in uelems.keys()]
 
     if colors and len(colors) != len(uelems.keys()):
-        print('Warning: Number of colors does not match number of elements. Using default colors.')
+        print('Warning: Number of colors does not match number of atom types. Using default colors.')
 
     if (colors is None) or len(colors) != len(uelems.keys()):
         colors = [_atom_colors[elem] for elem in uelems.keys()]
@@ -1449,12 +1450,12 @@ def splot_lat(poscar_data,plane = None, sizes=50,colors=None,colormap=None,
                 fill=fill,alpha=alpha,plane=plane,v3=v3,
                 vectors=vectors,light_from=light_from)
 
-    uelems = poscar_data.elems.to_dict()
+    uelems = poscar_data.types.to_dict()
     if not isinstance(sizes,(list,tuple, np.ndarray)):
         sizes = [sizes for elem in uelems.keys()]
 
     if colors and len(colors) != len(uelems.keys()):
-        print('Warning: Number of colors does not match number of elements. Using default colors.')
+        print('Warning: Number of colors does not match number of atom types. Using default colors.')
 
     if (colors is None) or len(colors) != len(uelems.keys()):
         colors = [_atom_colors[elem] for elem in uelems.keys()]
@@ -1549,7 +1550,7 @@ def join_poscars(poscar1,poscar2,direction='c',tol=1e-2, system = None):
     scale = np.linalg.norm(basis[0])
     u1 = _poscar1.unique.to_dict()
     u2 = _poscar2.unique.to_dict()
-    u_all = ({**u1,**u2}).keys() # Union of unique elements to keep track of order.
+    u_all = ({**u1,**u2}).keys() # Union of unique atom types to keep track of order.
 
 
     pos_all = []
@@ -1569,7 +1570,7 @@ def join_poscars(poscar1,poscar2,direction='c',tol=1e-2, system = None):
     sys = system or ''.join(uelems.keys())
     iscartesian = poscar1.extra_info.cartesian or poscar2.extra_info.cartesian
     extra_info = {'cartesian':iscartesian, 'scale': scale, 'comment': 'Modified by ipyvasp'}
-    out_dict = {'SYSTEM':sys,'basis':basis,'extra_info':extra_info,'positions':np.array(pos_all),'elems':uelems}
+    out_dict = {'SYSTEM':sys,'basis':basis,'extra_info':extra_info,'positions':np.array(pos_all),'types':uelems}
     return serializer.PoscarData(out_dict)
 
 
@@ -1629,7 +1630,7 @@ def scale_poscar(poscar_data,scale = (1,1,1),tol=1e-2):
     new_poscar['extra_info']['scale'] = np.linalg.norm(basis[0])
     new_poscar['extra_info']['comment'] = f'Modified by ipyvasp'
 
-    uelems = poscar_data.elems.to_dict()
+    uelems = poscar_data.types.to_dict()
     # Minus in below for block is because if we have 0-2 then 1 belongs to next cell not original.
     positions,shift = [],0
     for key,value in uelems.items():
@@ -1643,7 +1644,7 @@ def scale_poscar(poscar_data,scale = (1,1,1),tol=1e-2):
         positions = [*positions,*s_p] # Pick sites
         shift += len(s_p) #Update for next element
 
-    new_poscar['elems']    = uelems
+    new_poscar['types']    = uelems
     new_poscar['positions'] = np.array(positions)
     return serializer.PoscarData(new_poscar)
 
@@ -1674,7 +1675,7 @@ def convert_poscar(poscar_data, atoms_mapping, basis_factor):
     or list of three values to scale along (a,b,c) vectors (useful for strained structures).
     """
     poscar_data = poscar_data.to_dict() # Avoid modifying original
-    poscar_data['elems'] = {atoms_mapping.get(k,k):v for k,v in poscar_data['elems'].items()} # Update types
+    poscar_data['types'] = {atoms_mapping.get(k,k):v for k,v in poscar_data['types'].items()} # Update types
     basis = poscar_data['basis'].copy() # Get basis to avoid modifying original
 
     if isinstance(basis_factor,(int,float)):
@@ -1725,7 +1726,7 @@ def transform_poscar(poscar_data, transform_matrix, repeat_given = [2,2,2],tol =
     new_poscar['extra_info']['scale'] = np.linalg.norm(new_basis[0])
     new_poscar['extra_info']['comment'] = f'Transformed by ipyvasp'
 
-    uelems = poscar_data.elems.to_dict()
+    uelems = poscar_data.types.to_dict()
     positions,shift, unique_dict = [],0, {}
     for key,value in uelems.items():
         s_p = points[value] # Get positions of key
@@ -1738,7 +1739,7 @@ def transform_poscar(poscar_data, transform_matrix, repeat_given = [2,2,2],tol =
         positions = [*positions,*s_p] # Pick sites
         shift += len(s_p) #Update for next element
 
-    new_poscar['elems']  = unique_dict
+    new_poscar['types']  = unique_dict
     new_poscar['positions'] = np.array(positions)
     return serializer.PoscarData(new_poscar)
 
@@ -1790,7 +1791,7 @@ def transpose_poscar(poscar_data, axes = [1,0,2]):
 
 def add_atoms(poscar_data, name, positions):
     "Add atoms with a `name` to a POSCAR at given `positions` in fractional coordinates."
-    if name in poscar_data.elems.keys():
+    if name in poscar_data.types.keys():
         raise Exception(f'{name!r} already exists in POSCAR. Cannot add duplicate atoms.')
 
     positions = np.array(positions)
@@ -1799,11 +1800,11 @@ def add_atoms(poscar_data, name, positions):
 
     new_pos = np.vstack([poscar_data.positions,positions]) # Add new positions to existing ones
 
-    unique = poscar_data.elems.to_dict() # Copy unique dictionary to avoid modifying original
+    unique = poscar_data.types.to_dict() # Copy unique dictionary to avoid modifying original
     unique[name] = range(len(poscar_data.positions),len(new_pos)) # Add new unique element
 
     data = poscar_data.to_dict() # Copy data to avoid modifying original
-    data['elems'] = unique # Update unique dictionary
+    data['types'] = unique # Update unique dictionary
     data['positions'] = new_pos # Update positions
     data['SYSTEM'] = f'{data["SYSTEM"]}+{name}' # Update SYSTEM
     data['extra_info']['comment'] = f'{data["extra_info"]["comment"]} + Added {name!r}' # Update comment

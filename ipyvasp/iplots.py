@@ -24,19 +24,19 @@ def _get_rgb_data(
     kpath       = None,
     evals_set   = None,
     pros_set    = None,
-    elements    = [[0],[],[]],
+    atoms    = [[0],[],[]],
     orbs        = [[0],[],[]],
     interp_nk   = {},
     occs_set    = None,
     kpoints     = None,
     ):
     """
-    - Returns a formatted RGB colored data to pass into `_rgb2plotly` function. Two arguments, `elements` and `orbs` should be in one-to-one correspondence. Returned item has transpose data shape, so that main iteration is over bands.
+    - Returns a formatted RGB colored data to pass into `_rgb2plotly` function. Two arguments, `atoms` and `orbs` should be in one-to-one correspondence. Returned item has transpose data shape, so that main iteration is over bands.
     Args:
         - kapath   : `export_vasprun`().kpath or `get_kpts`().kpath.
         - evals_set: `export_vasprun`().bands.evals or `get_evals`().evals. If calculations are spin-polarized, it will be `...evals.SpinUp/SpinDown` for both. You need to apply twice for SpinUp and SpinDown separately.
         - pros_set : `export_vasprun().pro_bands.pros` or `get_bands_pro_set`().pros. If calculations are spin-polarized, it will be `...pros.SpinUp/SpinDown` for both. You need to create collections twice for SpinUp and SpinDown separately.
-        - elements : List three lists of ions to project on, each element could be `range(start,stop,step)` as well, remember that `stop` is not included in python. so `range(0,2)` will generate 0 and 1 indices.
+        - atoms : List three lists of ions to project on, each element could be `range(start,stop,step)` as well, remember that `stop` is not included in python. so `range(0,2)` will generate 0 and 1 indices.
         - orbs     : List of three lists of orbitals indices. `[[red],[green],[blue]]`, you can create any color by this combination. For example, to get `s-orbital in yellow color`, you will use `[[0],[0],[]]`. Do not remove empty list from there, it will not effect your orbital selection.
         - interp_nk   : Dictionary with keys 'n' and 'k' for interpolation.
         - occs_set: `export_vasprun`().bands.occs or `get_evals`().occs. If calculations are spin-polarized, it will be `...occs.SpinUp/SpinDown` for both. You need to apply twice for SpinUp and SpinDown separately.
@@ -54,15 +54,15 @@ def _get_rgb_data(
                          "Try with large energy range.")
     if len(orbs) < 3 :
         raise ValueError("orbs have structure [[],[],[]], do not reduce structure even if it is empty.")
-    elif len(elements) <3:
-        raise ValueError("elements have structure [[],[],[]], do not reduce structure even if it is empty.")
+    elif len(atoms) <3:
+        raise ValueError("atoms have structure [[],[],[]], do not reduce structure even if it is empty.")
     else:
        r = np.take(pros_set,orbs[0],axis=3).sum(axis=3)
-       r = np.take(r,list(elements[0]),axis=0).sum(axis=0)
+       r = np.take(r,list(atoms[0]),axis=0).sum(axis=0)
        g = np.take(pros_set,orbs[1],axis=3).sum(axis=3)
-       g = np.take(g,list(elements[1]),axis=0).sum(axis=0)
+       g = np.take(g,list(atoms[1]),axis=0).sum(axis=0)
        b = np.take(pros_set,orbs[2],axis=3).sum(axis=3)
-       b = np.take(b,list(elements[2]),axis=0).sum(axis=0)
+       b = np.take(b,list(atoms[2]),axis=0).sum(axis=0)
        if interp_nk:
            from ipyvasp import utils as gu
            knew,evals = gu.interpolate_data(kpath,evals_set,**interp_nk)
@@ -115,7 +115,7 @@ def _flip_even_patches(array_1d, patch_length):
     return out_put
 
 # Cell
-def _rgb2plotly(rgb_data=None,mode='markers',max_width=None,showlegend=False,name='',labels=['s','p','d'],symbol=0,bands_indices = None):
+def _rgb2plotly(rgb_data=None,mode='markers',max_width=None,showlegend=False,name='',labels=['s','p','d'],symbol=0):
     """
     - Returns data object of plotly's figure using `_get_rgb_data`. Returned data could be fed to a plolty's figure.
     - ** Parameters**
@@ -129,13 +129,12 @@ def _rgb2plotly(rgb_data=None,mode='markers',max_width=None,showlegend=False,nam
         - labels     : Optional, show red green blue colors corresponding orbitals.
         - showlegend : Optional, only suitbale if spin up/down or 'bands' mode is ON.
         - symbol     : Plotly's marker symbol. 0 for circle, 5/6 for Up/Down.
-        - bands_indices : `len(bands_indices) == NBANDS` should hold. `export_vasprun().bands.indices` or `get_evals().indices`.
     """
     if mode not in ('markers','bands','lines'):
         raise TypeError("Argument `mode` expects one of ['markers','bands','lines'], got '{}'.".format(mode))
     if rgb_data:
         k,en,occ, rgb,lws, norms, kpoints = rgb_data
-        _indices = range(np.shape(en)[1]) if bands_indices is None else bands_indices
+        _indices = range(np.shape(en)[1])
 
         _names = [["<sub>{}</sub>".format(int(1+i)) for j in range(len(en[0]))]
                   for i in _indices]
@@ -238,7 +237,7 @@ def iplot2html(fig,filename=None,out_string=False,modebar=True):
 # Cell
 def iplot_rgb_lines(
     path_evr    = None,
-    elements    = [[],[],[]],
+    atoms    = [[],[],[]],
     orbs        = [[],[],[]],
     labels      = ['','',''],
     mode        = 'markers',
@@ -252,13 +251,13 @@ def iplot_rgb_lines(
     ktick_vals  = ['Γ','M'],
     figsize     = None,
     interp_nk   = {},
-    query  = {}
+    atoms_orbs_dict  = {}
     ):
     """
-    - Returns plotly's figure object, takes care of spin-polarized calculations automatically. `elements`,`orbs` and `labels` are required to be one-to-one lists of size 3 where each item in list could be another list or integer.
+    - Returns plotly's figure object, takes care of spin-polarized calculations automatically. `atoms`,`orbs` and `labels` are required to be one-to-one lists of size 3 where each item in list could be another list or integer.
     Args:
         - path_evr  : Path/to/vasprun.xml or xml output of `read_asxml`.
-        - elements   : List of size 3 of list of indices of ions. If not given, picks all ions for each orbital.
+        - atoms   : List of size 3 of list of indices of ions. If not given, picks all ions for each orbital.
         - orbs       : List of size 3 of list of orbital indices, if not gievn, s,p,d plotted.
         - labels  : List of labels for projection.
         - mode       : Three plotting modes are available:
@@ -268,7 +267,7 @@ def iplot_rgb_lines(
 
         - interp_nk   : Dictionary with keys 'n' and 'k' for interpolation.
         - figsize   : Tuple(width,height) in pixels, e.g. (700,400).
-        - query : Dictionary with keys as label and values as list of length 2. len(query) <=3 should hold for RGB plots. If given, used in place of elements, orbs and labels arguments.
+        - atoms_orbs_dict : Dictionary with keys as label and values as list of length 2. len(atoms_orbs_dict) <=3 should hold for RGB plots. If given, used in place of atoms, orbs and labels arguments.
                         Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
         - **Other Parameters**
             - ktick_inds, ktick_vals,elim,kseg_inds,max_width,title etc.
@@ -278,10 +277,10 @@ def iplot_rgb_lines(
 
     vr = vp._validate_evr(path_evr=path_evr,skipk=skipk,elim=elim)
 
-    # Fix orbitals, elements and labels lengths very early.
-    if query:
-        elements, orbs, labels = sp._format_input(query,rgb=False) # prefer over elements, orbs and labels
-    elements,orbs,labels = sp._validate_input(elements,orbs,labels,vr.sys_info)
+    # Fix orbitals, atoms and labels lengths very early.
+    if atoms_orbs_dict:
+        atoms, orbs, labels = sp._format_input(atoms_orbs_dict,rgb=False) # prefer over atoms, orbs and labels
+    atoms,orbs,labels = sp._validate_input(atoms,orbs,labels,vr.sys_info)
 
     ## Main working here.
     if vr.pro_bands == None:
@@ -303,7 +302,7 @@ def iplot_rgb_lines(
         title= "{}[{}]".format(SYSTEM,','.join(labels))
     # After All Fixing
     ISPIN=vr.sys_info.ISPIN
-    args_dict=dict(orbs=orbs,elements=elements,interp_nk=interp_nk) # Do not scale color there, scale here.
+    args_dict=dict(orbs=orbs,atoms=atoms,interp_nk=interp_nk) # Do not scale color there, scale here.
     data,showlegend,name=[],False,'' # Place holder
 
     if mode=='bands':
@@ -316,7 +315,7 @@ def iplot_rgb_lines(
         new_args=dict(kpath=K, evals_set=En, pros_set=Pros, occs_set = Oc, **args_dict)
         rgb_lines=_get_rgb_data(kpoints = kpoints,**new_args)
         data=_rgb2plotly(rgb_data=rgb_lines,mode=mode,showlegend=showlegend,
-                           labels=labels,name='B',max_width=max_width,bands_indices= vr.bands.indices)
+                           labels=labels,name='B',max_width=max_width)
     if ISPIN == 2:
         if mode == 'markers':
             showlegend=True
@@ -329,11 +328,11 @@ def iplot_rgb_lines(
         new_args1=dict(kpath=K, evals_set=En1, pros_set=Pros1,occs_set = Oc1,**args_dict)
         rgb_lines1=_get_rgb_data(kpoints = kpoints,**new_args1)
         data1=_rgb2plotly(rgb_data=rgb_lines1,mode=mode,symbol=0,showlegend=showlegend,
-                            labels=labels,name='B<sup>↑</sup>',max_width=max_width,bands_indices= vr.bands.indices)
+                            labels=labels,name='B<sup>↑</sup>',max_width=max_width)
         new_args2=dict(kpath=K, evals_set=En2, pros_set=Pros2,occs_set = Oc2,**args_dict)
         rgb_lines2=_get_rgb_data(kpoints = kpoints,**new_args2)
         data2=_rgb2plotly(rgb_data=rgb_lines2,mode=mode,symbol=100,showlegend=showlegend,
-                            labels=labels,name='B<sup>↓</sup>',max_width=max_width,bands_indices= vr.bands.indices)
+                            labels=labels,name='B<sup>↓</sup>',max_width=max_width)
         data=[[d1,d2] for d1,d2 in zip(data1,data2)]
         data=[d for ds in data for d in ds]
 
@@ -359,7 +358,7 @@ def iplot_rgb_lines(
 # Cell
 def iplot_dos_lines(
     path_evr      = None,
-    elements      = [[0,],],
+    atoms      = [[0,],],
     orbs          = [[0],],
     labels        = ['s',],
     elim          = [],
@@ -373,13 +372,13 @@ def iplot_dos_lines(
     spin          = 'both',
     interp_nk     = {},
     title         = None,
-    query    = {}
+    atoms_orbs_dict    = {}
     ):
         """
-        - Returns plotly's figure. If given,elements,orbs colors, and labels must have same length. If not given, zeroth ions is plotted with s-orbital.
+        - Returns plotly's figure. If given,atoms,orbs colors, and labels must have same length. If not given, zeroth ions is plotted with s-orbital.
         Args:)
             - path_evr   : Path/to/vasprun.xml or output of `export_vasprun`. Auto picks in CWD.
-            - elements   : List [[0,],] of ions indices, by defualt plot first ion's projections.
+            - atoms   : List [[0,],] of ions indices, by defualt plot first ion's projections.
             - orbs       : List [[0,],] lists of indices of orbitals, could be empty.
             - labels     : List [str,] of orbitals labels. len(labels) == len(orbs) must hold.
             - elim       : [min,max] of energy range.
@@ -389,17 +388,17 @@ def iplot_dos_lines(
             - vertical   : False, If True, plots along y-axis.
             - interp_nk  : Dictionary with keys 'n' and 'k' for interpolation.
             - figsize    : Tuple(width,height) in pixels, e.g. (700,400).
-            - query : Dictionary with keys as label and values as list of length 2. If given, used in place of elements, orbs and labels arguments.
+            - atoms_orbs_dict : Dictionary with keys as label and values as list of length 2. If given, used in place of atoms, orbs and labels arguments.
                         Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
         - **Returns**
             - fig        : Plotly's figure object.
         """
-        if query:
-            elements,orbs,labels = sp._format_input(query,rgb=False) # prefer query over elements,orbs,labels
+        if atoms_orbs_dict:
+            atoms,orbs,labels = sp._format_input(atoms_orbs_dict,rgb=False) # prefer atoms_orbs_dict over atoms,orbs,labels
             # These are validated inisde _collect_dos, no need here
         en,tdos,pdos,vr=None,None,None,None # Place holders for defining
         cl_dos = sp._collect_dos(path_evr=path_evr,elim=elim,
-                            elements=elements, orbs=orbs,labels=labels,
+                            atoms=atoms, orbs=orbs,labels=labels,
                             Fermi=Fermi, spin='both',interp_nk=interp_nk)
         try:
             en,tdos,pdos,labels,vr = cl_dos
@@ -412,7 +411,7 @@ def iplot_dos_lines(
             ylim=[min(elim),max(elim)]
         else:
             ylim=[-10,10]
-        # Fix elements and colors length
+        # Fix atoms and colors length
         if colormap in plt.colormaps():
             from matplotlib.pyplot import cm
             if len(tdos) == 2:

@@ -169,7 +169,7 @@ def get_summary(xml_data):
     [elem_name.append(item) for item in elem[:-type_ions] if item not in elem_name]
     elem_index=[0]; #start index
     [elem_index.append((int(entry)+elem_index[-1])) for entry in elem[-type_ions:]];
-    elems = {k: range(elem_index[i],elem_index[i+1]) for i,k in enumerate(elem_name)}
+    types = {k: range(elem_index[i],elem_index[i+1]) for i,k in enumerate(elem_name)}
     
     ISPIN = get_ispin(xml_data=xml_data)
     NELECT = int([i.text.strip().split('.')[0] for i in xml_data.root.iter('i') if i.attrib['name']=='NELECT'][0])
@@ -187,17 +187,26 @@ def get_summary(xml_data):
     #Writing information to a dictionary
     space_info = get_space_info(xml_data=xml_data)
     info_dic={'SYSTEM':incar['SYSTEM'],'NION':n_ions,'NELECT':NELECT,'TypeION':type_ions,
-              'elems':elems,'Fermi': efermi,'ISPIN':ISPIN,
+              'types':types,'Fermi': efermi,'ISPIN':ISPIN,
               'fields':dos_fields,'incar':incar, 'space_info':space_info}
     return serializer.Dict2Data(info_dic)
 
-def join_ksegments(kpath,kseg_inds=[]):
-    """Joins a broken kpath's next segment to previous. `kseg_inds` should be list of first index of next segment"""
+def join_ksegments(kpath,*pairs):
+    """Joins a broken kpath's next segment to previous. `pairs` should provide the adjacent indices of the kpoints to be joined."""
     path_arr = np.array(kpath)
     path_max = path_arr.max()
-    if kseg_inds:
-        for ind in kseg_inds:
-            path_arr[ind:] -= path_arr[ind] - path_arr[ind-1]
+    if pairs:
+        for pair in pairs:
+            if len(pair) != 2:
+                raise ValueError(f"{pair} should have exactly two indices.")
+            for idx in pair:
+                if not isinstance(idx, int):
+                    raise ValueError(f"{pair} should have integers, got {idx!r}.")
+            
+            idx_1, idx_2 = pair
+            if idx_2 - idx_1 != 1:
+                raise ValueError(f"Indices in pair ({idx_1}, {idx_2}) are not adjacent.")
+            path_arr[idx_2:] -= path_arr[idx_2] - path_arr[idx_1]
         path_arr = path_max * path_arr/path_arr[-1] # Normalize to max value back
     return list(path_arr)
 
@@ -431,7 +440,7 @@ def get_structure(xml_data):
     cartesian = space_info.cartesian_positions
     st_dic={'SYSTEM':SYSTEM,'basis': np.array(basis),
             'extra_info': {'comment':'Exported from vasprun.xml','cartesian':cartesian,'scale':scale},
-            'positions': np.array(positions),'elems': unique_d}
+            'positions': np.array(positions),'types': unique_d}
     return serializer.PoscarData(st_dic)
 
 def export_vasprun(path:str = None, skipk:int = None, elim:list = [], dos_only:bool = False):
@@ -499,7 +508,7 @@ def export_vasprun(path:str = None, skipk:int = None, elim:list = [], dos_only:b
     #Dimensions dictionary.
     dim_dic={'kpoints':'(NKPTS,3)','kpath':'(NKPTS,1)','evals':'⇅(NSPIN,NKPTS,NBANDS)','dos_total':'⇅(NSPIN, NE,3)','dos_partial':'⇅(NSPIN, NE, NIONS,NORBS+1)','evals_projector':'⇅(NSPIN,NKPTS,NBANDS,NIONS, NORBS)'}
     # Bands
-    bands = {'kpoints':kpts.kpoints,'kpath':kpts.kpath,'evals':eigenvals.evals,'occs':eigenvals.occs,'labels':pro_bands['labels'],'pros':pro_bands['pros']}
+    bands = {'kpoints':kpts.kpoints,'kpath':kpts.kpath,'evals':eigenvals.evals,'occs':eigenvals.occs, 'labels':pro_bands['labels'],'pros':pro_bands['pros']}
     # DOS
     dos = {'total':tot_dos.tdos,'labels':pro_dos['labels'],'partial':pro_dos['pros']}
     #Writing everything to be accessible via dot notation
