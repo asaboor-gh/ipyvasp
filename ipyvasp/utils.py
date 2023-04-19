@@ -51,19 +51,31 @@ def interpolate_data(x:np.ndarray,y:np.ndarray,n:int=10,k:int=3) -> tuple:
     .. note::
         Only axis 0 will be interpolated. If you want general interploation, use ``from scipy.interpolate import make_interp_spline, BSpline``.
     """
-    #Add very small values at simliar points to make interpolation work.
-    ind=[i for i in range(0,len(x)) if x[i-1]==x[i]] #Duplicate indices
-    xa=np.unique(x)
-    dx=0.001*np.min(xa[1:]-xa[:-1]) #Very small value to add to duplicate points.
-    if(ind):
-        for pt in ind:
-            x[pt:]=x[pt:]-x[pt]+x[pt-1]+dx
-    # Now Apply interpolation
-    xnew=[np.linspace(x[i],x[i+1],n) for i in range(len(x)-1)]
-    xnew=np.reshape(xnew,(-1))
-    spl = make_interp_spline(x, y, k=k) #BSpline object
-    ynew = spl(xnew)
-    return xnew,ynew
+    #Avoid adding points between same points, like in kpath patches
+    inds = [i for i in range(0,len(x)) if x[i-1] == x[i]] #Duplicate indices
+    if inds:
+        inds = [0,*inds,len(x)] #Indices to split x
+        ranges = list(zip(inds[:-1],inds[1:])) #we are using this twice,so make list
+        for p,q in ranges:
+            if q - p == 1: # means three consecutive points have same value
+                raise ValueError(f'Three or more duplicate values found at index {p} in array `x`, at most two allowed for broken kpath like scenario.')
+        arrays = [[x[i:j],y[i:j]] for i,j in ranges] #Split x,y into arrays
+    else:
+        arrays = [(x,y)]
+    
+    new_as, new_bs = [], []
+    for a,b in arrays:
+        anew = [np.linspace(a[i],a[i+1],n) for i in range(len(a)-1)]
+        anew = np.reshape(anew,(-1))
+        spl = make_interp_spline(a, b, k=k) #BSpline object
+        bnew = spl(anew)
+        new_as.append(anew) 
+        new_bs.append(bnew)
+    
+    if len(new_as) == 1:
+        return new_as[0], new_bs[0]
+        
+    return np.concatenate(new_as, axis = 0), np.concatenate(new_bs, axis = 0)
 
 def rolling_mean(X:np.ndarray, period:float, period_right:float = None, interface:float = None, mode:str = 'wrap', smoothness:int = 2) -> np.ndarray:
     """Caluate rolling mean of array X using scipy.ndimage.filters.convolve1d.

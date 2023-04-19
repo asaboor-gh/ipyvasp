@@ -244,11 +244,9 @@ def iplot_rgb_lines(
     elim        = [],
     Fermi     = None,
     skipk       = None,
-    kseg_inds  = [],
     max_width   = 6,
     title       = None,
-    ktick_inds  = [0,-1],
-    ktick_vals  = ['Γ','M'],
+    kpath_ticks = None,
     figsize     = None,
     interp_nk   = {},
     atoms_orbs_dict  = {}
@@ -269,8 +267,9 @@ def iplot_rgb_lines(
         - figsize   : Tuple(width,height) in pixels, e.g. (700,400).
         - atoms_orbs_dict : Dictionary with keys as label and values as list of length 2. len(atoms_orbs_dict) <=3 should hold for RGB plots. If given, used in place of atoms, orbs and labels arguments.
                         Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
+        - kpath_ticks:
         - **Other Parameters**
-            - ktick_inds, ktick_vals,elim,kseg_inds,max_width,title etc.
+            - max_width,title etc.
     """
     if mode not in ('markers','bands','lines'):
         raise TypeError("Argument `mode` expects one of ['markers','bands','lines'], got '{}'.".format(mode))
@@ -286,10 +285,15 @@ def iplot_rgb_lines(
     if vr.pro_bands == None:
         raise ValueError("Can not plot an empty eigenvalues object.\n"
                          "Try with large energy range.")
-
+    ktick_vals, ktick_inds, pairs = [],[],[]
+    if kpath_ticks:
+        ktick_vals = list(kpath_ticks.values()) 
+        ktick_inds = [i if isinstance(i,int) else i[0] for i in kpath_ticks.keys()]
+        pairs = [p for p in kpath_ticks.keys() if isinstance(p,tuple)]
+    
     if Fermi == None:
         Fermi = vr.fermi
-    K = vp.join_ksegments(vr.kpath,kseg_inds = kseg_inds)
+    K = vp.join_ksegments(vr.kpath,*pairs)
     xticks=[K[i] for i in ktick_inds]
     xlim=[min(K),max(K)]
     if elim:
@@ -345,9 +349,9 @@ def iplot_rgb_lines(
     if(figsize!=None):
         fig.update_layout(width=figsize[0],height=figsize[1],autosize=False)
     #Draw lines at breakpoints
-    if kseg_inds:
+    if pairs:
         kargs_dict = dict(mode='lines',line=dict(color='rgb(222,222,222)',width=1.2),showlegend=False)
-        for pt in kseg_inds:
+        for pt,_ in pairs:
             fig.add_trace(go.Scatter(x=[K[pt],K[pt]],y=ylim,**kargs_dict))
             fig.add_trace(go.Scatter(x=[K[pt],K[pt]],y=ylim,**kargs_dict))
     update_args = dict(linewidth=0.1,linecolor='rgba(222,222,222,0.1)', mirror=True)

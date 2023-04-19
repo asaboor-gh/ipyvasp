@@ -318,7 +318,7 @@ class InputGui:
                 HBox([Label('Orbs: ',layout=l_width),self._dds['orbs'],
                       Label('::>>:: ',layout=l_width),self._texts['orbs']
                     ]).add_class('borderless').add_class('marginless')
-                ],layout=Layout(height="{}px".format(height))
+                ],layout=Layout(height="{}px".format(height or 400))
                 ).add_class(_class).add_class('marginless')
 
 
@@ -341,7 +341,7 @@ class InputGui:
                 orbs_opts = [*orbs_opts,('9-15: f','9-15')]
             max_ind = len(sys_info.fields)-1
             orbs_opts = [('0-{}: All'.format(max_ind), "0-{}".format(max_ind)),*orbs_opts]
-            inds = sorted(np.flatten(list(sys_info.types.values())))
+            inds = sorted(np.ravel(list(sys_info.types.values())))
             ions_opts = [("{}-{}: {}".format(v[0],v[-1],k),"{}-{}".format(
                                     v[0],v[-1])) for k,v in sys_info.types.items()]
             self._dds['elms'].options = [*ions_opts,('0-{}: All'.format(inds[-1]),'0-{}'.format(inds[-1]))]
@@ -575,12 +575,10 @@ class VasprunApp:
         self._InGui.html.observe(self.__update_input,"value")
         self._InGui.html.observe(self._warn_to_load_graph,"value")
         self._files_dd.observe(self._warn_to_load_graph,"value")
-        self._texts['kjoin'].observe(self._warn_to_load_graph,"value")
+        self._texts['kticks'].observe(self._warn_to_load_graph,"value")
         self._dds['band_dos'].observe(self._warn_to_load_graph,"value")
         self._dds['band_dos'].observe(self.__update_input,"value")
-        self._texts['kjoin'].observe(self.__update_input,"value")
         self._texts['kticks'].observe(self.__update_xyt,"value")
-        self._texts['ktickv'].observe(self.__update_xyt,"value")
         self._texts['elim'].observe(self.__update_xyt,"value")
         self._texts['xyt'].observe(self.__update_xyt)
         self._dds['theme'].observe(self.__update_theme,"value")
@@ -689,6 +687,10 @@ class VasprunApp:
             self._dds['en_type'].value = 'None'
 
     def _warn_to_load_graph(self, change = None):
+        if change['owner'] == self._texts['kticks']:
+            if '|' not in self._texts['kticks'].value:
+                return None # No need to warn if no broken path
+                
         self._buttons['load_graph'].icon = 'refresh'
         self._buttons['load_graph'].style.button_color = 'yellow'
         self._buttons['load_graph'].description = 'Update Graph'
@@ -737,13 +739,10 @@ class VasprunApp:
         if 'Bands' in self._dds['band_dos'].value:
             in_box.children = [Label('---------- Projections ----------'),self._InGui.box,
                                Label('---- Other Arguments/Options ----'),
-                      VBox([HBox([Label('Ticks At: ',layout=l_out),
+                      VBox([HBox([Label('kpath_ticks: ',layout=l_out),
                                   self._texts['kticks'],
-                                  Label('Labels: ',layout=l_out),
-                                  self._texts['ktickv']
-                                 ]).add_class('borderless').add_class('marginless'),
-                      HBox([Label('Join At: ',layout=l_out),
-                            self._texts['kjoin'],
+                                  ]).add_class('borderless').add_class('marginless'),
+                      HBox([
                             Label('E Range: ',layout=l_out),
                             self._texts['elim']
                            ]).add_class('marginless').add_class('borderless')
@@ -811,13 +810,10 @@ class VasprunApp:
     def __fill_ticks(self):
         kpath = os.path.join(os.path.split(self._files_dd.value)[0],'KPOINTS')
         tvs = sio.read_ticks(kpath) #ticks values segments
-        if tvs['ktick_inds']: #If is must, if not present, avoid overwritting custom input
-            self._texts['kticks'].value = ','.join([str(v) for v in tvs['ktick_inds']])
-        if tvs['ktick_vals']:
-            self._texts['ktickv'].value = ','.join(tvs['ktick_vals'])
-        if tvs['kseg_inds']:
-            self._texts['kjoin'].value = ','.join([str(v) for v in tvs['kseg_inds']])
-
+        if tvs: #If is must, if not present, avoid overwritting custom input
+            text_ticks = ', '.join('{}:{}'.format(k if isinstance(k,int) else '{}|{}'.format(*k),v) for k,v in tvs.items())
+            self._texts['kticks'].value = text_ticks
+        
     def __update_theme(self,change):
         if self._dds['theme'].value == 'Dark':
             self._htmls['theme'].value = css_style(dark_colors,_class=self._main_class)
@@ -914,15 +910,14 @@ class VasprunApp:
             self._input['Fermi'] = float(self._data.fermi)
         self._input['elim'] = [float(v) for v in elim_str if v!='-'][:2] if len(elim_str) >= 2 else None
         if self._dds['band_dos'].value == 'Bands':
-            kjoin_str  = [v for v in self._texts['kjoin'].value.split(',') if v!='']
-            kticks_str = [v for v in self._texts['kticks'].value.split(',') if v!='']
-            ktickv_str = [v for v in self._texts['ktickv'].value.split(',') if v!='']
-            self._input['kseg_inds'] = [int(v) for v in kjoin_str if v!='-'] if kjoin_str else None
-            self._input['ktick_inds'] = [int(v) for v in kticks_str if v!='-'] if kticks_str else [0,-1]
-            self._input['ktick_vals'] = [v for v in ktickv_str if v!=''] if ktickv_str else ['A','B']
-
+            kpath_ticks = {}
+            hsk = [[v.strip() for v in vs.split(':')] for vs in self._texts['kticks'].value.split(',')]
+            for k,v in hsk:
+                kpath_ticks[k] = tuple([int(v.strip()) for v in k.split('|')]) if '|' in k else int(k)
+            
+            self._input['kpath_ticks'] = kpath_ticks
         else:
-            self._input = {k:v for k,v in self._input.items() if k not in ['ktick_inds','ktick_vals','kseg_inds']}
+            self._input = {k:v for k,v in self._input.items() if k not in ['kpath_ticks']}
         #Update at last
         self._InGui.output = self._input
         self._buttons['load_graph'].tooltip = "Current Input\n{!r}".format(serializer.Dict2Data(self._input))
@@ -968,11 +963,11 @@ class VasprunApp:
                 self._fig.update_layout(title=xyt_text[2])
             except: pass #do nothing else
 
-        if self._texts['ktickv'].value or self._texts['kticks'].value or self._texts['elim'].value:
+        if self._texts['kticks'].value or self._texts['elim'].value:
             self.__update_input(change=None)
         if self._dds['band_dos'].value == 'Bands' and self._data:
-            tickvals = [self._data.kpath[i] for i in self._input['ktick_inds']]
-            self._fig.update_xaxes(ticktext=self._input['ktick_vals'], tickvals=tickvals)
+            tickvals = [self._data.kpath[i if isinstance(i,int) else i[0]] for i in self._input['kpath_ticks']]
+            self._fig.update_xaxes(ticktext = list(self._input['kpath_ticks'].values()), tickvals = tickvals)
         if self._texts['elim'].value and self._input['elim'] != None and len(self._input['elim']) == 2:
             if self._dds['band_dos'].value == 'Bands':
                 self._fig.update_yaxes(range = self._input['elim'])

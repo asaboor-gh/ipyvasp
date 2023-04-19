@@ -701,7 +701,11 @@ class Vasprun:
             return kwargs
         
         kpath_ticks = kwargs.pop('kpath_ticks', None) #Remove kpath_ticks from kwargs for later use
-        kwargs = {'kpath_ticks': kpath_ticks or self.kpath_ticks,**kwargs} #Prefer provided ones by user
+        
+        if 'interp_nk' in kwargs and kwargs['interp_nk']:
+            kwargs['kpath_ticks'] = kpath_ticks # Accept provided kpath_ticks only because we are interpolating
+        else:
+            kwargs = {'kpath_ticks': kpath_ticks or self.kpath_ticks,**kwargs} #Prefer provided ones by user
 
         # Set for info only in case of bandstructure
         if  (pairs := [k for k in kwargs['kpath_ticks'] if isinstance(k, tuple)]):
@@ -812,7 +816,7 @@ class Vasprun:
         efermi     = None,
         kpath_ticks= None, 
         interp_nk  = None, 
-        max_width  = None,
+        max_width  = 2.5,
         scale_data = False,
         colormap   = None,
         colorbar   = True,
@@ -822,7 +826,7 @@ class Vasprun:
         data = self.pick_bands(spin = spin, kpoints = kpoints, bands = bands, atoms_orbs_dict = atoms_orbs_dict)
         K, E, pros, labels = data['K'], data['E'] - self._efermi, data['pros'], data['labels']
         
-        return sp.splot_rgb_lines(K, E, pros, labels **plot_kws)
+        return sp.splot_rgb_lines(K, E, pros, labels, **plot_kws)
     
     @_sub_doc(sp.splot_color_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_skb_doc}\n    ax :"})
     def splot_color_lines(self, atoms_orbs_dict,

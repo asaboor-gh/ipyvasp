@@ -279,6 +279,16 @@ def _validate_data(K, E,  elim, kpath_ticks, interp_nk):
     if kpath_ticks and not isinstance(kpath_ticks, dict):
         raise ValueError("kpath_ticks must be a dictionary of int/tuple -> str.")
     
+    # tuple/int keys, list is not hashable
+    for k, v in kpath_ticks.items():
+        if not isinstance(k, (tuple, int)):
+            raise ValueError("kpath_ticks keys must be int or tuple of size 2 to join broken path")
+        if not isinstance(v, str):
+            raise ValueError("kpath_ticks values must be str.")
+        if isinstance(k, tuple) and len(k) != 2:
+            raise ValueError("kpath_ticks keys must be int or tuple of size 2 to join broken path")
+                
+    
     pairs = [k for k in kpath_ticks.keys() if isinstance(k, tuple)] # tuple keys, list is not hashable
     
     K = vp.join_ksegments(K, *pairs)
@@ -321,10 +331,15 @@ def splot_bands(K, E, ax = None, elim = None, kpath_ticks = None, interp_nk = No
     
     if interp_nk:
         K,E = gu.interpolate_data(K,E,**interp_nk)
+    
+    # handle broken paths
+    breaks = [i for i in range(0,len(K)) if K[i-1] == K[i]]
+    K = np.insert(K,breaks,np.nan)
+    E = np.insert(E,breaks,np.nan,axis=0)
 
     ax = get_axes() if ax is None else ax
     if 'color' not in kwargs and 'c' not in kwargs:
-        kwargs['color'] = 'blue' # default color
+        kwargs['color'] = '#2e3157' # default color dark blue
     
     if 'linewidth' not in kwargs and 'lw' not in kwargs:
         kwargs['linewidth'] = 0.9 # default linewidth to make it look good
@@ -562,10 +577,7 @@ def _make_line_collection(max_width  = 2.5,
 
     # Default linewidth = 2.5 unless specified otherwise
     if rgb: # Single channel line widths
-        try:
-            lws = pros_data.get('lws') #Get from splot_rgb_lines, so lws represent actual data
-        except:
-            lws = 0.1 + 0.25*np.sum(colors,axis=1) # If not called from splot_rgb_lines
+        lws = pros_data.get('lws', 0.1 + 0.25*np.sum(colors,axis=1)) #Get from splot_rgb_lines if given, so lws represent actual data, otherwise use default.
     else: # For separate lines
         lws = 0.1 + 2.5*colors.T # .T to access in for loop.
 
@@ -752,13 +764,21 @@ def _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False):
         if c_max > 0.0000001: # Avoid division error
             pros = pros/c_max
             
+    data = {'kpath':K, 'evals':E, 'pros':pros}
     if interp_nk:
         min_d, max_d = np.min(pros),np.max(pros) # For cliping
         _K, E = gu.interpolate_data(K,E,**interp_nk)
         pros = gu.interpolate_data(K,pros,**interp_nk)[1].clip(min=min_d,max=max_d) 
-        return {'kpath':_K, 'evals':E, 'pros':pros}
+        data.update({'kpath':_K, 'evals':E, 'pros':pros})
     
-    return {'kpath':K, 'evals':E, 'pros':pros} 
+    # Handle kpath discontinuities
+    X = data['kpath']
+    breaks = [i for i in range(0,len(X)) if X[i-1] == X[i]]
+    data['kpath'] = np.insert(data['kpath'],breaks,np.nan)
+    data['evals'] = np.insert(data['evals'],breaks,np.nan,axis=0)
+    data['pros']  = np.insert(data['pros'],breaks,data['pros'][breaks],axis=0) # Repeat the same data to keep color consistent
+    
+    return data
 
 def splot_rgb_lines(K, E, pros, labels, 
     ax         = None, 

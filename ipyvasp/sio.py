@@ -491,6 +491,7 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
         - *ptaches : Any number of disconnected patches where a single patch is a dictionary like {'label': (x,y,z,[N]), ...} where x,y,z is high symmetry point and
                     N (optional) is number of points in current inteval, points in a connected path patch are at least two i.e. `{'p1':[x1,y1,z1],'p2':[x2,y2,z2]}`.
                     A key of a patch should be string reperenting the label of the high symmetry point. A key that starts with '_' is ignored, so you can add points without high symmetry points as well.
+                    Add + before a label if it is duplicated in a patch, so L-G-L path can be written as {'L':[x1,y1,z1],'G':[x2,y2,z2],'+L':[x3,y3,z3]} to keep second L point, otherwise it will be ignored by dictioanry.
         - n        : int, number per length of body diagonal of rec_basis, this makes uniform steps based on distance between points.
         - weight : Float, if None, auto generates weights.
         - ibzkpt : Path to ibzkpt file, required for HSE calculations.
@@ -514,7 +515,7 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
                 raise TypeError("Label must be a string")
             if (not isinstance(v,(list,tuple,set,np.ndarray))) and (len(v) not in [3,4]):
                 raise TypeError("Value must be a list or tuple of length 3 or 4, like (x,y,z,[N])")
-            labels.append('skip' if k.startswith('_') else k)
+            labels.append('skip' if k.startswith('_') else k.lstrip('+')) # + handles duplicate labels
             _patch.append(v)
         hsk_list.append(_patch)
 
@@ -576,7 +577,9 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
 
     inds = [i for k,i in enumerate(inds) if 'skip' != _labels[k]]
     _labels = [l.replace('|skip','') for l in _labels if l != 'skip']
-    top_str = "Automatically generated using ipyvasp with HSK-INDS = {}, LABELS = {}, SEG-INDS = {}\n\t{}\nReciprocal Lattice".format(inds,_labels,joinat,N)
+    path_info = ', '.join('{}:{}'.format(f'{idx - 1}|{idx}' if idx in joinat else idx, v) for idx, v in zip(inds,_labels))
+    
+    top_str = "Automatically generated using ipyvasp for HSK-PATH {}\n\t{}\nReciprocal Lattice".format(path_info,N)
     out_str = "{}\n{}".format(top_str,out_str)
     if outfile != None:
         with open(outfile,'w') as f:
@@ -584,23 +587,24 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
     else:
         print(out_str)
 
-def read_ticks(kpoints_file_path):
+def read_ticks(kpoints_path):
     "Reads ticks values and labels in header of kpoint file. Returns dictionary of `kpath_ticks` that can be used in plotting functions. If not exist in header, returns empty values(still valid)."
-    kinds, klabs, kseg = [],[],[]
-    if os.path.isfile(kpoints_file_path):
-        head = vp.islice2array(kpoints_file_path,exclude=None,raw=True,nlines=1)
-        if 'HSK-INDS' in head:
-            hsk = head.split('HSK-INDS')[1].split(']')[0].split('[')[1].split(',')
-            kinds = [int(h) for h in hsk if h]
-        if 'LABELS' in head:
-            labs = head.split('LABELS')[1].split(']')[0].split('[')[1].split(',')
-            klabs = [l.replace("'","").replace('"','').strip() for l in labs if l]
-        if 'SEG-INDS' in head:
-            segs = head.split('SEG-INDS')[1].split(']')[0].split('[')[1].split(',')
-            kseg = [int(s) for s in segs if s]
+    kpath_ticks = {}
+    if os.path.isfile(kpoints_path):
+        top_line = vp.islice2array(kpoints_path,exclude=None,raw=True,nlines=1)
+        if 'HSK-PATH' in top_line:
+            head = head.split('HSK-PATH')[1].strip() # Only update head if HSK-PATH is found.
     
-    return {(k, k-1) if k in kseg else k : l for k,l in zip(kinds,klabs)} # int/tuple : str
-
+            hsk = [[v.strip() for v in vs.split(':')] for vs in head.split(',')]
+            for k,v in hsk:
+                if '|' in k:
+                    k = tuple([int(v.strip()) for v in k.split('|')])
+                else:
+                    k = int(k)
+                kpath_ticks[k] = v
+                
+    return kpath_ticks
+        
 # Cell
 def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec_basis = None):
     """Get Kpath from a string of kpoints (Line-Mode like). Useful in Terminal.
@@ -618,7 +622,7 @@ def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec
     - **Example**
         > str2kpath('''0 0 0 !$\Gamma$ 3
                     0.25 0.25 0.25 !L''')
-        > Automatically generated using ipyvasp with HSK-INDS = [0, -1], LABELS = ['$\\Gamma$', 'L'], SEG-INDS = []
+        > Automatically generated using ipyvasp for HSK-PATH 0:$\Gamma$, -1:L
 	    >   3
         > Reciprocal Lattice
         >   0.0000000000    0.0000000000    0.0000000000    0.333333
@@ -653,6 +657,15 @@ def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec
                 except: print(f'4th number in line {j+1+skipN} should be integer!')
 
             hsk_list.append(_ks)
+    
+    # Duplicate labels will be washed away by dictionary, so let's fix it.
+    test_labs = []
+    for i,lab in enumerate(labels):
+        if lab in test_labs:
+            labels[i] = i*'+' + lab # Add + to duplicate labels, who cares about the number of +++++, they will be fixed in get_kpath
+        test_labs.append(lab)
+    
+    del test_labs
 
     if where_blanks:
         filtered = [w-i for i,w in enumerate(where_blanks)]

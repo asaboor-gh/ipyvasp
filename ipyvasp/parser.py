@@ -334,7 +334,7 @@ def get_bands_pro_set(xml_data, spin = 0, skipk = 0, bands_range:range=None, set
         NKPTS = NKPTS-skipk # Update after start, and bands_range.
         COUNT = NIONS*NBANDS*NKPTS*NORBS
         data = islice2array(set_path,start=start,nlines=nlines,count=COUNT)
-        data = data.reshape((NKPTS,NBANDS,NIONS,NORBS)).transpose([2,0,1,3])
+        data = data.reshape((1, NKPTS,NBANDS,NIONS,NORBS))  # 1 for spin to just be consistent
         return serializer.Dict2Data({'labels':fields,'pros':data})
 
     #Collect Projection fields
