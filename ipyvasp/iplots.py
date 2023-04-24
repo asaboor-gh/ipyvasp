@@ -18,6 +18,55 @@ except:
     import ipyvasp.parser as vp
     import ipyvasp.splots as sp
     import ipyvasp.utils as gu
+    
+
+def _format_rgb_data(K, E, pros, labels, interp_nk, occs, kpoints, max_width = 10):
+    "Transform data to 1D for rgb lines to plot effectently. Output is a dictionary."
+    data = sp._fix_data(K, E, pros, labels, interp_nk, scale_data = False, rgb = True, occs = occs, kpoints = kpoints)
+    
+    max_c = np.max(data['pros'])
+    if max_c == 0:
+        max_c = 1 # Avoid divide by 0.
+    
+    rgb = np.zeros((*np.shape(data['evals']),3)) # Initialize rgb array, because there could be less than three channels
+    if data['pros'].shape[2] == 3:
+        rgb = data['pros']/max_c
+    elif data['pros'].shape[2] == 2:
+        rgb[:,:,:2] = data['pros']/max_c # Normalized overall color data
+        labels = [*labels, '']
+    elif data['pros'].shape[2] == 1:
+        rgb[:,:,:1] = data['pros']/max_c # Normalized overall color data
+        labels = [*labels, '','']
+        
+    data['norms'] = (rgb*100).astype(int) # Normalized overall data
+    lws = np.sum(rgb,axis=2) # Sum of all colors
+    lws = lws/np.max(lws)*max_width # Normalize to max_width
+    data['widths'] = 0.0001+ lws #should be before scale colors
+    
+
+    # Now scale colors to 1 at each point.
+    cl_max = np.max(data['pros'],axis=2)
+    cl_max[cl_max==0.0] = 1 # avoid divide by zero. Contributions are 4 digits only.
+    data['pros'] = (rgb/cl_max[:,:,np.newaxis]*255).astype(int) # Normalized per point and set rgb data back to data.
+    
+    # Now process data to make single data for faster plotting.
+    txt = 'Projection: [{}]</br>Norm (%):'.format(', '.join(labels))
+    K, E, C, S, PT, OT, KT, ET = [], [], [], [], [], [], [], []
+    for i in range(np.shape(data['evals'])[1]):
+        K  = [*K, *data['kpath'], np.nan]
+        E  = [*E, *data['evals'][:,i], np.nan]
+        C  = [*C, *[f'rgb({r},{g},{b})' for (r,g,b) in data['pros'][:,i,:]], 'rgb(0,0,0)']
+        S  = [*S, *data['widths'][:,i], data['widths'][-1,i]]
+        PT = [*PT, *[f'{txt} [{s}, {p}, {d}]' for (s,p,d) in data['norms'][:,i]], ""]
+        OT = [*OT, *[f'Occ: {t:>7.4f}' for t in data['occs'][:,i]], ""]
+        KT = [*KT, *[f'K<sub>{j+1}</sub>: {x:>7.3f}{y:>7.3f}{z:>7.3f}' for j, (x,y,z) in enumerate(data['kpoints'])], ""]
+        ET = [*ET, *["{}".format(i+1) for _ in data['kpath']],""] # Add subscripts to labels.
+    
+    if np.shape(data['evals'])[1] == 1: # If only one band, then remove last nan.
+        K, E, C, S, PT, OT, KT, ET = K[:-1], E[:-1], C[:-1], S[:-1], PT[:-1], OT[:-1], KT[:-1], ET[:-1]
+    
+    T = [f"</br>{p} </br></br>Band: {e}  {o}</br>{k}" for (p,e,o,k) in zip(PT,ET, OT,KT)]
+    return {'K':K, 'E':E, 'C':C, 'S':S, 'T':T, 'labels': labels} # K, energy, marker color, marker size, text, labels that get changed
 
 # Cell
 def _get_rgb_data(
@@ -113,6 +162,7 @@ def _flip_even_patches(array_1d, patch_length):
         else:
             out_put.extend(array_1d[i*n:(i+1)*n])
     return out_put
+
 
 # Cell
 def _rgb2plotly(rgb_data=None,mode='markers',max_width=None,showlegend=False,name='',labels=['s','p','d'],symbol=0):
@@ -233,6 +283,42 @@ def iplot2html(fig,filename=None,out_string=False,modebar=True):
         else:
             from IPython.display import HTML
             return HTML(template)
+        
+def iplot_rgb_lines1(K, E, pros, labels, occs, kpoints,
+    elim       = None,
+    kpath_ticks= None, 
+    interp_nk  = None, 
+    max_width  = 10,   
+    fig        = None,
+    figsize    = None,
+    title      = None,
+    **kwargs        
+    ):
+    K, E, xticks, xticklabels = sp._validate_data(K,E,elim,kpath_ticks,interp_nk)
+    data = _format_rgb_data(K, E, pros, labels, interp_nk, occs, kpoints,max_width = max_width)
+    K, E, C, S, T, labels = data['K'], data['E'], data['C'], data['S'], data['T'], data['labels']
+    
+    if fig is None:
+        fig = go.Figure()
+        
+    kwargs.pop('marker_color',None) # Provided by C
+    kwargs.pop('marker_size',None) # Provided by S
+    kwargs.update({'hovertext': T, 'marker': {**kwargs.get('marker',{}), 'color': C, 'size': S}})
+    
+    fig.add_trace(go.Scatter(x = K, y = E, **kwargs))
+    
+    if figsize and len(figsize) == 2:
+        fig.update_layout(width = figsize[0], height = figsize[1], autosize = False)
+    
+    fig.update_layout(title = title or '',margin=go.layout.Margin(l=60,r=50,b=40,t=75,pad=0),
+            yaxis = go.layout.YAxis(title_text = 'Energy (eV)',range = elim or [np.min(E), np.max(E)]),
+            xaxis = go.layout.XAxis(ticktext = xticklabels, tickvals = xticks,tickmode = "array",range = [np.min(K), np.max(K)]),
+            font = dict(family="stix, serif",size=14))
+
+    update_args = dict(linewidth = 0.1,linecolor = 'rgba(222,222,222,0.1)', mirror = True)
+    fig.update_xaxes(showgrid = True,zeroline = False,showline = True,**update_args)
+    fig.update_yaxes(showgrid = False,zeroline = True,showline = True,**update_args)
+    return fig
 
 # Cell
 def iplot_rgb_lines(

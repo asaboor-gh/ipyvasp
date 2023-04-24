@@ -276,7 +276,10 @@ def _validate_data(K, E,  elim, kpath_ticks, interp_nk):
     if np.shape(E)[0] != len(K):
         raise ValueError("Length of first dimension of E must be equal to length of K.")
     
-    if kpath_ticks and not isinstance(kpath_ticks, dict):
+    if kpath_ticks is None:
+        kpath_ticks = {}
+    
+    if not isinstance(kpath_ticks, dict):
         raise ValueError("kpath_ticks must be a dictionary of int/tuple -> str.")
     
     # tuple/int keys, list is not hashable
@@ -560,6 +563,9 @@ def _make_line_collection(max_width  = 2.5,
         - colors_list: List of colors for multiple lines, length equal to 3rd axis length of colors.
         - rgb        : Default is False. If True and np.shape(colors)[-1] == 3, RGB line collection is returned in a tuple of length 1. Tuple is just to support iteration.
     """
+    if not isinstance(max_width,(int,float)):
+        raise ValueError("max_width must be an int or float.")
+    
     if not pros_data:
         raise ValueError("No pros_data given.")
     else:
@@ -577,13 +583,13 @@ def _make_line_collection(max_width  = 2.5,
 
     # Default linewidth = 2.5 unless specified otherwise
     if rgb: # Single channel line widths
-        lws = pros_data.get('lws', 0.1 + 0.25*np.sum(colors,axis=1)) #Get from splot_rgb_lines if given, so lws represent actual data, otherwise use default.
+        lws = pros_data.get('lws', 0.1 + 2.5*np.sum(colors,axis=1)) #Get from splot_rgb_lines if given, so lws represent actual data, otherwise use default.
     else: # For separate lines
         lws = 0.1 + 2.5*colors.T # .T to access in for loop.
 
     if max_width != 2.5: # Scale linewidths to max_width if other than 2.5
         # here division does not fail as min(lws)==0.1
-        lws = max_width*lws/(2.5*np.max(lws)) # Only if not None or zero.
+        lws = max_width*lws/np.max(lws) # Only if not None or zero.
 
     if np.any(colors_list):
         lc_colors = colors_list
@@ -741,14 +747,20 @@ def color_cube(ax, colormap = 'brg', loc = (1,0.4), size = 0.2,
     return cax
 
 # Further fix data for all cases which have projections
-def _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False):
-    "Input pros must be [m,nk,nb], output is [nk,nb, m]"
+def _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False, **others):
+    "Input pros must be [m,nk,nb], output is [nk,nb, m]. `others` must have shape [nk,nb] for occupancies or [nk,3] for kpoints"
     
     if np.shape(pros)[-2:] != np.shape(E):
         raise ValueError("last two dimensions of `pros` must have same shape as `E`")
     
     if np.ndim(pros) == 2:
         pros = np.expand_dims(pros,0) # still as [m,nk,nb]
+        
+    
+    if others:
+        for k,v in others.items():
+            if np.shape(v)[0] != len(K):
+                raise ValueError(f"{k} must have same length as K")
         
     if rgb and len(pros) > 3:
         raise ValueError("In RGB lines mode, pros.shape[-1] <= 3 should hold")
@@ -764,19 +776,24 @@ def _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False):
         if c_max > 0.0000001: # Avoid division error
             pros = pros/c_max
             
-    data = {'kpath':K, 'evals':E, 'pros':pros}
+    data = {'kpath':K, 'evals':E, 'pros':pros, **others}
     if interp_nk:
         min_d, max_d = np.min(pros),np.max(pros) # For cliping
         _K, E = gu.interpolate_data(K,E,**interp_nk)
         pros = gu.interpolate_data(K,pros,**interp_nk)[1].clip(min=min_d,max=max_d) 
         data.update({'kpath':_K, 'evals':E, 'pros':pros})
+        for k,v in others.items():
+            data[k] = gu.interpolate_data(K,v,**interp_nk)[1]
     
     # Handle kpath discontinuities
     X = data['kpath']
     breaks = [i for i in range(0,len(X)) if X[i-1] == X[i]]
-    data['kpath'] = np.insert(data['kpath'],breaks,np.nan)
-    data['evals'] = np.insert(data['evals'],breaks,np.nan,axis=0)
-    data['pros']  = np.insert(data['pros'],breaks,data['pros'][breaks],axis=0) # Repeat the same data to keep color consistent
+    if breaks:
+        data['kpath'] = np.insert(data['kpath'],breaks,np.nan)
+        data['evals'] = np.insert(data['evals'],breaks,np.nan,axis=0)
+        data['pros']  = np.insert(data['pros'],breaks,data['pros'][breaks],axis=0) # Repeat the same data to keep color consistent
+        for k,v in others.items():
+            data[k] = np.insert(data[k],breaks,v[breaks],axis=0) # Repeat here too
     
     return data
 
