@@ -835,6 +835,7 @@ class Vasprun:
         bands      = -1, 
         axes       = None, 
         elim       = None, 
+        efermi      = None,
         kpath_ticks= None, 
         interp_nk  = None, 
         max_width  = 2.5,
@@ -850,6 +851,27 @@ class Vasprun:
         K , E, pros, labels = data['K'], data['E'] - self._efermi, data['pros'], data['labels']
         return sp.splot_color_lines(K, E, pros, labels, **plot_kws, **kwargs)
     
+    @_sub_doc(ip.iplot_rgb_lines,['K :','E :', 'pros :', 'labels :','occs :','kpoints :'], replace = {'fig :': f"{_proj_doc}\n    {_skb_doc}\n    fig :"})
+    def iplot_rgb_lines(self, atoms_orbs_dict,
+        spin       = 0,
+        kpoints    = -1,
+        bands      = -1,
+        elim       = None,
+        efermi     = None,
+        kpath_ticks= None, 
+        interp_nk  = None, 
+        max_width  = 10,   
+        mode       = 'markers + lines',
+        fig        = None,
+        title      = None,
+        **kwargs              
+        ):
+        plot_kws = self.__handle_kwargs({k:v for k,v in locals().items() if k not in ['self','spin','kpoints','bands', 'atoms_orbs_dict','kwargs']}) # should be on top to avoid other loacals
+        data = self.pick_bands(spin = spin, kpoints = kpoints, bands = bands, atoms_orbs_dict = atoms_orbs_dict)
+        K, E, pros, labels, occs, kpoints = data['K'], data['E'] - self._efermi, data['pros'], data['labels'], data['occs'], data['kpoints']
+        return ip.iplot_rgb_lines(K, E, pros, labels, occs, kpoints, **plot_kws, **kwargs)
+        
+    
     @_sub_doc(sp.splot_dos_lines,'- path_evr')
     def splot_dos_lines(self, atoms_orbs_dict= {}, *, ax = None, **kwargs):
         kwargs = self.__handle_kwargs(kwargs,dos=True)
@@ -860,11 +882,6 @@ class Vasprun:
     def iplot_dos_lines(self,atoms_orbs_dict= {}, **kwargs):
         kwargs = self.__handle_kwargs(kwargs, dos=True)
         return ip.iplot_dos_lines(self._data, atoms_orbs_dict = atoms_orbs_dict,**kwargs)
-
-    @_sub_doc(ip.iplot_rgb_lines,'- path_evr')
-    def iplot_rgb_lines(self, atoms_orbs_dict = {}, **kwargs):
-        kwargs = self.__handle_kwargs(kwargs)
-        return ip.iplot_rgb_lines(self._data, atoms_orbs_dict = atoms_orbs_dict,**kwargs)
 
     def get_band_info(self,b_i,k_i=None):
         """Get band information for given band index `b_i`. If `k_i` is given, returns info at that point
