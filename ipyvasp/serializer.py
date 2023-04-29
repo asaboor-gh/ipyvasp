@@ -274,13 +274,13 @@ class PoscarData(Dict2Data):
     @property
     def labels(self):
         "Returns the labels of the atoms in the poscar data."
-        return np.array([f'{k} {v - vs.start + 1}' for k,vs in self.unique.items() for v in vs])
+        return np.array([f'{k} {v - vs.start + 1}' for k,vs in self.types.items() for v in vs])
     
     def get_bond_length(self,atom1,atom2):
         "Returns the bond length between two atoms names should be as 'Ga', 'As'"
         all_dist =[]
-        for idx in self.unique[atom1]:
-            others = self.unique[atom2]
+        for idx in self.types[atom1]:
+            others = self.types[atom2]
             all_dist = [*all_dist,*np.linalg.norm(self.coords[others] - self.coords[idx,:], axis = 1)] # Get the second closest distance, first is itself
         
         all_dist = np.array(all_dist)

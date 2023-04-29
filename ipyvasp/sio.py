@@ -1169,7 +1169,7 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)',background = 'r
     # Special Points only if in reciprocal space.
     if vname == 'b' and special_kpoints:
         texts,values =[],[]
-        norms = np.round(np.linalg.norm(bz_data.specials.coords,axis=1),5)
+        norms = np.round(np.linalg.norm(bz_data.specials.coords,axis=1),16)
         sps = bz_data.specials
         for key,value, (i,norm) in zip(sps.kpoints, sps.coords, enumerate(norms)):
             texts.append("P{}</br>d = {}</br> Index = {}".format(key,norm,i))
@@ -1561,8 +1561,8 @@ def join_poscars(poscar1,poscar2,direction='c',tol=1e-2, system = None):
         raise Exception("direction expects one of ['a','b','c']")
 
     scale = np.linalg.norm(basis[0])
-    u1 = _poscar1.unique.to_dict()
-    u2 = _poscar2.unique.to_dict()
+    u1 = _poscar1.types.to_dict()
+    u2 = _poscar2.types.to_dict()
     u_all = ({**u1,**u2}).keys() # Union of unique atom types to keep track of order.
 
 
@@ -1823,3 +1823,11 @@ def add_atoms(poscar_data, name, positions):
     data['extra_info']['comment'] = f'{data["extra_info"]["comment"]} + Added {name!r}' # Update comment
 
     return serializer.PoscarData(data) # Return new POSCAR
+
+def strain_poscar(poscar_data, strain_matrix):
+    if not isinstance(strain_matrix,np.ndarray):
+        strain_matrix = np.array(strain_matrix)
+    if strain_matrix.shape != (3,3):
+        raise ValueError('`strain_matrix` must be a 3x3 matrix to multiply with basis.')
+    raise NotImplementedError
+    

@@ -182,7 +182,7 @@ class POSCAR:
         Args:
             - content: string of POSCAR content
             - path: path to file
-            - data: PoscarData object.
+            - data: PoscarData object. This assumes positions are in fractional coordinates.
 
         Prefrence order: data, content, path"""
         self._path = path
@@ -709,7 +709,7 @@ class Vasprun:
 
         # Set for info only in case of bandstructure
         if  (pairs := [k for k in kwargs['kpath_ticks'] if isinstance(k, tuple)]):
-            self._kpath =  vp.join_ksegments(self._data.bands.kpath,*pairs)
+            self._kpath =  sp.join_ksegments(self._data.bands.kpath,*pairs)
         return kwargs
     
 
@@ -1010,3 +1010,79 @@ class Vasprun:
         coords = np.array(coords) # make sure it is np.array
         ax.step(*coords.T,**kwargs)
         return ax
+    
+class Bands:
+    """
+    Class to handle and plot bandstructure data.
+    
+    Parameters
+    ----------
+    source : instance of `ipyvasp.DataSource` such as `ipyvasp.Vasprun` or `ipyvasp.Vaspout`. You can define your own class to parse data with same attributes and methods by subclassing `ipyvasp.DataSource`.
+    """
+    def __init__(self, source):
+        if not isinstance(source, vp.DataSource):
+            raise TypeError('`source` must be a subclass of `ipyvasp.parser.DataSource`.')
+        self._source = source # source is instance of DataSource
+    
+    @property
+    def source(self):
+        return self._source
+        
+#     def get_data(self, spin = 0, kpoints = -1, bands = -1,  atoms_orbs_dict: dict = None):
+#         """
+#         Selects bands and projections to use in plotting functions.
+        
+#         Parameters
+#         ----------
+#         spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations.
+#         kpoints : int, list, tuple, range or -1 by default use all kpoints. Use list, tuple or range to select specific kpoints.
+#         bands : int, list, tuple, range or -1 by default use all bands. Use list, tuple or range to select specific bands.
+#         atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs.
+        
+#         Returns
+#         -------
+#         dict : Selected bands and projections dictionary to be used in bandstructure plotting functions under this class as `data` argument.
+#         """
+#         if spin not in [0,1]:
+#             raise ValueError('spin must be 0 or 1')
+        
+#         kpts = self._source.get_kpoints()
+#         bands = self._source.get_evals()
+        
+#         output = {}
+        
+#         if kpoints == -1:
+#             output['K'] = kpts.kpath
+#             output['kpoints'] = kpts.kpoints
+#         elif isinstance(kpoints, (list,tuple, range)):
+#             old_kpath = kpts.kpath # Safe array
+#             rel_dist = [np.abs(d1-d2) for d1,d2 in zip(old_kpath[kpoints][1:], old_kpath[kpoints][:-1])]
+#             rel_dist = [old_kpath[0], *rel_dist]
+#             all_dist = np.cumsum(rel_dist).round(6)
+#             all_dist = all_dist - all_dist[0]  #Shift to start from 0
+#             output['K'] = all_dist/all_dist[-1] #Normalize to [0,1] for plotting on shared axes
+#             output['kpoints'] = self.data.bands.kpoints[kpoints]
+#         else:
+#             raise ValueError('kpoints must be -1 or a list of indices.')
+        
+#         pk = range(len(kpts.kpath)) if kpoints == -1 else kpoints
+#         pb = range(bands.evals.shape[-1]) if bands == -1 else bands
+#         output['E'] = bands.evals[spin][pk][:,pb] # 2D array
+#         output['occs'] = bands.occs[spin][pk][:,pb] # 2D array
+        
+#         if atoms_orbs_dict:
+#             atoms, orbs, labels = sp._format_input(atoms_orbs_dict, self.data.sys_info)
+#             output['labels'] = labels
+#             pros = self._source.get_bands_pro_set(spin)
+#             pros = self.data.bands.pros[spin][pk][:,pb,:,:] # 4D array
+
+#             arrays = []
+#             for atom,orb in zip(atoms,orbs):
+#                 _pros  = np.take(pros,atom,axis=2).sum(axis=2) # Sum over atoms leaves 3D array
+#                 _pros = np.take(_pros,orb,axis=2).sum(axis=2) # Sum over orbitals leaves 2D array
+#                 arrays.append(_pros)
+
+#             output['pros'] = np.array(arrays)
+        
+#         return output
+    

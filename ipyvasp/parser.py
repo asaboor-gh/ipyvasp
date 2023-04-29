@@ -25,38 +25,172 @@ def dict2tuple(name,d):
     return namedtuple(name,d.keys())(
            *(dict2tuple(k.upper(),v) if isinstance(v,dict) else v for k,v in d.items())
            )
+    
+class DataSource:
+    "Base class for all data sources. It provides a common interface to access data from different sources. Subclass it to get data from a source."
+    def __init__(self, path):
+        if not os.path.isfile(path):
+            raise FileNotFoundError("File: '{}'' does not exist!".format(path))
+        self._path = path
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.path!r})"
+    
+    @property
+    def path(self): return self._path
+    
+    @property
+    def bands(self):
+        "Returns a Bands object to access band structure data and plotting methods."
+        from .api import Bands
+        return Bands(self)
+    
+    # Following methods should be implemented in a subclass
+    def get_summary(self): raise NotImplementedError("`get_summary` should be implemented in a subclass. See Vasprun.get_summary as example.")
+    
+    def get_structure(self): raise NotImplementedError("`get_structure` should be implemented in a subclass. See Vasprun.get_structure as example.")
+    
+    def get_kpoints(self): raise NotImplementedError("`get_kpoints` should be implemented in a subclass. See Vasprun.get_kpoints as example.")
+    
+    def get_evals(self, *args, **kwargs): raise NotImplementedError("`get_evals` should be implemented in a subclass. See Vasprun.get_evals as example.")
+    
+    def get_dos(self, *args, **kwargs): raise NotImplementedError("`get_dos` should be implemented in a subclass. See Vasprun.get_dos as example.")
+    
+    def get_spins(self, *args, **kwargs): raise NotImplementedError("`get_spins` should be implemented in a subclass. See Vasprun.get_spins as example.")
+    
+    def get_forces(self): raise NotImplementedError("`get_forces` should be implemented in a subclass. See Vasprun.get_forces as example.")
+    
+    def get_scsteps(self): raise NotImplementedError("`get_scsteps` should be implemented in a subclass. See Vasprun.get_scsteps as example.")
+    
 
-def read_asxml(path :str = None):
-    """Reads a big vasprun.xml file into memory once and then apply commands. If current folder contains ``vasprun.xml`` file, it automatically picks it.
-
-    Args:
-        path (str): Path/To/vasprun.xml
-
-    Returns
-        ``XML element tree`` to use in other functions
-    """
-    path = path or './vasprun.xml'
-    if not os.path.isfile(path):
-        raise FileNotFoundError("File: '{}'' does not exist!".format(path))
-
-    elif 'vasprun.xml' not in path:
-        raise Exception("File name should end with 'vasprun.xml'")
-
-    fsize = utils.get_file_size(path)
-    value = float(fsize.split()[0])
-    print_str = """
-    Memory Consumption Warning!
-    ---------------------------
-    File: {} is large ({}). It may consume a lot of memory (generally 3 times the file size).
-        An alternative way is to use `ipyvasp.split_vasprun()` to split the file into multiple files and then read resulting '_vasprun.xml' file.
-    """.format(path,fsize)
-    if 'MB' in fsize and value > 200:
-        print(utils.color.y(textwrap.dedent(print_str)))
-    elif 'GB' in fsize and value > 1:
-        print(utils.color.y(textwrap.dedent(print_str)))
+class Vasprun(DataSource):
+    "Reads vasprun.xml file lazily. It reads only the required data from the file when a plot or data access is requested."
+    def __init__(self, path = './vasprun.xml', skipk = None):
+        super().__init__(path)
+        self._skipk = skipk if isinstance(skipk,int) else self.get_skipk()
         
-    nt = namedtuple('VasprunXML',['path','root']) # Safe and full of info
-    return nt(os.path.abspath(path), ET.parse(path).getroot()) # THis is xml_data for other functions
+    def read(self, start_match, stop_match, nth_match = 1):
+        """Reads a part of the file between start_match and stop_match and returns a generator. It is lazy and fast.
+        `start_match` and `stop_match` are regular expressions. `nth_match` is the number of occurence of start_match to start reading.
+        
+        """
+        if '|' in start_match:
+            raise ValueError("start_match should be a single match, so '|' character is not allowed.")
+        
+        with open(self.path) as f:
+            lines = islice(f,None) # this is fast
+            matched = False
+            n_start = 1
+            for line in lines:
+                if re.search(start_match, line, flags = re.DOTALL):
+                    if nth_match != n_start:
+                        n_start +=1
+                    else:
+                        matched = True
+                if matched:
+                    yield line
+                if matched and re.search(stop_match,line, flags = re.DOTALL): # avoid stop before start
+                    matched = False
+                    break
+                
+    def get_skipk(self):
+        "Returns the number of k-points to skip in band structure plot in case of HSE calculation."
+        weights = np.fromiter(
+            (v.text for v in ET.fromstringlist(self.read('<varray.*weights','</varray')).iter('v')),
+            dtype = float)
+        return len([w for w in weights if w != weights[-1]])
+    
+    def get_summary(self):
+        "Returns summary data of calculation."
+        # info_dic={
+        #       'space_info':space_info}
+        incar = {v.attrib['name']: v.text for v in ET.fromstringlist(self.read('<incar','</incar')).iter('i')}
+        
+        info_dict = {'SYSTEM':incar['SYSTEM']}
+        info_dict['ISPIN']  = int(ET.fromstring(next(self.read('<i.*ISPIN','</i>'))).text)
+        info_dict['NBANDS'] = int(ET.fromstring(next(self.read('<i.*NBANDS','</i>'))).text)
+        info_dict['NELECTS'] = int(float(ET.fromstring(next(self.read('<i.*NELECT','</i>'))).text)) # Beacuse they are poorly writtern as float, come on VASP!
+        info_dict['LSORBIT'] = True if 't' in ET.fromstring(next(self.read('<i.*LSORBIT','</i>'))).text.lower() else False
+        info_dict['Fermi']  = float(ET.fromstring(next(self.read('<i.*efermi','</i>'))).text)
+        
+        # Getting ions is kind of terrbile, but it works
+        atominfo = ET.fromstringlist(self.read('<atominfo','</atominfo'))
+        info_dict['NIONS'] = [int(atom.text) for atom in atominfo.iter('atoms')][0]
+        
+        types  = [int(_type.text) for _type in atominfo.iter('types')][0]
+        elems  = [rc[0].text.strip() for rc in atominfo.iter('rc')]
+        _inds  = [int(a) for a in elems[-types:]]
+
+        inds = np.cumsum([0,*_inds]).astype(int)
+        names = list(np.unique(elems[:-types]))
+        info_dict['types'] = {name:range(inds[i],inds[i+1]) for i,name in enumerate(names)}
+    
+        # Getting projection fields
+        fields = [f.replace('field','').strip(' ></\n') for f in self.read('<partial','<set') if 'field' in f] # poor formatting again
+        if fields:
+            info_dict['orbs'] = [f for f in fields if 'energy' not in f] # projection fields
+        
+        info_dict['incar'] = incar # Just at end 
+        return serializer.Dict2Data(info_dict)
+    
+    def get_structure(self):
+        "Returns a structure object including types, basis, rec_basis and positions."
+        arrays = np.array([[float(i) for i in v.text.split()] for v in ET.fromstringlist(self.read('<structure.*finalpos','</structure')).iter('v')])
+        info = self.get_summary()
+        return serializer.PoscarData({
+            'SYSTEM':info.SYSTEM,
+            'basis': arrays[:3],
+            'rec_basis':arrays[3:6],
+            'positions':arrays[6:],
+            'types':info.types,
+            'extra_info': {'comment':'Exported from vasprun.xml','cartesian':False,'scale':1}
+            })
+        
+    def get_kpoints(self):
+        "Returns k-points data including kpoints, coords, weights and rec_basis in which coords are calculated."
+        kpoints = np.array([[float(i) for i in v.text.split()] for v in ET.fromstringlist(self.read('<varray.*kpoint','</varray')).iter('v')])[self._skipk:]
+        weights = np.fromiter((v.text for v in ET.fromstringlist(self.read('<varray.*weights','</varray')).iter('v')),dtype = float)[self._skipk:]
+        # Get rec_basis to make cartesian coordinates
+        rec_basis = np.array([[float(i) for i in v.text.split()] for v in ET.fromstringlist(self.read('<structure.*finalpos','</structure')).iter('v')])[3:6]
+        coords = kpoints.dot(rec_basis) # cartesian coordinates
+        kpath = np.cumsum([0, *np.linalg.norm(coords[1:] - coords[:-1],axis=1)])
+        kpath = kpath/kpath[-1] # normalized kpath to see the band structure of all materials in same scale
+        return serializer.Dict2Data({'kpoints':kpoints,'coords':coords,'kpath': kpath, 'weights':weights,'rec_basis':rec_basis})
+     
+     
+    def get_dos(self, spin = 0, elim = None, atoms = None):
+        pass 
+    
+    def get_evals(self, spin = 0, elim = None, atoms = None): # may be bands and kpoints should be given
+        pass
+    
+    def get_spins(self, elim = None, atoms = None): # may be bands and kpoints should be given
+        pass
+    
+    def get_forces(self):
+        "Reads force on each ion from vasprun.xml"
+        node = ET.fromstringlist(self.read('<varray.*forces','</varray>'))
+        return np.array([[float(i) for i in v.text.split()] for v in node.iter('v')])
+    
+    def get_scsteps(self):
+        "Reads all self-consistent steps from vasprun.xml"
+        node = ET.fromstringlist(['<steps>', *list(self.read('<.*scstep','<structure>'))[:-1],'</steps>']) # poor formatting 
+        steps = []
+        for e in node.iter('energy'):
+            _d = {}
+            for i in e.iter('i'):
+                if '_en' in i.attrib['name']:
+                    _d[i.attrib['name']] = float(i.text)
+            steps.append(_d)
+            
+        if steps:
+            arrays = {k:[] for k in steps[0].keys()}
+            for step in steps:
+                for k,v in step.items():
+                    arrays[k].append(v)
+
+            return serializer.Dict2Data({k:np.array(v) for k,v in arrays.items()})
+        
 
 def xml2dict(xmlnode_or_filepath):
     """Convert xml node or xml file content to dictionary. All output text is in string format, so further processing is required to convert into data types/split etc.
@@ -76,151 +210,6 @@ def xml2dict(xmlnode_or_filepath):
     nodes = [xml2dict(child) for child in list(node)]
     return {'tag': node.tag,'text': text, 'attr':node.attrib, 'nodes': nodes}
 
-def exclude_kpts(xml_data):
-    for kpts in xml_data.root.iter('varray'):
-        if(kpts.attrib=={'name': 'weights'}):
-            weights=[float(arr.text.strip()) for arr in kpts.iter('v')]
-    exclude=[]
-    [exclude.append(item) for item in weights if item!=weights[-1]];
-    skipk=len(exclude) #that much to skip
-    return skipk
-
-def get_ispin(xml_data):
-    for item in xml_data.root.iter('i'):
-        if(item.attrib=={'type': 'int', 'name': 'ISPIN'}):
-            return int(item.text)
-        
-def get_force(xml_data):
-    "Reads force on each ion from vasprun.xml"
-    forces = []
-    for node in xml_data.root.iter('varray'):
-        if 'name' in node.attrib and node.attrib['name'] == 'forces':
-            for subnode in node.iter('v'):
-                forces = [*forces, *subnode.text.split()]
-    
-    forces = np.fromiter(forces,dtype=float).reshape((-1,3))
-    return forces
-
-def get_scsteps(xml_data):
-    "Reads scsteps energies from vasprun.xml"
-    steps = []
-    for node in xml_data.root.iter('scstep'):
-        for e in node.iter('energy'):
-            _d = {}
-            for i in e.iter('i'):
-                if '_en' in i.attrib['name']:
-                    _d[i.attrib['name']] = float(i.text)
-            steps.append(_d)
-    if steps:
-        arrays = {k:[] for k in steps[0].keys()}
-        for step in steps:
-            for k,v in step.items():
-                arrays[k].append(v)
-                
-        return {k:np.array(v) for k,v in arrays.items()}
-
-
-def get_space_info(xml_data):
-    base_dir = os.path.split(os.path.abspath(xml_data.path))[0]
-    path = os.path.join(base_dir,'OUTCAR')
-    if not os.path.isfile(path):
-        raise FileNotFoundError(f"File {path!r} not found. OUTCAR file should be in same directory as of {xml_data.path!r}.")
-    
-    info_dict = {}
-    pos_line = islice2array(path,include = '^positions|^\s+positions',raw=True)
-    info_dict['cartesian_positions'] = True if 'cartesian' in pos_line.lower() else False
-    
-    k_line = islice2array(path,include = '^k-points|^\s+k-points',raw=True).splitlines()[0]
-    info_dict['cartesian_kpoints'] = True if 'cartesian' in k_line.lower() else False
-    
-    with open(path, 'r') as f:
-        text = f.read()
-        two_pi, reciprocal = re.findall(r'2pi/SCALE.*position',text, flags = re.DOTALL)[0].split('k-points')
-        reciprocal = reciprocal.split('position')[0].strip().splitlines()[1:]
-        two_pi = two_pi.strip().splitlines()[1:]
-    
-    k_rec = np.array([[float(v) for v in r.strip().split()[:3]] for r in reciprocal])
-    k_scale = np.array([[float(v) for v in r.strip().split()[:3]] for r in two_pi])
-    
-    for final in xml_data.root.iter('structure'):
-        if final.attrib.get('name','') == 'finalpos':
-            for arr in final.iter('varray'):
-                if arr.attrib.get('name','') == 'rec_basis':
-                    rec_basis = np.array([[float(a) for a in v.text.split()] for v in arr.iter('v')])
-                    k_coords = k_rec.dot(rec_basis)
-                    ks_norm = np.linalg.norm(k_scale,axis=1)
-                    kc_norm = np.linalg.norm(k_coords,axis=1)
-                    where = (kc_norm > 1e-6) # Some kpoints may yield zero norm
-                    info_dict['scale'] = (ks_norm[where]/kc_norm[where]).mean().round(12).astype(float)
-    
-    cartesian_kpath = np.cumsum(np.linalg.norm(k_scale[1:]-k_scale[:-1],axis=1))
-    info_dict['cartesian_kpath'] = np.insert(cartesian_kpath,0,0)
-    return serializer.Dict2Data(info_dict)
-    
-
-def get_summary(xml_data):
-    for i_car in xml_data.root.iter('incar'):
-        incar={car.attrib['name']:car.text.strip() for car in i_car}
-    n_ions=[int(atom.text) for atom in xml_data.root.iter('atoms')][0]
-    type_ions=[int(atom_types.text) for atom_types in xml_data.root.iter('types')][0]
-    elem=[info[0].text.strip() for info in xml_data.root.iter('rc')]
-    
-    elem_name=[]; #collect IONS names
-    [elem_name.append(item) for item in elem[:-type_ions] if item not in elem_name]
-    elem_index=[0]; #start index
-    [elem_index.append((int(entry)+elem_index[-1])) for entry in elem[-type_ions:]];
-    types = {k: range(elem_index[i],elem_index[i+1]) for i,k in enumerate(elem_name)}
-    
-    ISPIN = get_ispin(xml_data=xml_data)
-    NELECT = int([i.text.strip().split('.')[0] for i in xml_data.root.iter('i') if i.attrib['name']=='NELECT'][0])
-    # Fields
-    try:
-        for pro in xml_data.root.iter('partial'):
-            dos_fields=[field.text.strip() for field in pro.iter('field')]
-            dos_fields = [field for field in dos_fields if 'energy' not in field]
-    except:
-        dos_fields = []
-    for i in xml_data.root.iter('i'): #efermi for condition required.
-        if(i.attrib=={'name': 'efermi'}):
-            efermi=float(i.text)
-    
-    #Writing information to a dictionary
-    space_info = get_space_info(xml_data=xml_data)
-    info_dic={'SYSTEM':incar['SYSTEM'],'NION':n_ions,'NELECT':NELECT,'TypeION':type_ions,
-              'types':types,'Fermi': efermi,'ISPIN':ISPIN,
-              'fields':dos_fields,'incar':incar, 'space_info':space_info}
-    return serializer.Dict2Data(info_dic)
-
-def join_ksegments(kpath,*pairs):
-    """Joins a broken kpath's next segment to previous. `pairs` should provide the adjacent indices of the kpoints to be joined."""
-    path_arr = np.array(kpath)
-    path_max = path_arr.max()
-    if pairs:
-        for pair in pairs:
-            if len(pair) != 2:
-                raise ValueError(f"{pair} should have exactly two indices.")
-            for idx in pair:
-                if not isinstance(idx, int):
-                    raise ValueError(f"{pair} should have integers, got {idx!r}.")
-            
-            idx_1, idx_2 = pair
-            if idx_2 - idx_1 != 1:
-                raise ValueError(f"Indices in pair ({idx_1}, {idx_2}) are not adjacent.")
-            path_arr[idx_2:] -= path_arr[idx_2] - path_arr[idx_1]
-        path_arr = path_max * path_arr/path_arr[-1] # Normalize to max value back
-    return list(path_arr)
-
-def get_kpts(xml_data, skipk = 0):
-    for kpts in xml_data.root.iter('varray'):
-        if(kpts.attrib=={'name': 'kpointlist'}):
-            kpoints=[[float(item) for item in arr.text.split()] for arr in kpts.iter('v')]
-    kpoints=np.array(kpoints[skipk:])
-    #KPath solved.
-    kpath = get_space_info(xml_data).cartesian_kpath[skipk:]
-    kpath = kpath - kpath[0] # Shift to start at 0
-    kpath = kpath/kpath[-1] # Normaliz to 1 to see all bandstuructres on common axis in full range
-    # Do Not Join KPath if it is broken, leave that to plotting functions
-    return serializer.Dict2Data({'NKPTS':len(kpoints),'kpoints':kpoints,'kpath':kpath})
 
 def get_tdos(xml_data,elim = []):
     tdos=[]; #assign for safely exit if wrong spin set entered.
@@ -417,31 +406,6 @@ def get_dos_pro_set(xml_data,spin = 0,dos_range:range=None):
     return serializer.Dict2Data({'labels':dos_fields,'pros':final_data})
 
 
-def get_structure(xml_data):
-    SYSTEM = [i.text for i in xml_data.root.iter('i') if i.attrib['name'] == 'SYSTEM'][0]
-
-    for final in xml_data.root.iter('structure'):
-        if(final.attrib=={'name': 'finalpos'}):
-            for arr in final.iter('varray'):
-                if(arr.attrib=={'name': 'basis'}):
-                    basis=[[float(a) for a in v.text.split()] for v in arr.iter('v')]
-                if(arr.attrib=={'name': 'positions'}):
-                    positions=[[float(a) for a in v.text.split()] for v in arr.iter('v')]
-    # element labels
-    types  = [int(_type.text) for _type in xml_data.root.iter('types')][0]
-    elems  = [info[0].text.strip() for info in xml_data.root.iter('rc')]
-    _inds  = np.array([int(a) for a in elems[-types:]])
-
-    INDS = np.cumsum([0,*_inds]).astype(int)
-    Names = list(np.unique(elems[:-types]))
-    unique_d = {e:range(INDS[i],INDS[i+1]) for i,e in enumerate(Names)}
-    space_info = get_space_info(xml_data)
-    scale = space_info.scale
-    cartesian = space_info.cartesian_positions
-    st_dic={'SYSTEM':SYSTEM,'basis': np.array(basis),
-            'extra_info': {'comment':'Exported from vasprun.xml','cartesian':cartesian,'scale':scale},
-            'positions': np.array(positions),'types': unique_d}
-    return serializer.PoscarData(st_dic)
 
 def export_vasprun(path:str = None, skipk:int = None, elim:list = [], dos_only:bool = False):
     """Returns a full dictionary of all objects from ``vasprun.xml`` file. It first try to load the data exported by powershell's `Export-VR(Vasprun)`, which is very fast for large files. It is recommended to export large files in powershell first.
@@ -468,7 +432,7 @@ def export_vasprun(path:str = None, skipk:int = None, elim:list = [], dos_only:b
         skipk = exclude_kpts(xml_data) #that much to skip by default
     info_dic = get_summary(xml_data) #Reads important information of system.
     #KPOINTS
-    kpts = get_kpts(xml_data,skipk=skipk)
+    kpts = get_kpoints(xml_data,skipk=skipk)
     #EIGENVALS
     eigenvals = get_evals(xml_data,skipk=skipk,elim=elim)
     #TDOS
@@ -740,7 +704,7 @@ def split_vasprun(path:str = None):
         NIONS  = _summary.NION
         NORBS  = len(_summary.fields)
         NBANDS = get_evals(xml_data).NBANDS
-        NKPTS  = get_kpts(xml_data).NKPTS
+        NKPTS  = get_kpoints(xml_data).NKPTS
         del xml_data # free meory now.
         for i in range(N_sets): #Reads every set
             print("Writing {!r} ...".format(out_sets[i]),end=' ')
@@ -787,7 +751,7 @@ def export_spin_data(path = None, spins = 's', skipk = None, elim = None):
                 raise ValueError(f"LSORBIT = {LSORBIT} does not include spin component {comp!r}!")
 
     full_dic['dim_info'] = {'kpoints':'(NKPTS,3)','evals.<e,u,d>':'⇅(NKPTS,NBANDS)','spins.<u,d,s,x,y,z>':'⇅(NION,NKPTS,NBANDS,pro_fields)'}
-    full_dic['kpoints']= get_kpts(xml_data, skipk = skipk).kpoints
+    full_dic['kpoints']= get_kpoints(xml_data, skipk = skipk).kpoints
 
     bands = get_evals(xml_data, skipk = skipk,elim = elim).to_dict()
     evals = bands['evals']

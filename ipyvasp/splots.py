@@ -268,6 +268,25 @@ def add_text(ax=None,xs=0.25,ys=0.9,txts='[List]',colors='r',transform=True,**kw
                 except:
                     ax.text(x,y,txt,color=colors,**args_dict,**kwargs)
                     
+def join_ksegments(kpath,*pairs):
+    """Joins a broken kpath's next segment to previous. `pairs` should provide the adjacent indices of the kpoints to be joined."""
+    path_arr = np.array(kpath)
+    path_max = path_arr.max()
+    if pairs:
+        for pair in pairs:
+            if len(pair) != 2:
+                raise ValueError(f"{pair} should have exactly two indices.")
+            for idx in pair:
+                if not isinstance(idx, int):
+                    raise ValueError(f"{pair} should have integers, got {idx!r}.")
+            
+            idx_1, idx_2 = pair
+            if idx_2 - idx_1 != 1:
+                raise ValueError(f"Indices in pair ({idx_1}, {idx_2}) are not adjacent.")
+            path_arr[idx_2:] -= path_arr[idx_2] - path_arr[idx_1]
+        path_arr = path_max * path_arr/path_arr[-1] # Normalize to max value back
+    return list(path_arr)
+               
 # This is to verify things together and make sure they are working as expected.
 def _validate_data(K, E,  elim, kpath_ticks, interp_nk):
     if np.ndim(E) != 2:
