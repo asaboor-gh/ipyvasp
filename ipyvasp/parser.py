@@ -45,6 +45,15 @@ class DataSource:
         from .api import Bands
         return Bands(self)
     
+    def get_efermi(self, evals, occs, tol = 1e-3):
+        "Gets Fermi energy or VBM from evals and occs."
+        if np.shape(evals) != np.shape(occs):
+            raise ValueError("evals and occs should have same shape.")
+        try:
+            float(evals[occs > tol].max())
+        except:
+            raise ValueError("Fermi energy/VBM could not be determined form given evals and occs.")
+    
     # Following methods should be implemented in a subclass
     def get_summary(self): raise NotImplementedError("`get_summary` should be implemented in a subclass. See Vasprun.get_summary as example.")
     
@@ -69,10 +78,10 @@ class Vasprun(DataSource):
         super().__init__(path)
         self._skipk = skipk if isinstance(skipk,int) else self.get_skipk()
         
-    def read(self, start_match, stop_match, nth_match = 1):
+    def read(self, start_match, stop_match, nth_match = 1, skip_last = False):
         """Reads a part of the file between start_match and stop_match and returns a generator. It is lazy and fast.
         `start_match` and `stop_match` are regular expressions. `nth_match` is the number of occurence of start_match to start reading.
-        
+        `skip_last` is used to determine whether to keep or skip last line.
         """
         if '|' in start_match:
             raise ValueError("start_match should be a single match, so '|' character is not allowed.")
@@ -87,11 +96,14 @@ class Vasprun(DataSource):
                         n_start +=1
                     else:
                         matched = True
-                if matched:
-                    yield line
                 if matched and re.search(stop_match,line, flags = re.DOTALL): # avoid stop before start
                     matched = False
-                    break
+                    if not skip_last:
+                        yield line
+                        
+                    break # stop reading
+                if matched: # should be after break to handle last line above
+                    yield line
                 
     def get_skipk(self):
         "Returns the number of k-points to skip in band structure plot in case of HSE calculation."
@@ -102,16 +114,14 @@ class Vasprun(DataSource):
     
     def get_summary(self):
         "Returns summary data of calculation."
-        # info_dic={
-        #       'space_info':space_info}
         incar = {v.attrib['name']: v.text for v in ET.fromstringlist(self.read('<incar','</incar')).iter('i')}
         
         info_dict = {'SYSTEM':incar['SYSTEM']}
-        info_dict['ISPIN']  = int(ET.fromstring(next(self.read('<i.*ISPIN','</i>'))).text)
-        info_dict['NBANDS'] = int(ET.fromstring(next(self.read('<i.*NBANDS','</i>'))).text)
+        info_dict['ISPIN']   = int(ET.fromstring(next(self.read('<i.*ISPIN','</i>'))).text)
+        info_dict['NBANDS']  = int(ET.fromstring(next(self.read('<i.*NBANDS','</i>'))).text)
         info_dict['NELECTS'] = int(float(ET.fromstring(next(self.read('<i.*NELECT','</i>'))).text)) # Beacuse they are poorly writtern as float, come on VASP!
         info_dict['LSORBIT'] = True if 't' in ET.fromstring(next(self.read('<i.*LSORBIT','</i>'))).text.lower() else False
-        info_dict['Fermi']  = float(ET.fromstring(next(self.read('<i.*efermi','</i>'))).text)
+        info_dict['EFERMI']  = float(ET.fromstring(next(self.read('<i.*efermi','</i>'))).text)
         
         # Getting ions is kind of terrbile, but it works
         atominfo = ET.fromstringlist(self.read('<atominfo','</atominfo'))
@@ -159,12 +169,48 @@ class Vasprun(DataSource):
      
      
     def get_dos(self, spin = 0, elim = None, atoms = None):
+        # Should be as energy(NE,), total(NE,), integrated(NE,), partial(NE, NATOMS(selected), NORBS) and atoms reference should be returned
         pass 
     
-    def get_evals(self, spin = 0, elim = None, atoms = None): # may be bands and kpoints should be given
-        pass
+    def _get_spin_set(self, spin, bands_range, atoms):
+        if atoms == -1:
+            pass 
+        elif isinstance(atoms, (list, tuple, range)):
+            pass 
+        else:
+            raise ValueError('atoms should be a list, tuple, range or -1 for all atoms')
+        return None
     
-    def get_spins(self, elim = None, atoms = None): # may be bands and kpoints should be given
+    def get_evals(self, spin = 0, elim = None, atoms = None): # may be bands and kpoints should be given
+        # mention that elim applies to unsubstracted efermi from evals 
+        info = self.get_summary()
+        bands_range = range(info.NBANDS)
+        
+        ev = (r.split()[1:3] for r in self.read(f'<set.*spin {spin+1}',f'<set.*spin {spin+2}|</eigenvalues>') if '<r>' in r)
+        ev = (e for es in ev for e in es) # flatten
+        ev = np.fromiter(ev,float)
+        if ev.size:
+            ev = ev.reshape((-1,info.NBANDS,2))[self._skipk:]
+        else:
+            raise ValueError('No eigenvalues found for spin {}'.format(spin))
+        evals, occs = ev[:,:,0], ev[:,:,1]
+        
+        if elim:
+            up_ind = np.max(np.where(evals[:,:] <= np.max(elim))[1]) + 1
+            lo_ind = np.min(np.where(evals[:,:] >= np.min(elim))[1])
+            evals = evals[:, lo_ind:up_ind]
+            occs = occs[:, lo_ind:up_ind]
+            bands_range = range(lo_ind, up_ind)
+            
+        if atoms:
+            # Get projections here
+            pros = self._get_spin_set(spin, bands_range, atoms)
+            
+        return serializer.Dict2Data({'evals':evals,'occs':occs, 'pros':pros, 'atoms': atoms})
+
+    def get_spins(self, bands = -1, atoms = -1): 
+        # Just have a loop over _get_spin_set and collect all spins, evals must be collected for both spin up and down
+        # shape should be (ISPIN, NKPOINTS, NBANDS, [NATOMS(selected), NORBS]) and atoms and bands reference should be returned
         pass
     
     def get_forces(self):
@@ -174,7 +220,7 @@ class Vasprun(DataSource):
     
     def get_scsteps(self):
         "Reads all self-consistent steps from vasprun.xml"
-        node = ET.fromstringlist(['<steps>', *list(self.read('<.*scstep','<structure>'))[:-1],'</steps>']) # poor formatting 
+        node = ET.fromstringlist(['<steps>', *self.read('<.*scstep','<structure>', skip_last = True),'</steps>']) # poor formatting 
         steps = []
         for e in node.iter('energy'):
             _d = {}
