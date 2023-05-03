@@ -313,7 +313,7 @@ def _validate_data(K, E,  elim, kpath_ticks, interp_nk):
     
     pairs = [k for k in kpath_ticks.keys() if isinstance(k, tuple)] # tuple keys, list is not hashable
     
-    K = vp.join_ksegments(K, *pairs)
+    K = join_ksegments(K, *pairs)
     
     inds  = [k[0] if isinstance(k, tuple) else k for k in kpath_ticks.keys()]
     vals = list(kpath_ticks.values())
@@ -361,7 +361,7 @@ def splot_bands(K, E, ax = None, elim = None, kpath_ticks = None, interp_nk = No
 
     ax = get_axes() if ax is None else ax
     if 'color' not in kwargs and 'c' not in kwargs:
-        kwargs['color'] = '#2e3157' # default color dark blue
+        kwargs['color'] = '#01579b' # default color dark blue
     
     if 'linewidth' not in kwargs and 'lw' not in kwargs:
         kwargs['linewidth'] = 0.9 # default linewidth to make it look good
@@ -635,6 +635,9 @@ def _make_line_collection(max_width  = 2.5,
 # Cell
 def _validate_input(atoms,orbs,labels,sys_info):
     "Fix input atoms, orbs and labels according to given sys_info. Returns (atoms, orbs,labels)."
+    if not hasattr(sys_info,'fields'): # change to orbs later
+        raise ValueError("Given data does not include orbital projection.")
+    
     if len(atoms) != len(orbs) or len(atoms) != len(labels):
         raise ValueError("`atoms`, `orbs` and `labels` expect same length, even if empty.")
 
@@ -656,7 +659,7 @@ def _validate_input(atoms,orbs,labels,sys_info):
         raise IndexError("index {} is out of bound for {} ions".format(max(_es),max_ind+1))
 
     # Orbitals Index fixing
-    nfields = len(sys_info.fields)
+    nfields = len(sys_info.fields) # fields are changed to orbs and only exist if suitable value of LORBIT is given.
     orbs = [[item] if type(item) == int else item for item in orbs] #Fix if integer given.
     _os = [r for rr in orbs for r in rr]
     if  _os and max(_os) >= nfields:
@@ -790,6 +793,8 @@ def _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False, **others):
     
     pros = np.transpose(pros,(1,2,0)) # [nk,nb,m] now
     
+    # NOTE: Add peak to peak data and normalize to 0-1 by default, just hold min and max refrence, do not need scale_paramter, but then two plots will not be comparable
+    # NOTE: Scaling is required to put any data, like negative as well, so spin up and down can be subtracted. 
     if scale_data: # Normalize overall data
         c_max = np.max(pros)
         if c_max > 0.0000001: # Avoid division error

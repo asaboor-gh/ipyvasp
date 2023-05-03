@@ -50,7 +50,7 @@ class DataSource:
         if np.shape(evals) != np.shape(occs):
             raise ValueError("evals and occs should have same shape.")
         try:
-            float(evals[occs > tol].max())
+            return float(evals[occs > tol].max())
         except:
             raise ValueError("Fermi energy/VBM could not be determined form given evals and occs.")
     
@@ -145,9 +145,11 @@ class Vasprun(DataSource):
     
     def get_structure(self):
         "Returns a structure object including types, basis, rec_basis and positions."
-        arrays = np.array([[float(i) for i in v.text.split()] for v in ET.fromstringlist(self.read('<structure.*finalpos','</structure')).iter('v')])
+        arrays = np.array([[float(i) for i in v.split()[1:4]] for v in self.read('<structure.*finalpos','select|</structure') if '<v>' in v]) # Stop at selctive dynamics if exists
         info = self.get_summary()
         return serializer.PoscarData({
+            
+            
             'SYSTEM':info.SYSTEM,
             'basis': arrays[:3],
             'rec_basis':arrays[3:6],
@@ -161,7 +163,7 @@ class Vasprun(DataSource):
         kpoints = np.array([[float(i) for i in v.text.split()] for v in ET.fromstringlist(self.read('<varray.*kpoint','</varray')).iter('v')])[self._skipk:]
         weights = np.fromiter((v.text for v in ET.fromstringlist(self.read('<varray.*weights','</varray')).iter('v')),dtype = float)[self._skipk:]
         # Get rec_basis to make cartesian coordinates
-        rec_basis = np.array([[float(i) for i in v.text.split()] for v in ET.fromstringlist(self.read('<structure.*finalpos','</structure')).iter('v')])[3:6]
+        rec_basis = np.array([[float(i) for i in v.split()[1:4]] for v in self.read('<structure.*finalpos','select|</structure') if '<v>' in v])[3:6] # could be selective dynamics there
         coords = kpoints.dot(rec_basis) # cartesian coordinates
         kpath = np.cumsum([0, *np.linalg.norm(coords[1:] - coords[:-1],axis=1)])
         kpath = kpath/kpath[-1] # normalized kpath to see the band structure of all materials in same scale
@@ -172,7 +174,7 @@ class Vasprun(DataSource):
         # Should be as energy(NE,), total(NE,), integrated(NE,), partial(NE, NATOMS(selected), NORBS) and atoms reference should be returned
         pass 
     
-    def _get_spin_set(self, spin, bands_range, atoms):
+    def _get_spin_set(self, spin, bands_range, atoms): # bands_range comes from elim applied to all bands
         if atoms == -1:
             pass 
         elif isinstance(atoms, (list, tuple, range)):
@@ -181,8 +183,8 @@ class Vasprun(DataSource):
             raise ValueError('atoms should be a list, tuple, range or -1 for all atoms')
         return None
     
-    def get_evals(self, spin = 0, elim = None, atoms = None): # may be bands and kpoints should be given
-        # mention that elim applies to unsubstracted efermi from evals 
+    def get_evals(self, spin = 0, elim = None, atoms = None): 
+        # mention that elim applies to unsubstracted efermi from evals, and elim should keep track of efermi, inside Bands and DOS, add efermi to elim passed to get_evals from bands
         info = self.get_summary()
         bands_range = range(info.NBANDS)
         
@@ -201,12 +203,14 @@ class Vasprun(DataSource):
             evals = evals[:, lo_ind:up_ind]
             occs = occs[:, lo_ind:up_ind]
             bands_range = range(lo_ind, up_ind)
-            
+        
+        out = {'evals':evals,'occs':occs}
         if atoms:
             # Get projections here
-            pros = self._get_spin_set(spin, bands_range, atoms)
+            out['pros'] = self._get_spin_set(spin, bands_range, atoms)
+            out['atoms'] = atoms
             
-        return serializer.Dict2Data({'evals':evals,'occs':occs, 'pros':pros, 'atoms': atoms})
+        return serializer.Dict2Data(out)
 
     def get_spins(self, bands = -1, atoms = -1): 
         # Just have a loop over _get_spin_set and collect all spins, evals must be collected for both spin up and down

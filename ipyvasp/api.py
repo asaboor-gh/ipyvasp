@@ -627,9 +627,7 @@ get_axes.__doc__ = get_axes.__doc__ + '''
 
 # Cell
 
-_skb_doc = '''spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations.
-    kpoints : int, list, tuple, range or -1 by default use all kpoints. Use list, tuple or range to select specific kpoints.
-    bands : int, list, tuple, range or -1 by default use all bands. Use list, tuple or range to select specific bands.'''
+_skb_doc = 'spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations.'
 _proj_doc = "atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs."
 class Vasprun:
     """
@@ -676,13 +674,6 @@ class Vasprun:
             self.kpath_ticks = sio.read_ticks(os.path.join(os.path.dirname(path),'KPOINTS'))
         else:
             self.kpath_ticks = {} # no kticks available when loading from json/pickle data_str
-
-    def __enter__(self):
-        import weakref
-        return weakref.proxy(self)
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        pass
 
     @property
     def poscar(self):
@@ -883,133 +874,6 @@ class Vasprun:
         kwargs = self.__handle_kwargs(kwargs, dos=True)
         return ip.iplot_dos_lines(self._data, atoms_orbs_dict = atoms_orbs_dict,**kwargs)
 
-    def get_band_info(self,b_i,k_i=None):
-        """Get band information for given band index `b_i`. If `k_i` is given, returns info at that point
-        Fermi energy is subtracted from all energies. When a plot commnad is called, the Fermi energy is updated if provided.
-        """
-        def at_minmax(_bands,_pros,func,k_i=None):
-            _bands_ = _bands.flatten() - self._efermi # subtract fermi energy
-            if isinstance(k_i,int):
-                extrema = _bands_[k_i]
-                k = float(self._kpath[k_i])
-                kp = self._data.bands.kpoints[k_i]
-                pros = _pros[:,k_i,:].sum(axis=0).flatten()
-            else:
-                extrema = func(_bands_)
-                where, = np.where(_bands_ == extrema) # unpack singelton
-                k, kp = [float(self._kpath[w]) for w in where], self._data.bands.kpoints[where]
-                pros = _pros[:,where[0],:].sum(axis=0).flatten()
-            return serializer.Dict2Data({'e':float(extrema),'k':k,'kp':kp.tolist(),
-                    'pros':{l.replace('-',''):float(p) for p,l in zip(pros,self._data.pro_bands.labels)}})
-
-        if self._data.bands.ISPIN == 1:
-            b = self._data.bands.evals[:,b_i]
-            p = self._data.pro_bands.pros[:,:,b_i,:]
-
-            if isinstance(k_i,int): # single kpoint
-                return at_minmax(b,p,np.min,k_i=k_i)
-
-            return serializer.Dict2Data({'min':at_minmax(b,p,np.min,k_i=k_i),'max':at_minmax(b,p,np.max,k_i=k_i)})
-
-        else: # spin-polarized
-            bu = self._data.bands.evals.SpinUp[:,b_i]
-            pu = self._data.pro_bands.pros.SpinUp[:,:,b_i,:]
-
-            _minu = at_minmax(bu,pu,np.min,k_i=k_i)
-            _maxu = at_minmax(bu,pu,np.max,k_i=k_i)
-
-            bd = self._data.bands.evals.SpinDown[:,b_i]
-            pd = self._data.pro_bands.pros.SpinDown[:,:,b_i,:]
-
-            _mind = at_minmax(bd,pd,np.min,k_i=k_i)
-            _maxd = at_minmax(bd,pd,np.max,k_i=k_i)
-
-            if isinstance(k_i,int): # single kpoint
-                return serializer.Dict2Data({'SpinUp':_minu,'SpinDown':_mind})
-
-            return serializer.Dict2Data({'SpinUp':{'min':_minu,'max':_maxu},'SpinDown':{'min':_mind,'max':_maxd}})
-
-    def get_en_diff(self,b1_i,b2_i,k1_i=None,k2_i=None):
-        """Get energy difference between two bands at given two kpoints indices. Index 2 is considered at higher energy.
-        - b1_i, b2_i : band indices of the two bands, minimum energy difference is calculated.
-        - k1_i, k2_i : k-point indices of the two bands.
-
-        > If k1_i and k2_i are not provided, `min(b2_i) - max(b1_i)` is calculated which is equivalent to band gap.
-
-        Returns: Data with follwoing attributes which can be used to annotate the difference on plot.
-            de     : energy difference
-            coords : np.array([[k1,e1],[k2,e2]]) #Fermi is subtracted either from system or when user provides in a plot command.
-            eqv_coords: list(coords) at equivalent k-points if exit. Do not appear if k1_i and k2_i are provided.
-
-        For spin-polarized case, 4 blocks of above data are returned which are accessible by
-        `u1u2, u1d2, d1u2, d1d2` and they collects energy difference between 2 given bands at 2 different spin.
-
-        """
-        if k1_i and k2_i == None:
-            raise ValueError('When you provide `k1_i`, `k2_i` cannot be None. They both can be None at same time.')
-        if k1_i == None and k2_i:
-            raise ValueError('When you provide `k2_i`, `k1_i` cannot be None. They both can be None at same time.')
-
-        def format_coords(b1_max,b2_min):
-            "maximum of b1 and min of b2 is taken for energy difference of two bands when kpoint not given."
-            combs = []
-            for k1 in b1_max.k:
-                for k2 in b2_min.k:
-                    combs.append(np.array([[k1,b1_max.e],[k2,b2_min.e]]))
-
-            _out = {'coords':combs[0]}
-            if combs[1:]:
-                _out['eqv_coords'] = combs[1:]
-            return _out
-
-        if self._data.bands.ISPIN == 1:
-            if isinstance(k1_i,int):
-                b1 = self.get_band_info(b1_i,k_i=k1_i)
-                b2 = self.get_band_info(b2_i,k_i=k2_i)
-                return serializer.Dict2Data({'de':b2.e - b1.e, 'coords': np.array([[b1.k,b1.e],[b2.k, b2.e]])})
-            else:
-                b1 = self.get_band_info(b1_i,k_i=None).max
-                b2 = self.get_band_info(b2_i,k_i=None).min
-
-                return serializer.Dict2Data({'de':b2.e - b1.e, **format_coords(b1,b2)})
-        else:
-            if isinstance(k1_i,int):
-                b1u = self.get_band_info(b1_i,k_i=k1_i).SpinUp
-                b1d = self.get_band_info(b1_i,k_i=k1_i).SpinDown
-                b2u = self.get_band_info(b2_i,k_i=k2_i).SpinUp
-                b2d = self.get_band_info(b2_i,k_i=k2_i).SpinDown
-
-                return serializer.Dict2Data({
-                    'u1u2':{'de':b2u.e - b1u.e, 'coords':np.array([[b1u.k, b1u.e], [b2u.k, b2u.e]])},
-                    'd1d2':{'de':b2d.e - b1d.e, 'coords':np.array([[b1d.k, b1d.e], [b2d.k, b2d.e]])},
-                    'd1u2':{'de':b2u.e - b1d.e, 'coords':np.array([[b1d.k, b1d.e], [b2u.k, b2u.e]])},
-                    'u1d2':{'de':b2d.e - b1u.e, 'coords':np.array([[b1u.k, b1u.e], [b2d.k, b2d.e]])}
-                })
-            else:
-                b1u = self.get_band_info(b1_i,k_i=None).SpinUp.max # max in lower band
-                b1d = self.get_band_info(b1_i,k_i=None).SpinDown.max
-                b2u = self.get_band_info(b2_i,k_i=None).SpinUp.min # min in upper band
-                b2d = self.get_band_info(b2_i,k_i=None).SpinDown.min
-
-                return serializer.Dict2Data({
-                    'u1u2':{'de':b2u.e - b1u.e, **format_coords(b1u,b2u)},
-                    'd1d2':{'de':b2d.e - b1d.e, **format_coords(b1d,b2d)},
-                    'd1u2':{'de':b2u.e - b1d.e, **format_coords(b1d,b2u)},
-                    'u1d2':{'de':b2d.e - b1u.e, **format_coords(b1u,b2d)}
-                })
-
-    def splot_en_diff(self, coords, ax, **kwargs):
-        """Plot energy difference at given ax. Provide `coords` from output of `get_en_diff().coords` or `get_en_diff().eqv_coords[i]` if exist.
-        Provide `ax` on which bandstructure is plotted.
-        Fermi is already subtracted in `coords` from system or by user input when bandstructure plot commands are run.
-        kwargs are passed to `ax.step`.
-        Returns ax.
-        """
-        kwargs = {'marker':'.',**kwargs}
-        kwargs['where'] = 'mid' # override this
-        coords = np.array(coords) # make sure it is np.array
-        ax.step(*coords.T,**kwargs)
-        return ax
     
 class Bands:
     """
@@ -1023,66 +887,64 @@ class Bands:
         if not isinstance(source, vp.DataSource):
             raise TypeError('`source` must be a subclass of `ipyvasp.parser.DataSource`.')
         self._source = source # source is instance of DataSource
+        self._efermi = 0 # It will be changed when plotting
+        self._kpath_ticks = {}
+        
+        try:
+            self._kpath_ticks = sio.read_ticks('KPOINTS')
+        except:
+            file = os.path.join(os.path.dirname(self.source.path),'KPOINTS')
+            if os.path.isfile(file):
+                self._kpath_ticks = sio.read_ticks(file)
     
     @property
     def source(self):
         return self._source
         
-#     def get_data(self, spin = 0, kpoints = -1, bands = -1,  atoms_orbs_dict: dict = None):
-#         """
-#         Selects bands and projections to use in plotting functions.
+    def get_data(self, spin = 0, elim = None, atoms_orbs_dict: dict = None):
+        """
+        Selects bands and projections to use in plotting functions.
         
-#         Parameters
-#         ----------
-#         spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations.
-#         kpoints : int, list, tuple, range or -1 by default use all kpoints. Use list, tuple or range to select specific kpoints.
-#         bands : int, list, tuple, range or -1 by default use all bands. Use list, tuple or range to select specific bands.
-#         atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs.
+        Parameters
+        ----------
+        spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations.
+        elim : list, tuple or range by default use all energy range. Use list, tuple or range to select specific energy range.
+        atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs.
         
-#         Returns
-#         -------
-#         dict : Selected bands and projections dictionary to be used in bandstructure plotting functions under this class as `data` argument.
-#         """
-#         if spin not in [0,1]:
-#             raise ValueError('spin must be 0 or 1')
+        Returns
+        -------
+        dict : Selected bands and projections dictionary to be used in bandstructure plotting functions under this class as `data` argument.
+        """
+        if spin not in [0,1]:
+            raise ValueError('spin must be 0 or 1')
         
-#         kpts = self._source.get_kpoints()
-#         bands = self._source.get_evals()
+        atoms, orbs, labels = None, None, None
+        if atoms_orbs_dict:
+            # NOTE: Fix here relative indices and only pick what is needed
+            atoms, orbs, labels = sp._format_input(atoms_orbs_dict, self.source.get_summary())
         
-#         output = {}
+        kpts = self._source.get_kpoints()
+        eigens = self._source.get_evals(spin = spin, elim = elim, atoms = atoms) # others be there
         
-#         if kpoints == -1:
-#             output['K'] = kpts.kpath
-#             output['kpoints'] = kpts.kpoints
-#         elif isinstance(kpoints, (list,tuple, range)):
-#             old_kpath = kpts.kpath # Safe array
-#             rel_dist = [np.abs(d1-d2) for d1,d2 in zip(old_kpath[kpoints][1:], old_kpath[kpoints][:-1])]
-#             rel_dist = [old_kpath[0], *rel_dist]
-#             all_dist = np.cumsum(rel_dist).round(6)
-#             all_dist = all_dist - all_dist[0]  #Shift to start from 0
-#             output['K'] = all_dist/all_dist[-1] #Normalize to [0,1] for plotting on shared axes
-#             output['kpoints'] = self.data.bands.kpoints[kpoints]
-#         else:
-#             raise ValueError('kpoints must be -1 or a list of indices.')
+        output = {'kpath': kpts.kpath, 'kpoints': kpts.kpoints, 'coords': kpts.coords, 'evals': eigens.evals, 'occs': eigens.occs}
         
-#         pk = range(len(kpts.kpath)) if kpoints == -1 else kpoints
-#         pb = range(bands.evals.shape[-1]) if bands == -1 else bands
-#         output['E'] = bands.evals[spin][pk][:,pb] # 2D array
-#         output['occs'] = bands.occs[spin][pk][:,pb] # 2D array
-        
-#         if atoms_orbs_dict:
-#             atoms, orbs, labels = sp._format_input(atoms_orbs_dict, self.data.sys_info)
-#             output['labels'] = labels
-#             pros = self._source.get_bands_pro_set(spin)
-#             pros = self.data.bands.pros[spin][pk][:,pb,:,:] # 4D array
+        if hasattr(eigens, 'pros'):
+            arrays = []
+            for atom,orb in zip(atoms,orbs):
+                _pros  = np.take(eigens.pros,atom,axis=2).sum(axis=2) # Sum over atoms leaves 3D array
+                _pros = np.take(_pros,orb,axis=2).sum(axis=2) # Sum over orbitals leaves 2D array
+                arrays.append(_pros)
 
-#             arrays = []
-#             for atom,orb in zip(atoms,orbs):
-#                 _pros  = np.take(pros,atom,axis=2).sum(axis=2) # Sum over atoms leaves 3D array
-#                 _pros = np.take(_pros,orb,axis=2).sum(axis=2) # Sum over orbitals leaves 2D array
-#                 arrays.append(_pros)
-
-#             output['pros'] = np.array(arrays)
+            output['pros'] = np.array(arrays)
+            output['labels'] = labels
         
-#         return output
+        return serializer.Dict2Data(output)
     
+    
+    @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': f"{_skb_doc}\n    ax :"})
+    def splot_bands(self, spin = 0, ax = None, elim = None, efermi = None, kpath_ticks = None, interp_nk = {}, **kwargs):
+        plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin','efermi','kpoints','bands','kwargs']} # should be on top to avoid other loacals
+        rlim = [e + (efermi or 0) for e in elim] if isinstance(elim,(list, tuple)) else None
+        data = self.get_data(spin = spin, elim = rlim) # picked relative limit
+        K, E = data.kpath, data.evals - (efermi or 0)
+        return sp.splot_bands(K, E, **plot_kws, **kwargs)

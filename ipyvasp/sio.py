@@ -593,7 +593,7 @@ def read_ticks(kpoints_path):
     if os.path.isfile(kpoints_path):
         top_line = vp.islice2array(kpoints_path,exclude=None,raw=True,nlines=1)
         if 'HSK-PATH' in top_line:
-            head = head.split('HSK-PATH')[1].strip() # Only update head if HSK-PATH is found.
+            head = top_line.split('HSK-PATH')[1].strip() # Only update head if HSK-PATH is found.
     
             hsk = [[v.strip() for v in vs.split(':')] for vs in head.split(',')]
             for k,v in hsk:
