@@ -669,11 +669,11 @@ class Vasprun:
         self._efermi = self._data.fermi   # For info only, get updated with plot commands
 
         if path == None:
-            self.kpath_ticks = sio.read_ticks('KPOINTS')
+            self.kticks = sio.read_ticks('KPOINTS')
         elif os.path.isfile(path):
-            self.kpath_ticks = sio.read_ticks(os.path.join(os.path.dirname(path),'KPOINTS'))
+            self.kticks = sio.read_ticks(os.path.join(os.path.dirname(path),'KPOINTS'))
         else:
-            self.kpath_ticks = {} # no kticks available when loading from json/pickle data_str
+            self.kticks = {} # no kticks available when loading from json/pickle data_str
 
     @property
     def poscar(self):
@@ -691,15 +691,15 @@ class Vasprun:
         if dos:
             return kwargs
         
-        kpath_ticks = kwargs.pop('kpath_ticks', None) #Remove kpath_ticks from kwargs for later use
+        kticks = kwargs.pop('kticks', None) #Remove kticks from kwargs for later use
         
-        if 'interp_nk' in kwargs and kwargs['interp_nk']:
-            kwargs['kpath_ticks'] = kpath_ticks # Accept provided kpath_ticks only because we are interpolating
+        if 'interp' in kwargs and kwargs['interp']:
+            kwargs['kticks'] = kticks # Accept provided kticks only because we are interpolating
         else:
-            kwargs = {'kpath_ticks': kpath_ticks or self.kpath_ticks,**kwargs} #Prefer provided ones by user
+            kwargs = {'kticks': kticks or self.kticks,**kwargs} #Prefer provided ones by user
 
         # Set for info only in case of bandstructure
-        if  (pairs := [k for k in kwargs['kpath_ticks'] if isinstance(k, tuple)]):
+        if  (pairs := [k for k in kwargs['kticks'] if isinstance(k, tuple)]):
             self._kpath =  sp.join_ksegments(self._data.bands.kpath,*pairs)
         return kwargs
     
@@ -791,7 +791,7 @@ class Vasprun:
 
 
     @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': f"{_skb_doc}\n    ax :"})
-    def splot_bands(self, spin = 0, kpoints = -1, bands = -1, ax = None, elim = None, efermi = None, kpath_ticks = None, interp_nk = {}, **kwargs):
+    def splot_bands(self, spin = 0, kpoints = -1, bands = -1, ax = None, elim = None, efermi = None, kticks = None, interp = None, **kwargs):
         plot_kws = self.__handle_kwargs({k:v for k,v in locals().items() if k not in ['self','spin','kpoints','bands','kwargs']}) # should be on top to avoid other loacals
         data = self.pick_bands(spin = spin, kpoints = kpoints, bands = bands)
         K, E = data['K'], data['E'] - self._efermi
@@ -805,10 +805,9 @@ class Vasprun:
         ax         = None, 
         elim       = None, 
         efermi     = None,
-        kpath_ticks= None, 
-        interp_nk  = None, 
-        max_width  = 2.5,
-        scale_data = False,
+        kticks     = None, 
+        interp     = None, 
+        maxwidth   = 2.5,
         colormap   = None,
         colorbar   = True,
         N          = 9,
@@ -826,11 +825,10 @@ class Vasprun:
         bands      = -1, 
         axes       = None, 
         elim       = None, 
-        efermi      = None,
-        kpath_ticks= None, 
-        interp_nk  = None, 
-        max_width  = 2.5,
-        scale_data = False,
+        efermi     = None,
+        kticks     = None, 
+        interp     = None, 
+        maxwidth   = 2.5,
         colormap   = None,
         shadow     = False,
         showlegend = True,
@@ -849,9 +847,9 @@ class Vasprun:
         bands      = -1,
         elim       = None,
         efermi     = None,
-        kpath_ticks= None, 
-        interp_nk  = None, 
-        max_width  = 10,   
+        kticks     = None, 
+        interp     = None, 
+        maxwidth   = 10,   
         mode       = 'markers + lines',
         fig        = None,
         title      = None,
@@ -888,14 +886,14 @@ class Bands:
             raise TypeError('`source` must be a subclass of `ipyvasp.parser.DataSource`.')
         self._source = source # source is instance of DataSource
         self._efermi = 0 # It will be changed when plotting
-        self._kpath_ticks = {}
+        self._kticks = {}
         
         try:
-            self._kpath_ticks = sio.read_ticks('KPOINTS')
+            self._kticks = sio.read_ticks('KPOINTS')
         except:
             file = os.path.join(os.path.dirname(self.source.path),'KPOINTS')
             if os.path.isfile(file):
-                self._kpath_ticks = sio.read_ticks(file)
+                self._kticks = sio.read_ticks(file)
     
     @property
     def source(self):
@@ -920,8 +918,8 @@ class Bands:
         
         atoms, orbs, labels = None, None, None
         if atoms_orbs_dict:
-            # NOTE: Fix here relative indices and only pick what is needed
             atoms, orbs, labels = sp._format_input(atoms_orbs_dict, self.source.get_summary())
+            atoms = sorted(set([i for ii in atoms for i in ii])) # flatten and sort unique or NOTE: request it from above function
         
         kpts = self._source.get_kpoints()
         eigens = self._source.get_evals(spin = spin, elim = elim, atoms = atoms) # others be there
@@ -931,7 +929,8 @@ class Bands:
         if hasattr(eigens, 'pros'):
             arrays = []
             for atom,orb in zip(atoms,orbs):
-                _pros  = np.take(eigens.pros,atom,axis=2).sum(axis=2) # Sum over atoms leaves 3D array
+                picked_atoms = [i for i, a in enumerate(eigens.atoms) if a in atom] # indices for partial data loaded
+                _pros  = np.take(eigens.pros,picked_atoms,axis=2).sum(axis=2) # Sum over atoms leaves 3D array
                 _pros = np.take(_pros,orb,axis=2).sum(axis=2) # Sum over orbitals leaves 2D array
                 arrays.append(_pros)
 
@@ -942,7 +941,7 @@ class Bands:
     
     
     @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': f"{_skb_doc}\n    ax :"})
-    def splot_bands(self, spin = 0, ax = None, elim = None, efermi = None, kpath_ticks = None, interp_nk = {}, **kwargs):
+    def splot_bands(self, spin = 0, ax = None, elim = None, efermi = None, kticks = None, interp = None, **kwargs):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin','efermi','kpoints','bands','kwargs']} # should be on top to avoid other loacals
         rlim = [e + (efermi or 0) for e in elim] if isinstance(elim,(list, tuple)) else None
         data = self.get_data(spin = spin, elim = rlim) # picked relative limit

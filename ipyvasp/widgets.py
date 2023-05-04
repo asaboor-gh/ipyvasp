@@ -498,7 +498,8 @@ class VasprunApp:
     va.set_options(
         cache_data = False, #Turn off cache globally.
         mode = 'bands', #Change graph mode from 'markers' to 'bands'. Setting it to 'lines' is not recommended in live graph, it could hang all UI.
-        interp_nk = dict(n = 2, k = 2), #Add 2 points between data points with quadratic interpolation.
+        interp = (5,3), # int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
+    
     )
     va.show() #Displays App and do work!
     va.theme_colors = pp.dark_colors #Set theme to dark externally and edit dictionary values to make your own theme
@@ -534,8 +535,8 @@ class VasprunApp:
         self.theme_colors = light_colors.copy() # Avoid Modification
         # Permeannet Parameters
         self._idos_kws   = dict(colormap='RGB',tdos_color=(0.5, 0.95, 0),linewidth=2,fill_area=True,
-                               spin='both',interp_nk={},title=None)
-        self._ibands_kws = dict(mode='bands',skipk=None,max_width=6,title=None,interp_nk={})
+                               spin='both',interp = None,title=None)
+        self._ibands_kws = dict(mode='bands',skipk=None,maxwidth=6,title=None,interp=None)
         self._evr_kws = dict(skipk=None,elim=[])
         self._cache_data = True
 
@@ -634,8 +635,8 @@ class VasprunApp:
     def output(self): return self.__class__._output
 
     def set_options(self, cache_data = True, # general options
-        mode = 'bands', max_width = 6, skipk = None, # bands only keywords
-        interp_nk = {}, title = None, # Mixed keywords
+        mode = 'bands', maxwidth = 6, skipk = None, # bands only keywords
+        interp = None, title = None, # Mixed keywords
         colormap='RGB',tdos_color=(0.5, 0.95, 0),linewidth=2,fill_area=True, spin='both' # DOS only keywords
         ):
         self._cache_data = cache_data
@@ -643,14 +644,16 @@ class VasprunApp:
             raise ValueError("mode must be 'bands','markers','lines'")
         # bands only keywords
         self._ibands_kws['mode'] = mode
-        self._ibands_kws['max_width'] = max_width
+        self._ibands_kws['maxwidth'] = maxwidth
         self._ibands_kws['skipk'] = skipk
 
-        if ''.join(interp_nk.keys()) not in 'nk':
-            raise ValueError("interp_nk must be be of the form {'n': int, 'k': int}")
+        if interp and not isinstance(interp,(list,tuple,int)):
+            raise ValueError("interp must be int or list/tuple of (n,k)")
+        if isinstance(interp,(list,tuple)) and len(interp) != 2:
+            raise ValueError("interp must be int or list/tuple of (n,k)")
         # Mixed keywords
-        self._ibands_kws['interp_nk'] = interp_nk
-        self._idos_kws['interp_nk'] = interp_nk
+        self._ibands_kws['interp'] = interp
+        self._idos_kws['interp'] = interp
         self._idos_kws['title'] = title
         self._ibands_kws['title'] = title
 
@@ -739,7 +742,7 @@ class VasprunApp:
         if 'Bands' in self._dds['band_dos'].value:
             in_box.children = [Label('---------- Projections ----------'),self._InGui.box,
                                Label('---- Other Arguments/Options ----'),
-                      VBox([HBox([Label('kpath_ticks: ',layout=l_out),
+                      VBox([HBox([Label('kticks: ',layout=l_out),
                                   self._texts['kticks'],
                                   ]).add_class('borderless').add_class('marginless'),
                       HBox([
@@ -910,14 +913,14 @@ class VasprunApp:
             self._input['Fermi'] = float(self._data.fermi)
         self._input['elim'] = [float(v) for v in elim_str if v!='-'][:2] if len(elim_str) >= 2 else None
         if self._dds['band_dos'].value == 'Bands':
-            kpath_ticks = {}
+            kticks = {}
             hsk = [[v.strip() for v in vs.split(':')] for vs in self._texts['kticks'].value.split(',')]
             for k,v in hsk:
-                kpath_ticks[k] = tuple([int(v.strip()) for v in k.split('|')]) if '|' in k else int(k)
+                kticks[k] = tuple([int(v.strip()) for v in k.split('|')]) if '|' in k else int(k)
             
-            self._input['kpath_ticks'] = kpath_ticks
+            self._input['kticks'] = kticks
         else:
-            self._input = {k:v for k,v in self._input.items() if k not in ['kpath_ticks']}
+            self._input = {k:v for k,v in self._input.items() if k not in ['kticks']}
         #Update at last
         self._InGui.output = self._input
         self._buttons['load_graph'].tooltip = "Current Input\n{!r}".format(serializer.Dict2Data(self._input))
@@ -966,8 +969,8 @@ class VasprunApp:
         if self._texts['kticks'].value or self._texts['elim'].value:
             self.__update_input(change=None)
         if self._dds['band_dos'].value == 'Bands' and self._data:
-            tickvals = [self._data.kpath[i if isinstance(i,int) else i[0]] for i in self._input['kpath_ticks']]
-            self._fig.update_xaxes(ticktext = list(self._input['kpath_ticks'].values()), tickvals = tickvals)
+            tickvals = [self._data.kpath[i if isinstance(i,int) else i[0]] for i in self._input['kticks']]
+            self._fig.update_xaxes(ticktext = list(self._input['kticks'].values()), tickvals = tickvals)
         if self._texts['elim'].value and self._input['elim'] != None and len(self._input['elim']) == 2:
             if self._dds['band_dos'].value == 'Bands':
                 self._fig.update_yaxes(range = self._input['elim'])

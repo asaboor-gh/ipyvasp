@@ -148,8 +148,6 @@ class Vasprun(DataSource):
         arrays = np.array([[float(i) for i in v.split()[1:4]] for v in self.read('<structure.*finalpos','select|</structure') if '<v>' in v]) # Stop at selctive dynamics if exists
         info = self.get_summary()
         return serializer.PoscarData({
-            
-            
             'SYSTEM':info.SYSTEM,
             'basis': arrays[:3],
             'rec_basis':arrays[3:6],

@@ -20,7 +20,7 @@ except:
     import ipyvasp.splots._validate_input as _validate_input
 
 # Cell
-def _collect_spin_data(exported_spin_data, bands = [0], atoms = [[0],], orbs = [[0],], scale_data = False):
+def _collect_spin_data(exported_spin_data, bands = [0], atoms = [[0],], orbs = [[0],]):
     if not isinstance(bands,(list,tuple)):
         raise TypeError('`bands` must be list/tuple of integer.')
     atoms, orbs, _ = _validate_input(atoms,orbs,[str(i) for i,o in enumerate(orbs)],sys_info = exported_spin_data.sys_info)
@@ -50,7 +50,7 @@ def _collect_spin_data(exported_spin_data, bands = [0], atoms = [[0],], orbs = [
         for k, v in main_dict.items():
             main_dict[k] = [*main_dict[k], *data[k]]
 
-    if atoms and scale_data == True: # Only scale if projections given
+    if atoms: # NOTE: Make room for negative peak to peak. Only scale if projections given
         _max = []
         for k,v in main_dict.items():
             if k.startswith('s'):
@@ -70,7 +70,6 @@ class SpinDataFrame(pd.DataFrame):
         - bands: list of band indices [zero based here], In output data frame you will see corresponding band number based on full data.
         - atoms: list of atoms to plot. inner list contains ions indices. Can leave empty to discard projection data.
         - orbs: list of orbitals to plot. inner list contains orbitals indices. Can leave empty to discard projection data
-        - scale_data: if True, spin data is scaled to -1 to 1.
         - skipk: if not None, auto skipped unnecessary k-points.
         - elim: if not None, filtered out unnecessary bands.
         - data: if not None, data is loaded from given data/pickle/json/dict and validated. Many other parameters are ignored when data is given.
@@ -89,8 +88,8 @@ class SpinDataFrame(pd.DataFrame):
 
         All other methods are inherited from pd.DataFrame. If you apply some method that do not pass metadat, then use `send_metadata` to copy metadata to traget SpinDataFrame.
     """
-    _metadata = ['_current_attrs','scale_data','sys_info','poscar','projection'] # These are passed after operations to new dataframe.
-    def __init__(self, *args, path = None, bands = [0], atoms = [[0],], orbs = [[0],], scale_data = False, elim = None, skipk=None, data = None, **kwargs):
+    _metadata = ['_current_attrs','sys_info','poscar','projection'] # These are passed after operations to new dataframe.
+    def __init__(self, *args, path = None, bands = [0], atoms = [[0],], orbs = [[0],], elim = None, skipk=None, data = None, **kwargs):
         if not (path or args): # It works fine without path given, but it is not recommended.
             path = './vasprun.xml'
         if path or data: # Don't updates args otherwise
@@ -109,9 +108,8 @@ class SpinDataFrame(pd.DataFrame):
                 raise ValueError('Invalid path or data!')
 
             if spin_data:
-                out_dict = _collect_spin_data(spin_data, bands = bands, atoms = atoms, orbs = orbs, scale_data = scale_data)
+                out_dict = _collect_spin_data(spin_data, bands = bands, atoms = atoms, orbs = orbs)
                 super().__init__(out_dict)
-                self.scale_data = scale_data
                 self.sys_info = spin_data.sys_info
                 atoms, orbs, _ = _validate_input(atoms,orbs,[str(i) for i,o in enumerate(orbs)],sys_info = self.sys_info)
                 self.projection = serializer.Dict2Data({f'_{i}': {'ions': e, 'orbs': o} for i,(e,o) in enumerate(zip(atoms,orbs))})
@@ -245,14 +243,14 @@ class SpinDataFrame(pd.DataFrame):
 
             df = df.round(6).dropna()
 
-            if self.scale_data == True:
-                _max = []
-                for k in [c for c in df.columns if c.startswith('s')]:
-                    _max.append(np.abs(df[k]).max())
+            # SCALE DATA NOTE: See if negative peak to peak scaling required
+            _max = []
+            for k in [c for c in df.columns if c.startswith('s')]:
+                _max.append(np.abs(df[k]).max())
 
-                _max = max(_max)
-                for k in [c for c in df.columns if c.startswith('s')]:
-                    df[k] = df[k] / (_max if _max != 0 else 1)
+            _max = max(_max)
+            for k in [c for c in df.columns if c.startswith('s')]:
+                df[k] = df[k] / (_max if _max != 0 else 1)
 
         # Make sure to keep metadata, it doesn't work otherwise.
         self.send_metadata(df)

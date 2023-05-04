@@ -288,35 +288,35 @@ def join_ksegments(kpath,*pairs):
     return list(path_arr)
                
 # This is to verify things together and make sure they are working as expected.
-def _validate_data(K, E,  elim, kpath_ticks, interp_nk):
+def _validate_data(K, E,  elim, kticks, interp):
     if np.ndim(E) != 2:
         raise ValueError("E must be a 2D array.")
     
     if np.shape(E)[0] != len(K):
         raise ValueError("Length of first dimension of E must be equal to length of K.")
     
-    if kpath_ticks is None:
-        kpath_ticks = {}
+    if kticks is None:
+        kticks = {}
     
-    if not isinstance(kpath_ticks, dict):
-        raise ValueError("kpath_ticks must be a dictionary of int/tuple -> str.")
+    if not isinstance(kticks, dict):
+        raise ValueError("kticks must be a dictionary of int/tuple -> str.")
     
     # tuple/int keys, list is not hashable
-    for k, v in kpath_ticks.items():
+    for k, v in kticks.items():
         if not isinstance(k, (tuple, int)):
-            raise ValueError("kpath_ticks keys must be int or tuple of size 2 to join broken path")
+            raise ValueError("kticks keys must be int or tuple of size 2 to join broken path")
         if not isinstance(v, str):
-            raise ValueError("kpath_ticks values must be str.")
+            raise ValueError("kticks values must be str.")
         if isinstance(k, tuple) and len(k) != 2:
-            raise ValueError("kpath_ticks keys must be int or tuple of size 2 to join broken path")
+            raise ValueError("kticks keys must be int or tuple of size 2 to join broken path")
                 
     
-    pairs = [k for k in kpath_ticks.keys() if isinstance(k, tuple)] # tuple keys, list is not hashable
+    pairs = [k for k in kticks.keys() if isinstance(k, tuple)] # tuple keys, list is not hashable
     
     K = join_ksegments(K, *pairs)
     
-    inds  = [k[0] if isinstance(k, tuple) else k for k in kpath_ticks.keys()]
-    vals = list(kpath_ticks.values())
+    inds  = [k[0] if isinstance(k, tuple) else k for k in kticks.keys()]
+    vals = list(kticks.values())
     
     xticks = [K[i] for i in inds] if inds else None
     xticklabels = [str(v) for v in vals] if vals else None
@@ -324,13 +324,16 @@ def _validate_data(K, E,  elim, kpath_ticks, interp_nk):
     if elim and len(elim) != 2:
         raise ValueError("elim must be a list or tuple of length 2.")
     
-    if interp_nk and not isinstance(interp_nk, dict):
-        raise ValueError("interp_nk must be a dictionary with keys n and k.")
+    if interp and not isinstance(interp, (int, list, tuple)):
+        raise ValueError("interp must be an integer or a list/tuple of (n,k).")
+    
+    if isinstance(interp, int) and len(interp) != 2:
+        raise ValueError("interp must be an integer or a list/tuple of (n,k).")
     
     return K, E, xticks, xticklabels
 
                     
-def splot_bands(K, E, ax = None, elim = None, kpath_ticks = None, interp_nk = None, **kwargs):
+def splot_bands(K, E, ax = None, elim = None, kticks = None, interp = None, **kwargs):
     """
     Plot band structure for a single spin channel and return the matplotlib axes which can be used to add other channel if spin polarized.
     
@@ -340,8 +343,8 @@ def splot_bands(K, E, ax = None, elim = None, kpath_ticks = None, interp_nk = No
     E : array-like of shape (nkpts, nbands)
     ax : matplotlib axes 
     elim : list of length 2 
-    kpath_ticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
-    interp_nk : dict of interpolation parameters with keys 'n' and 'k' 
+    kticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
+    interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
     
     kwargs are passed to matplotlib's command `ax.plot`.
     
@@ -349,10 +352,11 @@ def splot_bands(K, E, ax = None, elim = None, kpath_ticks = None, interp_nk = No
     -------
     ax : matplotlib axes
     """
-    K, E, xticks, xticklabels = _validate_data(K, E, elim, kpath_ticks, interp_nk)
+    K, E, xticks, xticklabels = _validate_data(K, E, elim, kticks, interp)
     
-    if interp_nk:
-        K,E = gu.interpolate_data(K,E,**interp_nk)
+    if interp:
+        nk = interp if isinstance(interp, (list, tuple)) else (interp, 3)
+        K,E = gu.interpolate_data(K,E,*nk)
     
     # handle broken paths
     breaks = [i for i in range(0,len(K)) if K[i-1] == K[i]]
@@ -569,7 +573,7 @@ def color_wheel(ax=None,
     return cax
 
 
-def _make_line_collection(max_width  = 2.5,
+def _make_line_collection(maxwidth   = 2.5,
                          colors_list = None,
                          rgb         = False,
                          shadow      = False,
@@ -577,13 +581,13 @@ def _make_line_collection(max_width  = 2.5,
     """
     - Returns a tuple of line collections for each given projection data.
     - **Parametrs**
-        - **pros_data: Output dictionary from `_fix_data` containing kpath, evals and colors arrays.
-        - max_width  : Default is 2.5. Max linewidth is scaled to max_width if an int of float is given.
+        - **pros_data: Output dictionary from `_fix_data` containing kpath, evals, colors arrays.
+        - maxwidth  : Default is 2.5. Max linewidth is scaled to maxwidth if an int of float is given.
         - colors_list: List of colors for multiple lines, length equal to 3rd axis length of colors.
         - rgb        : Default is False. If True and np.shape(colors)[-1] == 3, RGB line collection is returned in a tuple of length 1. Tuple is just to support iteration.
     """
-    if not isinstance(max_width,(int,float)):
-        raise ValueError("max_width must be an int or float.")
+    if not isinstance(maxwidth,(int,float)):
+        raise ValueError("maxwidth must be an int or float.")
     
     if not pros_data:
         raise ValueError("No pros_data given.")
@@ -602,13 +606,13 @@ def _make_line_collection(max_width  = 2.5,
 
     # Default linewidth = 2.5 unless specified otherwise
     if rgb: # Single channel line widths
-        lws = pros_data.get('lws', 0.1 + 2.5*np.sum(colors,axis=1)) #Get from splot_rgb_lines if given, so lws represent actual data, otherwise use default.
+        lws = 0.1 + 2.5*np.sum(colors,axis=1) # Sum over RGB
     else: # For separate lines
         lws = 0.1 + 2.5*colors.T # .T to access in for loop.
 
-    if max_width != 2.5: # Scale linewidths to max_width if other than 2.5
+    if maxwidth != 2.5: # Scale linewidths to maxwidth if other than 2.5
         # here division does not fail as min(lws)==0.1
-        lws = max_width*lws/np.max(lws) # Only if not None or zero.
+        lws = maxwidth*lws/np.max(lws) # Only if not None or zero.
 
     if np.any(colors_list):
         lc_colors = colors_list
@@ -769,7 +773,7 @@ def color_cube(ax, colormap = 'brg', loc = (1,0.4), size = 0.2,
     return cax
 
 # Further fix data for all cases which have projections
-def _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False, **others):
+def _fix_data(K, E, pros, labels, interp, rgb = False, **others):
     "Input pros must be [m,nk,nb], output is [nk,nb, m]. `others` must have shape [nk,nb] for occupancies or [nk,3] for kpoints"
     
     if np.shape(pros)[-2:] != np.shape(E):
@@ -793,21 +797,21 @@ def _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False, **others):
     
     pros = np.transpose(pros,(1,2,0)) # [nk,nb,m] now
     
-    # NOTE: Add peak to peak data and normalize to 0-1 by default, just hold min and max refrence, do not need scale_paramter, but then two plots will not be comparable
-    # NOTE: Scaling is required to put any data, like negative as well, so spin up and down can be subtracted. 
-    if scale_data: # Normalize overall data
-        c_max = np.max(pros)
-        if c_max > 0.0000001: # Avoid division error
-            pros = pros/c_max
+    # Normalize overall data because colors are normalized to 0-1
+    min_max_pros = (np.min(pros), np.max(pros)) # For data scales to use later
+    c_max = np.ptp(pros)
+    if c_max > 0.0000001: # Avoid division error
+        pros = (pros - np.min(pros))/c_max
             
-    data = {'kpath':K, 'evals':E, 'pros':pros, **others}
-    if interp_nk:
+    data = {'kpath':K, 'evals':E, 'pros':pros, **others, 'ptp': min_max_pros}
+    if interp:
+        nk = interp if isinstance(interp, (list, tuple)) else (interp, 3)
         min_d, max_d = np.min(pros),np.max(pros) # For cliping
-        _K, E = gu.interpolate_data(K,E,**interp_nk)
-        pros = gu.interpolate_data(K,pros,**interp_nk)[1].clip(min=min_d,max=max_d) 
+        _K, E = gu.interpolate_data(K,E,*nk)
+        pros = gu.interpolate_data(K,pros,*nk)[1].clip(min=min_d,max=max_d) 
         data.update({'kpath':_K, 'evals':E, 'pros':pros})
         for k,v in others.items():
-            data[k] = gu.interpolate_data(K,v,**interp_nk)[1]
+            data[k] = gu.interpolate_data(K,v,*nk)[1]
     
     # Handle kpath discontinuities
     X = data['kpath']
@@ -824,10 +828,9 @@ def _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False, **others):
 def splot_rgb_lines(K, E, pros, labels, 
     ax         = None, 
     elim       = None, 
-    kpath_ticks= None, 
-    interp_nk  = None, 
-    max_width  = 2.5,
-    scale_data = False,
+    kticks     = None, 
+    interp     = None, 
+    maxwidth   = 2.5,
     colormap   = None,
     colorbar   = True,
     N          = 9,
@@ -844,10 +847,9 @@ def splot_rgb_lines(K, E, pros, labels,
     labels : list of str, length m
     ax : matplotlib.axes.Axes 
     elim : tuple of min and max values    
-    kpath_ticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
-    interp_nk : dict of interpolation parameters with keys 'n' and 'k' 
-    max_width : float, maximum linewidth, 2.5 by default
-    scale_data : bool, if True, scale projection data to be between 0 and 1
+    kticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
+    interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
+    maxwidth : float, maximum linewidth, 2.5 by default
     colormap : str, name of a matplotlib colormap
     colorbar : bool, if True, add colorbar, otherwise add attribute to ax to add colorbar or color cube later
     N : int, number of colors in colormap
@@ -859,17 +861,12 @@ def splot_rgb_lines(K, E, pros, labels,
         .add_colorbar() : Add colorbar that represents most recent plot
         .color_cube()   : Add color cube that represents most recent plot if `pros` is 3 components
     """
-    K, E, xticks, xticklabels = _validate_data(K,E,elim,kpath_ticks, interp_nk)
+    K, E, xticks, xticklabels = _validate_data(K,E,elim,kticks, interp)
     
     ax  = get_axes() if ax is None else ax
     
     #=====================================================
-    pros_data = _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = True) # (nk,), (nk, nb), (nk, nb, m) at this point
-    _lws_ = 0.1 + 2.5*np.sum(pros_data['pros'],axis=2) # Before changing color, get linewidths
-    ax._min_max_c = [(np.min(_lws_) -0.1)/2.5,(np.max(_lws_) - 0.1)/2.5] # Save for later use.
-    pros_data['lws']  = np.transpose(_lws_[:-1,:]/2 + _lws_[1:,:]/2).ravel() # NBANDS[NKPTS-1] repeatition.
-    # These 'lws' are passed in to _make_line_collection to keep true linwidths even color changes
-
+    pros_data = _fix_data(K, E, pros, labels, interp, rgb = True) # (nk,), (nk, nb), (nk, nb, m) at this point
     colors = pros_data['pros']
     how_many = np.shape(colors)[-1]
 
@@ -906,7 +903,7 @@ def splot_rgb_lines(K, E, pros, labels,
 
         pros_data['pros'] = pros_data['pros']/c_max
 
-    line_coll, = _make_line_collection(**pros_data,rgb=True,colors_list= None, max_width=max_width, shadow = shadow)
+    line_coll, = _make_line_collection(**pros_data,rgb=True,colors_list= None, maxwidth = maxwidth, shadow = shadow)
     ax.add_collection(line_coll)
     ax.autoscale_view()
     modify_axes(ax,xticks = xticks,xt_labels = xticklabels,xlim = [min(K), max(K)], ylim = elim, vlines = True)
@@ -914,7 +911,7 @@ def splot_rgb_lines(K, E, pros, labels,
     
     # Add colorbar/legend etc.
     cmap = colormap or ('copper' if how_many == 1 else 'brg' if how_many == 3 else 'coolwarm')
-    ticks = np.linspace(*ax._min_max_c,5, endpoint=True) if how_many == 1 else None if how_many == 3 else [0,1]
+    ticks = np.linspace(*pros_data['ptp'],5, endpoint=True) if how_many == 1 else None if how_many == 3 else [0,1]
     ticklabels = [f'{t:4.2f}' for t in ticks] if how_many == 1 else labels
     
     if colorbar:
@@ -945,10 +942,9 @@ def splot_rgb_lines(K, E, pros, labels,
 def splot_color_lines(K, E, pros, labels, 
     axes       = None, 
     elim       = None, 
-    kpath_ticks= None, 
-    interp_nk  = None, 
-    max_width  = 2.5,
-    scale_data = False,
+    kticks     = None, 
+    interp     = None, 
+    maxwidth   = 2.5,
     colormap   = None,
     shadow     = False,
     showlegend = True,
@@ -966,10 +962,9 @@ def splot_color_lines(K, E, pros, labels,
     labels : list of str, length m
     axes : matplotlib.axes.Axes or list of Axes equal to the number of projections to plot separately. If None, create new axes.
     elim : tuple of min and max values    
-    kpath_ticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
-    interp_nk : dict of interpolation parameters with keys 'n' and 'k' 
-    max_width : float, maximum linewidth, 2.5 by default
-    scale_data : bool, if True, scale projection data to be between 0 and 1
+    kticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
+    interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
+    maxwidth : float, maximum linewidth, 2.5 by default
     colormap : str, name of a matplotlib colormap
     shadow : bool, if True, add shadow to lines
     showlegend : bool, if True, add legend, otherwise adds a label to the plot.
@@ -981,8 +976,8 @@ def splot_color_lines(K, E, pros, labels,
     ------- 
     ax : matplotlib.axes.Axes. Use ax.subplots_adjust to adjust the plot if needed.
     """
-    K, E, xticks, xticklabels = _validate_data(K, E, elim, kpath_ticks, interp_nk)
-    pros_data = _fix_data(K, E, pros, labels, interp_nk, scale_data, rgb = False) 
+    K, E, xticks, xticklabels = _validate_data(K, E, elim, kticks, interp)
+    pros_data = _fix_data(K, E, pros, labels, interp, rgb = False) 
     
     if colormap not in plt.colormaps():
         c_map = plt.cm.get_cmap('viridis')
@@ -1000,14 +995,14 @@ def splot_color_lines(K, E, pros, labels,
     elif len(axes) != pros_data['pros'].shape[-1]:
         raise ValueError("Number of axes should be 1 or same as number of projections")
     
-    lcs = _make_line_collection(max_width=max_width, colors_list=colors, rgb = False, shadow=shadow, **pros_data)
+    lcs = _make_line_collection(maxwidth = maxwidth, colors_list=colors, rgb = False, shadow=shadow, **pros_data)
     _ = [ax.add_collection(lc) for ax, lc in zip(axes,lcs)]
     _ = [ax.autoscale_view() for ax in axes]
     
     if showlegend:
         # Default values for legend_kwargs are overwritten by **kwargs
         legend_kwargs = {'ncol': 4, 'anchor': (0, 1.05), 'handletextpad': 0.5, 'handlelength': 1,'fontsize': 'small', 'frameon': False, **kwargs}
-        add_legend(ax=axes[0],colors = colors,labels = labels,widths = max_width,**legend_kwargs)
+        add_legend(ax=axes[0],colors = colors,labels = labels,widths = maxwidth, **legend_kwargs)
         
     else:
         xs, ys, colors = xyc_label
@@ -1023,8 +1018,8 @@ def _select_pdos(
     pdos_set    = None,
     ions        = [0,],
     orbs        = [0,],
-    Fermi     = 0,
-    interp_nk   = {}
+    Fermi       = 0,
+    interp      = None
      ):
     """
     - Returns (interpolated/orginal) enrgy(N,), tdos(N,), and pdos(N,) of selected ions/orbitals.
@@ -1034,7 +1029,8 @@ def _select_pdos(
         - ions     : List of ions to project on, could be `range(start,stop,step)` as well, remember that `stop` is not included in python. so `range(0,2)` will generate 0 and 1 indices.
         - orbs     : List of orbitals indices to pick.
         - Fermi  : Here it is zero. Needs to be input.
-        - interp_nk   : Dictionary with keys 'n' and 'k' for interpolation.
+        - interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
+    
     """
     if tdos==[]:
         raise ValueError("Can not plot empty DOS.")
@@ -1042,11 +1038,12 @@ def _select_pdos(
     t_dos = tdos[:,1]
     pros = np.take(pdos_set[:,:,1:],list(ions),axis=0).sum(axis=0)
     p_dos = np.take(pros,orbs,axis=1).sum(axis=1)
-    if interp_nk:
+    if interp:
         from ipyvasp import utils as gu
-        _en,_tdos=gu.interpolate_data(en,t_dos,**interp_nk)
+        nk = interp if isinstance(interp, (list, tuple)) else (interp, 3)
+        _en,_tdos=gu.interpolate_data(en,t_dos,*nk)
         _tdos = _tdos.clip(min=0)
-        _pdos = gu.interpolate_data(en,p_dos,**interp_nk)[1].clip(min=0)
+        _pdos = gu.interpolate_data(en,p_dos,*nk)[1].clip(min=0)
     else:
         _en,_tdos,_pdos=pdos_set[0,:,0]-Fermi,t_dos,p_dos # reading _en from projected dos if not interpolated.
 
@@ -1061,7 +1058,7 @@ def _collect_dos(
     labels        = ['s',],
     Fermi         = None,
     spin          = 'both',
-    interp_nk     = {}
+    interp        = None
     ):
     """
     - Returns lists of energy,tdos, pdos and labels. If given,atoms,orbs and labels must have same length. If not given, zeroth ions is collected with s-orbital.
@@ -1073,7 +1070,8 @@ def _collect_dos(
         - orbs       : List [[0],] lists of indices of orbitals, could be empty.
         - labels     : List [str,] of orbitals labels. len(labels)==len(orbs) must hold.  Auto adds `↑`,`↓` for ISPIN=2.
         - spin       : Plot spin-polarized for spin {'up','down','both'}. Default is both.
-        - interp_nk   : Dictionary with keys 'n' and 'k' for interpolation.
+        - interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
+    
     - **Returns**
         - Energy : (N,1) size.
         - tdos   : (N,1) size or [(N,1),(N,1)] if spin polarized.
@@ -1103,7 +1101,7 @@ def _collect_dos(
     ISPIN=vr.sys_info.ISPIN
     e,ts,ps,ls=None,None,[],[] # to collect all total/projected dos.
     for elem,orb,label in zip(atoms,orbs,labels):
-        args_dict=dict(ions=elem,orbs=orb,interp_nk=interp_nk,Fermi=Fermi)
+        args_dict=dict(ions=elem,orbs=orb,interp=interp,Fermi=Fermi)
         if ISPIN==1:
             tdos=vr.tdos.tdos[0]
             pdos_set=vr.pro_dos.pros
@@ -1150,9 +1148,9 @@ def splot_dos_lines(
     linewidth     = 0.5,
     fill_area     = True,
     vertical      = False,
-    Fermi       = None,
+    Fermi         = None,
     spin          = 'both',
-    interp_nk     = {},
+    interp        = None,
     showlegend    = True,
     legend_kwargs = {'ncol'         : 4,
                    'anchor'         : (0,1),
@@ -1179,7 +1177,7 @@ def splot_dos_lines(
             - vertical   : False, If True, plots along y-axis.
             - showlegend : True by defualt.
             - spin       : Plot spin-polarized for spin {'up','down','both'}. Default is both.
-            - interp_nk   : Dictionary with keys 'n' and 'k' for interpolation.
+            - interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
             - legend_kwargs: Dictionary to contain legend arguments to fix.
             - atoms_orbs_dict : Dictionary with keys as label and values as list of length 2. If given, used in place of atoms, orbs and labels arguments.
                         Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
@@ -1200,7 +1198,7 @@ def splot_dos_lines(
                             labels=labels,
                             Fermi=Fermi,
                             spin=spin,
-                            interp_nk=interp_nk)
+                            interp=interp)
         try:
             en,tdos,pdos,labels,vr=cl_dos # Labels updated
         except:

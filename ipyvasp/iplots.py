@@ -20,27 +20,25 @@ except:
     import ipyvasp.utils as gu
     
 
-def _format_rgb_data(K, E, pros, labels, interp_nk, occs, kpoints, max_width = 10):
+def _format_rgb_data(K, E, pros, labels, interp, occs, kpoints, maxwidth = 10):
     "Transform data to 1D for rgb lines to plot effectently. Output is a dictionary."
-    data = sp._fix_data(K, E, pros, labels, interp_nk, scale_data = False, rgb = True, occs = occs, kpoints = kpoints)
-    
-    max_c = np.max(data['pros'])
-    if max_c == 0:
-        max_c = 1 # Avoid divide by 0.
-    
+    data = sp._fix_data(K, E, pros, labels, interp, rgb = True, occs = occs, kpoints = kpoints)
+    # Note that data['pros'] is normalized to 0-1
     rgb = np.zeros((*np.shape(data['evals']),3)) # Initialize rgb array, because there could be less than three channels
     if data['pros'].shape[2] == 3:
-        rgb = data['pros']/max_c
+        rgb = data['pros']
     elif data['pros'].shape[2] == 2:
-        rgb[:,:,:2] = data['pros']/max_c # Normalized overall color data
+        rgb[:,:,:2] = data['pros'] # Normalized overall color data
         labels = [*labels, '']
     elif data['pros'].shape[2] == 1:
-        rgb[:,:,:1] = data['pros']/max_c # Normalized overall color data
+        rgb[:,:,:1] = data['pros'] # Normalized overall color data
         labels = [*labels, '','']
-        
-    data['norms'] = (rgb*100).astype(int) # Normalized overall data
-    lws = np.sum(rgb,axis=2) # Sum of all colors
-    lws = lws/np.max(lws)*max_width # Normalize to max_width
+    
+    # Since normalized data is Y = (X - X_min)/(X_max - X_min), so X = Y*(X_max - X_min) + X_min is the actual data.
+    low, high = data['ptp']
+    data['norms'] = np.round(rgb*(high - low) + low, 3) # Read actual data back from normalized data.
+    lws = np.sum(rgb,axis = 2) # Sum of all colors
+    lws = lws/np.max(lws)*maxwidth # Normalize to maxwidth
     data['widths'] = 0.0001+ lws #should be before scale colors
     
 
@@ -50,7 +48,7 @@ def _format_rgb_data(K, E, pros, labels, interp_nk, occs, kpoints, max_width = 1
     data['pros'] = (rgb/cl_max[:,:,np.newaxis]*255).astype(int) # Normalized per point and set rgb data back to data.
     
     # Now process data to make single data for faster plotting.
-    txt = 'Projection: [{}]</br>Norm (%):'.format(', '.join(labels))
+    txt = 'Projection: [{}]</br>Value:'.format(', '.join(labels))
     K, E, C, S, PT, OT, KT, ET = [], [], [], [], [], [], [], []
     for i in range(np.shape(data['evals'])[1]):
         K  = [*K, *data['kpath'], np.nan]
@@ -124,9 +122,9 @@ def iplot2html(fig,filename = None, out_string = False, modebar = True):
 def iplot_rgb_lines(K, E, pros, labels, occs, kpoints,
     fig        = None,
     elim       = None,
-    kpath_ticks= None, 
-    interp_nk  = None, 
-    max_width  = 10,   
+    kticks     = None, 
+    interp     = None, 
+    maxwidth   = 10,   
     mode       = 'markers + lines',
     title      = None,
     **kwargs        
@@ -144,9 +142,9 @@ def iplot_rgb_lines(K, E, pros, labels, occs, kpoints,
     kpoints : array-like, shape (nk,3)
     fig : plotly.graph_objects.Figure, if not provided, a new figure will be created
     elim : tuple, (emin,emax), energy range to plot
-    kpath_ticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
-    interp_nk : dict of interpolation parameters with keys 'n' and 'k' 
-    max_width : float, maximum linewidth, 10 by default
+    kticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
+    interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
+    maxwidth : float, maximum linewidth, 10 by default
     mode : str, plotly mode, 'markers + lines' by default, see modes in `plotly.graph_objects.Scatter`.
     title : str, title of the figure, labels are added to the end of the title.
     
@@ -156,8 +154,8 @@ def iplot_rgb_lines(K, E, pros, labels, occs, kpoints,
     -------
     fig : plotly.graph_objects.Figure that can be displayed in Jupyter notebook or saved as html using `iplot2html`.
     """
-    K, E, xticks, xticklabels = sp._validate_data(K,E,elim,kpath_ticks,interp_nk)
-    data = _format_rgb_data(K, E, pros, labels, interp_nk, occs, kpoints,max_width = max_width)
+    K, E, xticks, xticklabels = sp._validate_data(K,E,elim,kticks,interp)
+    data = _format_rgb_data(K, E, pros, labels, interp, occs, kpoints,maxwidth = maxwidth)
     K, E, C, S, T, labels = data['K'], data['E'], data['C'], data['S'], data['T'], data['labels']
     
     if fig is None:
@@ -197,7 +195,7 @@ def iplot_dos_lines(
     Fermi       = None,
     figsize       = None,
     spin          = 'both',
-    interp_nk     = {},
+    interp        = None,
     title         = None,
     atoms_orbs_dict    = {}
     ):
@@ -213,7 +211,7 @@ def iplot_dos_lines(
             - colormap   : Matplotlib's standard color maps. Default is 'gist_ranibow'. Use 'RGB' if want to compare with `iplot_rgb_lines` with 3 projection inputs (len(orbs)==3).
             - fill_area  : Default is True and plots filled area for dos. If False, plots lines only.
             - vertical   : False, If True, plots along y-axis.
-            - interp_nk  : Dictionary with keys 'n' and 'k' for interpolation.
+            - interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
             - figsize    : Tuple(width,height) in pixels, e.g. (700,400).
             - atoms_orbs_dict : Dictionary with keys as label and values as list of length 2. If given, used in place of atoms, orbs and labels arguments.
                         Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
@@ -226,7 +224,7 @@ def iplot_dos_lines(
         en,tdos,pdos,vr=None,None,None,None # Place holders for defining
         cl_dos = sp._collect_dos(path_evr=path_evr,elim=elim,
                             atoms=atoms, orbs=orbs,labels=labels,
-                            Fermi=Fermi, spin='both',interp_nk=interp_nk)
+                            Fermi=Fermi, spin='both',interp=interp)
         try:
             en,tdos,pdos,labels,vr = cl_dos
         except:

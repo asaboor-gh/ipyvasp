@@ -588,8 +588,8 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
         print(out_str)
 
 def read_ticks(kpoints_path):
-    "Reads ticks values and labels in header of kpoint file. Returns dictionary of `kpath_ticks` that can be used in plotting functions. If not exist in header, returns empty values(still valid)."
-    kpath_ticks = {}
+    "Reads ticks values and labels in header of kpoint file. Returns dictionary of `kticks` that can be used in plotting functions. If not exist in header, returns empty values(still valid)."
+    kticks = {}
     if os.path.isfile(kpoints_path):
         top_line = vp.islice2array(kpoints_path,exclude=None,raw=True,nlines=1)
         if 'HSK-PATH' in top_line:
@@ -601,9 +601,9 @@ def read_ticks(kpoints_path):
                     k = tuple([int(v.strip()) for v in k.split('|')])
                 else:
                     k = int(k)
-                kpath_ticks[k] = v
+                kticks[k] = v
                 
-    return kpath_ticks
+    return kticks
         
 # Cell
 def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec_basis = None):
