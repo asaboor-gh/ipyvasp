@@ -666,12 +666,12 @@ class Vasprun:
 
         self.elim = elim
         self._kpath = self._data.bands.kpath  # For info only, get updated with plot commands
-        self._efermi = self._data.fermi   # For info only, get updated with plot commands
+        self._efermi = 0   # For info only, get updated with plot commands
 
         if path == None:
-            self.kticks = sio.read_ticks('KPOINTS')
+            self.kticks = sio.read_kticks('KPOINTS')
         elif os.path.isfile(path):
-            self.kticks = sio.read_ticks(os.path.join(os.path.dirname(path),'KPOINTS'))
+            self.kticks = sio.read_kticks(os.path.join(os.path.dirname(path),'KPOINTS'))
         else:
             self.kticks = {} # no kticks available when loading from json/pickle data_str
 
@@ -717,20 +717,6 @@ class Vasprun:
         "Get exported data."
         return self._data
 
-    @property
-    def fermi(self):
-        "Fermi energy based on occupancy. Use .get_fermi() if you want to limit the occupancy tolerance."
-        return self._data.fermi
-
-    def get_fermi(self, tol=1e-3):
-        "Fermi energy based on occupancy. Returns `self.Fermi` if occupancies cannot be resolved. `tol` is the value of occupnacy to ignore as filled."
-        return self._data.get_fermi(tol=tol)
-
-
-    @property
-    def Fermi(self):
-        "Fermi energy given in vasprun.xml."
-        return self._data.Fermi
     
     def pick_bands(self, spin = 0, kpoints = -1, bands = -1,  atoms_orbs_dict: dict = None):
         """
@@ -885,20 +871,23 @@ class Bands:
         if not isinstance(source, vp.DataSource):
             raise TypeError('`source` must be a subclass of `ipyvasp.parser.DataSource`.')
         self._source = source # source is instance of DataSource
-        self._efermi = 0 # It will be changed when plotting
-        self._kticks = {}
-        
-        try:
-            self._kticks = sio.read_ticks('KPOINTS')
-        except:
-            file = os.path.join(os.path.dirname(self.source.path),'KPOINTS')
-            if os.path.isfile(file):
-                self._kticks = sio.read_ticks(file)
     
     @property
     def source(self):
         return self._source
+    
+    def get_kticks(self):
+        """
+        Reads associated KPOINTS file and returns kticks. If KPOINTS file does not exist or was not created by this module, returns empty dict.
         
+        .. note:: 
+            kticks become useless when you interploate data in plotting, in that case write kticks manually.
+        """
+        file = os.path.join(os.path.dirname(self.source.path),'KPOINTS')
+        if os.path.isfile(file):
+            return sio.read_kticks(file)
+        return {}
+                
     def get_data(self, spin = 0, elim = None, atoms_orbs_dict: dict = None):
         """
         Selects bands and projections to use in plotting functions.
@@ -924,7 +913,7 @@ class Bands:
         kpts = self._source.get_kpoints()
         eigens = self._source.get_evals(spin = spin, elim = elim, atoms = atoms) # others be there
         
-        output = {'kpath': kpts.kpath, 'kpoints': kpts.kpoints, 'coords': kpts.coords, 'evals': eigens.evals, 'occs': eigens.occs}
+        output = {'kpath': kpts.kpath, 'kpoints': kpts.kpoints, 'coords': kpts.coords, 'evals': eigens.evals, 'occs': eigens.occs, 'vbm': eigens.vbm}
         
         if hasattr(eigens, 'pros'):
             arrays = []
@@ -945,5 +934,5 @@ class Bands:
         plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin','efermi','kpoints','bands','kwargs']} # should be on top to avoid other loacals
         rlim = [e + (efermi or 0) for e in elim] if isinstance(elim,(list, tuple)) else None
         data = self.get_data(spin = spin, elim = rlim) # picked relative limit
-        K, E = data.kpath, data.evals - (efermi or 0)
+        K, E = data.kpath, data.evals - (efermi or data['vbm'])
         return sp.splot_bands(K, E, **plot_kws, **kwargs)

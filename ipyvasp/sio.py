@@ -587,7 +587,7 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
     else:
         print(out_str)
 
-def read_ticks(kpoints_path):
+def read_kticks(kpoints_path):
     "Reads ticks values and labels in header of kpoint file. Returns dictionary of `kticks` that can be used in plotting functions. If not exist in header, returns empty values(still valid)."
     kticks = {}
     if os.path.isfile(kpoints_path):

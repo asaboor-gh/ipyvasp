@@ -45,15 +45,6 @@ class DataSource:
         from .api import Bands
         return Bands(self)
     
-    def get_efermi(self, evals, occs, tol = 1e-3):
-        "Gets Fermi energy or VBM from evals and occs."
-        if np.shape(evals) != np.shape(occs):
-            raise ValueError("evals and occs should have same shape.")
-        try:
-            return float(evals[occs > tol].max())
-        except:
-            raise ValueError("Fermi energy/VBM could not be determined form given evals and occs.")
-    
     # Following methods should be implemented in a subclass
     def get_summary(self): raise NotImplementedError("`get_summary` should be implemented in a subclass. See Vasprun.get_summary as example.")
     
@@ -170,6 +161,8 @@ class Vasprun(DataSource):
      
     def get_dos(self, spin = 0, elim = None, atoms = None):
         # Should be as energy(NE,), total(NE,), integrated(NE,), partial(NE, NATOMS(selected), NORBS) and atoms reference should be returned
+        # include vbm property as in evals, just from integrated dos and NELECT
+        # check size and if nothing, throw error
         pass 
     
     def _get_spin_set(self, spin, bands_range, atoms): # bands_range comes from elim applied to all bands
@@ -194,6 +187,7 @@ class Vasprun(DataSource):
         else:
             raise ValueError('No eigenvalues found for spin {}'.format(spin))
         evals, occs = ev[:,:,0], ev[:,:,1]
+        vbm = float(evals[occs > 0.0001].max()) # discard very small occupations
         
         if elim:
             up_ind = np.max(np.where(evals[:,:] <= np.max(elim))[1]) + 1
@@ -202,7 +196,7 @@ class Vasprun(DataSource):
             occs = occs[:, lo_ind:up_ind]
             bands_range = range(lo_ind, up_ind)
         
-        out = {'evals':evals,'occs':occs}
+        out = {'evals':evals,'occs':occs, 'vbm':vbm}
         if atoms:
             # Get projections here
             out['pros'] = self._get_spin_set(spin, bands_range, atoms)
@@ -213,6 +207,7 @@ class Vasprun(DataSource):
     def get_spins(self, bands = -1, atoms = -1): 
         # Just have a loop over _get_spin_set and collect all spins, evals must be collected for both spin up and down
         # shape should be (ISPIN, NKPOINTS, NBANDS, [NATOMS(selected), NORBS]) and atoms and bands reference should be returned
+        # include vbm property like in evals
         pass
     
     def get_forces(self):

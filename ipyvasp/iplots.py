@@ -37,6 +37,11 @@ def _format_rgb_data(K, E, pros, labels, interp, occs, kpoints, maxwidth = 10):
     # Since normalized data is Y = (X - X_min)/(X_max - X_min), so X = Y*(X_max - X_min) + X_min is the actual data.
     low, high = data['ptp']
     data['norms'] = np.round(rgb*(high - low) + low, 3) # Read actual data back from normalized data.
+    if data['pros'].shape[2] == 2:
+        data['norms'][:,:,2] = np.nan # Avoid wrong info here
+    elif data['pros'].shape[2] == 1:
+        data['pros'][:,:,1:] = np.nan
+    
     lws = np.sum(rgb,axis = 2) # Sum of all colors
     lws = lws/np.max(lws)*maxwidth # Normalize to maxwidth
     data['widths'] = 0.0001+ lws #should be before scale colors

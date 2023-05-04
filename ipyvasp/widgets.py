@@ -812,7 +812,7 @@ class VasprunApp:
 
     def __fill_ticks(self):
         kpath = os.path.join(os.path.split(self._files_dd.value)[0],'KPOINTS')
-        tvs = sio.read_ticks(kpath) #ticks values segments
+        tvs = sio.read_kticks(kpath) #ticks values segments
         if tvs: #If is must, if not present, avoid overwritting custom input
             text_ticks = ', '.join('{}:{}'.format(k if isinstance(k,int) else '{}|{}'.format(*k),v) for k,v in tvs.items())
             self._texts['kticks'].value = text_ticks

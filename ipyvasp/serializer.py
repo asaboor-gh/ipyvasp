@@ -164,17 +164,6 @@ class VasprunData(Dict2Data):
     def __repr__(self):
         return super().__repr__().replace("Data","VasprunData",1)
     
-    def get_fermi(self,tol=1e-3):
-        "Fermi energy based on occupancy. Returns `self.Fermi` if occupancies cannot be resolved. `tol` is the value of occupnacy to ignore as filled."
-        try:
-            return float(self.bands.evals[self.bands.occs > tol].max())
-        except:
-            return self.Fermi
-    
-    @property
-    def fermi(self):
-        "Fermi energy based on occupancy. Use .get_fermi() if you want to limit the occupancy tolerance."
-        return self.get_fermi(tol=1e-3)
     
     @property
     def Fermi(self):
