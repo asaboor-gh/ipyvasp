@@ -876,17 +876,17 @@ class Bands:
     def source(self):
         return self._source
     
-    def get_kticks(self):
+    def get_kticks(self, rel_path = 'KPOINTS'):
         """
-        Reads associated KPOINTS file and returns kticks. If KPOINTS file does not exist or was not created by this module, returns empty dict.
+        Reads associated KPOINTS file form a relative path of calculations and returns kticks. If KPOINTS file does not exist or was not created by this module, returns empty dict.
         
         .. note:: 
             kticks become useless when you interploate data in plotting, in that case write kticks manually.
         """
-        file = os.path.join(os.path.dirname(self.source.path),'KPOINTS')
+        file = os.path.join(os.path.dirname(self.source.path),rel_path)
         if os.path.isfile(file):
             return sio.read_kticks(file)
-        return {}
+        return []
                 
     def get_data(self, spin = 0, elim = None, atoms_orbs_dict: dict = None):
         """

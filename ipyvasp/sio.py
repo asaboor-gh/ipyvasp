@@ -485,18 +485,14 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
     """
     Generate list of kpoints along high symmetry path. Options are write to file or return KPOINTS list.
     It generates uniformly spaced point with input `n` as just a scale factor of number of points per unit length.
-    You can also specify custom number of kpoints in an interval by putting number of kpoints as 4th entry in left kpoint.
+    
     Parameters   
     ----------
-        - *ptaches : Any number of disconnected patches where a single patch is a dictionary like {'label': (x,y,z,[N]), ...} where x,y,z is high symmetry point and
-                    N (optional) is number of points in current inteval, points in a connected path patch are at least two i.e. `{'p1':[x1,y1,z1],'p2':[x2,y2,z2]}`.
-                    A key of a patch should be string reperenting the label of the high symmetry point. A key that starts with '_' is ignored, so you can add points without high symmetry points as well.
-                    Add + before a label if it is duplicated in a patch, so L-G-L path can be written as {'L':[x1,y1,z1],'G':[x2,y2,z2],'+L':[x3,y3,z3]} to keep second L point, otherwise it will be ignored by dictioanry.
-        - n        : int, number per length of body diagonal of rec_basis, this makes uniform steps based on distance between points.
-        - weight : Float, if None, auto generates weights.
-        - ibzkpt : Path to ibzkpt file, required for HSE calculations.
-        - outfile: Path/to/file to write kpoints.
-        - rec_basis: Reciprocal basis 3x3 array to use for calculating uniform points.
+    ptaches : Any number of disconnected patches where a single patch is a list of points as [(x,y,z,[label],[N]), ...]
+    weight : Float, if None, auto generates weights.
+    ibzkpt : Path to ibzkpt file, required for HSE calculations.
+    outfile : Path/to/file to write kpoints.
+    rec_basis : Reciprocal basis 3x3 array to use for calculating uniform points.
 
     If `outfile = None`, KPONITS file content is printed.
     """
@@ -505,18 +501,34 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
 
     hsk_list, labels = [], []
     for patch in patches:
-        if not isinstance(patch,dict):
-            raise TypeError("Patche must be a dictionary as {'label': (x,y,z,[N]), ...}")
-        if len(patch.keys()) < 2:
+        if not isinstance(patch, (list, tuple)):
+            raise TypeError("Patche must be a list or tuple of points as [(x,y,z,[label],[N]), ...]")
+        if len(patch) < 2:
             raise ValueError("Please provide at least one high symmetry path consisting of two points.")
         _patch = []
-        for k,v in patch.items():
-            if not isinstance(k,str):
-                raise TypeError("Label must be a string")
-            if (not isinstance(v,(list,tuple,set,np.ndarray))) and (len(v) not in [3,4]):
-                raise TypeError("Value must be a list or tuple of length 3 or 4, like (x,y,z,[N])")
-            labels.append('skip' if k.startswith('_') else k.lstrip('+')) # + handles duplicate labels
-            _patch.append(v)
+        for point in patch:
+            if len(point) == 3:
+                _patch.append(point)
+                labels.append('skip')
+            elif len(point) == 4:
+                if isinstance(point[3],str):
+                    _patch.append(point[:3]) # add only (x,y,z)
+                    labels.append(point[3])
+                elif isinstance(point[3],int):
+                    _patch.append(point) # add full point as (x,y,z,N)
+                    labels.append('skip')
+                else:
+                    raise TypeError("4th entry in point should be string label or int number of points for next interval if label is skipped.")
+            elif len(point) == 5:
+                if not isinstance(point[4],int):
+                    raise TypeError("5th entry in point should be an integer to add that many points in interval.")
+                if not isinstance(point[3],str):
+                    raise TypeError("4th entry in point should be string label when 5 entries are given.")
+                _patch.append([*point[:3],point[4]])
+                labels.append(point[3])
+            else:
+                raise ValueError("Please provide point as (x,y,z,[label],[N])")
+                
         hsk_list.append(_patch)
 
     xs,ys,zs, inds,joinat = [],[],[],[0],[] # 0 in inds list is important
@@ -589,7 +601,7 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
 
 def read_kticks(kpoints_path):
     "Reads ticks values and labels in header of kpoint file. Returns dictionary of `kticks` that can be used in plotting functions. If not exist in header, returns empty values(still valid)."
-    kticks = {}
+    kticks = []
     if os.path.isfile(kpoints_path):
         top_line = vp.islice2array(kpoints_path,exclude=None,raw=True,nlines=1)
         if 'HSK-PATH' in top_line:
@@ -601,23 +613,25 @@ def read_kticks(kpoints_path):
                     k = tuple([int(v.strip()) for v in k.split('|')])
                 else:
                     k = int(k)
-                kticks[k] = v
+                kticks.append((k,v))
                 
     return kticks
         
 # Cell
 def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec_basis = None):
     """Get Kpath from a string of kpoints (Line-Mode like). Useful in Terminal.
-    Args:
-        - kpath_str: str, a multiline string similiar to line mode of KPOINTS, initial 4 lines are not required.
-            - If you do not want to label a point, label it as 'skip' and it will be removed.
-            - You can add an interger at end of a line to customize number of points in a given patch.
-            - Each empty line breaks the path, so similar points before and after empty line are useless here.
-        - n      : int, number per length of body diagonal of rec_basis, this makes uniform steps based on distance between points.
-        - weight : Float, if None, auto generates weights.
-        - ibzkpt : Path to ibzkpt file, required for HSE calculations.
-        - outfile: Path/to/file to write kpoints.
-        - rec_basis: Reciprocal basis 3x3 array to use for calculating uniform points.
+    
+    Parameters:
+    -----------
+    kpath_str : str, a multiline string similiar to line mode of KPOINTS, initial 4 lines are not required.
+        - If you do not want to label a point, leave it empty.
+        - You can add an interger at end of a line to customize number of points in a given patch.
+        - Each empty line breaks the path, so similar points before and after empty line are useless here unlike line mode.
+    n : int, number per length of body diagonal of rec_basis, this makes uniform steps based on distance between points.
+    weight : Float, if None, auto generates weights.
+    ibzkpt : Path to ibzkpt file, required for HSE calculations.
+    outfile : Path/to/file to write kpoints.
+    rec_basis: Reciprocal basis 3x3 array to use for calculating uniform points.
 
     - **Example**
         > str2kpath('''0 0 0 !$\Gamma$ 3
@@ -638,44 +652,30 @@ def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec
 
     where_blanks = [i for i,line in enumerate(lines) if line.strip() == '']
 
-    hsk_list, labels = [],[]
+    hsk_list = []
     for j,line in enumerate(lines[skipN:]):
-        if line.strip():
-            _labs = re.findall('\$\\\\[a-zA-Z]+\$|[a-zA-Z]+|[α-ωΑ-Ω]+|\|', line)
-            labels.append(_labs[0] if _labs else '')
-            _ks = re.findall('[-+\d]*[.][\d+]+|[-+]*\d+/\d+|[-+]*\d+',line)
-            _ks = [[float(k) for k in w.split('/')] if '/' in w else float(w) for w in _ks]
-
-            for i,_k in enumerate(_ks):
-                if type(_k) == list and len(_k) == 2:
-                    _ks[i] = _k[0]/_k[1]
-                elif type(_k) == list and len(_k) != 2:
-                    print(f'Check if you provide fraction correctly in line {j+1+skipN}!')
-
-            if len(_ks) == 4:
-                try: _ks[3] = int(_ks[3])
-                except: print(f'4th number in line {j+1+skipN} should be integer!')
-
-            hsk_list.append(_ks)
-    
-    # Duplicate labels will be washed away by dictionary, so let's fix it.
-    test_labs = []
-    for i,lab in enumerate(labels):
-        if lab in test_labs:
-            labels[i] = i*'+' + lab # Add + to duplicate labels, who cares about the number of +++++, they will be fixed in get_kpath
-        test_labs.append(lab)
-    
-    del test_labs
+        if line.strip(): # Make sure line is not empty
+            data = line.split()
+            if len(data) == 3:
+                hsk_list.append([float(i) for i in data])
+            elif len(data) == 4:
+                x,y,z = [float(i) for i in data[:3]]
+                _4th = data[3] if re.search('\$\\\\[a-zA-Z]+\$|[a-zA-Z]+|[α-ωΑ-Ω]+|\|', line) else int(data[3])
+                hsk_list.append([x,y,z,_4th])
+            elif len(data) == 5:
+                x,y,z = [float(i) for i in data[:3]]
+                _5th = int(data[4])
+                hsk_list.append([x,y,z,data[3],_5th]) # 5th is number of points, 4th is label
 
     if where_blanks:
         filtered = [w-i for i,w in enumerate(where_blanks)]
         where_blanks = np.unique([0,*filtered,len(hsk_list)]).tolist()
 
-    patches = [] if where_blanks else [{k:v for v,k in zip(hsk_list,labels)},] #Fix up both
+    patches = [] if where_blanks else hsk_list #Fix up both
     for a,b in zip(where_blanks[:-1], where_blanks[1:]):
         if b - a < 2:
             raise ValueError(f"There should be at least two points in a patch of path at line {a+1}!")
-        patches.append({k:v for v,k in zip(hsk_list[a:b],labels[a:b])})
+        patches.append(hsk_list[a:b])
 
     return get_kpath(*patches,n=n,weight=weight,ibzkpt=ibzkpt,outfile=outfile, rec_basis = rec_basis)
 

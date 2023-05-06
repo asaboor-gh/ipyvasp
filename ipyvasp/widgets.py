@@ -299,9 +299,9 @@ class InputGui:
             'rgb' : Dropdown(options=[('Red',0),('Green',1),('Blue',2)],value=0,layout=layout)
             }
         self._texts = {
-            'orbs' : Text(layout=layout,continuous_update=False),
-            'elms' : Text(layout=layout,continuous_update=False),
-            'label': Text(layout=layout,continuous_update=False)
+            'orbs' : Text(value='', layout=layout,continuous_update=False), 
+            'elms' : Text(value='', layout=layout,continuous_update=False),
+            'label': Text(value='', layout=layout,continuous_update=False)
             }
         self.update_options(self.sys_info) # In start if given
 
@@ -814,7 +814,7 @@ class VasprunApp:
         kpath = os.path.join(os.path.split(self._files_dd.value)[0],'KPOINTS')
         tvs = sio.read_kticks(kpath) #ticks values segments
         if tvs: #If is must, if not present, avoid overwritting custom input
-            text_ticks = ', '.join('{}:{}'.format(k if isinstance(k,int) else '{}|{}'.format(*k),v) for k,v in tvs.items())
+            text_ticks = ', '.join('{}:{}'.format(k if isinstance(k,int) else '{}|{}'.format(*k),v) for k,v in tvs)
             self._texts['kticks'].value = text_ticks
         
     def __update_theme(self,change):

@@ -296,30 +296,32 @@ def _validate_data(K, E,  elim, kticks, interp):
         raise ValueError("Length of first dimension of E must be equal to length of K.")
     
     if kticks is None:
-        kticks = {}
+        kticks = []
     
-    if not isinstance(kticks, dict):
-        raise ValueError("kticks must be a dictionary of int/tuple -> str.")
+    if not isinstance(kticks, (list, tuple, zip)):
+        raise ValueError("kticks must be a list, tuple or zip consisting of (index, label) pairs. index must be an int or tuple of (i, i+1) to join broken path.")
+    
+    if isinstance(kticks, zip):
+        kticks = list(kticks) # otherwise it will be empty after first use
     
     # tuple/int keys, list is not hashable
-    for k, v in kticks.items():
-        if not isinstance(k, (tuple, int)):
-            raise ValueError("kticks keys must be int or tuple of size 2 to join broken path")
+    for k, v in kticks:
+        if not isinstance(k, (tuple, list, int)):
+            raise ValueError("First item of pairs in kticks must be int or tuple of size 2 to join broken path")
         if not isinstance(v, str):
-            raise ValueError("kticks values must be str.")
-        if isinstance(k, tuple) and len(k) != 2:
-            raise ValueError("kticks keys must be int or tuple of size 2 to join broken path")
+            raise ValueError("SEcond item of kticks must be str.")
+        if isinstance(k, (tuple,list)) and len(k) != 2:
+            raise ValueError("First item in kticks must be of size 2 if tuple given to join broken path")
                 
     
-    pairs = [k for k in kticks.keys() if isinstance(k, tuple)] # tuple keys, list is not hashable
+    pairs = [k for k, _ in kticks if isinstance(k, (list,tuple))] # tuple keys, list is not hashable
     
     K = join_ksegments(K, *pairs)
     
-    inds  = [k[0] if isinstance(k, tuple) else k for k in kticks.keys()]
-    vals = list(kticks.values())
+    inds  = [k[0] if isinstance(k, (list,tuple)) else k for k, _ in kticks]
     
-    xticks = [K[i] for i in inds] if inds else None
-    xticklabels = [str(v) for v in vals] if vals else None
+    xticks = [K[i] for i in inds] if inds else None # AVoid turning off xticks if no kticks given
+    xticklabels = [str(v) for _, v in kticks] if kticks else None
     
     if elim and len(elim) != 2:
         raise ValueError("elim must be a list or tuple of length 2.")
@@ -343,7 +345,7 @@ def splot_bands(K, E, ax = None, elim = None, kticks = None, interp = None, **kw
     E : array-like of shape (nkpts, nbands)
     ax : matplotlib axes 
     elim : list of length 2 
-    kticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
+    kticks : [(int/tuple, str),...] for indices of high symmetry k-points. To join a broken path, use a tuple of indices like [(0, 'G'),((39,40), 'M'), ...]. zip([0,10,20],'GMK') can be a shortcut for this.
     interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
     
     kwargs are passed to matplotlib's command `ax.plot`.
@@ -847,7 +849,7 @@ def splot_rgb_lines(K, E, pros, labels,
     labels : list of str, length m
     ax : matplotlib.axes.Axes 
     elim : tuple of min and max values    
-    kticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
+    kticks : [(int/tuple, str),...] for indices of high symmetry k-points. To join a broken path, use a tuple of indices like [(0, 'G'),((39,40), 'M'), ...]. zip([0,10,20],'GMK') can be a shortcut for this.
     interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
     maxwidth : float, maximum linewidth, 2.5 by default
     colormap : str, name of a matplotlib colormap
@@ -962,7 +964,7 @@ def splot_color_lines(K, E, pros, labels,
     labels : list of str, length m
     axes : matplotlib.axes.Axes or list of Axes equal to the number of projections to plot separately. If None, create new axes.
     elim : tuple of min and max values    
-    kticks : dict of int/tuple -> str for high symmetry k-points. To join a broken path, use a tuple of indices as key like (39,40).
+    kticks : [(int/tuple, str),...] for indices of high symmetry k-points. To join a broken path, use a tuple of indices like [(0, 'G'),((39,40), 'M'), ...]. zip([0,10,20],'GMK') can be a shortcut for this.
     interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
     maxwidth : float, maximum linewidth, 2.5 by default
     colormap : str, name of a matplotlib colormap
