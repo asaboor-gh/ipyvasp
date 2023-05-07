@@ -147,7 +147,7 @@ def iplot_rgb_lines(K, E, pros, labels, occs, kpoints,
     kpoints : array-like, shape (nk,3)
     fig : plotly.graph_objects.Figure, if not provided, a new figure will be created
     elim : tuple, (emin,emax), energy range to plot
-    kticks : [(int/tuple, str),...] for indices of high symmetry k-points. To join a broken path, use a tuple of indices like [(0, 'G'),((39,40), 'M'), ...]. zip([0,10,20],'GMK') can be a shortcut for this.
+    kticks : [(int, str),...] for indices of high symmetry k-points. To join a broken path, use '<=' before symbol, e.g.  [(0, 'G'),(40, '<=K|M'), ...] will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').
     interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
     maxwidth : float, maximum linewidth, 10 by default
     mode : str, plotly mode, 'markers + lines' by default, see modes in `plotly.graph_objects.Scatter`.

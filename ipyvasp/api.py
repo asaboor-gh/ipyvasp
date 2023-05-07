@@ -928,11 +928,19 @@ class Bands:
         
         return serializer.Dict2Data(output)
     
+    def _handle_kwargs(self, kwargs):
+        "Returns fixed kwargs and new elim relative to fermi energy for gettig data."
+        if kwargs.get('kticks',None):
+            kwargs['kticks'] = kwargs['kticks'] or self.get_kticks() # Does not change even after interpolation, prefer user
+        
+        elim = kwargs.get('elim',None)
+        new_elim = [e + (kwargs.get('efermi',None) or 0) for e in elim] if isinstance(elim,(list, tuple)) else None
+        return kwargs, new_elim
     
     @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': f"{_skb_doc}\n    ax :"})
     def splot_bands(self, spin = 0, ax = None, elim = None, efermi = None, kticks = None, interp = None, **kwargs):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin','efermi','kpoints','bands','kwargs']} # should be on top to avoid other loacals
-        rlim = [e + (efermi or 0) for e in elim] if isinstance(elim,(list, tuple)) else None
-        data = self.get_data(spin = spin, elim = rlim) # picked relative limit
+        plot_kws, new_elim = self._handle_kwargs(plot_kws)
+        data = self.get_data(spin = spin, elim = new_elim) # picked relative limit
         K, E = data.kpath, data.evals - (efermi or data['vbm'])
         return sp.splot_bands(K, E, **plot_kws, **kwargs)

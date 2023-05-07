@@ -489,6 +489,7 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
     Parameters   
     ----------
     ptaches : Any number of disconnected patches where a single patch is a list of points as [(x,y,z,[label],[N]), ...]
+    n : int, number per length of body diagonal of rec_basis, this makes uniform steps based on distance between points.
     weight : Float, if None, auto generates weights.
     ibzkpt : Path to ibzkpt file, required for HSE calculations.
     outfile : Path/to/file to write kpoints.
@@ -509,14 +510,14 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
         for point in patch:
             if len(point) == 3:
                 _patch.append(point)
-                labels.append('skip')
+                labels.append('')
             elif len(point) == 4:
                 if isinstance(point[3],str):
                     _patch.append(point[:3]) # add only (x,y,z)
                     labels.append(point[3])
                 elif isinstance(point[3],int):
                     _patch.append(point) # add full point as (x,y,z,N)
-                    labels.append('skip')
+                    labels.append('')
                 else:
                     raise TypeError("4th entry in point should be string label or int number of points for next interval if label is skipped.")
             elif len(point) == 5:
@@ -532,8 +533,6 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
         hsk_list.append(_patch)
 
     xs,ys,zs, inds,joinat = [],[],[],[0],[] # 0 in inds list is important
-    _labels = []
-    _len_prev = 0
     for j,a in enumerate(hsk_list):
         for i in range(len(a)-1):
             try:
@@ -549,21 +548,16 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
                     _m = np.rint(np.linalg.norm(_vec)*n).astype(int) # Calculate
 
             _m = _m if _m >= 2 else 2 # minimum of 2 points in a path
-
-            inds.append(inds[-1]+_m) #Append first then do next
-            _labels.append(labels[i+_len_prev])
-            if j !=0 and i == 0:
-                joinat.append(inds[-2]) # Add previous in joinpath and label
-                if 'skip' not in _labels[-2]:
-                    _labels[-1] = _labels[-2] + '|' + _labels[-1]
-                    _labels = [*_labels[:-2],_labels[-1]] # Drop the label we added before
-
+            
+            if j != 0 and i == 0: # start of new interval
+                inds.append(inds[-1] + 1) # Need duplicate + 1 here
+                joinat.append(inds[-2] + 1) # Add previous in joinpath and label
+                
+            inds.append(inds[-1] + _m - 1) #Append to index list
             xs.append(list(np.linspace(a[i][0],a[i+1][0],_m)))
             ys.append(list(np.linspace(a[i][1],a[i+1][1],_m)))
             zs.append(list(np.linspace(a[i][2],a[i+1][2],_m)))
-
-        _labels.append(labels[len(a) -1 +_len_prev]) # Add last in current interval
-        _len_prev += len(a)
+            
 
     xs = [y for z in xs for y in z] #flatten values.
     ys = [y for z in ys for y in z]
@@ -584,12 +578,20 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
             slines = lines[3:N+4]
             ibz_str = ''.join(slines)
             out_str = "{}\n{}".format(ibz_str,out_str) # Update out_str
-    if inds:
-        inds[-1] = -1 # last index to -1
+    
+    
+    _inds, _labels = [], []
+    for i, idx in enumerate(inds):
+        if (idx + 1) in joinat: # say 8 is in joinat, previous 7 will match
+            _inds.append(idx + 1)
+            l1, l2 = labels[i], labels[i+1]
+            lab = f'<={l1}|{l2}' if (l1 and l2) else f'<={l1 or l2}' if (l1 + l2) else '<='
+            _labels.append(lab)
+        elif idx not in joinat: # next point shhould be discarded for same label
+            _inds.append(idx)
+            _labels.append(labels[i])
 
-    inds = [i for k,i in enumerate(inds) if 'skip' != _labels[k]]
-    _labels = [l.replace('|skip','') for l in _labels if l != 'skip']
-    path_info = ', '.join('{}:{}'.format(f'{idx - 1}|{idx}' if idx in joinat else idx, v) for idx, v in zip(inds,_labels))
+    path_info = ', '.join(f'{idx}:{v}' for idx, v in zip(_inds,_labels))
     
     top_str = "Automatically generated using ipyvasp for HSK-PATH {}\n\t{}\nReciprocal Lattice".format(path_info,N)
     out_str = "{}\n{}".format(top_str,out_str)
@@ -609,11 +611,7 @@ def read_kticks(kpoints_path):
     
             hsk = [[v.strip() for v in vs.split(':')] for vs in head.split(',')]
             for k,v in hsk:
-                if '|' in k:
-                    k = tuple([int(v.strip()) for v in k.split('|')])
-                else:
-                    k = int(k)
-                kticks.append((k,v))
+                kticks.append((int(k),v))
                 
     return kticks
         
@@ -636,7 +634,7 @@ def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec
     - **Example**
         > str2kpath('''0 0 0 !$\Gamma$ 3
                     0.25 0.25 0.25 !L''')
-        > Automatically generated using ipyvasp for HSK-PATH 0:$\Gamma$, -1:L
+        > Automatically generated using ipyvasp for HSK-PATH 0:$\Gamma$, 2:L
 	    >   3
         > Reciprocal Lattice
         >   0.0000000000    0.0000000000    0.0000000000    0.333333
@@ -656,17 +654,20 @@ def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec
     for j,line in enumerate(lines[skipN:]):
         if line.strip(): # Make sure line is not empty
             data = line.split()
-            if len(data) == 3:
-                hsk_list.append([float(i) for i in data])
-            elif len(data) == 4:
-                x,y,z = [float(i) for i in data[:3]]
+            if len(data) < 3:
+                raise ValueError(f"Line {j + skipN + 1} has less than 3 values.")
+            
+            point = [float(i) for i in data[:3]]
+            
+            if len(data) == 4:
                 _4th = data[3] if re.search('\$\\\\[a-zA-Z]+\$|[a-zA-Z]+|[α-ωΑ-Ω]+|\|', line) else int(data[3])
-                hsk_list.append([x,y,z,_4th])
+                point.append(_4th)
             elif len(data) == 5:
-                x,y,z = [float(i) for i in data[:3]]
                 _5th = int(data[4])
-                hsk_list.append([x,y,z,data[3],_5th]) # 5th is number of points, 4th is label
-
+                point = point + [data[3],_5th]
+                
+            hsk_list.append(point)
+            
     if where_blanks:
         filtered = [w-i for i,w in enumerate(where_blanks)]
         where_blanks = np.unique([0,*filtered,len(hsk_list)]).tolist()
