@@ -226,11 +226,11 @@ def write_poscar(poscar_data, outfile = None, selective_dynamics = None, overwri
     out_str += '\n'.join(pos_list)
     if outfile:
         if not os.path.isfile(outfile):
-            with open(outfile,'w') as f:
+            with open(outfile,'w', encoding='utf-8') as f:
                 f.write(out_str)
 
         elif overwrite and os.path.isfile(outfile):
-            with open(outfile,'w') as f:
+            with open(outfile,'w', encoding='utf-8') as f:
                 f.write(out_str)
         else:
             raise FileExistsError(f"{outfile!r} exists, can not overwrite, \nuse overwrite=True if you want to chnage.")
@@ -244,35 +244,41 @@ def export_poscar(path = None,content = None):
         - content: POSCAR content as string, This takes precedence to path.
     """
     if content and isinstance(content,str):
-        path = content.splitlines() # This acts as slice for islice2array.
-    elif not path:
-        path = './POSCAR'
+        file_lines = content.splitlines() 
+    else:
+        if not path:
+            path = './POSCAR'
         if not os.path.isfile(path):
             raise FileNotFoundError(f"{path!r} not found.")
-    header = vp.islice2array(path,start=0,nlines=1,raw=True,exclude=None).split('#',1)
+        
+        with open(path,'r', encoding='utf-8') as f:
+            file_lines = f.readlines()
+            
+    header = file_lines[0].split('#',1)
     SYSTEM = header[0].strip()
     comment = header[1].strip() if len(header) > 1 else 'Exported by Pivopty'
 
-    scale = float(vp.islice2array(path,start=1,nlines=1,exclude=None,raw=True).strip())
+    scale = float(file_lines[1].strip())
     if scale < 0: # If that is for volume
         scale = 1
-    basis = scale*vp.islice2array(path,start=2,nlines=3,exclude=None).reshape((-1,3))
+        
+    basis = scale*vp.gen2numpy(file_lines[2:5],(3,3),[-1,-1],exclude = None)
     #volume = np.linalg.det(basis)
     #rec_basis = np.linalg.inv(basis).T # general formula
     out_dict = {'SYSTEM':SYSTEM,#'volume':volume,
                 'basis':basis,#'rec_basis':rec_basis,
                 'extra_info':{'comment':comment,'scale':scale}}
 
-    elems = vp.islice2array(path,raw=True,start=5,nlines=1,exclude=None).split()
-    ions = vp.islice2array(path,start=6,nlines=1,exclude=None)
-    N = np.sum(ions).astype(int)
+    elems = file_lines[5].split()
+    ions = [int(i) for i in file_lines[6].split()]
+    N = int(np.sum(ions)) # Must be py int, not numpy
     inds = np.cumsum([0,*ions]).astype(int)
     # Check Cartesian and Selective Dynamics
-    lines = vp.islice2array(path,start=7,nlines=2,exclude=None,raw=True).splitlines()
-    lines = [l.strip() for l in lines] # remove whitespace or tabs
+    lines = [l.strip() for l in file_lines[7:9]] # remove whitespace or tabs
     out_dict['extra_info']['cartesian'] = True if ((lines[0][0] in 'cCkK') or (lines[1][0] in 'cCkK')) else False
     # Two lines are excluded in below command before start. so start = 7-2
-    positions = vp.islice2array(path,start=5,exclude="^\s+[a-zA-Z]|^[a-zA-Z]",cols=[0,1,2]).reshape((-1,3))[:N]
+    sd = True if file_lines[7].strip().lower().startswith('s') else False
+    positions = vp.gen2numpy(file_lines[7:],(N,6 if sd else 3),(-1,[0,1,2]),exclude="^\s+[a-zA-Z]|^[a-zA-Z]") # handle selective dynamics word here
 
     if out_dict['extra_info']['cartesian']:
         positions = scale*to_basis(basis, positions)
@@ -596,7 +602,7 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
     top_str = "Automatically generated using ipyvasp for HSK-PATH {}\n\t{}\nReciprocal Lattice".format(path_info,N)
     out_str = "{}\n{}".format(top_str,out_str)
     if outfile != None:
-        with open(outfile,'w') as f:
+        with open(outfile,'w', encoding='utf-8') as f: # write to allow unicode characters in path
             f.write(out_str)
     else:
         print(out_str)
@@ -605,7 +611,8 @@ def read_kticks(kpoints_path):
     "Reads ticks values and labels in header of kpoint file. Returns dictionary of `kticks` that can be used in plotting functions. If not exist in header, returns empty values(still valid)."
     kticks = []
     if os.path.isfile(kpoints_path):
-        top_line = vp.islice2array(kpoints_path,exclude=None,raw=True,nlines=1)
+        with open(kpoints_path,'r', encoding='utf-8') as f: # Read header, important to use utf-8 to include greek letters.
+            top_line = f.readline()
         if 'HSK-PATH' in top_line:
             head = top_line.split('HSK-PATH')[1].strip() # Only update head if HSK-PATH is found.
     
@@ -760,7 +767,7 @@ def get_kmesh(poscar_data, *args, shift = 0, weight = None, cartesian = False, i
     out_str = '\n'.join(out_str)
     N = len(points)
     if ibzkpt and os.path.isfile(ibzkpt):
-        with open(ibzkpt,'r') as f:
+        with open(ibzkpt,'r', encoding='utf-8') as f:
             lines = f.readlines()
 
         if (cartesian == False) and (lines[2].strip()[0] in 'cCkK'):
@@ -774,7 +781,7 @@ def get_kmesh(poscar_data, *args, shift = 0, weight = None, cartesian = False, i
     top_str = "Generated uniform mesh using ipyvasp, GRID-SHAPE = [{},{},{}]\n\t{}\n{}".format(nx,ny,nz,N,mode)
     out_str = "{}\n{}".format(top_str,out_str)
     if outfile != None:
-        with open(outfile,'w') as f:
+        with open(outfile,'w', encoding='utf-8') as f:
             f.write(out_str)
     else:
         print(out_str)

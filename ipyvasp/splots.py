@@ -1373,7 +1373,7 @@ def plt2text(plt_fig=None,width=144,vscale=0.96,colorful=True,invert=False,crop=
     out_str = '\n'.join([''.join([p for p in ps]) for ps in pixels])
 
     if outfile:
-        with open(outfile,'w') as f:
+        with open(outfile,'w', encoding='utf-8') as f: # unicode
             f.write(out_str)
     else:
         # For loop is important for printing lines, otherwise breaks appear.

@@ -5,6 +5,7 @@ __all__ = ['download_structure', '__all__', 'parse_text', 'POSCAR', 'LOCPOT', 'C
 
 # Cell
 import os
+from itertools import islice
 import numpy as np
 import plotly.graph_objects as go
 try:
@@ -82,7 +83,7 @@ _memebers = (
     sio.to_R3,
     sio.periodic_table,
     wdg.generate_summary,
-    vp.split_vasprun,
+    vp.minify_vasprun,
     vp.xml2dict,
     ip.iplot2html,
     sp.plt2html,
@@ -107,68 +108,17 @@ for _m in _memebers:
     locals()[_m.__name__] = _m # Assign to local namespace that can be exported, classes only have __name__, not name
 
 # Cell
-def parse_text(path,
-          dtype=float, delimiter='\s+',
-          include=None, exclude='#',
-          raw=False, fix_format=True,
-          start=0, nlines=None, count=-1,
-          new_shape=None,cols=None,
-          old_shape=None, slice_rows=None #Works if both given
-          ):
-    """
-    - Reads a sliced array from txt,csv type files and return to array.
-        Also manages if columns lengths are not equal and return 1D array.
-        It is faster than loading  whole file into memory. This single function could be used
-        to parse EIGENVAL, PROCAR, DOCAR and similar files with just a
-        combination of `exclude, include,start,stop,step` arguments.
-    Args:
-        - path: Path/to/file to be parsed.
-        - dtype: float by default. Data type of output array, it is must have argument.
-        - start,nlines: The indices of lines to start reading from and number of lines after start respectively.
-            Both could be None or int, while start could be a list to read slices from file provided that nlines is int.
-            The spacing between adjacent indices in start should be equal to or greater than nlines as pointer in file
-            do not go back on its own.  These parameters are not required if `slice_rows` and `old_shape` are given.
-            > Note: `start` should count comments if `exclude` is None.
-        - count: `np.size(output_array) = nrows x ncols`, if it is known before execution, performance is increased.
-        - delimiter:  Default is `\s+`. Could be any kind of delimiter valid in numpy and in the file.
-        - cols: List of indices of columns to pick. Useful when reading a file like PROCAR which e.g. has text and numbers inline. This parameter is in output of `slice_data`.
-        - include: Default is None and includes everything. String of patterns separated by | to keep, could be a regular expression.
-        - exclude: Default is '#' to remove comments. String of patterns separated by | to drop,could be a regular expression.
-        - raw    : Default is False, if True, returns list of raw strings. Useful to select `cols`.
-        - fix_format: Default is True, it sepearates numbers with poor formatting like 1.000-2.000 to 1.000 2.000 which is useful in PROCAR. Keep it False if want to read string literally.
-        - new_shape : Tuple of shape Default is None. Will try to reshape in this shape, if fails fallbacks to 2D or 1D. Not required if `slice_rows` and `old_shape` are given.
-        - old_shape: It is required when you need to pick blocks of data from rows.
-                columns should be last entry, like (2,2,3) means 3 columns and two different indexed blocks are there.
-                Only works if `slice_rows` is given too.
-        - slice_rows: It is required when you need to pick blocks of data from rows.
-                [(0,1),(0,1)] will pick lines at index 0,1,3,4 if first dimension has size 3. It is like N1*i+j for N1=3.
-                General formula to pick rows is `inner_block_index + inner_block_size*second_block_index + inner_most_size*second_block_size*third_block_index + ...`
-                `i_1 + N_1*i_2 + N_1*N_2*i_3 + ...` where i_1 is inner most index.
-                Only works if `old_shape` is given too.
-    - **Examples**
-        > `parse_text('path/to/PROCAR',start=3,include='k-point',cols=[3,4,5])[:2]`
-        > array([[ 0.125,  0.125,  0.125],
-        >        [ 0.375,  0.125,  0.125]])
-        > `parse_text('path/to/EIGENVAL',start=7,exclude='E',cols=[1,2])[:2]`
-        > array([[-11.476913,   1.      ],
-        >        [  0.283532,   1.      ]])
-    > Note: Slicing a dimension to 100% of its data is faster than let say 80% for inner dimensions, so if you have to slice more than 50% of an inner dimension, then just load full data and slice after it.
-
-    """
+@_sub_doc(vp.gen2numpy,skip_param= 'gen :', replace= {'shape :':'path : Path to file containing data.\nshape :'})
+def parse_text(path, shape, slices, raw:bool = False, dtype = float, delimiter = '\s+', include:str = None,exclude:str = '#',fix_format:bool = True):
+    kwargs = {k:v for k,v in locals().items() if k not in ['path']}
+    
     if not os.path.isfile(path):
         raise FileNotFoundError(f"File {path!r} does not exists")
 
-    extra_kws = dict(dtype=dtype,delimiter=delimiter, # Data related
-                     include=include, exclude= exclude, # selection related
-                     raw=raw, fix_format= fix_format,new_shape=new_shape, # Output related
-                     start=start,nlines=nlines,count=count,cols=cols # slicing related
-                     )
-    if old_shape and slice_rows:
-        _cols = -1 if cols == None else cols
-        extra_kws.update(vp.slice_data(dim_inds=[*slice_rows,_cols],old_shape=old_shape))
-        print(extra_kws)
-
-    return vp.islice2array(path_or_islice=path,**extra_kws)
+    with open(path, 'r', encoding='utf-8') as f:
+        gen = islice(f, 0, None)
+        data = vp.gen2numpy(gen, **kwargs) # should be under open file context
+    return data
 
 # Cell
 from contextlib import redirect_stdout

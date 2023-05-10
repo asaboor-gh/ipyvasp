@@ -2,8 +2,7 @@ import re
 import os
 from io import StringIO
 from itertools import islice, chain, product
-from collections import namedtuple
-import textwrap
+from collections import namedtuple, Iterable
 import xml.etree.ElementTree as ET
 
 import numpy as np
@@ -31,7 +30,7 @@ class DataSource:
     def __init__(self, path):
         if not os.path.isfile(path):
             raise FileNotFoundError("File: '{}'' does not exist!".format(path))
-        self._path = path
+        self._path = os.path.abspath(path) # Keep absolute path in case directory changes
     
     def __repr__(self):
         return f"{self.__class__.__name__}({self.path!r})"
@@ -159,13 +158,18 @@ class Vasprun(DataSource):
         return serializer.Dict2Data({'kpoints':kpoints,'coords':coords,'kpath': kpath, 'weights':weights,'rec_basis':rec_basis})
      
      
-    def get_dos(self, spin = 0, elim = None, atoms = None):
+    def get_dos(self, spin = 0, elim = None, atoms = None, orbs = None):
         # Should be as energy(NE,), total(NE,), integrated(NE,), partial(NE, NATOMS(selected), NORBS) and atoms reference should be returned
         # include vbm property as in evals, just from integrated dos and NELECT
         # check size and if nothing, throw error
         pass 
+        
+        if atoms and orbs:
+            pass
+        elif (atoms, orbs) != (None, None):
+            raise ValueError('atoms and orbs should be specified together')
     
-    def _get_spin_set(self, spin, bands_range, atoms): # bands_range comes from elim applied to all bands
+    def _get_spin_set(self, spin, bands, atoms, orbs): 
         if atoms == -1:
             pass 
         elif isinstance(atoms, (list, tuple, range)):
@@ -173,11 +177,38 @@ class Vasprun(DataSource):
         else:
             raise ValueError('atoms should be a list, tuple, range or -1 for all atoms')
         return None
+
+        if orbs == -1:
+            pass 
+        elif isinstance(orbs, (list, tuple, range)):
+            pass 
+        else:
+            raise ValueError('orbs should be a list, tuple, range or -1 for all atoms')
+        return None
     
-    def get_evals(self, spin = 0, elim = None, atoms = None): 
+        # from itertools import chain
+        # X = list(r for r in vr.read('spin1','spin2|</projected') if '<r>' in r) # NOTE: skip k here
+        # def pick_innermost(gen, idxs, N):
+        #     j = 0
+        #     group = ()
+        #     for i, line in enumerate(gen, start =1):
+        #         if j in idxs:
+        #             group = chain(group, (line,))
+        #         j = j + 1
+        #         if i % N == 0:
+        #             j = 0
+        #             yield group
+        #             group = ()
+
+        # Y = pick_innermost(X, [0],64)
+        # Z = pick_innermost(Y, [0,1,2],168)
+        # K = (x for xxx in Z for xx in xxx for x in xx) # total flattening
+        # gen2numpy(K, cols=range(1,10)).reshape((-1,3,1,9))
+
+    def get_evals(self, spin = 0, elim = None, atoms = None, orbs = None): 
         # mention that elim applies to unsubstracted efermi from evals, and elim should keep track of efermi, inside Bands and DOS, add efermi to elim passed to get_evals from bands
         info = self.get_summary()
-        bands_range = range(info.NBANDS)
+        bands = range(info.NBANDS)
         
         ev = (r.split()[1:3] for r in self.read(f'<set.*spin {spin+1}',f'<set.*spin {spin+2}|</eigenvalues>') if '<r>' in r)
         ev = (e for es in ev for e in es) # flatten
@@ -194,13 +225,24 @@ class Vasprun(DataSource):
             lo_ind = np.min(np.where(evals[:,:] >= np.min(elim))[1])
             evals = evals[:, lo_ind:up_ind]
             occs = occs[:, lo_ind:up_ind]
-            bands_range = range(lo_ind, up_ind)
+            bands = range(lo_ind, up_ind)
         
         out = {'evals':evals,'occs':occs, 'vbm':vbm}
-        if atoms:
-            # Get projections here
-            out['pros'] = self._get_spin_set(spin, bands_range, atoms)
+        if atoms and orbs:
+            if not hasattr(info, 'orbs'):
+                raise ValueError('This calculation does not have projected orbitals!')
+            
+            gen = (r for r in self.read(f'spin{spin+1}',f'spin{spin+2}|</projected') if '<r>' in r)
+            NKPTS = self._skipk + evals.shape[0]
+            NBANDS = info.NBANDS
+            NIONS = info.NIONS
+            NORBS = len(info.orbs)
+            
+            out['pros'] = self._get_spin_set(spin, bands, atoms, orbs)
             out['atoms'] = atoms
+            out['orbs'] = orbs
+        elif (atoms, orbs) != (None, None):
+            raise ValueError('atoms and orbs should be passed together')
             
         return serializer.Dict2Data(out)
 
@@ -233,6 +275,19 @@ class Vasprun(DataSource):
                     arrays[k].append(v)
 
             return serializer.Dict2Data({k:np.array(v) for k,v in arrays.items()})
+    
+    def minify(self):
+        "Removes partial dos and projected eigenvalues data from large vasprun.xml to make it smaller in size to save on disk."
+        path = os.path.join(os.path.split(self.path)[0], 'mini-vasprun.xml')
+        lines_1 = self.read('xml','<partial',skip_last=True)
+        lines_2 = islice(self.read('</partial','<projected',skip_last=True), 1, None)
+        lines_3 = islice(self.read('</projected','</xml'), 1, None)
+        text = ''.join(chain(lines_1, lines_2, lines_3))
+        
+        with open(path,'w') as f:
+            f.write(text)
+            
+        print('Minified vasprun.xml saved at {}'.format(path))
         
 
 def xml2dict(xmlnode_or_filepath):
@@ -245,7 +300,7 @@ def xml2dict(xmlnode_or_filepath):
     ``xml2dict()['nodes'][index]['nodes'][index]...`` tree which makes it simple.
     """
     if isinstance(xmlnode_or_filepath,str):
-        node = read_asxml(xmlnode_or_filepath)
+        node = ET.parse(xmlnode_or_filepath).getroot()
     else:
         node = xmlnode_or_filepath
 
@@ -341,34 +396,7 @@ def get_bands_pro_set(xml_data, spin = 0, skipk = 0, bands_range:range=None, set
         check_list = list(bands_range)
         if check_list==[]:
             raise ValueError("No bands prjections found in given energy range.")
-    # Try to read _set.txt first. instance check is important.
-    if isinstance(set_path,str) and os.path.isfile(set_path):
-        _header = islice2array(set_path,nlines=1,raw=True,exclude=None)
-        _shape = [int(v) for v in _header.split('=')[1].strip().split(',')]
-        NKPTS, NBANDS, NIONS, NORBS = _shape
-        if NORBS == 3:
-            fields = ['s','p','d']
-        elif NORBS == 9:
-            fields = ['s','py','pz','px','dxy','dyz','dz2','dxz','x2-y2']
-        else:
-            fields = [str(i) for i in range(NORBS)] #s,p,d in indices.
-        COUNT = NIONS*NBANDS*(NKPTS-skipk)*NORBS
-        start = NBANDS*NIONS*skipk
-        nlines = None # Read till end.
-        if bands_range:
-            _b_r = list(bands_range)
-            # First line is comment but it is taken out by exclude in islice2array.
-            start = [[NIONS*NBANDS*k + NIONS*b for b in _b_r] for k in range(skipk,NKPTS)]
-            start = [s for ss in start for s in ss] #flatten
-            nlines = NIONS # 1 band has nions
-            NBANDS = _b_r[-1]-_b_r[0]+1 # upadte after start
-
-        NKPTS = NKPTS-skipk # Update after start, and bands_range.
-        COUNT = NIONS*NBANDS*NKPTS*NORBS
-        data = islice2array(set_path,start=start,nlines=nlines,count=COUNT)
-        data = data.reshape((1, NKPTS,NBANDS,NIONS,NORBS))  # 1 for spin to just be consistent
-        return serializer.Dict2Data({'labels':fields,'pros':data})
-
+    
     #Collect Projection fields
     fields=[];
     for pro in xml_data.root.iter('projected'):
@@ -538,226 +566,129 @@ def _validate_evr(path_evr=None,**kwargs):
     # Other things are not valid.
     raise ValueError('path_evr must be a path string or output of export_vasprun function.')
 
-def islice2array(path_or_islice,dtype = float,delimiter:str = '\s+',
-                include:str=None,exclude:str='#',raw:bool=False,fix_format:bool = True,
-                start:int=0,nlines:int=None,count:int=-1,cols: tuple =None,new_shape : tuple=None
-                ):
-    """Reads a sliced array from txt,csv type files and return to array. Also manages if columns lengths are not equal and return 1D array. 
-    It is faster than loading  whole file into memory. This single function could be used to parse EIGENVAL, PROCAR, DOCAR and similar files 
-    with just a combination of ``exclude, include,start,stop,step`` arguments. See code of ``ipyvasp.parser.export_locpot`` for example.
-    
-    Args:
-        path_or_islice: Path/to/file or ``itertools.islice(file_object)``. islice is interesting when you want to read different slices of 
-            an opened file and do not want to open it again. 
-        dtype (conversion function): float by default. Data type of output array, it is must have argument.
-        start (int): Starting line number. Default is 0. It could be a list to read slices from file provided that nlines is int. 
-            The spacing between adjacent indices in start should be equal to or greater than nlines as pointer in file do not go back on its own.
-            ``start`` should count comments if ``exclude`` is None. You can use ``slice_data`` function to get a dictionary of 
-            ``start,nlines, count, cols, new_shape`` and unpack in argument instead of thinking too much.
-        nlines (int): Number of lines after start respectively. Only work if ``path_or_islice`` is a file path. could be None or int.
-        count (int): Default is -1. ``count = np.size(output_array) = nrows x ncols``, if it is known before execution, performance is increased. This parameter is in output of ``slice_data``.
-        delimiter (str):  Default is `\s+`. Could be any kind of delimiter valid in numpy and in the file.
-        cols (tuple): Tuple of indices of columns to pick. Useful when reading a file like PROCAR which e.g. has text and numbers inline. This parameter is in output of ``slice_data``.
-        include (str): Default is None and includes everything. String of patterns separated by | to keep, could be a regular expression.
-        exclude (str): Default is '#' to remove comments. String of patterns separated by | to drop,could be a regular expression.
-        raw (bool): Default is False, if True, returns list of raw strings. Useful to select ``cols``.
-        fix_format (bool): Default is True, it sepearates numbers with poor formatting like ``1.000-2.000`` to ``1.000 -2.000`` which is useful in PROCAR. Keep it False if want to read string literally.
-        new_shape (tuple): Tuple of shape Default is None. Will try to reshape in this shape, if fails fallbacks to 2D or 1D. This parameter is in output of ``slice_data``.
-    
-    Returns:
-        1D or 2D array of dtype. If raw is True, returns raw data.
-        
-    .. code-block:: python
-        :caption: **Example**
-        
-        islice2array('path/to/PROCAR',start=3,include='k-point',cols=[3,4,5])[:2]
-        array([[ 0.125,  0.125,  0.125],
-               [ 0.375,  0.125,  0.125]])
-        islice2array('path/to/EIGENVAL',start=7,exclude='E',cols=[1,2])[:2]
-        array([[-11.476913,   1.      ],
-               [  0.283532,   1.      ]])
-    
-    .. note::
-        Slicing a dimension to 100% of its data is faster than let say 80% for inner dimensions, so if you have to slice more than 50% of an inner dimension, then just load full data and slice after it.
+def gen2numpy(gen, shape, slices, raw:bool = False, dtype = float, delimiter = '\s+', include:str = None,exclude:str = '#',fix_format:bool = True):
     """
-    if nlines is None and isinstance(start,(list,np.ndarray)):
-        print("`nlines = None` with `start = array/list` is useless combination.")
-        return np.array([]) # return empty array.
-
-    def _fixing(_islice,include=include, exclude=exclude,fix_format=fix_format,nlines=nlines,start=start):
-        if include:
-            _islice = (l for l in _islice if re.search(include,l))
-
-        if exclude:
-            _islice = (l for l in _islice if not re.search(exclude,l))
-
-        _islice = (l.strip() for l in _islice) # remove whitespace and new lines
-
-        # Make slices here after comment excluding.
-        if isinstance(nlines,int) and isinstance(start,(list,np.ndarray)):
-            #As islice moves the pointer as it reads, start[1:]-nlines-1
-            # This confirms spacing between two indices in start >= nlines
-            start = [start[0],*[s2-s1-nlines for s1,s2 in zip(start,start[1:])]]
-            _islice = chain(*(islice(_islice,s,s+nlines) for s in start))
-        elif isinstance(nlines,int) and isinstance(start,int):
-            _islice = islice(_islice,start,start+nlines)
-        elif nlines is None and isinstance(start,int):
-            _islice = islice(_islice,start,None)
-
-        # Negative connected digits to avoid, especially in PROCAR
-        if fix_format:
-            _islice = (re.sub(r"(\d)-(\d)",r"\1 -\2",l) for l in _islice)
-        return _islice
-
-    def _gen(_islice,cols=cols):
-        for line in _islice:
-            line = line.strip().replace(delimiter,'  ').split()
-            if line and cols is not None: # if is must here.
-                line = [line[i] for i in cols]
-            for chars in line:
-                yield dtype(chars)
-
-    #Process Now
-    if isinstance(path_or_islice,str) and os.path.isfile(path_or_islice):
-        with open(path_or_islice,'r') as f:
-            _islice = islice(f,0,None) # Read full, Will fix later.
-            _islice = _fixing(_islice)
-            if raw:
-                return '\n'.join(_islice)
-            # Must to consume islice when file is open
-            data = np.fromiter(_gen(_islice),dtype=dtype,count=count)
-    else:
-        _islice = _fixing(path_or_islice)
-        if raw:
-            return '\n'.join(_islice)
-        data = np.fromiter(_gen(_islice),dtype=dtype,count=count)
-
-    if new_shape:
-        try: data = data.reshape(new_shape)
-        except: pass
-    elif cols: #Otherwise single array.
-        try: data = data.reshape((-1,len(cols)))
-        except: pass
-    return data
-
-def slice_data(dim_inds:list,old_shape:tuple):
-    """Returns a dictionary that can be unpacked in arguments of isclice2array function. This function works only for regular txt/csv/tsv data files which have rectangular data written.
+    Convert a generator of text lines to numpy array while excluding comments, given matches and empty lines. 
+    Data is sliced and reshaped as per given shape and slices. It is very efficient for large data files to fetch only required data.
     
-    Args:
-        dim_inds (list): List of indices array or range to pick from each dimension. Inner dimensions are more towards right. Last itmes in dim_inds is considered to be columns. If you want to include all values in a dimension, you can put -1 in that dimension. Note that negative indexing does not work in file readig, -1 is s special case to fetch all items.
-        old_shape (tuple): Shape of data set including the columns length in right most place.
+    Parameters
+    ----------
+    gen : generator object. Typical example is `with open('file.txt') as f: gen = itertools.islice(f,0,None)`
+    shape : tuple or list of integers. Given shape of data to be read. Last item is considered to be columns. User should keep track of empty lines and excluded lines.
+    slices : tuple or list of integers or range or -1. Given slices of data to be read along each dimension. Last item is considered to be columns.
+    raw : bool, returns raw data for quick visualizing and determining shape such as columns, if True.
+    dtype : data type of numpy array to be returned.
+    delimiter : delimiter of data in text file.
+    include : string to include in each line to be read. If None, all lines are included.
+    exclude : string to exclude in each line to be read. If None, no lines are excluded.
+    fix_format : bool, if True, it will fix the format of data in each line. It is useful when data is not properly formatted. like 0.500-0.700 -> 0.500 -0.700
     
-    Suppose You have data as 3D arry where third dimension is along column.
+    Returns
+    -------
+    numpy array of given shape and dtype.
     
-    .. code-block:: shell
-        :caption: data.txt
-        
-        0 0
-        0 2
-        1 0
-        1 2
-        
-    To pick [[0,2], [1,2]], i.e. second and fourth row, you need to run
-    
-    .. code-block:: python
-        :caption: slicing data
-        
-        slice_data(dim_inds = [[0,1],[1],-1], old_shape=(2,2,2))
-        {'start': array([1, 3]), 'nlines': 1, 'count': 2}
-        
-    Unpack above dictionary in ``islice2array`` and you will get output array.
-    
-    .. note::
-        The dimensions are packed from right to left, like 0,2 is repeating in 2nd column.
+    Raises
+    ------
+    Multiple errors are raised if given arguments are not of correct type or shape.
+    If number of lines in generators are less than given shape, it will raise ValueError for short iterator from numpy.
     """
-    # Columns are treated diffiernetly.
-    if dim_inds[-1] == -1:
-        cols = None
-    else:
-        cols = list(dim_inds[-1])
-
-    r_shape = old_shape[:-1]
-    dim_inds = dim_inds[:-1]
-    for i,ind in enumerate(dim_inds.copy()):
-        if ind == -1:
-            dim_inds[i] = range(r_shape[i])
-    nlines = 1
-    #start = [[NIONS*NBANDS*k + NIONS*b for b in _b_r] for k in range(skipk,NKPTS)] #kind of thing.
-    _prod_ = product(*dim_inds)
-    _mult_ = [np.product(r_shape[i+1:]) for i in range(len(r_shape))]
-    _out_ = np.array([np.dot(p,_mult_) for p in _prod_]).astype(int)
-    # check if innermost dimensions could be chunked.
-    step = 1
-    for i in range(-1,-len(dim_inds),-1):
-        _inds = np.array(dim_inds[i]) #innermost
-        if np.max(_inds[1:] - _inds[:-1]) == 1: # consecutive
-            step = len(_inds)
-            _out_ = _out_[::step] # Pick first indices
-            nlines = step*nlines
-            # Now check if all indices picked then make chunks in outer dimensions too.
-            if step != r_shape[i]: # Can't make chunk of outer dimension if inner is not 100% picked.
-                break # Stop more chunking
-    new_shape = [len(inds) for inds in dim_inds] #dim_inds are only in rows.
-    new_shape.append(old_shape[-1])
-    return {'start':_out_,'nlines':nlines,'count': nlines*len(_out_),'cols':cols,'new_shape':tuple(new_shape)}
-
-def split_vasprun(path:str = None):
-    """Splits a given vasprun.xml file into a smaller _vasprun.xml file plus _set[1,2,3,4].txt files which contain projected data for each spin set.
+    if not isinstance(shape,(list,tuple)):
+        raise TypeError(f"shape must be a list/tuple of size of dimensions.")
     
-    Args:
-        path (str): path/to/vasprun.xml file.
+    if not isinstance(slices,(list,tuple)):
+        raise TypeError(f"slices must be a list/tuple of size of dimensions.")
     
-    Output:
-        - _vasprun.xml file with projected data.
-        - _set1.txt for projected data of colinear calculation.
-        - _set1.txt for spin up data and _set2.txt for spin-polarized case.
-        - _set[1,2,3,4].txt for each spin set of non-colinear calculations.
-    """
-    if not path:
-        path = './vasprun.xml'
-    if not os.path.isfile(path):
-        raise FileNotFoundError("{!r} does not exist!".format(path))
-    base_dir = os.path.split(os.path.abspath(path))[0]
-    out_file = os.path.join(base_dir,'_vasprun.xml')
-    out_sets = [os.path.join(base_dir,'_set{}.txt'.format(i)) for i in range(1,5)]
-    # process
-    with open(path,'r') as f:
-        lines = islice(f,None)
-        indices = [i for i,l in enumerate(lines) if re.search('projected|/eigenvalues',l)]
-        f.seek(0)
-        print("Writing {!r} ...".format(out_file),end=' ')
-        with open(out_file,'w') as outf:
-            outf.write(''.join(islice(f,0,indices[1])))
-            f.seek(0)
-            outf.write(''.join(islice(f,indices[-1]+1,None)))
-            print('Done')
+    if len(shape) != len(slices):
+        raise ValueError(f"shape and slices must be of same size.")
+    
+    for sh in shape:
+        if (not isinstance(sh, int)) or (sh < 1):
+            raise TypeError(f"Each item in shape must be integer of size of that dimension, at least 1.")
+    
+    for idx, sli in enumerate(slices):
+        if not isinstance(sli, (list, tuple, range, int)):
+            raise TypeError(f"Expect -1 to pick all data or list/tuple/range to slice data in a dimension, got {sli}")
+        if isinstance(sli, int) and (sli != -1):
+            raise TypeError(f"Expect -1 to pick all data or list/tuple/range to slice data in a dimension, got {sli}")
+        if isinstance(sli, (list, tuple, range)) and not sli:
+            raise TypeError(f"Expect non-empty items in slices, got {type(sli)}")
+        
+        # Verify order, index and values in take
+        if isinstance(sli, (list,tuple,range)):
+            if not all(isinstance(i, int) for i in sli):
+                raise TypeError(f"Expect integers in a slice, got {sli}")
+            if not all(i >= 0 for i in sli):
+                raise ValueError(f"Expect positive integers in a slice, got {sli}")
+            if not all(i < shape[idx] for i in sli):
+                raise ValueError(f"Some indices in slice {sli} are out of bound for dimension {idx} of size {shape[idx]}")
+            
+            if not all(a < b for a,b in zip(sli[:-1],sli[1:])): # Check order
+                raise ValueError(f"Expect increasing order in a slice, got {sli}")
+                
+    start     = int(np.product(shape[1:-1])*slices[0][0]) if isinstance(slices[0], (list, tuple, range)) else 0 # Discard all lines not need in outer dimension.
+    nlines    = int(np.product(shape[:-1])) if len(shape) > 1 else 1 # pick all data if only one dimension given or pick just one line to determine columns.
+    new_shape = tuple([len(sli) if isinstance(sli, (list, tuple, range)) else N for sli, N in zip(slices, shape)])
+    count     = int(np.product(new_shape)) # include columns here for overall data count.
+    
+    # Process generator    
+    if include:
+        gen = (l for l in gen if re.search(include,l))
 
-        f.seek(0)
-        middle = islice(f,indices[-2]+1,indices[-1]) #projected words excluded
-        spin_inds = [i for i,l in enumerate(middle) if re.search('spin',l)][1:] #first useless.
-        if len(spin_inds)>1:
-            set_length = spin_inds[1]-spin_inds[0] # Must define
-        else:
-            set_length = indices[-1]-indices[-2] #It is technically more than set length, but fine for 1 set
-        f.seek(0) # Must be at zero
-        N_sets = len(spin_inds)
-        # Let's read shape from out_file as well.
-        xml_data = read_asxml(out_file)
-        _summary = get_summary(xml_data)
-        NIONS  = _summary.NION
-        NORBS  = len(_summary.fields)
-        NBANDS = get_evals(xml_data).NBANDS
-        NKPTS  = get_kpoints(xml_data).NKPTS
-        del xml_data # free meory now.
-        for i in range(N_sets): #Reads every set
-            print("Writing {!r} ...".format(out_sets[i]),end=' ')
-            start = (indices[-2]+1+spin_inds[0] if i==0 else 0) # pointer is there next time.
-            stop_ = start + set_length # Should move up to set length only.
-            with open(out_sets[i],'w') as setf:
-                setf.write("  # Set: {} Shape: (NKPTS[NBANDS[NIONS]],NORBS) = {},{},{},{}\n".format(i+1,NKPTS,NBANDS,NIONS,NORBS))
-                middle = islice(f,start,stop_)
-                setf.write(''.join(l.lstrip().replace('/','').replace('<r>','') for l in middle if '</r>' in l))
-                print('Done')
+    if exclude:
+        gen = (l for l in gen if not re.search(exclude,l))
+
+    gen = (l for l in gen if l.strip()) # remove empty lines
+    
+    # take after include/exclude and empty line
+    gen = islice(gen, start, start + nlines) 
+    
+    def fold_dim(gen, take, N):
+        if take == -1:
+            yield from gen # return does not work here.
+        
+        j = 0
+        group = ()
+        for i, line in enumerate(gen, start =1):
+            if j in take:
+                group = chain(group, (line,))
+            j = j + 1
+            if i % N == 0:
+                j = 0
+                yield group
+                group = ()
+    
+    def flatten(gen):
+        for g in gen:
+            if isinstance(g, Iterable) and not isinstance(g, str):
+                yield from flatten(g)
+            else:
+                yield g
+    
+    # Slice data, but we keep columns here for now, should return raw data if asked.  
+    for take, N in zip(slices[:-1][::-1], shape[:-1][::-1]): # reverse order to pick innermost first but leave columns
+        gen = fold_dim(gen, take, N)
+    else: # flatter on success
+        gen = flatten(gen)
+    
+    # Negative connected digits to avoid fix after slicing to reduce time.
+    if fix_format:
+        gen = (re.sub(r"(\d)-(\d)",r"\1 -\2",l) for l in gen)
+        
+    if raw:
+        return ''.join(gen) # lines already have '\n' at the end.
+    
+    # Split columns and flatten after escaped from raw return.
+    gen = (item for line in gen for item in line.replace(delimiter,'  ').split())
+    gen = flatten(fold_dim(gen, slices[-1], shape[-1])) # columns
+
+    data = np.fromiter(gen,dtype = dtype, count = count)
+    return data.reshape(new_shape)
+
+
+def minify_vasprun(path : str):
+    "Minify vasprun.xml file by removing projected data."
+    return Vasprun(path).minify()
+
 
 def export_spin_data(path = None, spins = 's', skipk = None, elim = None):
     """Returns Data with selected spin sets. For spin polarized calculations, it returns spin up and down data.
