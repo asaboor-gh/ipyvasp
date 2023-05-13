@@ -495,7 +495,7 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
     Parameters   
     ----------
     ptaches : Any number of disconnected patches where a single patch is a list of points as [(x,y,z,[label],[N]), ...]
-    n : int, number per length of body diagonal of rec_basis, this makes uniform steps based on distance between points.
+    n : int, number of point per maximum span of `rec_basis` in cartesian space, this makes uniform steps based on distance between points. If (x,y,z,[label], N) is provided, this is ignored for that specific interval. If `rec_basis` is not provided, each interval has exactly `n` points.
     weight : Float, if None, auto generates weights.
     ibzkpt : Path to ibzkpt file, required for HSE calculations.
     outfile : Path/to/file to write kpoints.
@@ -506,24 +506,22 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
     if len(patches) == 0:
         raise ValueError("Please provide at least one high symmetry path consisting of two points.")
 
-    hsk_list, labels = [], []
+    fixed_patches = []
     for patch in patches:
         if not isinstance(patch, (list, tuple)):
             raise TypeError("Patche must be a list or tuple of points as [(x,y,z,[label],[N]), ...]")
         if len(patch) < 2:
             raise ValueError("Please provide at least one high symmetry path consisting of two points.")
+        
         _patch = []
         for point in patch:
             if len(point) == 3:
-                _patch.append(point)
-                labels.append('')
+                _patch.append([*point,'']) # make (x,y,z,label)
             elif len(point) == 4:
                 if isinstance(point[3],str):
-                    _patch.append(point[:3]) # add only (x,y,z)
-                    labels.append(point[3])
+                    _patch.append(point) # add (x,y,z,label)
                 elif isinstance(point[3],int):
-                    _patch.append(point) # add full point as (x,y,z,N)
-                    labels.append('')
+                    _patch.append([*point[:3], '', point[-1]]) # add full point as (x,y,z,label, N)
                 else:
                     raise TypeError("4th entry in point should be string label or int number of points for next interval if label is skipped.")
             elif len(point) == 5:
@@ -531,50 +529,58 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
                     raise TypeError("5th entry in point should be an integer to add that many points in interval.")
                 if not isinstance(point[3],str):
                     raise TypeError("4th entry in point should be string label when 5 entries are given.")
-                _patch.append([*point[:3],point[4]])
-                labels.append(point[3])
+                _patch.append(point) # add full point as (x,y,z,label, N)
             else:
                 raise ValueError("Please provide point as (x,y,z,[label],[N])")
                 
-        hsk_list.append(_patch)
+        fixed_patches.append(_patch)
+    
+    def add_points(p1,p2, rec_basis):
+        if len(p1) == 5:
+            m = p1[4] # number of points given explicitly. 
+        elif rec_basis is not None and np.size(rec_basis) == 9:
+            basis = np.array(rec_basis)
+            coords = to_R3(basis,[p1[:3],p2[:3]])
+            ptp_cart = max(np.ptp(basis,axis = 0)) # maximum span of cell in cartesian coordinates
+            m = n*np.rint(np.linalg.norm(coords[0] - coords[1])/ptp_cart)
+            m = int(m) # numpy int to python int is important
+        else:
+            m = n # equal number of points in each interval, given by n.
+        
+        # Doing m - 1 in an interval, so along with last point, total n points are generated per interval.
+        Np = max(m - 1, 1) # At least 2 points. one is given by end point of interval.
+        X = np.linspace(p1[0],p2[0],Np,endpoint = False)
+        Y = np.linspace(p1[1],p2[1],Np,endpoint = False)
+        Z = np.linspace(p1[2],p2[2],Np,endpoint = False)
+        
+        kpts = [(x,y,z) for x,y,z in zip(X,Y,Z)]
+        return kpts, Np, (p1[3], p2[3]) # return kpoints, number of points, labels
 
-    xs,ys,zs, inds,joinat = [],[],[],[0],[] # 0 in inds list is important
-    for j,a in enumerate(hsk_list):
-        for i in range(len(a)-1):
-            try:
-                _m = a[i][3] # number of points given explicitly.
-            except IndexError:
-                if rec_basis is not None and np.size(rec_basis) == 9:
-                    basis = np.array(rec_basis)
-                    coords = to_R3(basis,[a[i][:3],a[i+1][:3]])
-                    largest_dist = np.linalg.norm(basis.sum(axis=0)) # body diagonal
-                    _m = np.rint(np.linalg.norm(coords[0] - coords[1])*n/largest_dist).astype(int)
-                else:
-                    _vec = [_a-_b for _a,_b in zip(a[i][:3],a[i+1] )] # restruct point if 4 entries
-                    _m = np.rint(np.linalg.norm(_vec)*n).astype(int) # Calculate
+    points, numbers, labels = [], [], []
+    for idx, patch in enumerate(fixed_patches):
+        for i,(p1,p2) in enumerate(zip(patch[:-1],patch[1:])):
+            kp, m, labs = add_points(p1,p2, rec_basis)
+            points.extend(kp)
+            numbers.append(m)
+            if idx != 0 and i == 0:
+                labels[-1] = f'<={labels[-1]}|{labs[0]}' # add label of previous patch
+            else:
+                labels.append(labs[0])
+        else:
+            points.append(p2[:3]) # add last point of patch at success of for loop
+            labels.append(labs[1]) # add last label of patch at success of for loop
+            numbers[-1] = numbers[-1] + 1 # added one extra point to last interval
+    
+    if numbers:
+        numbers[-1] = numbers[-1] - 1 # last index should be one less than total number of points
+    numbers = np.cumsum([0,*numbers]) # convert to cumulative sum for indices
 
-            _m = _m if _m >= 2 else 2 # minimum of 2 points in a path
-            
-            if j != 0 and i == 0: # start of new interval
-                inds.append(inds[-1] + 1) # Need duplicate + 1 here
-                joinat.append(inds[-2] + 1) # Add previous in joinpath and label
-                
-            inds.append(inds[-1] + _m - 1) #Append to index list
-            xs.append(list(np.linspace(a[i][0],a[i+1][0],_m)))
-            ys.append(list(np.linspace(a[i][1],a[i+1][1],_m)))
-            zs.append(list(np.linspace(a[i][2],a[i+1][2],_m)))
-            
+    if weight is None and points:
+        weight = 1/len(points)
 
-    xs = [y for z in xs for y in z] #flatten values.
-    ys = [y for z in ys for y in z]
-    zs = [y for z in zs for y in z]
-
-    if weight == None and xs:
-        weight = 1/len(xs)
-
-    out_str = ["{0:>16.10f}{1:>16.10f}{2:>16.10f}{3:>12.6f}".format(x,y,z,weight) for x,y,z in zip(xs,ys,zs)]
+    out_str = ["{0:>16.10f}{1:>16.10f}{2:>16.10f}{3:>12.6f}".format(x,y,z,weight) for x,y,z in points]
     out_str = '\n'.join(out_str)
-    N = np.size(xs)
+    N = len(points)
     if ibzkpt != None:
         if os.path.isfile(ibzkpt):
             with open(ibzkpt,'r') as f:
@@ -585,19 +591,8 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
             ibz_str = ''.join(slines)
             out_str = "{}\n{}".format(ibz_str,out_str) # Update out_str
     
-    
-    _inds, _labels = [], []
-    for i, idx in enumerate(inds):
-        if (idx + 1) in joinat: # say 8 is in joinat, previous 7 will match
-            _inds.append(idx + 1)
-            l1, l2 = labels[i], labels[i+1]
-            lab = f'<={l1}|{l2}' if (l1 and l2) else f'<={l1 or l2}' if (l1 + l2) else '<='
-            _labels.append(lab)
-        elif idx not in joinat: # next point shhould be discarded for same label
-            _inds.append(idx)
-            _labels.append(labels[i])
 
-    path_info = ', '.join(f'{idx}:{v}' for idx, v in zip(_inds,_labels))
+    path_info = ', '.join(f'{idx}:{lab}' for idx, lab in zip(numbers,labels) if lab != '')
     
     top_str = "Automatically generated using ipyvasp for HSK-PATH {}\n\t{}\nReciprocal Lattice".format(path_info,N)
     out_str = "{}\n{}".format(top_str,out_str)
@@ -905,13 +900,12 @@ def rotation(angle_deg,axis_vec):
     return Rotation.from_rotvec(angle_rad * axis_vec)
 
 # Cell
-def get_bz(path_pos = None,loop = True,digits=8,primitive=False):
+def get_bz(path_pos = None,loop = True,primitive=False):
     """
     - Return required information to construct first Brillouin zone in form of tuple (basis, normals, vertices, faces).
     Args:
         - path_pos : POSCAR file path or list of 3 Real space vectors in 3D as list[list,list,list].
         - loop   : If True, joins the last vertex of a BZ plane to starting vertex in order to complete loop.
-        - digits : int, rounding off decimal places, no effect on intermediate calculations, just for pretty final results.
         - primitive: Defualt is False and returns Wigner-Seitz cell, If True returns parallelipiped in rec_basis.
 
     - **Attributes**
@@ -956,49 +950,15 @@ def get_bz(path_pos = None,loop = True,digits=8,primitive=False):
     face_vectors = []
     for f in faces:
         face_vectors.append(np.mean(f,axis=0)) # In primitive point at face center
+    
     if primitive == False:
         face_vectors = [2*f for f in face_vectors] # In regular, cross plane as well.
 
     # Order Faces.
-    faces = [face[order(face,loop=loop)] for face in faces] # order based on given value of loop
-
-    # High symmerty KPOINTS in primitive BZ (positive only)
-    mid_faces = np.array([np.mean(np.unique(face,axis=0),axis=0) for face in faces])
-    mid_edges = []
-    for f in faces:
-        for i in range(len(f)-1):
-            # Do not insert point between unique vertices
-            if np.isclose(np.linalg.norm(f[i]),np.linalg.norm(f[i+1])):
-                mid_edges.append(np.mean([f[i],f[i+1]],axis=0))
-    if mid_edges!=[]:
-        mid_edges = np.unique(mid_edges,axis=0) # because faces share edges
-        mid_faces = np.concatenate([mid_faces,mid_edges])
-    # Bring all high symmetry points together.
-    mid_all = np.concatenate([[[0,0,0]],mid_faces,verts]) # Coords
-    mid_basis_all = np.array([np.linalg.solve(basis.T,v) for v in mid_all]) # Kpoints
-
-    # Round off results
-    mid_all_p    = np.round(mid_all,digits) # Coordinates
-    mid_basis_p  = np.round(mid_basis_all,digits) # Relative points
-    basis        = np.round(basis,digits)
-    face_vectors = np.round(face_vectors,digits)
-    verts        = np.round(verts,digits)
-    faces        = tuple([np.round(face,digits) for face in faces])
-
-    #Order special points near each vertex for z > 0.
-    _arrs = []
-    for v in verts[verts[:,2]>=0]: # Only upper hemisphere.
-        _arr = []
-        for i,c in enumerate(mid_all_p): # coordinates.
-            _arr.append([i, np.linalg.norm(v-c)])
-        _arr = np.array(_arr)
-        _arr = _arr[_arr[:,1].argsort()][:,0].astype(int)
-        upto = np.where(_arr == 0)[0][0]
-        _arrs.append([0,*_arr[:upto]])
-    one2one  = {'coords': mid_all_p ,'kpoints': mid_basis_p,'near': _arrs}
-    out_dict = {'basis':basis, 'normals':face_vectors, 'vertices':verts,
-                'faces':faces,'specials':one2one}
-    return serializer.dict2tuple('BZ',out_dict)
+    faces = [face[order(face,loop = loop)] for face in faces] # order based on given value of loop
+    
+    out_dict = {'basis' : basis,'normals' : np.array(face_vectors), 'vertices' : verts,'faces' : faces}
+    return serializer.BrZoneData(out_dict)
 
 
 # Cell

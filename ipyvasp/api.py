@@ -152,7 +152,7 @@ class POSCAR:
 
     def __repr__(self):
         atoms = ', '.join([f'{k}={len(v)}' for k,v in self._data.types.items()])
-        lat = ', '.join([f'{k}={v}' for k,v in zip('abcαβγ',(*self._data.norms.round(3), *self._data.angles))])
+        lat = ', '.join([f'{k}={v}' for k,v in zip('abcαβγ',(*self._data.norms.round(3), *self._data.angles.round(3)))])
         return f"{self.__class__.__name__}({atoms}, {lat})"
 
     def __str__(self):
@@ -214,18 +214,18 @@ class POSCAR:
         return self._cell
 
     @_sub_doc(sio.get_bz,'- path_pos')
-    def get_bz(self, loop=True, digits=8, primitive=False):
-        self._bz = sio.get_bz(path_pos = self._data.basis, loop=loop, digits=digits, primitive=primitive)
+    def get_bz(self, loop=True, primitive=False):
+        self._bz = sio.get_bz(path_pos = self._data.basis, loop=loop, primitive=primitive)
         self._primitive = primitive
         return self._bz
 
-    def set_bz(self,primitive=False,loop=True,digits=8):
+    def set_bz(self,primitive=False,loop=True):
         """Set BZ in primitive or regular shape. returns None, just set self.bz"""
-        self.get_bz(primitive=primitive,loop=loop,digits=digits)
+        self.get_bz(primitive=primitive,loop=loop)
 
-    def get_cell(self, loop=True, digits=8):
+    def get_cell(self, loop=True):
         "See docs of `get_bz`, same except space is inverted and no factor of 2pi."
-        self._cell = sio.get_bz(path_pos=self._data.rec_basis,loop=loop, digits=digits, primitive=True) # cell must be primitive
+        self._cell = serializer.CellData(sio.get_bz(path_pos=self._data.rec_basis,loop=loop, primitive=True).to_dict()) # cell must be primitive
         return self._cell
 
     @_sub_doc(sio.splot_bz,'- bz_data')
@@ -235,10 +235,10 @@ class POSCAR:
         self._ax = new_ax # Set ax for splot_kpath
         return new_ax
 
-    def splot_kpath(self,vertex = 0, knn_inds = None, labels = None, color='k', line_width = 0.8,marker_size = 10,marker_style = '.',**labels_kwargs):
+    def splot_kpath(self,orderby = (1,1,1), knn_inds = None, labels = None, color='k', line_width = 0.8,marker_size = 10,marker_style = '.',**labels_kwargs):
         """Plot k-path over existing BZ.
         Args:
-            - vertex: vertex index nearby which to plot path. There are as many vertices as there are in BZ's shape.
+            - orderby : point relative to which k-points are ordered in fractional coordinates. e.g. (1,1,1) will order k-points by distance from (1,1,1) in fractional coordinates.
             - knn_inds: list of indices of k nearest points e.g. [2,3,1] will trace path linking as 2-3-1.
                 0 is Gamma point and 1 is the selected vertex itself. Points are taken internally from BZ, you can see from `self.bz.specials`.
             - labels: list of labels for each k-point in same order as `knn_inds`.
@@ -251,7 +251,7 @@ class POSCAR:
         if not self._bz or not self._ax:
             raise ValueError("BZ not found, use `splot_bz` first")
 
-        _specials = self._bz.specials
+        _specials = self._bz.get_special_points(orderby = orderby)
         nearest = knn_inds
 
         ijk = [0,1,2]
@@ -259,10 +259,7 @@ class POSCAR:
         if isinstance(self._plane, str) and self._plane in _mapping:
             ijk = _mapping[self._plane]
 
-        inds = _specials.near[vertex]
-        if nearest:
-            inds = [inds[n] for n in nearest]
-
+        inds =  nearest if nearest else range(len(_specials.kpoints)//2) # if not given, take half of points in positive side 
         if not labels:
             labels = ["[{0:6.3f}, {1:6.3f}, {2:6.3f}]".format(*_specials.kpoints[i]) for i in inds]
             if nearest:
@@ -294,7 +291,7 @@ class POSCAR:
         return sio.splot_lat(self._data, sizes=sizes, colors=colors, colormap=colormap, bond_length=bond_length, tol=tol, bond_tol = bond_tol, eqv_sites=eqv_sites,
                              translate=translate, line_width=line_width, edge_color=edge_color, vectors=vectors, v3=v3, plane=plane, light_from=light_from, fill=fill,
                              alpha=alpha, alpha_points= alpha_points, ax=ax)
-
+    
     @_sub_doc(sio.iplot_lat,'- poscar_data')
     def iplot_lat(self, sizes=10, colors = None, bond_length=None, tol=1e-2, bond_tol = 1e-3, eqv_sites=True, translate=None, line_width=4, edge_color='black',
                   fill=False, alpha=0.4, ortho3d=True, fig=None):
@@ -417,7 +414,7 @@ class POSCAR:
         """Brings atoms's positions inside Cell and returns their R3 coordinates.
         """
         # Cartesain POSCAR is also loaded as relative to basis in memeory, so both same
-        return sio.to_R3(self._data.basis, points)
+        return self.to_R3(points, reciprocal = False)
 
     @_sub_doc(sio.kpoints2bz,'- bz_data')
     def bring_in_bz(self,kpoints, sys_info = None, shift = 0):
@@ -429,6 +426,14 @@ class POSCAR:
         if not self._bz:
             raise RuntimeError('No BZ found. Please run `get_bz()` first.')
         return sio.kpoints2bz(self._bz, kpoints= kpoints,primitive = self._primitive, sys_info = sys_info, shift = shift)
+    
+    def to_R3(self, points, reciprocal = False):
+        "Converts points to R3 coordinates. If reciprocal is True, converts to R3 in reciprocal basis."
+        points = np.array(points) # In case list of lists
+        if reciprocal:
+            return sio.to_R3(self.data.rec_basis, points)
+        return sio.to_R3(self.data.basis, points)
+        
 
 # Cell
 class LOCPOT:

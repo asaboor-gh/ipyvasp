@@ -230,7 +230,7 @@ class Vasprun(DataSource):
         out = {'evals':evals,'occs':occs, 'vbm':vbm}
         if atoms and orbs:
             if not hasattr(info, 'orbs'):
-                raise ValueError('This calculation does not have projected orbitals!')
+                raise ValueError(f'The file {self.path!r} does not have projected orbitals!')
             
             gen = (r for r in self.read(f'spin{spin+1}',f'spin{spin+2}|</projected') if '<r>' in r)
             NKPTS = self._skipk + evals.shape[0]

@@ -132,8 +132,8 @@ class Dict2Data:
             if isinstance(v,Dict2Data):
                 v = repr(v).replace("\n","\n    ")
             items.append(f"    {k} = {v}")
-
-        return "Data(\n{}\n)".format('\n'.join(items))
+        name = self.__class__.__name__ if self.__class__ is not Dict2Data else 'Data' # auto handle derived classes
+        return "{}(\n{}\n)".format(name, '\n'.join(items))
     def __getstate__(self):
         pass  #This is for pickling
 
@@ -161,10 +161,6 @@ class VasprunData(Dict2Data):
     def __init__(self,d):
         super().__init__(d)
     
-    def __repr__(self):
-        return super().__repr__().replace("Data","VasprunData",1)
-    
-    
     @property
     def Fermi(self):
         "Fermi energy given in vasprun.xml."
@@ -176,9 +172,6 @@ class SpinData(Dict2Data):
         super().__init__(d)
         with suppress(BaseException): # Silently set fermi if not present
             self.sys_info.fermi = self.fermi
-    
-    def __repr__(self):
-        return super().__repr__().replace("Data","SpinData",1)
     
     def get_fermi(self, tol = 1e-3):
         "Fermi energy based on occupancy. Returns `self.Fermi` if occupancies cannot be resolved. `tol` is the value of occupnacy to ignore as filled."
@@ -202,8 +195,6 @@ class PoscarData(Dict2Data):
     def __init__(self,d):
         super().__init__(d)
     
-    def __repr__(self):
-        return super().__repr__().replace("Data","PoscarData",1)
     
     @property
     def coords(self):
@@ -232,9 +223,9 @@ class PoscarData(Dict2Data):
         "Returns the angles of the lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed."
         norms = self.norms # Calculate once
         rad_angles = np.array([
-            np.abs(np.arccos(np.dot(self.basis[:,2],self.basis[:,1])/norms[2]/norms[1])),
-            np.abs(np.arccos(np.dot(self.basis[:,2],self.basis[:,0])/norms[2]/norms[0])),
-            np.abs(np.arccos(np.dot(self.basis[:,1],self.basis[:,0])/norms[1]/norms[0]))
+            np.abs(np.arccos(np.dot(self.basis[2],self.basis[1])/norms[2]/norms[1])),
+            np.abs(np.arccos(np.dot(self.basis[2],self.basis[0])/norms[2]/norms[0])),
+            np.abs(np.arccos(np.dot(self.basis[1],self.basis[0])/norms[1]/norms[0]))
         ])
         return np.degrees(rad_angles)
         
@@ -244,9 +235,9 @@ class PoscarData(Dict2Data):
         rec_norms = self.rec_norms # Calculate once
         rec_basis = self.rec_basis # Calculate once
         rad_angles = np.array([
-            np.abs(np.arccos(np.dot(rec_basis[:,2],rec_basis[:,1])/rec_norms[2]/rec_norms[1])),
-            np.abs(np.arccos(np.dot(rec_basis[:,2],rec_basis[:,0])/rec_norms[2]/rec_norms[0])),
-            np.abs(np.arccos(np.dot(rec_basis[:,1],rec_basis[:,0])/rec_norms[1]/rec_norms[0]))
+            np.abs(np.arccos(np.dot(rec_basis[2],rec_basis[1])/rec_norms[2]/rec_norms[1])),
+            np.abs(np.arccos(np.dot(rec_basis[2],rec_basis[0])/rec_norms[2]/rec_norms[0])),
+            np.abs(np.arccos(np.dot(rec_basis[1],rec_basis[0])/rec_norms[1]/rec_norms[0]))
         ])
         return np.degrees(rad_angles)
     
@@ -280,15 +271,62 @@ class PoscarData(Dict2Data):
         "Writes the poscar data to a file."
         from .sio import write_poscar # To avoid circular import
         return write_poscar(self,outfile = outfile,overwrite = overwrite)
-        
+    
 
+class SpecialPoints(Dict2Data):
+    _req_keys = ('coords','kpoints')
+    def __init__(self,d):
+        super().__init__(d)
+        
+class BrZoneData(Dict2Data):
+    _req_keys = ('normals','faces','vertices')
+    def __init__(self,d):
+        super().__init__(d)
+        
+        
+    def get_special_points(self, orderby = (1,1,1)):
+        "Returns the special points in the brillouin zone in the order relative to a given point in cartesian coordinates. Gamma is always first."
+        # High symmerty KPOINTS in primitive BZ 
+        mid_faces = np.array([np.mean(np.unique(face,axis=0),axis=0) for face in self.faces])
+        mid_edges = []
+        for f in self.faces:
+            for i in range(len(f)-1):
+                # Do not insert point between unique vertices
+                if np.isclose(np.linalg.norm(f[i]),np.linalg.norm(f[i+1])):
+                    mid_edges.append(np.mean([f[i],f[i+1]],axis=0))
+        
+        if mid_edges != []:
+            mid_edges = np.unique(mid_edges,axis=0) # because faces share edges
+            mid_faces = np.concatenate([mid_faces,mid_edges])
+        
+        # Bring all high symmetry points together.
+        sp_carts = np.concatenate([mid_faces,self.vertices]) # Coords, Gamma should be there
+        sp_basis = np.array([np.linalg.solve(self.basis.T,v) for v in sp_carts]) # Kpoints
+
+        order = np.linalg.norm(sp_carts - orderby, axis = 1) # order by cartesian distance, so it appears where it looks
+        order = np.argsort(order)
+        sp_carts = np.insert(sp_carts[order],0,np.zeros(3), axis = 0) # Gamma should be first
+        sp_basis = np.insert(sp_basis[order],0,np.zeros(3), axis = 0) # Gamma should be first
+        
+        return SpecialPoints({'coords':sp_carts,'kpoints':sp_basis})
+    
+    
+    @property
+    def specials(self):
+        "Returns the special points in the brillouin zone ordered by point (1,1,1) in cartesian coordinates. Gamma is always first."
+        return self.get_special_points()
+
+    
+class CellData(Dict2Data):
+    _req_keys = ('normals','faces','vertices')
+    def __init__(self,d):
+        super().__init__(d)
+        
+        
 class GridData(Dict2Data):
     _req_keys = ('path','poscar','SYSTEM')
     def __init__(self,d):
         super().__init__(d)
-    
-    def __repr__(self):
-        return super().__repr__().replace("Data","GridData",1)
     
     @property
     def coords(self):
@@ -314,9 +352,6 @@ class OutcarData(Dict2Data):
     def __init__(self,d):
         super().__init__(d)
     
-    def __repr__(self):
-        return super().__repr__().replace("Data","OutcarData",1)
-
 
 class EncodeFromNumpy(json.JSONEncoder):
     """Serializes python/Numpy objects via customizing json encoder.
