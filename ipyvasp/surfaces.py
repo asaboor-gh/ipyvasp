@@ -11,19 +11,17 @@ import matplotlib.pyplot as plt
 try:
     from ipyvasp import parser as vp
     from ipyvasp import api, serializer, splots
-    from .splots import _validate_input
 except:
     import ipyvasp.parser as vp
     import ipyvasp.api as api
     import ipyvasp.serializer as serializer
     import ipyvasp.splots as splots
-    import ipyvasp.splots._validate_input as _validate_input
 
 # Cell
-def _collect_spin_data(exported_spin_data, bands = [0], atoms = [[0],], orbs = [[0],]):
+def _collect_spin_data(exported_spin_data, bands = [0], atoms_orbs_dict = {'A':([0],[0])}):
     if not isinstance(bands,(list,tuple)):
         raise TypeError('`bands` must be list/tuple of integer.')
-    atoms, orbs, _ = _validate_input(atoms,orbs,[str(i) for i,o in enumerate(orbs)],sys_info = exported_spin_data.sys_info)
+    atoms, orbs, *_ = api._format_input(atoms_orbs_dict, sys_info = exported_spin_data.sys_info)
 
     def per_band_data(band):
         kpoints = exported_spin_data.kpoints
@@ -89,7 +87,7 @@ class SpinDataFrame(pd.DataFrame):
         All other methods are inherited from pd.DataFrame. If you apply some method that do not pass metadat, then use `send_metadata` to copy metadata to traget SpinDataFrame.
     """
     _metadata = ['_current_attrs','sys_info','poscar','projection'] # These are passed after operations to new dataframe.
-    def __init__(self, *args, path = None, bands = [0], atoms = [[0],], orbs = [[0],], elim = None, skipk=None, data = None, **kwargs):
+    def __init__(self, *args, path = None, bands = [0], atoms_orbs_dict = {'A':([0],[0])}, elim = None, skipk=None, data = None, **kwargs):
         if not (path or args): # It works fine without path given, but it is not recommended.
             path = './vasprun.xml'
         if path or data: # Don't updates args otherwise
@@ -111,7 +109,7 @@ class SpinDataFrame(pd.DataFrame):
                 out_dict = _collect_spin_data(spin_data, bands = bands, atoms = atoms, orbs = orbs)
                 super().__init__(out_dict)
                 self.sys_info = spin_data.sys_info
-                atoms, orbs, _ = _validate_input(atoms,orbs,[str(i) for i,o in enumerate(orbs)],sys_info = self.sys_info)
+                atoms, orbs, *_ =  api._format_input(atoms_orbs_dict,sys_info = self.sys_info)
                 self.projection = serializer.Dict2Data({f'_{i}': {'ions': e, 'orbs': o} for i,(e,o) in enumerate(zip(atoms,orbs))})
                 # Path below is used to get kpoints info
                 self.poscar = api.POSCAR(path = path, data = spin_data.poscar)
@@ -191,9 +189,9 @@ class SpinDataFrame(pd.DataFrame):
         """Mask dataframe with a given value, using a tolerance.
         If n is given, (band should also be given to avoid multivalued interpolation error) data values are interpolated to grid of size (l,m,n) where n is longest side.
         n could be arbirarily large as mask will filter out data outside the tolerance."""
-        if n and not isinstance(n,int):
+        if n and not isinstance(n,(int,np.integer)):
             raise TypeError('`n` must be an integer to be applied to short side of grid.')
-        if isinstance(n,int) and not isinstance(band,int):
+        if isinstance(n,(int,np.integer)) and not isinstance(band,(int,np.integer)):
             raise ValueError('A single `band`(int) from dataframe must be given to mask data.'
             'Interpolation does not give correct results for multiple values over a point (x,y,z).')
 

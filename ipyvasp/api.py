@@ -126,15 +126,22 @@ from io import StringIO
 from pandas.io.clipboard import clipboard_get, clipboard_set
 
 class POSCAR:
-    "POSACR class to contain data and related methods, data is PoscarData, json/tuple file/string."
+    _cb_instance = {} # Loads last clipboard data if not changed
+    _mp_instance = {} # Loads last mp data if not changed
+    
     def __init__(self,path = None,content = None,data = None):
-        """Do not use `data` yourself, it's for operations on poscar.
-        Args:
-            - content: string of POSCAR content
-            - path: path to file
-            - data: PoscarData object. This assumes positions are in fractional coordinates.
+        """
+        POSACR class to contain data and related methods, data is PoscarData, json/tuple file/string.
+        Do not use `data` yourself, it's for operations on poscar.
+        
+        Parameters
+        ----------
+        path : path to file
+        content : string of POSCAR content
+        data : PoscarData object. This assumes positions are in fractional coordinates.
 
-        Prefrence order: data, content, path"""
+        Prefrence order: data > content > path
+        """
         self._path = path
         self._content = content
         self._sd = None # Selective dynamics Array will be stored here if applied.
@@ -160,8 +167,9 @@ class POSCAR:
 
     @classmethod
     def from_file(cls,path):
-        "path is path to POSCAR file"
+        "Load data from POSCAR file"
         return cls(path = path)
+    
 
     @classmethod
     def from_string(cls,content):
@@ -174,12 +182,27 @@ class POSCAR:
     @classmethod
     def from_materials_project(cls,formula, mp_id, api_key = None, save_key = False):
         "Downloads POSCAR from materials project. `mp_id` should be string associated with a material on their website. `api_key` is optional if not saved."
-        return cls(data = download_structure(formula=formula,mp_id=mp_id,api_key=api_key,save_key=save_key)[0].export_poscar())
+        if cls._mp_instance and cls._mp_instance['kwargs'] == {'formula':formula,'mp_id':mp_id}:
+            if api_key and save_key: # If user wants to save key even if data is loaded from cache
+                sio._save_mp_API(api_key)
+            
+            return cls._mp_instance['instance']
+        
+        instance = cls(data = download_structure(formula=formula,mp_id=mp_id,api_key=api_key,save_key=save_key)[0].export_poscar())
+        cls._mp_instance = {'instance':instance,'kwargs':{'formula':formula,'mp_id':mp_id}}
+        return instance
 
     @classmethod
     def from_clipborad(cls):
         "Read POSCAR from clipboard (based on clipboard reader impelemented by pandas library) It picks the latest from clipboard."
-        return cls.from_string(content = clipboard_get()) # Handles error data is bad.
+        try:
+            return cls.from_string(content = clipboard_get()) # Handles error data is bad.
+        except:
+            if cls._cb_instance:
+                print("Loading from previously cached clipboard data, as current data is not valid POSCAR string.")
+                return cls._cb_instance['instance']
+            else:
+                raise ValueError("Clipboard does not contain valid POSCAR string and no previous data is cached.")
 
     def to_clipboard(self):
         "Writes POSCAR to clipboard (as implemented by pandas library) for copy in other programs such as vim."
@@ -595,8 +618,7 @@ class Vasprun:
         - skipk      : int: Skip initial kpoints.
         - elim       : list: Energy range e.g. [-5,5].
         - dos_only   : bool: False by default, If True, load mimimal bands data to save memeory.
-        - data   : json/pickle file/str or VasprunData or a valid dictionary. Takes precedence over path parameter.
-
+    
     - **Attributes and Methods**
         - data        : Exported data from given file. This has it's own attributes as well to save as json/pickle etc.
         - to_json     : Saves data in `.json` file. Useful for transport to other langauges.
@@ -613,11 +635,8 @@ class Vasprun:
     # The object `vr` is destroyed here and memory is freed.
     ```
     """
-    def __init__(self,path = None,skipk = None,elim = [],dos_only = False,data = None):
-        if data: #json/pickle data strings
-            self._data = serializer.VasprunData.validated(data)
-        else:
-            self._data = vp.export_vasprun(path=path,skipk=skipk,elim=elim,dos_only=dos_only)
+    def __init__(self,path = None,skipk = None,elim = [],dos_only = False):
+        self._data = vp.export_vasprun(path=path,skipk=skipk,elim=elim,dos_only=dos_only)
 
         self.elim = elim
         self._kpath = self._data.bands.kpath  # For info only, get updated with plot commands
@@ -641,7 +660,7 @@ class Vasprun:
     def __handle_kwargs(self, kwargs,dos=False):
         kwargs = {'elim': self.elim, **kwargs}
         f = kwargs.pop('efermi', None)
-        self._efermi = f if isinstance(f,(int,float)) else self._efermi # Keep zero by instance check
+        self._efermi = f if isinstance(f,(int,np.integer,float)) else self._efermi # Keep zero by instance check
             
         if dos:
             return kwargs
@@ -813,7 +832,80 @@ class Vasprun:
         kwargs = self.__handle_kwargs(kwargs, dos=True)
         return ip.iplot_dos_lines(self._data, atoms_orbs_dict = atoms_orbs_dict,**kwargs)
 
+def _format_input(atoms_orbs_dict, sys_info):
+    """
+    Format input atoms, orbs and labels according to select projections in atoms_orbs_dict.
+    For example: {'Ga-s':(0,[1]),'Ga-p':(0,[1,2,3]),'Ga-d':(0,[4,5,6,7,8])} #for Ga in GaAs, to pick Ga-1, use [0] instead of 0 at first place
+    """
+    if not isinstance(atoms_orbs_dict,dict):
+        raise TypeError("`atoms_orbs_dict` must be a dictionary, with keys as labels and values from picked projection indices.")
     
+    if not hasattr(sys_info,'orbs'): 
+        raise ValueError("No orbitals found to pick from given data.")
+    
+    types = list(sys_info.types.values())
+    names = list(sys_info.types.keys())
+    max_ind = np.max(types)
+    norbs = len(sys_info.orbs)
+    
+    # Set default values for different situations
+    atoms, orbs, labels = [], [], []
+
+    for i, (k, v) in enumerate(atoms_orbs_dict.items()):
+        if len(v) != 2:
+            raise ValueError(f"{k!r}: {v} expects 2 items (atoms, orbs), got {len(v)}.")
+        
+        if not isinstance(k,str):
+            raise TypeError(f"{k!r} is not a string. Use string as key for labels.")
+        
+        labels.append(k)
+        
+        A, B = v # A is atom, B is orbs only two cases: (1) int (2) list of int
+        
+        if not isinstance(A,(int,np.integer,list,tuple, range)):
+            raise TypeError(f"{A!r} is not an integer or list/tuple/range of integers.")
+        
+        if not isinstance(B,(int,np.integer,list,tuple,range)):
+            raise TypeError(f"{B!r} is not an integer or list/tuple/range of integers.")
+        
+        # Fix orbs
+        B = [B] if isinstance(B,(int,np.integer)) else B
+        
+        if np.max(B) >= norbs:
+            raise IndexError("index {} is out of bound for {} orbs".format(np.max(B),norbs))
+        if np.min(B) < 0:
+            raise IndexError("Only positive integers are allowed for selection of orbitals.")
+        
+        orbs.append(B)
+        
+        # Fix atoms
+        if isinstance(A, (int,np.integer)):
+            if A < 0:
+                raise IndexError("Only positive integers are allowed for selection of atoms.")
+            
+            if A < len(types):
+                atoms.append(types[A])
+                info = f"Given {A} at position {i+1} of sequence => {names[A]!r}: {atoms[i]}. "
+                print(gu.color.g(info + f"To just pick one ion, write it as [{A}]."))
+            else:
+                raise IndexError(f"index {A}  at is out of bound for {len(types)} types of ions. Wrap {A} in [] to pick single ion if that was what you meant.")
+        else:
+            if np.max(A) > max_ind:
+                raise IndexError(f"index {np.max(A)} is out of bound for {max_ind+1} ions")
+            
+            if np.min(A) < 0:
+                raise IndexError("Only positive integers are allowed for selection of atoms.")
+            
+            atoms.append(A)
+    
+    uatoms = np.unique([a for aa in atoms for a in aa]) # don't use set, need asceding order
+    uorbs = np.unique([o for oo in orbs for o in oo])
+    uorbs = tuple(uorbs) if len(uorbs) < norbs else -1 # -1 means all orbitals
+    uatoms = tuple(uatoms) if len(uatoms) == (max_ind + 1) else -1 # -1 means all atoms
+
+    return atoms,orbs,labels, uatoms, uorbs
+
+ 
 class Bands:
     """
     Class to handle and plot bandstructure data.
@@ -826,10 +918,16 @@ class Bands:
         if not isinstance(source, vp.DataSource):
             raise TypeError('`source` must be a subclass of `ipyvasp.parser.DataSource`.')
         self._source = source # source is instance of DataSource
+        self._data = None # will be updated on demand
     
     @property
     def source(self):
         return self._source
+    
+    @property
+    def data(self):
+        "Returns a dictionary of information about the picked data after a plotting function called."
+        return self._data
     
     def get_kticks(self, rel_path = 'KPOINTS'):
         """
@@ -860,28 +958,34 @@ class Bands:
         if spin not in [0,1]:
             raise ValueError('spin must be 0 or 1')
         
-        atoms, orbs, labels = None, None, None
+        atoms, orbs, labels, uatoms, uorbs = None, None, None, None, None
         if atoms_orbs_dict:
-            atoms, orbs, labels = sp._format_input(atoms_orbs_dict, self.source.get_summary())
-            atoms = sorted(set([i for ii in atoms for i in ii])) # flatten and sort unique or NOTE: request it from above function
-        
+            atoms, orbs, labels, uatoms, uorbs = _format_input(atoms_orbs_dict, self.source.get_summary())
+            
         kpts = self._source.get_kpoints()
-        eigens = self._source.get_evals(spin = spin, elim = elim, atoms = atoms) # others be there
+        eigens = self._source.get_evals(spin = spin, elim = elim, atoms = uatoms, orbs = uorbs) # others be there
         
-        output = {'kpath': kpts.kpath, 'kpoints': kpts.kpoints, 'coords': kpts.coords, 'evals': eigens.evals, 'occs': eigens.occs, 'vbm': eigens.vbm}
+        output = {'kpath': kpts.kpath, 'kpoints': kpts.kpoints, 'coords': kpts.coords, **eigens.to_dict()}
+        output['kvc'] = tuple(tuple(round(kpts.kpath[i],4) for i in kp) for kp in eigens.kvc) # 4 digits are enough to handle 10,000 kpoints
         
         if hasattr(eigens, 'pros'):
             arrays = []
             for atom,orb in zip(atoms,orbs):
-                picked_atoms = [i for i, a in enumerate(eigens.atoms) if a in atom] # indices for partial data loaded
-                _pros  = np.take(eigens.pros,picked_atoms,axis=2).sum(axis=2) # Sum over atoms leaves 3D array
+                if uatoms != -1:
+                    atom = [i for i, a in enumerate(eigens.atoms) if a in atom] # indices for partial data loaded
+                if uorbs != -1:
+                    orb = [i for i, o in enumerate(eigens.orbs) if o in orb]
+                _pros  = np.take(eigens.pros,atom,axis=2).sum(axis=2) # Sum over atoms leaves 3D array
                 _pros = np.take(_pros,orb,axis=2).sum(axis=2) # Sum over orbitals leaves 2D array
                 arrays.append(_pros)
 
             output['pros'] = np.array(arrays)
             output['labels'] = labels
+            output.pop('atoms', None) # No more needed
+            output.pop('orbs', None)
         
-        return serializer.Dict2Data(output)
+        self._data = serializer.Dict2Data(output) # Assign for later use
+        return self._data
     
     def _handle_kwargs(self, kwargs):
         "Returns fixed kwargs and new elim relative to fermi energy for gettig data."
@@ -897,5 +1001,6 @@ class Bands:
         plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin','efermi','kpoints','bands','kwargs']} # should be on top to avoid other loacals
         plot_kws, new_elim = self._handle_kwargs(plot_kws)
         data = self.get_data(spin = spin, elim = new_elim) # picked relative limit
-        K, E = data.kpath, data.evals - (efermi or data['vbm'])
+        fermi = efermi if efermi is not None else data['evc'][0]
+        K, E = data.kpath, data.evals - fermi
         return sp.splot_bands(K, E, **plot_kws, **kwargs)

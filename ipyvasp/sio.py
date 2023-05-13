@@ -520,12 +520,12 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
             elif len(point) == 4:
                 if isinstance(point[3],str):
                     _patch.append(point) # add (x,y,z,label)
-                elif isinstance(point[3],int):
+                elif isinstance(point[3],(int,np.integer)):
                     _patch.append([*point[:3], '', point[-1]]) # add full point as (x,y,z,label, N)
                 else:
                     raise TypeError("4th entry in point should be string label or int number of points for next interval if label is skipped.")
             elif len(point) == 5:
-                if not isinstance(point[4],int):
+                if not isinstance(point[4],(int, np.integer)):
                     raise TypeError("5th entry in point should be an integer to add that many points in interval.")
                 if not isinstance(point[3],str):
                     raise TypeError("4th entry in point should be string label when 5 entries are given.")
@@ -722,7 +722,7 @@ def get_kmesh(poscar_data, *args, shift = 0, weight = None, cartesian = False, i
         norms = np.linalg.norm(poscar_data.rec_basis, axis = 1)
 
     if len(args) == 1:
-        if not isinstance(args[0],int):
+        if not isinstance(args[0],(int, np.integer)):
             raise ValueError("get_kmesh expects integer for first positional argument!")
         nx,ny,nz = [args[0] for _ in range(3)]
 
@@ -731,7 +731,7 @@ def get_kmesh(poscar_data, *args, shift = 0, weight = None, cartesian = False, i
 
     elif len(args) == 3:
         for i,a in enumerate(args):
-            if not isinstance(a,int):
+            if not isinstance(a,(int, np.integer)):
                 raise ValueError("get_kmesh expects integer at position {}!".format(i))
         nx,ny,nz = list(args)
 
@@ -1253,7 +1253,7 @@ def fix_sites(poscar_data,tol=1e-2,eqv_sites=False,translate=None):
     labels = poscar_data.labels
     out_dict = poscar_data.to_dict() # For output
 
-    if translate and isinstance(translate,(int,float)):
+    if translate and isinstance(translate,(int,np.integer,float)):
         pos = pos + (translate - int(translate)) # Only translate in 0 - 1
     elif translate and len(translate) == 3:
         txyz = np.array([translate])
@@ -1563,7 +1563,7 @@ def repeat_poscar(poscar_data, n, direction):
         - n: Number of repetitions.
         - direction: Direction of repetition. Can be 'a', 'b' or 'c'.
     """
-    if not isinstance(n, int) and n < 2:
+    if not isinstance(n, (int, np.integer)) and n < 2:
         raise ValueError("n must be an integer greater than 1.")
     given_poscar = poscar_data
     for i in range(1,n):
@@ -1659,7 +1659,7 @@ def convert_poscar(poscar_data, atoms_mapping, basis_factor):
     poscar_data['types'] = {atoms_mapping.get(k,k):v for k,v in poscar_data['types'].items()} # Update types
     basis = poscar_data['basis'].copy() # Get basis to avoid modifying original
 
-    if isinstance(basis_factor,(int,float)):
+    if isinstance(basis_factor,(int, np.integer, float)):
         poscar_data['basis'] = basis_factor*basis # Rescale basis
     elif isinstance(basis_factor,(list,tuple,np.ndarray)):
         if len(basis_factor) != 3:
@@ -1693,7 +1693,7 @@ def transform_poscar(poscar_data, transform_matrix, repeat_given = [2,2,2],tol =
         raise ValueError('`repeat_given` must be a list of three integers.')
 
     for rep in repeat_given: # Repeat if needed
-        if not isinstance(rep,(int,np.int)) and rep >= 1:
+        if not isinstance(rep,(int,np.integer)) and rep >= 1:
             raise ValueError('`repeat_given` must have all values as integer >= 1.')
 
     for n, _dir in zip(repeat_given,'abc'): # Repeat if needed for including atoms in new cell
@@ -1758,7 +1758,7 @@ def add_vaccum(poscar_data, thickness, direction, left = False):
 def transpose_poscar(poscar_data, axes = [1,0,2]):
     "Transpose a POSCAR by switching basis from [0,1,2] -> `axes`. By Default, x and y are transposed."
     if isinstance(axes,(list,tuple, np.ndarray)) and len(axes) == 3:
-        if not all(isinstance(i,(int,np.int)) for i in axes):
+        if not all(isinstance(i,(int,np.integer)) for i in axes):
             raise ValueError('`axes` must be a list of three integers.')
 
         poscar_data = poscar_data.to_dict() #

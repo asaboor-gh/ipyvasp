@@ -277,7 +277,7 @@ def join_ksegments(kpath,*pairs):
             if len(pair) != 2:
                 raise ValueError(f"{pair} should have exactly two indices.")
             for idx in pair:
-                if not isinstance(idx, int):
+                if not isinstance(idx, (int, np.integer)):
                     raise ValueError(f"{pair} should have integers, got {idx!r}.")
             
             idx_1, idx_2 = pair
@@ -305,7 +305,7 @@ def _validate_data(K, E,  elim, kticks, interp):
         kticks = list(kticks) # otherwise it will be empty after first use
 
     for k, v in kticks:
-        if not isinstance(k, int):
+        if not isinstance(k, (np.integer, int)):
             raise ValueError("First item of pairs in kticks must be int")
         if not isinstance(v, str):
             raise ValueError("Second item of pairs in kticks must be str.")
@@ -320,7 +320,7 @@ def _validate_data(K, E,  elim, kticks, interp):
     if elim and len(elim) != 2:
         raise ValueError("elim must be a list or tuple of length 2.")
     
-    if interp and not isinstance(interp, (int, list, tuple)):
+    if interp and not isinstance(interp, (int, np.integer,list, tuple)):
         raise ValueError("interp must be an integer or a list/tuple of (n,k).")
     
     if isinstance(interp, (list,tuple)) and len(interp) != 2:
@@ -582,7 +582,7 @@ def _make_line_collection(maxwidth   = 2.5,
         - colors_list: List of colors for multiple lines, length equal to 3rd axis length of colors.
         - rgb        : Default is False. If True and np.shape(colors)[-1] == 3, RGB line collection is returned in a tuple of length 1. Tuple is just to support iteration.
     """
-    if not isinstance(maxwidth,(int,float)):
+    if not isinstance(maxwidth,(int,np.integer,float)):
         raise ValueError("maxwidth must be an int or float.")
     
     if not pros_data:
@@ -600,15 +600,12 @@ def _make_line_collection(maxwidth   = 2.5,
     colors = pros[1:,:,:]/2 + pros[:-1,:,:]/2 # Near kpoints avearge
     colors = colors.transpose((1,0,2)).reshape((-1,np.shape(colors)[-1])) # Must before lws
 
-    # Default linewidth = 2.5 unless specified otherwise
     if rgb: # Single channel line widths
-        lws = 0.1 + 2.5*np.sum(colors,axis=1) # Sum over RGB
+        lws = 0.1 + np.sum(colors,axis=1) # Sum over RGB
     else: # For separate lines
-        lws = 0.1 + 2.5*colors.T # .T to access in for loop.
+        lws = 0.1 + colors.T # .T to access in for loop.
 
-    if maxwidth != 2.5: # Scale linewidths to maxwidth if other than 2.5
-        # here division does not fail as min(lws)==0.1
-        lws = maxwidth*lws/np.max(lws) # Only if not None or zero.
+    lws = maxwidth*lws/np.max(lws) # Rescale to maxwidth
 
     if np.any(colors_list):
         lc_colors = colors_list
@@ -631,62 +628,6 @@ def _make_line_collection(maxwidth   = 2.5,
     else:
         lcs = [LineCollection(marr,colors=_cl,linewidths=lw, path_effects = path_shadow) for _cl,lw in zip(lc_colors,lws)]
         return tuple(lcs)
-
-# Cell
-def _validate_input(atoms,orbs,labels,sys_info):
-    "Fix input atoms, orbs and labels according to given sys_info. Returns (atoms, orbs,labels)."
-    if not hasattr(sys_info,'fields'): # change to orbs later
-        raise ValueError("Given data does not include orbital projection.")
-    
-    if len(atoms) != len(orbs) or len(atoms) != len(labels):
-        raise ValueError("`atoms`, `orbs` and `labels` expect same length, even if empty.")
-
-    # Fix atoms
-    ranges = list(sys_info.types.values())
-    names = list(sys_info.types.keys())
-    max_ind   =  np.max(ranges)
-    for i,elem in enumerate(atoms.copy()):
-        if type(elem) == int:
-            try:
-                atoms[i] = ranges[elem]
-                info = f"Given {elem} at position {i+1} of sequence => {names[elem]!r}: {atoms[i]}. "
-                print(gu.color.g(info + f"To just pick one ion, write it as [{elem}]."))
-            except:
-                raise IndexError(f"Wrap {elem} at position {i+1} of sequence in []. You have only {len(sys_info.ElemName)} types of ions.")
-
-    _es = [e for ee in atoms for e in (*ee,)] # important if ee is int
-    if  _es and max(_es) > max_ind:
-        raise IndexError("index {} is out of bound for {} ions".format(max(_es),max_ind+1))
-
-    # Orbitals Index fixing
-    nfields = len(sys_info.fields) # fields are changed to orbs and only exist if suitable value of LORBIT is given.
-    orbs = [[item] if type(item) == int else item for item in orbs] #Fix if integer given.
-    _os = [r for rr in orbs for r in rr]
-    if  _os and max(_os) >= nfields:
-        raise IndexError("index {} is out of bound for {} orbs".format(max(_os),nfields))
-
-    return atoms,orbs,labels
-
-def _format_input(atoms_orbs_dict, sys_info):
-    """
-    Format input atoms, orbs and labels according to select projections in atoms_orbs_dict.
-    For example: {'Ga-s':(0,[1]),'Ga-p':(0,[1,2,3]),'Ga-d':(0,[4,5,6,7,8])} #for Ga in GaAs, to pick Ga-1, use [0] instead of 0 at first place
-    """
-    if not isinstance(atoms_orbs_dict,dict):
-        raise TypeError("`atoms_orbs_dict` must be a dictionary, with keys as labels and values from picked projection indices.")
-
-    # Set default values for different situations
-    atoms, orbs, labels = [], [], []
-
-    for i, (k, v) in enumerate(atoms_orbs_dict.items()):
-        if len(v) != 2:
-            raise ValueError(f"{k!r}: {v} expects 2 items (atoms, orbs), got {len(v)}.")
-        
-        labels.append(k)
-        atoms.append(v[-2])
-        orbs.append(v[-1])
-        
-    return _validate_input(atoms,orbs,labels,sys_info)
 
 # Cell
 from matplotlib import tri
@@ -1075,11 +1016,10 @@ def _collect_dos(
         - labels : ['label1,'label2',...] spin polarized is auto-fixed.
         - vr     : Exported vasprun.
     """
-    vr = vp._validate_evr(path_evr=path_evr,elim=elim)
+    vr = None# its broken, can't validate path_evr now
 
     # Fix orbitals, atoms and labels lengths very early.
-    atoms,orbs,labels = _validate_input(atoms,orbs,labels,vr.sys_info)
-
+    atoms,orbs,labels = (None,None,None)# not validate thing
     # Main working here.
     if vr.pro_dos == None:
         raise ValueError("Can not plot an empty DOS object.")

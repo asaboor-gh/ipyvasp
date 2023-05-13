@@ -66,7 +66,7 @@ class Vasprun(DataSource):
     "Reads vasprun.xml file lazily. It reads only the required data from the file when a plot or data access is requested."
     def __init__(self, path = './vasprun.xml', skipk = None):
         super().__init__(path)
-        self._skipk = skipk if isinstance(skipk,int) else self.get_skipk()
+        self._skipk = skipk if isinstance(skipk,(int,np.integer)) else self.get_skipk()
         
     def read(self, start_match, stop_match, nth_match = 1, skip_last = False):
         """Reads a part of the file between start_match and stop_match and returns a generator. It is lazy and fast.
@@ -219,6 +219,12 @@ class Vasprun(DataSource):
             raise ValueError('No eigenvalues found for spin {}'.format(spin))
         evals, occs = ev[:,:,0], ev[:,:,1]
         vbm = float(evals[occs > 0.0001].max()) # discard very small occupations
+        cbm = float(evals[occs < 0.9999].min()) # discard very small occupations
+        evc = (vbm,cbm) # Easy to plot this way like [0, np.ptp(evc)] can work for defult efermi
+        
+        kvbm = [k for k in np.where(evals == vbm)[0]] # keep as indices here, we don't know the cartesian coordinates of kpoints here
+        kcbm = [k for k in np.where(evals == cbm)[0]]
+        kvc = tuple(set(product(kvbm,kcbm))) # make unique pairs (by set) of kpoints to plot easily
         
         if elim:
             up_ind = np.max(np.where(evals[:,:] <= np.max(elim))[1]) + 1
@@ -227,18 +233,18 @@ class Vasprun(DataSource):
             occs = occs[:, lo_ind:up_ind]
             bands = range(lo_ind, up_ind)
         
-        out = {'evals':evals,'occs':occs, 'vbm':vbm}
+        out = {'spin': spin, 'evals':evals,'occs':occs, 'evc':evc, 'kvc':kvc, 'bands':bands}
         if atoms and orbs:
             if not hasattr(info, 'orbs'):
                 raise ValueError(f'The file {self.path!r} does not have projected orbitals!')
             
-            gen = (r for r in self.read(f'spin{spin+1}',f'spin{spin+2}|</projected') if '<r>' in r)
             NKPTS = self._skipk + evals.shape[0]
-            NBANDS = info.NBANDS
-            NIONS = info.NIONS
-            NORBS = len(info.orbs)
+            shape = (NKPTS, info.NBANDS, info.NIONS, len(info.orbs))
+            slices = [range(self._skipk, NKPTS), bands, atoms, orbs]
+            print(shape, slices)
             
-            out['pros'] = self._get_spin_set(spin, bands, atoms, orbs)
+            gen = (r.strip(' \n/<>r') for r in self.read(f'spin{spin+1}',f'spin{spin+2}|</projected') if '<r>' in r) # stripping is must here to ensure that we get only numbers
+            out['pros'] = gen2numpy(gen, shape,slices)
             out['atoms'] = atoms
             out['orbs'] = orbs
         elif (atoms, orbs) != (None, None):
@@ -487,8 +493,7 @@ def export_vasprun(path:str = None, skipk:int = None, elim:list = [], dos_only:b
         elim  (list): List [min,max] of energy interval. Default is [], covers all bands.
         dos_only (bool): If True, only returns dos data with minimal other data. Default is False.
         
-    Returns:
-        VasprunData: ``ipyvasp.serializer.VasprunData`` object.
+
     """
     path = path or './vasprun.xml'
 
@@ -548,23 +553,7 @@ def export_vasprun(path:str = None, skipk:int = None, elim:list = [], dos_only:b
     dos = {'total':tot_dos.tdos,'labels':pro_dos['labels'],'partial':pro_dos['pros']}
     #Writing everything to be accessible via dot notation
     full_dic={'sys_info':info_dic,'dim_info':dim_dic,'bands':bands,'dos':dos,'poscar': poscar,'force':force,'scsteps':scsteps}
-    return serializer.VasprunData(full_dic)
-
-def _validate_evr(path_evr=None,**kwargs):
-    "Validates data given for plotting functions. Returns a tuple of (Boolean,data)."
-    if type(path_evr) == serializer.VasprunData:
-        return path_evr
-
-    path_evr = path_evr or './vasprun.xml' # default path.
-
-    if isinstance(path_evr,str):
-        if os.path.isfile(path_evr):
-            # kwargs -> skipk=skipk,elim=elim
-            return export_vasprun(path=path_evr,**kwargs)
-        else:
-            raise FileNotFoundError(f'File {path_evr!r} not found!')
-    # Other things are not valid.
-    raise ValueError('path_evr must be a path string or output of export_vasprun function.')
+    return #serializer.VasprunData(full_dic)
 
 def gen2numpy(gen, shape, slices, raw:bool = False, dtype = float, delimiter = '\s+', include:str = None,exclude:str = '#',fix_format:bool = True):
     """
@@ -602,20 +591,20 @@ def gen2numpy(gen, shape, slices, raw:bool = False, dtype = float, delimiter = '
         raise ValueError(f"shape and slices must be of same size.")
     
     for sh in shape:
-        if (not isinstance(sh, int)) or (sh < 1):
+        if (not isinstance(sh, (int,np.integer))) or (sh < 1):
             raise TypeError(f"Each item in shape must be integer of size of that dimension, at least 1.")
     
     for idx, sli in enumerate(slices):
-        if not isinstance(sli, (list, tuple, range, int)):
+        if not isinstance(sli, (list, tuple, range, int, np.integer)):
             raise TypeError(f"Expect -1 to pick all data or list/tuple/range to slice data in a dimension, got {sli}")
-        if isinstance(sli, int) and (sli != -1):
+        if isinstance(sli, (int,np.integer)) and (sli != -1):
             raise TypeError(f"Expect -1 to pick all data or list/tuple/range to slice data in a dimension, got {sli}")
         if isinstance(sli, (list, tuple, range)) and not sli:
             raise TypeError(f"Expect non-empty items in slices, got {type(sli)}")
         
         # Verify order, index and values in take
         if isinstance(sli, (list,tuple,range)):
-            if not all(isinstance(i, int) for i in sli):
+            if not all(isinstance(i, (int,np.integer)) for i in sli):
                 raise TypeError(f"Expect integers in a slice, got {sli}")
             if not all(i >= 0 for i in sli):
                 raise ValueError(f"Expect positive integers in a slice, got {sli}")
@@ -624,9 +613,7 @@ def gen2numpy(gen, shape, slices, raw:bool = False, dtype = float, delimiter = '
             
             if not all(a < b for a,b in zip(sli[:-1],sli[1:])): # Check order
                 raise ValueError(f"Expect increasing order in a slice, got {sli}")
-                
-    start     = int(np.product(shape[1:-1])*slices[0][0]) if isinstance(slices[0], (list, tuple, range)) else 0 # Discard all lines not need in outer dimension.
-    nlines    = int(np.product(shape[:-1])) if len(shape) > 1 else 1 # pick all data if only one dimension given or pick just one line to determine columns.
+    
     new_shape = tuple([len(sli) if isinstance(sli, (list, tuple, range)) else N for sli, N in zip(slices, shape)])
     count     = int(np.product(new_shape)) # include columns here for overall data count.
     
@@ -638,9 +625,6 @@ def gen2numpy(gen, shape, slices, raw:bool = False, dtype = float, delimiter = '
         gen = (l for l in gen if not re.search(exclude,l))
 
     gen = (l for l in gen if l.strip()) # remove empty lines
-    
-    # take after include/exclude and empty line
-    gen = islice(gen, start, start + nlines) 
     
     def fold_dim(gen, take, N):
         if take == -1:

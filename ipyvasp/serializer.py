@@ -60,8 +60,8 @@ class Dict2Data:
             
             if a == 'poscar' and 'extra_info' in b:
                 setattr(self,a, PoscarData(b)) # Enables custom methods for PoscarData
-            elif isinstance(b,(list,tuple)):
-                setattr(self,a,[Dict2Data(x) if isinstance(x,dict) else x for x in b])
+            elif isinstance(b,(list,tuple,set)):
+                setattr(self,a,tuple(Dict2Data(x) if isinstance(x,dict) else x for x in b))
             else:
                 setattr(self,a,Dict2Data(b) if isinstance(b,dict) else b)
     
@@ -155,16 +155,6 @@ class Dict2Data:
     def items(self):
         return self.__dict__.items()
 
-    
-class VasprunData(Dict2Data):
-    _req_keys = ('bands','dos','poscar')
-    def __init__(self,d):
-        super().__init__(d)
-    
-    @property
-    def Fermi(self):
-        "Fermi energy given in vasprun.xml."
-        return self.bands.Fermi
     
 class SpinData(Dict2Data):
     _req_keys = ('kpoints','spins','poscar')

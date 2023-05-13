@@ -395,7 +395,7 @@ def _click_data(sel_en_w,Fermi,data_dict,fig,bd_w):
     def handle_click(trace, points, state):
         if points.ys != []:
             v_clicked = points.ys[0] if bd_w.value=='Bands' else points.xs[0]
-            val = np.round(float(v_clicked) + Fermi,4) #exact value
+            val = np.round(float(v_clicked) + Fermi,6) #exact value
 
             for key in sel_en_w.options:
                 if key in sel_en_w.value and key != 'None':
@@ -403,9 +403,9 @@ def _click_data(sel_en_w,Fermi,data_dict,fig,bd_w):
 
             # Update E_gap, SO etc
             if data_dict['VBM'] and data_dict['CBM']:
-                data_dict['E_gap'] = np.round(data_dict['CBM'] - data_dict['VBM'], 4)
+                data_dict['E_gap'] = np.round(data_dict['CBM'] - data_dict['VBM'], 6)
             if data_dict['so_max'] and data_dict['so_min']:
-                data_dict['Δ_SO'] = np.round(data_dict['so_max'] - data_dict['so_min'], 4)
+                data_dict['Δ_SO'] = np.round(data_dict['so_max'] - data_dict['so_min'], 6)
             # Cycle energy types on graph click and chnage table as well unless it is None.
             if sel_en_w.value == 'CBM': # Avoid accidental SO calculation
                 sel_en_w.value = 'None'
@@ -647,7 +647,7 @@ class VasprunApp:
         self._ibands_kws['maxwidth'] = maxwidth
         self._ibands_kws['skipk'] = skipk
 
-        if interp and not isinstance(interp,(list,tuple,int)):
+        if interp and not isinstance(interp,(list,tuple,np.integer,int)):
             raise ValueError("interp must be int or list/tuple of (n,k)")
         if isinstance(interp,(list,tuple)) and len(interp) != 2:
             raise ValueError("interp must be int or list/tuple of (n,k)")
@@ -814,7 +814,7 @@ class VasprunApp:
         kpath = os.path.join(os.path.split(self._files_dd.value)[0],'KPOINTS')
         tvs = sio.read_kticks(kpath) #ticks values segments
         if tvs: #If is must, if not present, avoid overwritting custom input
-            text_ticks = ', '.join('{}:{}'.format(k if isinstance(k,int) else '{}|{}'.format(*k),v) for k,v in tvs)
+            text_ticks = ', '.join('{}:{}'.format(k if isinstance(k,(int,np.integer)) else '{}|{}'.format(*k),v) for k,v in tvs)
             self._texts['kticks'].value = text_ticks
         
     def __update_theme(self,change):
@@ -855,8 +855,8 @@ class VasprunApp:
         if sys_info != None:
             self._result["sys"] = sys_info.SYSTEM
         if poscar != None:
-            self._result["V"] = np.round(poscar.volume,5)
-            a,b,c = np.round(np.linalg.norm(poscar.basis,axis=1),5)
+            self._result["V"] = np.round(poscar.volume,6)
+            a,b,c = np.round(np.linalg.norm(poscar.basis,axis=1),6)
             self._result["a"] = a
             self._result["b"] = b
             self._result["c"] = c
@@ -969,7 +969,7 @@ class VasprunApp:
         if self._texts['kticks'].value or self._texts['elim'].value:
             self.__update_input(change=None)
         if self._dds['band_dos'].value == 'Bands' and self._data:
-            tickvals = [self._data.kpath[i if isinstance(i,int) else i[0]] for i in self._input['kticks']]
+            tickvals = [self._data.kpath[i if isinstance(i,(int,np.integer)) else i[0]] for i in self._input['kticks']]
             self._fig.update_xaxes(ticktext = list(self._input['kticks'].values()), tickvals = tickvals)
         if self._texts['elim'].value and self._input['elim'] != None and len(self._input['elim']) == 2:
             if self._dds['band_dos'].value == 'Bands':
