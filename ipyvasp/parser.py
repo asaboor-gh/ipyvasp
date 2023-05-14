@@ -44,6 +44,12 @@ class DataSource:
         from .api import Bands
         return Bands(self)
     
+    @property
+    def dos(self):
+        "Returns a Dos object to access density of states data and plotting methods."
+        from .api import DOS
+        return DOS(self)
+    
     # Following methods should be implemented in a subclass
     def get_summary(self): raise NotImplementedError("`get_summary` should be implemented in a subclass. See Vasprun.get_summary as example.")
     
@@ -108,6 +114,7 @@ class Vasprun(DataSource):
         
         info_dict = {'SYSTEM':incar['SYSTEM']}
         info_dict['ISPIN']   = int(ET.fromstring(next(self.read('<i.*ISPIN','</i>'))).text)
+        info_dict['NKPTS'] = len([v for v in ET.fromstringlist(self.read('<varray.*kpoint','</varray')).iter('v')])
         info_dict['NBANDS']  = int(ET.fromstring(next(self.read('<i.*NBANDS','</i>'))).text)
         info_dict['NELECTS'] = int(float(ET.fromstring(next(self.read('<i.*NELECT','</i>'))).text)) # Beacuse they are poorly writtern as float, come on VASP!
         info_dict['LSORBIT'] = True if 't' in ET.fromstring(next(self.read('<i.*LSORBIT','</i>'))).text.lower() else False
@@ -169,44 +176,32 @@ class Vasprun(DataSource):
         elif (atoms, orbs) != (None, None):
             raise ValueError('atoms and orbs should be specified together')
     
-    def _get_spin_set(self, spin, bands, atoms, orbs): 
-        if atoms == -1:
-            pass 
-        elif isinstance(atoms, (list, tuple, range)):
-            pass 
-        else:
-            raise ValueError('atoms should be a list, tuple, range or -1 for all atoms')
-        return None
-
-        if orbs == -1:
-            pass 
-        elif isinstance(orbs, (list, tuple, range)):
-            pass 
-        else:
-            raise ValueError('orbs should be a list, tuple, range or -1 for all atoms')
-        return None
-    
-        # from itertools import chain
-        # X = list(r for r in vr.read('spin1','spin2|</projected') if '<r>' in r) # NOTE: skip k here
-        # def pick_innermost(gen, idxs, N):
-        #     j = 0
-        #     group = ()
-        #     for i, line in enumerate(gen, start =1):
-        #         if j in idxs:
-        #             group = chain(group, (line,))
-        #         j = j + 1
-        #         if i % N == 0:
-        #             j = 0
-        #             yield group
-        #             group = ()
-
-        # Y = pick_innermost(X, [0],64)
-        # Z = pick_innermost(Y, [0,1,2],168)
-        # K = (x for xxx in Z for xx in xxx for x in xx) # total flattening
-        # gen2numpy(K, cols=range(1,10)).reshape((-1,3,1,9))
+    def _get_spin_set(self, spin, bands, atoms, orbs, sys_info): 
+        "sys_info is the summary data of calculation, used to get the shape of the array."
+        if not hasattr(sys_info, 'orbs'):
+            raise ValueError(f'The file {self.path!r} does not have projected orbitals!')
+            
+        shape = (sys_info.NKPTS, sys_info.NBANDS, sys_info.NIONS, len(sys_info.orbs))
+        slices = [range(self._skipk, sys_info.NKPTS), bands, atoms, orbs]
+            
+        gen = (r.strip(' \n/<>r') for r in self.read(f'spin{spin+1}',f'spin{spin+2}|</projected') if '<r>' in r) # stripping is must here to ensure that we get only numbers
+        return gen2numpy(gen, shape,slices)
 
     def get_evals(self, spin = 0, elim = None, atoms = None, orbs = None): 
-        # mention that elim applies to unsubstracted efermi from evals, and elim should keep track of efermi, inside Bands and DOS, add efermi to elim passed to get_evals from bands
+        """
+        Returns eigenvalues and occupations of the calculation. If atoms and orbs are specified, then orbitals are included too.
+        
+        Parameters
+        ----------
+        spin : int, index of spin set to be pick. Default is 0. Can be 0 or 1.
+        elim : tuple, energy range to be returned. Default is None, which returns all eigenvalues. User should supply elim as (min + efermi, max + efermi) to get the correct eigenvalues range.
+        atoms : list, indices of atoms to be returned. Default is None, which does not return ionic projections.
+        orbs : list, indices of orbitals to be returned. Default is None, which does not return orbitals.
+        
+        Returns
+        -------
+        Dict2Data object which includes `evals` and `occs` as attributes, and `pros` if atoms and orbs specified.
+        """
         info = self.get_summary()
         bands = range(info.NBANDS)
         
@@ -235,16 +230,7 @@ class Vasprun(DataSource):
         
         out = {'spin': spin, 'evals':evals,'occs':occs, 'evc':evc, 'kvc':kvc, 'bands':bands}
         if atoms and orbs:
-            if not hasattr(info, 'orbs'):
-                raise ValueError(f'The file {self.path!r} does not have projected orbitals!')
-            
-            NKPTS = self._skipk + evals.shape[0]
-            shape = (NKPTS, info.NBANDS, info.NIONS, len(info.orbs))
-            slices = [range(self._skipk, NKPTS), bands, atoms, orbs]
-            print(shape, slices)
-            
-            gen = (r.strip(' \n/<>r') for r in self.read(f'spin{spin+1}',f'spin{spin+2}|</projected') if '<r>' in r) # stripping is must here to ensure that we get only numbers
-            out['pros'] = gen2numpy(gen, shape,slices)
+            out['pros'] = self._get_spin_set(spin, bands, atoms, orbs, info)
             out['atoms'] = atoms
             out['orbs'] = orbs
         elif (atoms, orbs) != (None, None):
@@ -252,7 +238,7 @@ class Vasprun(DataSource):
             
         return serializer.Dict2Data(out)
 
-    def get_spins(self, bands = -1, atoms = -1): 
+    def get_spins(self, bands = -1, atoms = -1, orbs = -1): 
         # Just have a loop over _get_spin_set and collect all spins, evals must be collected for both spin up and down
         # shape should be (ISPIN, NKPOINTS, NBANDS, [NATOMS(selected), NORBS]) and atoms and bands reference should be returned
         # include vbm property like in evals
@@ -342,107 +328,7 @@ def get_tdos(xml_data,elim = []):
         dos_dic= {'Fermi':efermi,'ISPIN':ISPIN,'grid_range':range(lo_ind,up_ind),'tdos':tdos}
     return serializer.Dict2Data(dos_dic)
 
-def get_evals(xml_data, skipk = None, elim = []):
-    evals, occs = [], [] #assign for safely exit if wrong spin set entered.
-    ISPIN = get_ispin(xml_data=xml_data)
-    if skipk != None:
-        skipk=skipk
-    else:
-        skipk = exclude_kpts(xml_data=xml_data) #that much to skip by default
-    for neighbor in xml_data.root.iter('eigenvalues'):
-        for item in neighbor[0].iter('set'):
-            if ISPIN == 1:
-                if item.attrib=={'comment': 'spin 1'}:
-                    evals = np.array([[[float(t) for t in th.text.split()] for th in thing] for thing in item])[skipk:]
-                    evals, occs = np.expand_dims(evals[:,:,0],0), np.expand_dims(evals[:,:,1],0)
-                    NBANDS = len(evals[0])
-            if ISPIN == 2:
-                if item.attrib=={'comment': 'spin 1'}:
-                    eval_1 = np.array([[[float(t) for t in th.text.split()] for th in thing] for thing in item])[skipk:]
-                    eval_1, occs_1 = eval_1[:,:,0], eval_1[:,:,1]
-                if item.attrib=={'comment': 'spin 2'}:
-                    eval_2=np.array([[[float(t) for t in th.text.split()] for th in thing] for thing in item])[skipk:]
-                    eval_2, occs_2 = eval_2[:,:,0], eval_2[:,:,1]
-                
-                evals = np.array([eval_1,eval_2])
-                occs = np.array([occs_1,occs_2])
-                NBANDS = evals.shape[-1]
 
-    for i in xml_data.root.iter('i'): #efermi for condition required.
-        if i.attrib == {'name': 'efermi'}:
-            efermi = float(i.text)
-    evals_dic={'Fermi':efermi,'ISPIN':ISPIN,'NBANDS':NBANDS,'evals':evals,'occs':occs}
-    if elim: #check if elim not empty
-        up_ind = np.max(np.where(evals[:,:,:]-efermi <= np.max(elim))[2]) + 1
-        lo_ind = np.min(np.where(evals[:,:,:]-efermi >= np.min(elim))[2])
-        evals = evals[:, :, lo_ind:up_ind]
-        occs = occs[:, :, lo_ind:up_ind]
-        
-        NBANDS = int(up_ind - lo_ind) #update Bands
-        evals_dic['NBANDS'] = NBANDS
-        evals_dic['evals'] = evals
-        evals_dic['occs'] = occs
-        
-    return serializer.Dict2Data(evals_dic)
-
-def get_bands_pro_set(xml_data, spin = 0, skipk = 0, bands_range:range=None, set_path:str=None):
-    """Returns bands projection of a spin(default 0). If spin-polarized calculations, gives SpinUp and SpinDown keys as well.
-    
-    Args:
-        xml_data    : From ``read_asxml`` function's output.
-        skipk (int): Number of initil kpoints to skip (Default 0).
-        spin (int): Spin set to get, default is 0.
-        bands_range (range): If elim used in ``get_evals``,that will return ``bands_range`` to use here. Note that range(0,2) will give 2 bands 0,1 but tuple (0,2) will give 3 bands 0,1,2.
-        set_path (str): path/to/_set[1,2,3,4].txt, works if ``split_vasprun`` is used before.
-    
-    Returns:
-        Dict2Data: ``ipyvasp.Dict2Data`` with attibutes of bands projections and related parameters.
-    """
-    if bands_range != None:
-        check_list = list(bands_range)
-        if check_list==[]:
-            raise ValueError("No bands prjections found in given energy range.")
-    
-    #Collect Projection fields
-    fields=[];
-    for pro in xml_data.root.iter('projected'):
-        for arr in pro.iter('field'):
-            if('eig' not in arr.text and 'occ' not in arr.text):
-                fields.append(arr.text.strip())
-    NORBS = len(fields)
-    #Get NIONS for reshaping data
-    NIONS=[int(atom.text) for atom in xml_data.root.iter('atoms')][0]
-
-    for sp in xml_data.root.iter('set'):
-        if sp.attrib=={'comment': 'spin{}'.format(spin + 1)}:
-            k_sets = [kp for kp in sp.iter('set') if 'kpoint' in kp.attrib['comment']]
-    k_sets = k_sets[skipk:]
-    NKPTS = len(k_sets)
-    band_sets = []
-    for k_s in k_sets:
-        b_set = [b for b in k_s.iter('set') if 'band' in b.attrib['comment']]
-        if bands_range == None:
-            band_sets.extend(b_set)
-        else:
-            b_r = list(bands_range)
-            band_sets.extend(b_set[b_r[0]:b_r[-1]+1])
-    NBANDS = int(len(band_sets)/len(k_sets))
-    try:
-        # Error prone solution but 5 times fater than list comprehension.
-        bands_pro = (float(t) for band in band_sets for l in band.iter('r') for t in l.text.split())
-        COUNT = NKPTS*NBANDS*NORBS*NIONS # Must be counted for performance.
-        data = np.fromiter(bands_pro,dtype=float,count=COUNT)
-    except:
-        # Alternate slow solution
-        print("Error using `np.fromiter`.\nFalling back to (slow) list comprehension...",end=' ')
-        bands_pro = (l.text for band in band_sets for l in band.iter('r'))
-        bands_pro = [[float(t) for t in text.split()] for text in bands_pro]
-        data = np.array(bands_pro)
-        del bands_pro # Release memory
-        print("Done.")
-
-    data = data.reshape((1, NKPTS,NBANDS,NIONS,NORBS)) # extra dim for spin
-    return serializer.Dict2Data({'labels':fields,'pros':data})
 
 def get_dos_pro_set(xml_data,spin = 0,dos_range:range=None):
     """Returns dos projection of a spin(default 0) as numpy array. If spin-polarized calculations, gives SpinUp and SpinDown keys as well.
@@ -482,78 +368,6 @@ def get_dos_pro_set(xml_data,spin = 0,dos_range:range=None):
     final_data = np.expand_dims(dos_pro,0).transpose((0,2,1,3)) # shape(1, NE,NIONS, NORBS + 1)
     return serializer.Dict2Data({'labels':dos_fields,'pros':final_data})
 
-
-
-def export_vasprun(path:str = None, skipk:int = None, elim:list = [], dos_only:bool = False):
-    """Returns a full dictionary of all objects from ``vasprun.xml`` file. It first try to load the data exported by powershell's `Export-VR(Vasprun)`, which is very fast for large files. It is recommended to export large files in powershell first.
-    
-    Args:
-        path  (str): Path to ``vasprun.xml`` file. Default is ``'./vasprun.xml'``.
-        skipk (int): Default is None. Automatically detects kpoints to skip.
-        elim  (list): List [min,max] of energy interval. Default is [], covers all bands.
-        dos_only (bool): If True, only returns dos data with minimal other data. Default is False.
-        
-
-    """
-    path = path or './vasprun.xml'
-
-    xml_data = read_asxml(path=path)
-
-    base_dir = os.path.split(os.path.abspath(path))[0]
-    set_paths = [os.path.join(base_dir,"_set{}.txt".format(i)) for i in (1,2)]
-    #First exclude unnecessary kpoints. Includes only same weight points
-    if skipk!=None:
-        skipk=skipk
-    else:
-        skipk = exclude_kpts(xml_data) #that much to skip by default
-    info_dic = get_summary(xml_data) #Reads important information of system.
-    #KPOINTS
-    kpts = get_kpoints(xml_data,skipk=skipk)
-    #EIGENVALS
-    eigenvals = get_evals(xml_data,skipk=skipk,elim=elim)
-    #TDOS
-    tot_dos = get_tdos(xml_data,elim = elim)
-    #Bands and DOS Projection
-    if elim:
-        bands_range = eigenvals.indices #indices in range form.
-        grid_range=tot_dos.grid_range
-    else:
-        bands_range = None #projection function will read itself.
-        grid_range = None
-        
-    if dos_only:
-        bands_range = range(1) # Just one band
-        skipk = len(kpts.kpath) + skipk - 2 # Just Single kpoint
-        
-    if info_dic.ISPIN == 1:
-        pro_bands = get_bands_pro_set(xml_data=xml_data,spin = 0,skipk=skipk,bands_range=bands_range,set_path=set_paths[0])
-        pro_dos = get_dos_pro_set(xml_data=xml_data,spin = 0,dos_range=grid_range)
-    if info_dic.ISPIN == 2:
-        pro_1 = get_bands_pro_set(xml_data=xml_data,spin =0,skipk=skipk,bands_range=bands_range,set_path=set_paths[0])
-        pro_2 = get_bands_pro_set(xml_data=xml_data,spin =1,skipk=skipk,bands_range=bands_range,set_path=set_paths[1])
-        pros = np.vstack([pro_1.pros,pro_2.pros]) # accessing spins in dictionary after .pro.
-        pro_bands = {'labels':pro_1.labels,'pros': pros}
-        pdos_1 = get_dos_pro_set(xml_data=xml_data,spin =0,dos_range=grid_range)
-        pdos_2 = get_dos_pro_set(xml_data=xml_data,spin=0,dos_range=grid_range)
-        pdos = np.vstack([pdos_1.pros, pdos_2.pros]) # accessing spins in dictionary after .pro.
-        pro_dos = {'labels':pdos_1.labels,'pros': pdos}
-        
-    # Forces and steps
-    force = get_force(xml_data)
-    scsteps = get_scsteps(xml_data)
-
-    #Structure
-    poscar = get_structure(xml_data = xml_data)
-    poscar = {'SYSTEM':info_dic.SYSTEM,**poscar.to_dict()}
-    #Dimensions dictionary.
-    dim_dic={'kpoints':'(NKPTS,3)','kpath':'(NKPTS,1)','evals':'⇅(NSPIN,NKPTS,NBANDS)','dos_total':'⇅(NSPIN, NE,3)','dos_partial':'⇅(NSPIN, NE, NIONS,NORBS+1)','evals_projector':'⇅(NSPIN,NKPTS,NBANDS,NIONS, NORBS)'}
-    # Bands
-    bands = {'kpoints':kpts.kpoints,'kpath':kpts.kpath,'evals':eigenvals.evals,'occs':eigenvals.occs, 'labels':pro_bands['labels'],'pros':pro_bands['pros']}
-    # DOS
-    dos = {'total':tot_dos.tdos,'labels':pro_dos['labels'],'partial':pro_dos['pros']}
-    #Writing everything to be accessible via dot notation
-    full_dic={'sys_info':info_dic,'dim_info':dim_dic,'bands':bands,'dos':dos,'poscar': poscar,'force':force,'scsteps':scsteps}
-    return #serializer.VasprunData(full_dic)
 
 def gen2numpy(gen, shape, slices, raw:bool = False, dtype = float, delimiter = '\s+', include:str = None,exclude:str = '#',fix_format:bool = True):
     """
@@ -625,6 +439,8 @@ def gen2numpy(gen, shape, slices, raw:bool = False, dtype = float, delimiter = '
         gen = (l for l in gen if not re.search(exclude,l))
 
     gen = (l for l in gen if l.strip()) # remove empty lines
+    
+    gen = islice(gen, 0, int(np.product(shape[:-1]))) # Discard lines after required data
     
     def fold_dim(gen, take, N):
         if take == -1:

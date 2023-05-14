@@ -569,7 +569,7 @@ def color_wheel(ax=None,
     return cax
 
 
-def _make_line_collection(maxwidth   = 2.5,
+def _make_line_collection(maxwidth   = 3,
                          colors_list = None,
                          rgb         = False,
                          shadow      = False,
@@ -578,7 +578,7 @@ def _make_line_collection(maxwidth   = 2.5,
     - Returns a tuple of line collections for each given projection data.
     - **Parametrs**
         - **pros_data: Output dictionary from `_fix_data` containing kpath, evals, colors arrays.
-        - maxwidth  : Default is 2.5. Max linewidth is scaled to maxwidth if an int of float is given.
+        - maxwidth  : Default is 3. Max linewidth is scaled to maxwidth if an int of float is given.
         - colors_list: List of colors for multiple lines, length equal to 3rd axis length of colors.
         - rgb        : Default is False. If True and np.shape(colors)[-1] == 3, RGB line collection is returned in a tuple of length 1. Tuple is just to support iteration.
     """
@@ -605,7 +605,7 @@ def _make_line_collection(maxwidth   = 2.5,
     else: # For separate lines
         lws = 0.1 + colors.T # .T to access in for loop.
 
-    lws = maxwidth*lws/np.max(lws) # Rescale to maxwidth
+    lws = maxwidth*lws/(float(np.max(lws)) or 1) # Rescale to maxwidth, numpy does not behave well with or.
 
     if np.any(colors_list):
         lc_colors = colors_list
@@ -757,8 +757,8 @@ def _fix_data(K, E, pros, labels, interp, rgb = False, **others):
         data['kpath'] = np.insert(data['kpath'],breaks,np.nan)
         data['evals'] = np.insert(data['evals'],breaks,np.nan,axis=0)
         data['pros']  = np.insert(data['pros'],breaks,data['pros'][breaks],axis=0) # Repeat the same data to keep color consistent
-        for k,v in others.items():
-            data[k] = np.insert(data[k],breaks,v[breaks],axis=0) # Repeat here too
+        for key in others: # don't use items here, as interpolation may have changed the shape
+            data[key] = np.insert(data[key],breaks,data[key][breaks],axis=0) # Repeat here too
     
     return data
 
@@ -767,7 +767,7 @@ def splot_rgb_lines(K, E, pros, labels,
     elim       = None, 
     kticks     = None, 
     interp     = None, 
-    maxwidth   = 2.5,
+    maxwidth   = 3,
     colormap   = None,
     colorbar   = True,
     N          = 9,
@@ -786,7 +786,7 @@ def splot_rgb_lines(K, E, pros, labels,
     elim : tuple of min and max values    
     kticks : [(int, str),...] for indices of high symmetry k-points. To join a broken path, use '<=' before symbol, e.g.  [(0, 'G'),(40, '<=K|M'), ...] will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').
     interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
-    maxwidth : float, maximum linewidth, 2.5 by default
+    maxwidth : float, maximum linewidth, 3 by default
     colormap : str, name of a matplotlib colormap
     colorbar : bool, if True, add colorbar, otherwise add attribute to ax to add colorbar or color cube later
     N : int, number of colors in colormap
@@ -881,7 +881,7 @@ def splot_color_lines(K, E, pros, labels,
     elim       = None, 
     kticks     = None, 
     interp     = None, 
-    maxwidth   = 2.5,
+    maxwidth   = 3,
     colormap   = None,
     shadow     = False,
     showlegend = True,
@@ -901,7 +901,7 @@ def splot_color_lines(K, E, pros, labels,
     elim : tuple of min and max values    
     kticks : [(int, str),...] for indices of high symmetry k-points. To join a broken path, use '<=' before symbol, e.g.  [(0, 'G'),(40, '<=K|M'), ...] will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').
     interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
-    maxwidth : float, maximum linewidth, 2.5 by default
+    maxwidth : float, maximum linewidth, 3 by default
     colormap : str, name of a matplotlib colormap
     shadow : bool, if True, add shadow to lines
     showlegend : bool, if True, add legend, otherwise adds a label to the plot.

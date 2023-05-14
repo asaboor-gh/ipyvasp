@@ -43,7 +43,7 @@ def _format_rgb_data(K, E, pros, labels, interp, occs, kpoints, maxwidth = 10):
         data['pros'][:,:,1:] = np.nan
     
     lws = np.sum(rgb,axis = 2) # Sum of all colors
-    lws = lws/np.max(lws)*maxwidth # Normalize to maxwidth
+    lws = maxwidth*lws/(float(np.max(lws)) or 1) # Normalize to maxwidth
     data['widths'] = 0.0001+ lws #should be before scale colors
     
 
@@ -168,7 +168,7 @@ def iplot_rgb_lines(K, E, pros, labels, occs, kpoints,
         
     kwargs.pop('marker_color',None) # Provided by C
     kwargs.pop('marker_size',None) # Provided by S
-    kwargs.update({'hovertext': T, 'marker': {**kwargs.get('marker',{}), 'color': C, 'size': S}})
+    kwargs.update({'hovertext': T, 'marker': {'line_color': 'rgba(0,0,0,0)', **kwargs.get('marker',{}), 'color': C, 'size': S}}) # marker edge should be free
     
     fig.add_trace(go.Scatter(x = K, y = E, mode = mode, **kwargs))
     
