@@ -252,7 +252,7 @@ class Vasprun(DataSource):
             out['orbs'] = orbs
         elif (atoms, orbs) != (None, None):
             raise ValueError('atoms and orbs should be passed together')
-            
+        out['shape'] = '(kpoints, bands, [atoms, orbitals])'
         return serializer.Dict2Data(out)
 
     def get_spins(self, bands = -1, atoms = -1, orbs = -1): 

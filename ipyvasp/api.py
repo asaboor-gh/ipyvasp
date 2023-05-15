@@ -240,13 +240,13 @@ class POSCAR:
     def cell(self):
         return self._cell
 
-    @_sub_doc(sio.get_bz,'- path_pos')
-    def get_bz(self, loop=True, primitive=False):
+    @_sub_doc(sio.get_bz,'path_pos :')
+    def get_bz(self, loop = True, primitive = False):
         self._bz = sio.get_bz(path_pos = self._data.basis, loop=loop, primitive=primitive)
         self._primitive = primitive
         return self._bz
 
-    def set_bz(self,primitive=False,loop=True):
+    def set_bz(self,primitive = False,loop = True):
         """Set BZ in primitive or regular shape. returns None, just set self.bz"""
         self.get_bz(primitive=primitive,loop=loop)
 
@@ -256,7 +256,7 @@ class POSCAR:
         return self._cell
 
     @_sub_doc(sio.splot_bz,'- bz_data')
-    def splot_bz(self, ax=None, plane=None, color='blue', fill=True, vectors=True, v3=False, vname='b', colormap='plasma', light_from=(1, 1, 1), alpha=0.4):
+    def splot_bz(self, plane=None, ax=None, color='blue', fill=True, vectors=True, v3=False, vname='b', colormap='plasma', light_from=(1, 1, 1), alpha=0.4):
         self._plane = plane # Set plane for splot_kpath
         new_ax = sio.splot_bz(bz_data = self._bz, ax=ax, plane=plane, color=color, fill=fill, vectors=vectors, v3=v3, vname=vname, colormap=colormap, light_from=light_from, alpha=alpha)
         self._ax = new_ax # Set ax for splot_kpath
@@ -312,18 +312,24 @@ class POSCAR:
         "See docs of `iplot_bz`, everything is same except space is iverted."
         return sio.iplot_bz(bz_data = self._cell, fill=fill, color=color, background=background, vname=vname, alpha=alpha, ortho3d=ortho3d, fig=fig)
 
-    @_sub_doc(sio.splot_lat,'- poscar_data')
-    def splot_lat(self, plane = None, sizes=50, colors = None, colormap=None, bond_length=None, tol=1e-2, bond_tol = 1e-3, eqv_sites=True, translate=None, line_width=1,
-                  edge_color=(1, 0.5, 0, 0.4), vectors=True, v3=False, light_from=(1, 1, 1), fill=False, alpha=0.4, ax=None, alpha_points = 0.7):
-        return sio.splot_lat(self._data, sizes=sizes, colors=colors, colormap=colormap, bond_length=bond_length, tol=tol, bond_tol = bond_tol, eqv_sites=eqv_sites,
-                             translate=translate, line_width=line_width, edge_color=edge_color, vectors=vectors, v3=v3, plane=plane, light_from=light_from, fill=fill,
-                             alpha=alpha, alpha_points= alpha_points, ax=ax)
+    @_sub_doc(sio.splot_lattice,'poscar_data :')
+    def splot_lattice(self, plane = None, sizes = 50,colors=None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
+        translate = None, line_width=1, alpha = 0.7, ax = None,
+        splot_bz_kwargs = dict(
+            vname = 'a', color = ((1,0.5,0,0.4)),colormap = None, fill = False,alpha = 0.4,
+            vectors = True, v3=False, light_from = (1,1,1)
+        )
+        ):
+        kwargs = {k:v for k,v in locals().items() if k != 'self'} # should be at top line
+        return sio.splot_lattice(self._data, **kwargs)
     
-    @_sub_doc(sio.iplot_lat,'- poscar_data')
-    def iplot_lat(self, sizes=10, colors = None, bond_length=None, tol=1e-2, bond_tol = 1e-3, eqv_sites=True, translate=None, line_width=4, edge_color='black',
-                  fill=False, alpha=0.4, ortho3d=True, fig=None):
-        return sio.iplot_lat(self._data, sizes=sizes, colors=colors, bond_length=bond_length, tol=tol, bond_tol=bond_tol, eqv_sites=eqv_sites, translate=translate,
-                             line_width=line_width, edge_color=edge_color,fill=fill, alpha=alpha, ortho3d=ortho3d, fig=fig)
+    @_sub_doc(sio.iplot_lattice,'poscar_data :')
+    def iplot_lattice(self, sizes = 10, colors = None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
+              translate = None, line_width = 4, fig = None, ortho3d = True,
+              iplot_bz_kwargs = dict(vname = 'a',color='black', fill = False,alpha = 0.4)
+        ):
+        kwargs = {k:v for k,v in locals().items() if k != 'self'} # should be at top line
+        return sio.iplot_lattice(self._data, **kwargs)
 
     def write(self, outfile=None, overwrite=False):
         "Write POSCAR data to file."
@@ -681,7 +687,7 @@ def _format_input(atoms_orbs_dict, sys_info):
     return atoms,orbs,labels, uatoms, uorbs
 
 _spin_doc = 'spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations.'
-_proj_doc = "atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs."
+_proj_doc = "atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs and return array of same shape as evals."
 
 class _BandsDosBase:
     def __init__(self, source):
@@ -730,7 +736,7 @@ class Bands(_BandsDosBase):
         ----------
         spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations.
         elim : list, tuple of two floats to pick bands in this energy range. If None, picks all bands.
-        atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs.
+        atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs and return array of same shape as evals.
         
         Returns
         -------
@@ -740,13 +746,24 @@ class Bands(_BandsDosBase):
             raise ValueError('spin must be 0 or 1')
         
         atoms, orbs, labels, uatoms, uorbs, blim = None, None, None, None, None, None
-        if atoms_orbs_dict:
-            atoms, orbs, labels, uatoms, uorbs = _format_input(atoms_orbs_dict, self.source.get_summary())
+        
+        funcs = []
+        if isinstance(atoms_orbs_dict, dict):
+            _funcs = [callable(value) for _, value in atoms_orbs_dict.items()]
+            if any(_funcs) and not all(_funcs):
+                raise TypeError('Either all or none of the values of `atoms_orbs_dict` must be callable with two arguments evals, occs and return array of same shape as evals.')
+            elif all(_funcs):
+                funcs = [value for _, value in atoms_orbs_dict.items()]
+            else:
+                atoms, orbs, labels, uatoms, uorbs = _format_input(atoms_orbs_dict, self.source.get_summary())
+        
+        elif atoms_orbs_dict is not None:
+            raise TypeError('`atoms_orbs_dict` must be a dictionary or None.')
         
         if self._data and (1 - self._data.spin) == spin: # if they have used other channel before
             print('Using same bands for spin up and spin down. Run again to change and bands range and then apply same on other spin channel.')
             blim = min(self._data.bands), max(self._data.bands)
-        
+            
         kpts = self._source.get_kpoints()
         eigens = self._source.get_evals(spin = spin, elim = elim, atoms = uatoms, orbs = uorbs, blim = blim) # others be there
         
@@ -768,6 +785,17 @@ class Bands(_BandsDosBase):
             output['labels'] = labels
             output.pop('atoms', None) # No more needed
             output.pop('orbs', None)
+        
+        elif funcs:
+            output['labels'] = list(atoms_orbs_dict.keys())
+            output['pros'] = np.array([f(eigens.evals, eigens.occs) for f in funcs])
+            
+            if output['pros'].shape[1:] != eigens.evals.shape:
+                raise ValueError('Projections returned by functions must be of same shape as input evals.')
+            
+            output['info'] = '"Custom projections by user"'
+        
+        output['shape'] = '([selections], kpoints, bands)'
         
         self._data = serializer.Dict2Data(output) # Assign for later use
         return self._data
@@ -880,7 +908,7 @@ class DOS(_BandsDosBase):
         atoms, orbs, labels, uatoms, uorbs, gridlim = None, None, None, None, None, None
         if atoms_orbs_dict:
             atoms, orbs, labels, uatoms, uorbs = _format_input(atoms_orbs_dict, self.source.get_summary())
-        
+        # NOTE: Do same as done in bands to have functions
         if self._data and (1 - self._data.spin) == spin: # if they have used other channel before
             print('Using same energy limit for spin up and spin down. Run again to change it, then apply same on other spin channel.')
             gridlim = min(self._data.bands), max(self._data.bands)

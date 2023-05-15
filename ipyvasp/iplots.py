@@ -44,7 +44,7 @@ def _format_rgb_data(K, E, pros, labels, interp, occs, kpoints, maxwidth = 10):
     
     lws = np.sum(rgb,axis = 2) # Sum of all colors
     lws = maxwidth*lws/(float(np.max(lws)) or 1) # Normalize to maxwidth
-    data['widths'] = 0.0001+ lws #should be before scale colors
+    data['widths'] = 0.0001 + lws #should be before scale colors, almost zero size of a data point with no contribution.
     
 
     # Now scale colors to 1 at each point.

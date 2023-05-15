@@ -168,8 +168,8 @@ class SpinDataFrame(pd.DataFrame):
         out_dict['atoms'] = self.poscar.data.types
         out_dict['orbitals'] = self.sys_info.fields
         out_dict['projection'] = self.projection
-        out_dict['bz'] = self.poscar.bz._asdict()
-        out_dict['bz']['specials'] = self.poscar.bz.specials._asdict()
+        out_dict['bz'] = self.poscar.bz.to_dict()
+        out_dict['bz']['specials'] = self.poscar.bz.specials.to_dict()
 
         for band in bands:
             name = f'band_{band}'

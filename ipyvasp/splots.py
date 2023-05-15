@@ -601,11 +601,11 @@ def _make_line_collection(maxwidth   = 3,
     colors = colors.transpose((1,0,2)).reshape((-1,np.shape(colors)[-1])) # Must before lws
 
     if rgb: # Single channel line widths
-        lws = 0.1 + np.sum(colors,axis=1) # Sum over RGB
+        lws = np.sum(colors,axis=1) # Sum over RGB
     else: # For separate lines
-        lws = 0.1 + colors.T # .T to access in for loop.
+        lws = colors.T # .T to access in for loop.
 
-    lws = maxwidth*lws/(float(np.max(lws)) or 1) # Rescale to maxwidth, numpy does not behave well with or.
+    lws = 0.1 + maxwidth*lws/(float(np.max(lws)) or 1) # Rescale to maxwidth, with a residual with 0.1 as must be visible.
 
     if np.any(colors_list):
         lc_colors = colors_list

@@ -273,13 +273,12 @@ class BrZoneData(Dict2Data):
     def __init__(self,d):
         super().__init__(d)
         
-        
     def get_special_points(self, orderby = (1,1,1)):
         "Returns the special points in the brillouin zone in the order relative to a given point in cartesian coordinates. Gamma is always first."
         # High symmerty KPOINTS in primitive BZ 
-        mid_faces = np.array([np.mean(np.unique(face,axis=0),axis=0) for face in self.faces])
+        mid_faces = np.array([np.mean(np.unique(face,axis=0),axis=0) for face in self.faces_coords])
         mid_edges = []
-        for f in self.faces:
+        for f in self.faces_coords:
             for i in range(len(f)-1):
                 # Do not insert point between unique vertices
                 if np.isclose(np.linalg.norm(f[i]),np.linalg.norm(f[i+1])):
@@ -305,12 +304,22 @@ class BrZoneData(Dict2Data):
     def specials(self):
         "Returns the special points in the brillouin zone ordered by point (1,1,1) in cartesian coordinates. Gamma is always first."
         return self.get_special_points()
+    
+    @property
+    def faces_coords(self):
+        "Returns the coordinates of the faces of the brillouin zone in list of N faces of shape (M,3) where M is the number of vertices of the face."
+        return tuple(self.vertices[(face,)] for face in self.faces) # (face,) is to pick items from first dimension, face would try many dimensions
 
     
 class CellData(Dict2Data):
     _req_keys = ('normals','faces','vertices')
     def __init__(self,d):
         super().__init__(d)
+    
+    @property
+    def faces_coords(self):
+        "Returns the coordinates of the faces of the cell in list of N faces of shape (M,3) where M is the number of vertices of the face."
+        return tuple(self.vertices[(face,)] for face in self.faces) # (face,) is to pick items from first dimension, face would try many dimensions
         
         
 class GridData(Dict2Data):
