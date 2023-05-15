@@ -709,7 +709,7 @@ class Bands(_BandsDosBase):
     """
     def __init__(self, source):
         super().__init__(source)
-    
+        
     def get_kticks(self, rel_path = 'KPOINTS'):
         """
         Reads associated KPOINTS file form a relative path of calculations and returns kticks. If KPOINTS file does not exist or was not created by this module, returns empty dict.
@@ -729,7 +729,7 @@ class Bands(_BandsDosBase):
         Parameters
         ----------
         spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations.
-        elim : list, tuple or range by default use all energy range. Use list, tuple or range to select specific energy range.
+        elim : list, tuple of two floats to pick bands in this energy range. If None, picks all bands.
         atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs.
         
         Returns
@@ -739,12 +739,16 @@ class Bands(_BandsDosBase):
         if spin not in [0,1]:
             raise ValueError('spin must be 0 or 1')
         
-        atoms, orbs, labels, uatoms, uorbs = None, None, None, None, None
+        atoms, orbs, labels, uatoms, uorbs, blim = None, None, None, None, None, None
         if atoms_orbs_dict:
             atoms, orbs, labels, uatoms, uorbs = _format_input(atoms_orbs_dict, self.source.get_summary())
-            
+        
+        if self._data and (1 - self._data.spin) == spin: # if they have used other channel before
+            print('Using same bands for spin up and spin down. Run again to change and bands range and then apply same on other spin channel.')
+            blim = min(self._data.bands), max(self._data.bands)
+        
         kpts = self._source.get_kpoints()
-        eigens = self._source.get_evals(spin = spin, elim = elim, atoms = uatoms, orbs = uorbs) # others be there
+        eigens = self._source.get_evals(spin = spin, elim = elim, atoms = uatoms, orbs = uorbs, blim = blim) # others be there
         
         output = {'kpath': kpts.kpath, 'kpoints': kpts.kpoints, 'coords': kpts.coords, **eigens.to_dict()}
         output['kvc'] = tuple(tuple(round(kpts.kpath[i],4) for i in kp) for kp in eigens.kvc) # 4 digits are enough to handle 10,000 kpoints
@@ -870,4 +874,15 @@ class DOS(_BandsDosBase):
         super().__init__(source)
     
     def get_data(self, spin = 0, elim = None, atoms_orbs_dict: dict = None):
-        pass
+        if spin not in [0,1]:
+            raise ValueError('spin must be 0 or 1')
+        
+        atoms, orbs, labels, uatoms, uorbs, gridlim = None, None, None, None, None, None
+        if atoms_orbs_dict:
+            atoms, orbs, labels, uatoms, uorbs = _format_input(atoms_orbs_dict, self.source.get_summary())
+        
+        if self._data and (1 - self._data.spin) == spin: # if they have used other channel before
+            print('Using same energy limit for spin up and spin down. Run again to change it, then apply same on other spin channel.')
+            gridlim = min(self._data.bands), max(self._data.bands)
+        
+        data = self._source.get_dos(spin = spin, elim = elim, atoms = uatoms, orbs = uorbs, gridlim = gridlim)

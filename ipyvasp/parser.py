@@ -165,10 +165,11 @@ class Vasprun(DataSource):
         return serializer.Dict2Data({'kpoints':kpoints,'coords':coords,'kpath': kpath, 'weights':weights,'rec_basis':rec_basis})
      
      
-    def get_dos(self, spin = 0, elim = None, atoms = None, orbs = None):
+    def get_dos(self, spin = 0, elim = None, atoms = None, orbs = None, gridlim = None):
         # Should be as energy(NE,), total(NE,), integrated(NE,), partial(NE, NATOMS(selected), NORBS) and atoms reference should be returned
         # include vbm property as in evals, just from integrated dos and NELECT
         # check size and if nothing, throw error
+        # should have a gridlim like blim to override the elim
         pass 
         
         if atoms and orbs:
@@ -187,7 +188,7 @@ class Vasprun(DataSource):
         gen = (r.strip(' \n/<>r') for r in self.read(f'spin{spin+1}',f'spin{spin+2}|</projected') if '<r>' in r) # stripping is must here to ensure that we get only numbers
         return gen2numpy(gen, shape,slices)
 
-    def get_evals(self, spin = 0, elim = None, atoms = None, orbs = None): 
+    def get_evals(self, spin = 0, elim = None, atoms = None, orbs = None, blim = None): 
         """
         Returns eigenvalues and occupations of the calculation. If atoms and orbs are specified, then orbitals are included too.
         
@@ -197,6 +198,7 @@ class Vasprun(DataSource):
         elim : tuple, energy range to be returned. Default is None, which returns all eigenvalues. User should supply elim as (min + efermi, max + efermi) to get the correct eigenvalues range.
         atoms : list, indices of atoms to be returned. Default is None, which does not return ionic projections.
         orbs : list, indices of orbitals to be returned. Default is None, which does not return orbitals.
+        blim : tuple of length 2, overrides elim and returns eigenvalues in the band range. Useful to load same bands range for spin up and down channels. Plotting classes automatically handle this for spin up and down channels.
         
         Returns
         -------
@@ -208,7 +210,7 @@ class Vasprun(DataSource):
         ev = (r.split()[1:3] for r in self.read(f'<set.*spin {spin+1}',f'<set.*spin {spin+2}|</eigenvalues>') if '<r>' in r)
         ev = (e for es in ev for e in es) # flatten
         ev = np.fromiter(ev,float)
-        if ev.size:
+        if ev.size: # if not empty
             ev = ev.reshape((-1,info.NBANDS,2))[self._skipk:]
         else:
             raise ValueError('No eigenvalues found for spin {}'.format(spin))
@@ -221,9 +223,24 @@ class Vasprun(DataSource):
         kcbm = [k for k in np.where(evals == cbm)[0]]
         kvc = tuple(set(product(kvbm,kcbm))) # make unique pairs (by set) of kpoints to plot easily
         
-        if elim:
-            up_ind = np.max(np.where(evals[:,:] <= np.max(elim))[1]) + 1
-            lo_ind = np.min(np.where(evals[:,:] >= np.min(elim))[1])
+        to_from = (0, -1) # default values
+        if blim:
+            if (not isinstance(blim, (list, tuple))) and (len(blim) != 2):
+                raise TypeError('blim should be a tuple of length 2')
+            for b in blim:
+                if (not isinstance(b, (int, np.integer))) and (b < 0):
+                    raise TypeError('blim should be a tuple of length 2 of positive integers')
+            to_from = blim[0], blim[1] + 1 # +1 to include the last index which get skipped in slicing
+        elif elim:
+            if (not isinstance(elim, (list, tuple))) and (len(elim) != 2):
+                raise TypeError('elim should be a tuple of length 2')
+            
+            idx_max = np.max(np.where(evals[:,:] <= np.max(elim))[1]) + 1
+            idx_min = np.min(np.where(evals[:,:] >= np.min(elim))[1])
+            to_from = (idx_min, idx_max)
+        
+        if to_from != (0, -1):
+            lo_ind, up_ind = to_from
             evals = evals[:, lo_ind:up_ind]
             occs = occs[:, lo_ind:up_ind]
             bands = range(lo_ind, up_ind)
@@ -242,6 +259,7 @@ class Vasprun(DataSource):
         # Just have a loop over _get_spin_set and collect all spins, evals must be collected for both spin up and down
         # shape should be (ISPIN, NKPOINTS, NBANDS, [NATOMS(selected), NORBS]) and atoms and bands reference should be returned
         # include vbm property like in evals
+        # Tell user they can plot any spin using this data in splots
         pass
     
     def get_forces(self):
