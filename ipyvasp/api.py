@@ -255,23 +255,25 @@ class POSCAR:
         self._cell = serializer.CellData(sio.get_bz(path_pos=self._data.rec_basis,loop=loop, primitive=True).to_dict()) # cell must be primitive
         return self._cell
 
-    @_sub_doc(sio.splot_bz,'- bz_data')
-    def splot_bz(self, plane=None, ax=None, color='blue', fill=True, vectors=True, v3=False, vname='b', colormap='plasma', light_from=(1, 1, 1), alpha=0.4):
+    @_sub_doc(sio.splot_bz,'bz_data :')
+    def splot_bz(self, plane=None, ax=None, color='blue', fill=True, vectors = (0,1,2), colormap='plasma', shade = True, alpha=0.4):
         self._plane = plane # Set plane for splot_kpath
-        new_ax = sio.splot_bz(bz_data = self._bz, ax=ax, plane=plane, color=color, fill=fill, vectors=vectors, v3=v3, vname=vname, colormap=colormap, light_from=light_from, alpha=alpha)
+        new_ax = sio.splot_bz(bz_data = self._bz, ax=ax, plane=plane, color=color, fill=fill, vectors=vectors, colormap=colormap, shade = shade, alpha=alpha)
         self._ax = new_ax # Set ax for splot_kpath
         return new_ax
 
-    def splot_kpath(self,orderby = (1,1,1), knn_inds = None, labels = None, color='k', line_width = 0.8,marker_size = 10,marker_style = '.',**labels_kwargs):
-        """Plot k-path over existing BZ.
-        Args:
-            - orderby : point relative to which k-points are ordered in fractional coordinates. e.g. (1,1,1) will order k-points by distance from (1,1,1) in fractional coordinates.
-            - knn_inds: list of indices of k nearest points e.g. [2,3,1] will trace path linking as 2-3-1.
-                0 is Gamma point and 1 is the selected vertex itself. Points are taken internally from BZ, you can see from `self.bz.specials`.
-            - labels: list of labels for each k-point in same order as `knn_inds`.
-            - color, line_width, marker_size, marker_style are passed to `plt.plot`.
+    def splot_kpath(self,orderby = (1,1,1), knn_inds = None, labels = None, plot_kwargs = dict(color = 'k',linewidth=0.8,marker='.',markersize=10), **text_kwargs):
+        """
+        Plot k-path over existing BZ.
+        
+        Parameters
+        ----------
+        orderby : point relative to which k-points are ordered in fractional coordinates. e.g. (1,1,1) will order k-points by distance from (1,1,1) in fractional coordinates.
+        knn_inds : list of indices of k nearest points e.g. [2,3,1] will trace path linking as 2-3-1. Points are taken internally from BZ, by using `self.bz.get_special_points`.
+        labels : list of labels for each k-point in same order as `knn_inds`.
+        plot_kwargs: passed to `plt.plot` with some defaults.
 
-        labels_kwargs are passed to `plt.text`.
+        text_kwargs are passed to `plt.text`.
 
         > Tip: You can use this function multiple times to plot multiple/broken paths over same BZ.
         """
@@ -293,31 +295,30 @@ class POSCAR:
                 labels = [f"{n}: {_lab}" for n, _lab in zip(nearest, labels)]
 
         coords = _specials.coords[inds][:,ijk]
-        self._ax.plot(*coords.T,color = color,linewidth=line_width,marker=marker_style,markersize=marker_size)
+        self._ax.plot(*coords.T,**plot_kwargs)
 
         for c,text in zip(coords, labels):
-            self._ax.text(*c,text,**labels_kwargs)
+            self._ax.text(*c,text,**text_kwargs)
         return self._ax
 
-
-    def splot_cell(self, ax=None, plane=None, color='blue', fill=True, vectors=True, v3=False, vname='a', colormap='plasma', light_from=(1, 1, 1), alpha=0.4):
+    def splot_cell(self, plane = None, ax = None,  color='blue', fill=True, vectors = (0,1,2), colormap='plasma', shade = True, alpha=0.4):
         "See docs of `splot_bz`, everything is same except space is inverted."
-        return sio.splot_bz(bz_data = self._cell, ax=ax, plane=plane, color=color, fill=fill, vectors=vectors, v3=v3, vname=vname, colormap=colormap, light_from=light_from, alpha=alpha)
+        return sio.splot_bz(bz_data = self._cell, ax=ax, plane=plane, color=color, fill=fill, vectors=vectors, colormap=colormap, shade = shade, alpha=alpha)
 
-    @_sub_doc(sio.iplot_bz,'- bz_data')
-    def iplot_bz(self, fill=True, color='rgba(168,204,216,0.4)', background='rgb(255,255,255)', vname='b', special_kpoints = True, alpha=0.4, ortho3d=True, fig=None):
-        return sio.iplot_bz(bz_data = self._bz, fill=fill, color=color, background=background, vname=vname, special_kpoints=special_kpoints, alpha=alpha, ortho3d=ortho3d, fig=fig)
+    @_sub_doc(sio.iplot_bz,'bz_data :')
+    def iplot_bz(self, fill=True, color='rgba(168,204,216,0.4)', background='rgb(255,255,255)', special_kpoints = True, alpha=0.4, ortho3d=True, fig=None):
+        return sio.iplot_bz(bz_data = self._bz, fill=fill, color=color, background=background, special_kpoints=special_kpoints, alpha=alpha, ortho3d=ortho3d, fig=fig)
 
-    def iplot_cell(self, fill=True, color='rgba(168,204,216,0.4)', background='rgb(255,255,255)', vname='a', alpha=0.4, ortho3d=True, fig=None):
+    def iplot_cell(self, fill=True, color='rgba(168,204,216,0.4)', background='rgb(255,255,255)', alpha=0.4, ortho3d=True, fig=None):
         "See docs of `iplot_bz`, everything is same except space is iverted."
-        return sio.iplot_bz(bz_data = self._cell, fill=fill, color=color, background=background, vname=vname, alpha=alpha, ortho3d=ortho3d, fig=fig)
+        return sio.iplot_bz(bz_data = self._cell, fill=fill, color=color, background=background, alpha=alpha, ortho3d=ortho3d, fig=fig)
 
     @_sub_doc(sio.splot_lattice,'poscar_data :')
     def splot_lattice(self, plane = None, sizes = 50,colors=None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
-        translate = None, line_width=1, alpha = 0.7, ax = None,
+        translate = None, linewidth=1, alpha = 0.7, ax = None,
         splot_bz_kwargs = dict(
-            vname = 'a', color = ((1,0.5,0,0.4)),colormap = None, fill = False,alpha = 0.4,
-            vectors = True, v3=False, light_from = (1,1,1)
+            color = ((1,0.5,0,0.4)),colormap = None, fill = False,alpha = 0.4,
+            vectors = (0,1,2), shade = True
         )
         ):
         kwargs = {k:v for k,v in locals().items() if k != 'self'} # should be at top line
@@ -325,8 +326,8 @@ class POSCAR:
     
     @_sub_doc(sio.iplot_lattice,'poscar_data :')
     def iplot_lattice(self, sizes = 10, colors = None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
-              translate = None, line_width = 4, fig = None, ortho3d = True,
-              iplot_bz_kwargs = dict(vname = 'a',color='black', fill = False,alpha = 0.4)
+              translate = None, linewidth = 4, fig = None, ortho3d = True,
+              iplot_bz_kwargs = dict(color='black', fill = False,alpha = 0.4)
         ):
         kwargs = {k:v for k,v in locals().items() if k != 'self'} # should be at top line
         return sio.iplot_lattice(self._data, **kwargs)
@@ -802,7 +803,7 @@ class Bands(_BandsDosBase):
     
     def _handle_kwargs(self, kwargs):
         "Returns fixed kwargs and new elim relative to fermi energy for gettig data."
-        if kwargs.get('kticks',None):
+        if kwargs.get('kticks',None) is None:
             kwargs['kticks'] = kwargs['kticks'] or self.get_kticks() # Does not change even after interpolation, prefer user
         
         efermi = kwargs.pop('efermi',None) # remove from kwargs as plots don't need it

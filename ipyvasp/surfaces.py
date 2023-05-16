@@ -170,6 +170,7 @@ class SpinDataFrame(pd.DataFrame):
         out_dict['projection'] = self.projection
         out_dict['bz'] = self.poscar.bz.to_dict()
         out_dict['bz']['specials'] = self.poscar.bz.specials.to_dict()
+        out_dict['bz']['normals'] = self.poscar.bz.normals._asdict() # Named tuple to dict
 
         for band in bands:
             name = f'band_{band}'

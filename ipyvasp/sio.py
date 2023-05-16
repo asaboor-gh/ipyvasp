@@ -114,7 +114,7 @@ class Arrow3D(FancyArrowPatch):
         self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
         super().draw(renderer)
 
-    def do_3d_projection(self, renderer): # For matplotlib >= 3.5
+    def do_3d_projection(self, renderer = None): # For matplotlib >= 3.5
         xs3d, ys3d, zs3d = self._verts3d
         xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, self.axes.M)
         self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
@@ -276,10 +276,10 @@ def export_poscar(path = None,content = None):
     # Check Cartesian and Selective Dynamics
     lines = [l.strip() for l in file_lines[7:9]] # remove whitespace or tabs
     out_dict['extra_info']['cartesian'] = True if ((lines[0][0] in 'cCkK') or (lines[1][0] in 'cCkK')) else False
-    # Two lines are excluded in below command before start. so start = 7-2
-    sd = True if file_lines[7].strip().lower().startswith('s') else False
-    positions = vp.gen2numpy(file_lines[7:],(N,6 if sd else 3),(-1,[0,1,2]),exclude="^\s+[a-zA-Z]|^[a-zA-Z]") # handle selective dynamics word here
 
+    poslines = vp.gen2numpy(file_lines[7:],(N,6),(-1,[0,1,2]),exclude="^\s+[a-zA-Z]|^[a-zA-Z]", raw = True).splitlines() # handle selective dynamics word here
+    positions = np.array([line.split()[:3] for line in poslines],dtype=float) # this makes sure only first 3 columns are taken
+    
     if out_dict['extra_info']['cartesian']:
         positions = scale*to_basis(basis, positions)
         print(("Cartesian format found in POSCAR file, converted to direct format."))
@@ -912,29 +912,43 @@ def get_bz(path_pos = None,loop = True,primitive=False):
 
     Returns
     -------
-    BrZoneData(basis, normals, vertices, faces). 
+    BrZoneData(basis, vertices, faces). 
     
     - You can access special points with `.get_special_points` method or by default from `.specials` property.
-    - You can directly access coordinates of faces with `.faces_coords` property.
+    - You can access coordinates of faces with `.faces_coords` property.
+    - You can access normals vectors of faces with `.normals` property.
     """
     basis = _get_basis(path_pos).inverted # Reads
     b1, b2, b3 = basis # basis are reciprocal basis
     # Get all vectors for BZ
     if primitive:
-        b0 = np.array([0,0,0])
-        bd = b1+b2+b3 #Diagonal point
-        faces = np.array([
-                 [b0, b1, b1+b2, b2],
-                 [b0,b2,b2+b3,b3],
-                 [b0,b3,b3+b1,b1],
-                 [b1,b1+b2,b1+b3,bd],
-                 [b2,b2+b1,b2+b3,bd],
-                 [b3,b3+b1,b3+b2,bd]
-                ])
+        # verts, faces, below are in order, if you cange 1, change all
+        verts = np.array([
+            [0,0,0],
+            b1,
+            b2,
+            b3,
+            b1+b2,
+            b1+b3,
+            b2+b3,
+            b1+b2+b3
+        ])
+        idx_faces = ( # Face are kept anti-clockwise sorted.
+            (0,1,5,3,0),
+            (0,2,4,1,0),
+            (0,3,6,2,0),
+            (2,6,7,4,2),
+            (1,4,7,5,1),
+            (3,5,7,6,3)
+        )
+        if loop is False:
+            idx_faces = tuple(face[:-1] for face in idx_faces)
+        
     else:
         vectors = []
         for i,j,k in product([0,1,-1],[0,1,-1],[0,1,-1]):
             vectors.append(i*b1+j*b2+k*b3)
+            
         vectors = np.array(vectors)
         # Generate voronoi diagram
         vor = Voronoi(vectors)
@@ -944,59 +958,58 @@ def get_bz(path_pos = None,loop = True,primitive=False):
             if r[0] == 0 or r[1] == 0:
                 verts_in_face = np.array([vor.vertices[i] for i in vrd[r]])
                 faces.append(verts_in_face)
-        #faces = np.array(faces) # should be a list instead as not regular shape.
-
-    verts = [v for vs in faces for v in vs]
-    verts = np.unique(verts,axis=0)
-
-    face_vectors = []
-    for f in faces:
-        face_vectors.append(np.mean(f,axis=0)) # In primitive point at face center
-    
-    if primitive == False:
-        face_vectors = [2*f for f in face_vectors] # In regular, cross plane as well.
-
-    # Let's now make faces as indices over vertices because that what most programs accept
-    idx_faces = []
-    for face in faces:
-        vert_inds = [i for i,v in enumerate(verts) if tuple(v) in [tuple(f) for f in face]] # having tuple comparsion is important here.
-        idx_faces.append(vert_inds) # other zero is to pick single index out of same three
         
-    # order faces
-    idx_faces = [tuple(face[i] for i in order(verts[face], loop = loop)) for face in idx_faces]
+        verts = [v for vs in faces for v in vs]
+        verts = np.unique(verts,axis=0)
+        
+        # make faces as indices over vertices because that what most programs accept
+        idx_faces = []
+        for face in faces:
+            vert_inds = [i for i,v in enumerate(verts) if tuple(v) in [tuple(f) for f in face]] # having tuple comparsion is important here.
+            idx_faces.append(vert_inds) # other zero is to pick single index out of same three
+
+        # order faces
+        idx_faces = [tuple(face[i] for i in order(verts[face], loop = loop)) for face in idx_faces]
     
-    out_dict = {'basis' : basis,'normals' : np.array(face_vectors), 'vertices' : verts,'faces' : idx_faces}
+    out_dict = {'basis' : basis, 'vertices' : verts,'faces' : idx_faces}
     return serializer.BrZoneData(out_dict)
 
 
 # Cell
-def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors=True,v3=False,vname='b',colormap='plasma',light_from=(1,1,1),alpha=0.4):
+def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = (0,1,2),colormap='plasma',shade = True,alpha=0.4):
     """
-    - Plots matplotlib's static figure.
-    Args:
-        - bz_data    : Output of `get_bz`.
-        - plane      : Default is None and plots 3D surface. Can take 'xy','yz','zx' to plot in 2D.
-        - fill       : True by defult, determines whether to fill surface of BZ or not.
-        - color      : color to fill surface and stroke color.
-        - vectors    : Plots basis vectors, default is True.
-        - v3         : Plots 3rd vector as well. Only works in 2D and when `vectors=True`.
-        - ax         : Auto generated by default, 2D/3D axes, auto converts in 3D on demand as well.
-        - vname      : Default is `b` for reciprocal space, can set `a` for plotting cell as after `get_bz(get_bz().basis)` you get real space lattice back if `primitive=True` both times.
-        - colormap  : If None, single color is applied, only works in 3D and `fill=True`. Colormap is applied along z.
-        - light_from: Point from where light is thrown on BZ planes, default is (1,1,1). Only works on plane in 3D.
-        - alpha    : Opacity of filling in range [0,1]. Increase for clear viewpoint.
-    - **Returns**
-        - ax   : Matplotlib's 2D axes if `plane=None`.
-        - ax3d : Matplotlib's 2D axes if `plane` is given.
-
-    > Tip: `splot_bz(rec_basis,primitive=True)` will plot cell in real space.
+    Plots matplotlib's static figure of Brillouin zone.
+    
+    Parameters
+    ----------
+    bz_data : Output of `get_bz`.
+    plane : Default is None and plots 3D surface. Can take 'xy','yz','zx' to plot in 2D.
+    fill : True by defult, determines whether to fill surface of BZ or not.
+    color : color to fill surface and stroke color.
+    vectors : Tuple of indices of basis vectors to plot. Default is (0,1,2). All three are plotted in 3D (you can turn of by None or empty tuple), whhile you can specify any two/three in 2D.
+    ax : Auto generated by default, 2D/3D axes, auto converts in 3D on demand as well.
+    colormap : If None, single color is applied, only works in 3D and `fill=True`. Colormap is applied along z.
+    shade : Shade polygons or not. Only works in 3D and `fill=True`.
+    alpha : Opacity of filling in range [0,1]. Increase for clear viewpoint.
+    
+    Returns
+    -------
+    ax : Matplotlib's 2D axes if `plane=None` otherswise 3D axes.
     """
+    vname = 'a' if bz_data.__class__.__name__ == 'CellData' else 'b'
     label = r"$k_{}$" if vname=='b' else "{}"
     if not ax: #For both 3D and 2D, initialize 2D axis.
         ax = sp.get_axes(figsize=(3.4,3.4)) #For better display
 
-    _label = r'\vec{}'.format(vname) # For both
+    _label = r'\vec{' + vname + '}' # For both
     valid_planes = 'xyzxzyx' # cylic
+    
+    if vectors and not isinstance(vectors,(tuple,list)):
+        raise ValueError(f"`vectors` expects tuple or list, got {vectors!r}")
+    
+    for v in vectors:
+        if v not in [0,1,2]:
+            raise ValueError(f"`vectors` expects values in [0,1,2], got {vectors!r}")
     
     if plane and plane not in valid_planes:
         raise ValueError(f"`plane` expects value in 'xyzxzyx' or None, got {plane!r}")
@@ -1007,20 +1020,15 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors=Tr
         _ = [ax.plot(f[:,i],f[:,j],color=(color),lw=0.7) for f in bz_data.faces_coords]
 
         if vectors:
-            if v3:
-                s_basis = bz_data.basis
-                ijk = [0,1,2]
-            else:
-                s_basis = bz_data.basis[[i,j]]# Only two.
-                ijk = [i,j]
+            s_basis = bz_data.basis[(vectors,)]
 
-            for k,y in zip(ijk,s_basis):
+            for k,y in zip(vectors,s_basis):
                 l = "\n" + r" ${}_{}$".format(_label,k+1)
                 ax.text(0.8*y[i],0.8*y[j], l, va='center',ha='left')
                 ax.scatter([y[i]],[y[j]],color='w',s=0.0005) # Must be to scale below arrow.
 
-            s_zero = [0 for s_b in s_basis] # either 3 or 2.
-            ax.quiver(s_zero,s_zero,*s_basis.T[[i,j]],lw=0.9,color='k',angles='xy', scale_units='xy', scale=1)
+            s_zero = [0 for _ in s_basis] # either 3 or 2.
+            ax.quiver(s_zero,s_zero,*s_basis.T[[i,j]],lw=0.9,color='navy',angles='xy', scale_units='xy', scale=1)
 
         ax.set_xlabel(label.format(valid_planes[i]))
         ax.set_ylabel(label.format(valid_planes[j]))
@@ -1043,14 +1051,9 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors=Tr
                 colors = plt.cm.get_cmap(colormap)(levels)
             else:
                 colors = np.array([[*mplc.to_rgb(color)] for f in bz_data.faces_coords]) # Single color.
-            if light_from:
-                intensity = bz_data.normals.dot(light_from) #Plane facing light
-                intensity = (intensity - np.min(intensity) + 0.2)/np.ptp(intensity)
-                intensity = intensity.clip(0,1)
-                colors = np.array([i*c[:3] for i, c in zip(intensity,colors)])
-
-            poly = Poly3DCollection(bz_data.faces_coords,edgecolors=[color,],facecolors=colors, alpha=alpha)
-            ax3d.add_collection3d(poly)
+            
+            poly = Poly3DCollection(bz_data.faces_coords,edgecolors=[color,],facecolors=colors, alpha=alpha, shade = shade)
+            ax3d.add_collection(poly)
             ax3d.autoscale_view()
         else:
             _ = [ax3d.plot3D(f[:,0],f[:,1],f[:,2],color=(color),lw=0.7) for f in bz_data.faces_coords]
@@ -1077,27 +1080,29 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors=Tr
         return ax3d
 
 # Cell
-def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)',background = 'rgb(255,255,255)',vname = 'b', special_kpoints = True, alpha=0.4,ortho3d=True,fig=None):
+def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)',background = 'rgb(255,255,255)', special_kpoints = True, alpha=0.4,ortho3d=True,fig=None):
     """
-    - Plots interactive figure showing axes,BZ surface, special points and basis, each of which could be hidden or shown.
-    Args:
-        - bz_data    : Output of `get_bz`.
-        - fill       : True by defult, determines whether to fill surface of BZ or not.
-        - color      : color to fill surface 'rgba(168,204,216,0.4)` by default.
-        - background : Plot background color, default is 'rgb(255,255,255)'.
-        - vname      : Default is `b` for reciprocal space, can set `a` for plotting cell as after `get_bz(get_bz().basis)` you get real space lattice back if `primitive=True` both times.
-        - special_kpoints : True by default, determines whether to plot special points or not.
-        - alpha      : Opacity of BZ planes.
-        - ortho3d    : Default is True, decides whether x,y,z are orthogonal or perspective.
-        - fig        : (Optional) Plotly's `go.Figure`. If you want to plot on another plotly's figure, provide that.
-    - **Returns**
-        - fig   : plotly.graph_object's Figure instance.
-
-    > Tip: `iplot_bz(rec_basis,primitive=True)` will plot cell in real space.
+    Plots interactive figure showing axes,BZ surface, special points and basis, each of which could be hidden or shown.
+    
+    Parameters
+    ----------
+    bz_data : Output of `get_bz`.
+    fill : True by defult, determines whether to fill surface of BZ or not.
+    color : color to fill surface 'rgba(168,204,216,0.4)` by default.
+    background : Plot background color, default is 'rgb(255,255,255)'.
+    special_kpoints : True by default, determines whether to plot special points or not.
+    alpha : Opacity of BZ planes.
+    ortho3d : Default is True, decides whether x,y,z are orthogonal or perspective.
+    fig : (Optional) Plotly's `go.Figure`. If you want to plot on another plotly's figure, provide that.
+    
+    Returns
+    -------
+    fig : plotly.graph_object's Figure instance.
     """
     if not fig:
         fig = go.Figure()
     # Name fixing
+    vname = 'a' if bz_data.__class__.__name__ == 'CellData' else 'b'
     axes_text = ["<b>k</b><sub>x</sub>","","<b>k</b><sub>y</sub>","","<b>k</b><sub>z</sub>"]
     s_name = 'BZ'
     a_name = 'Axes'
@@ -1124,7 +1129,6 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)',background = 'r
             u=[0.2*b[0]],v=[0.2*b[1]],w=[0.2*b  [2]],showscale=False,colorscale='Reds',
             legendgroup="{}<sub>{}</sub>".format(vname,i+1),name="<b>{}</b><sub>{}</sub>".format(vname,i+1)))
     
-    other_traces = []
     # Faces
     legend = True
     for pts in bz_data.faces_coords:
@@ -1332,8 +1336,8 @@ def _get_bond_length(poscar_data,given=None,tol=1e-3):
 
 # Cell
 def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
-        translate = None, line_width = 4, fig = None, ortho3d = True,
-        iplot_bz_kwargs = dict(vname = 'a',color='black', fill = False,alpha = 0.4)
+        translate = None, linewidth = 4, fig = None, ortho3d = True,
+        iplot_bz_kwargs = dict(color='black', fill = False,alpha = 0.4)
     ):
     """
     Plotly's interactive plot of lattice.
@@ -1389,7 +1393,7 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
                 z = cp[:,2].T,
                 mode='lines',line_color = c,
                 legendgroup='Bonds',showlegend=showlegend,
-                name='Bonds',line_width=line_width))
+                name='Bonds',line_width=linewidth))
 
     for (k,v),c,s in zip(uelems.items(),colors,sizes):
         fig.add_trace(go.Scatter3d(
@@ -1407,11 +1411,11 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
     return fig
 
 # Cell
-def splot_lattice(poscar_data, plane = None, sizes=50,colors=None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
-    translate = None, line_width=1, alpha = 0.7, ax = None,
+def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
+    translate = None, linewidth=1, alpha = 0.7, ax = None,
     splot_bz_kwargs = dict(
-        vname = 'a', color = ((1,0.5,0,0.4)),colormap = None, fill = False,alpha = 0.4,
-        vectors = True, v3=False, light_from = (1,1,1)
+        color = ((1,0.5,0,0.4)),colormap = None, fill = False,alpha = 0.4,
+        vectors = (0,1,2), shade = True
     )):
     """
     Matplotlib Static plot of lattice.
@@ -1480,9 +1484,9 @@ def splot_lattice(poscar_data, plane = None, sizes=50,colors=None, bond_length =
         colors_n = np.array(colors_n)
 
         if not plane:
-            _ = [ax.plot(*c.T,c=_c,lw=line_width, alpha = alpha) for c,_c in zip(coords_n,colors_n)]
+            _ = [ax.plot(*c.T,c=_c,lw=linewidth, alpha = alpha) for c,_c in zip(coords_n,colors_n)]
         elif plane in 'xyzxzyx':
-            _ = [ax.plot(c[:,ix],c[:,iy],c=_c,lw=line_width, alpha = alpha) for c,_c in zip(coords_n,colors_n)]
+            _ = [ax.plot(c[:,ix],c[:,iy],c=_c,lw=linewidth, alpha = alpha) for c,_c in zip(coords_n,colors_n)]
 
     if not plane:
         ax.scatter(coords[:,0],coords[:,1],coords[:,2],c = colors ,s =sizes,depthshade=False,alpha=alpha)

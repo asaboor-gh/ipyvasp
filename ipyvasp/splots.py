@@ -176,7 +176,7 @@ def append_axes(ax,position='right',size=0.2,pad=0.1,sharex=False,sharey=False,*
     kwargs are passed to `mpl_toolkits.axes_grid1.make_axes_locatable.append_axes`.
     Returns appended axes.
     """
-    extra_args = dict(add_to_figure=True)
+    extra_args = {}
     if sharex:
         extra_args['sharex'] = ax
     if sharey:

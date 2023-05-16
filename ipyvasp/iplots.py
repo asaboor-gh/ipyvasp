@@ -275,7 +275,7 @@ def iplot_dos_lines(
                 fill=None
             if(fill_area==True):
                 fill='tozeroy'
-            args_dic=dict(mode='lines',line_width=linewidth,fill=fill)
+            args_dic=dict(mode='lines',linewidth=linewidth,fill=fill)
             fig.update_xaxes(range=ylim,title='Energy (eV)')
             if(len(tdos)==2):   # Spin polarized.
                 fig.add_scatter(x=en,y=tdos[0],line_color='rgb({},{},{})'.format(*[int(255*i) for i in t_color]),\
@@ -293,7 +293,7 @@ def iplot_dos_lines(
                 fill=None
             if(fill_area==True):
                 fill='tozerox'
-            args_dic=dict(mode='lines',line_width=linewidth,fill=fill)
+            args_dic=dict(mode='lines',linewidth=linewidth,fill=fill)
             fig.update_yaxes(range=ylim,title='Energy (eV)')
             if(len(tdos)==2):   # Spin polarized.
                 fig.add_scatter(y=en,x=tdos[0],line_color='rgb({},{},{})'.format(*[int(255*i) for i in t_color]),\

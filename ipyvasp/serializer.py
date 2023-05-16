@@ -269,7 +269,7 @@ class SpecialPoints(Dict2Data):
         super().__init__(d)
         
 class BrZoneData(Dict2Data):
-    _req_keys = ('normals','faces','vertices')
+    _req_keys = ('basis','faces','vertices')
     def __init__(self,d):
         super().__init__(d)
         
@@ -309,18 +309,38 @@ class BrZoneData(Dict2Data):
     def faces_coords(self):
         "Returns the coordinates of the faces of the brillouin zone in list of N faces of shape (M,3) where M is the number of vertices of the face."
         return tuple(self.vertices[(face,)] for face in self.faces) # (face,) is to pick items from first dimension, face would try many dimensions
+    
+    @property
+    def normals(self):
+        "Get normal vectors to the faces of BZ. Returns a tuple of 6 arrays as (X,Y,Z,U,V,W) where (X,Y,Z) is the center of the faces and (U,V,W) is the normal direction."
+        faces = self.faces_coords # get once
+        centers = np.array([np.mean(np.unique(face,axis=0),axis=0) for face in faces]) # unique is must to avoid a duplicate point at end
+        other_points = []
+        for center, face in zip(centers,faces):
+            a = face[0] - center
+            b = face[1] - center
+            perp = np.cross(a,b) # a and b are anti-clockwise
+            perp = perp/np.linalg.norm(perp) # Normalize
+            other_points.append(perp) 
+        
+        other_points = np.array(other_points)
+        return namedtuple('Normals',['X','Y','Z','U','V','W'])(*centers.T, *other_points.T)  # Keep this as somewhere it will be used _asdict()
 
     
 class CellData(Dict2Data):
-    _req_keys = ('normals','faces','vertices')
+    _req_keys = ('basis','faces','vertices')
     def __init__(self,d):
         super().__init__(d)
     
     @property
     def faces_coords(self):
         "Returns the coordinates of the faces of the cell in list of N faces of shape (M,3) where M is the number of vertices of the face."
-        return tuple(self.vertices[(face,)] for face in self.faces) # (face,) is to pick items from first dimension, face would try many dimensions
-        
+        return BrZoneData.faces_coords.fget(self)
+    
+    @property
+    def normals(self):
+        "Get normal vectors to the faces of Cell. Returns a tuple of 6 arrays as (X,Y,Z,U,V,W) where (X,Y,Z) is the center of the faces and (U,V,W) is the normal direction."
+        return BrZoneData.normals.fget(self)
         
 class GridData(Dict2Data):
     _req_keys = ('path','poscar','SYSTEM')
