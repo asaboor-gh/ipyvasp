@@ -31,12 +31,16 @@ class DataSource:
         if not os.path.isfile(path):
             raise FileNotFoundError("File: '{}'' does not exist!".format(path))
         self._path = os.path.abspath(path) # Keep absolute path in case directory changes
+        self._summary = self.get_summary() # summary data is read only once
     
     def __repr__(self):
         return f"{self.__class__.__name__}({self.path!r})"
     
     @property
     def path(self): return self._path
+    
+    @property
+    def summary(self): return self._summary
     
     @property
     def bands(self):
@@ -61,13 +65,17 @@ class DataSource:
     
     def get_dos(self, *args, **kwargs): raise NotImplementedError("`get_dos` should be implemented in a subclass. See Vasprun.get_dos as example.")
     
-    def get_spins(self, *args, **kwargs): raise NotImplementedError("`get_spins` should be implemented in a subclass. See Vasprun.get_spins as example.")
-    
     def get_forces(self): raise NotImplementedError("`get_forces` should be implemented in a subclass. See Vasprun.get_forces as example.")
     
     def get_scsteps(self): raise NotImplementedError("`get_scsteps` should be implemented in a subclass. See Vasprun.get_scsteps as example.")
     
 
+class Vaspout(DataSource):
+    "Read data from vaspout.h5 file on demand."
+    def __init__(self, path):
+        raise NotImplementedError("Vaspout is not implemented yet.")
+    
+    
 class Vasprun(DataSource):
     "Reads vasprun.xml file lazily. It reads only the required data from the file when a plot or data access is requested."
     def __init__(self, path = './vasprun.xml', skipk = None):
@@ -143,7 +151,7 @@ class Vasprun(DataSource):
     def get_structure(self):
         "Returns a structure object including types, basis, rec_basis and positions."
         arrays = np.array([[float(i) for i in v.split()[1:4]] for v in self.read('<structure.*finalpos','select|</structure') if '<v>' in v]) # Stop at selctive dynamics if exists
-        info = self.get_summary()
+        info = self.summary
         return serializer.PoscarData({
             'SYSTEM':info.SYSTEM,
             'basis': arrays[:3],
@@ -165,11 +173,10 @@ class Vasprun(DataSource):
         return serializer.Dict2Data({'kpoints':kpoints,'coords':coords,'kpath': kpath, 'weights':weights,'rec_basis':rec_basis})
      
      
-    def get_dos(self, spin = 0, elim = None, ezero = None, atoms = None, orbs = None, gridlim = None):
+    def get_dos(self, spin = 0, elim = None, ezero = None, atoms = None, orbs = None):
         # Should be as energy(NE,), total(NE,), integrated(NE,), partial(NE, NATOMS(selected), NORBS) and atoms reference should be returned
         # include vbm property as in evals, just from integrated dos and NELECT
         # check size and if nothing, throw error
-        # should have a gridlim like blim to override the elim
         pass 
         
         if atoms and orbs:
@@ -188,34 +195,34 @@ class Vasprun(DataSource):
         gen = (r.strip(' \n/<>r') for r in self.read(f'spin{spin+1}',f'spin{spin+2}|</projected') if '<r>' in r) # stripping is must here to ensure that we get only numbers
         return gen2numpy(gen, shape,slices)
 
-    def get_evals(self, spin = 0, elim = None, ezero = None, atoms = None, orbs = None, blim = None): 
+    def get_evals(self, elim = None, ezero = None, atoms = None, orbs = None, spins = None, bands = None): 
         """
         Returns eigenvalues and occupations of the calculation. If atoms and orbs are specified, then orbitals are included too.
         
         Parameters
         ----------
-        spin : int, index of spin set to be pick. Default is 0. Can be 0 or 1.
         elim : tuple, energy range to be returned. Default is None, which returns all eigenvalues. `elim` is applied around `ezero` if specified, otherwise around VBM.
         ezero : float, energy reference to be used. Default is None, which uses VBM as reference. ezero is ignored if elim is not specified. In output data, ezero would be VBM or ezero itself if specified.
-        atoms : list, indices of atoms to be returned. Default is None, which does not return ionic projections.
-        orbs : list, indices of orbitals to be returned. Default is None, which does not return orbitals.
-        blim : tuple of length 2, overrides elim and returns eigenvalues in the band range. Useful to load same bands range for spin up and down channels. Plotting classes automatically handle this for spin up and down channels.
+        atoms : list/tuple/range, indices of atoms to be returned. Default is None, which does not return ionic projections.
+        orbs : list/tuple/range, indices of orbitals to be returned. Default is None, which does not return orbitals.
+        spins : list/tuple/range of spin sets indices to pick. If None, spin set will be picked 0 or [0,1] if spin-polarized. Default is None.
+        bands : list/tuple/range, indices of bands to pick. overrides elim. Useful to load same bands range for spin up and down channels. Plotting classes automatically handle this for spin up and down channels.
         
         Returns
         -------
         Dict2Data object which includes `evals` and `occs` as attributes, and `pros` if atoms and orbs specified.
         """
-        info = self.get_summary()
-        bands = range(info.NBANDS)
+        info = self.summary
+        bands_range = range(info.NBANDS)
         
-        ev = (r.split()[1:3] for r in self.read(f'<set.*spin {spin+1}',f'<set.*spin {spin+2}|</eigenvalues>') if '<r>' in r)
+        ev = (r.split()[1:3] for r in self.read(f'<eigenvalues>',f'</eigenvalues>') if '<r>' in r)
         ev = (e for es in ev for e in es) # flatten
         ev = np.fromiter(ev,float)
         if ev.size: # if not empty
-            ev = ev.reshape((-1,info.NBANDS,2))[self._skipk:]
+            ev = ev.reshape((-1,info.NKPTS, info.NBANDS,2))[:,self._skipk:,:, :] # shape is (NSPIN, NKPTS, NBANDS, 2)
         else:
             raise ValueError('No eigenvalues found for spin {}'.format(spin))
-        evals, occs = ev[:,:,0], ev[:,:,1]
+        evals, occs = ev[:,:,:,0], ev[:,:,:,1]
         vbm = float(evals[occs > 0.5].max()) # more than half filled condition
         cbm = float(evals[occs < 0.5].min()) # less than half filled condition
         evc = (vbm,cbm) # Easy to plot this way like [0, np.ptp(evc)] can work for defult ezero
@@ -225,14 +232,15 @@ class Vasprun(DataSource):
         kcbm = [k for k in np.where(evals == cbm)[0]]
         kvc = tuple(sorted(product(kvbm,kcbm),key = lambda K: np.ptp(K))) # bring closer points first by sorting
         
-        to_from = (0, -1) # default values
-        if blim:
-            if (not isinstance(blim, (list, tuple))) and (len(blim) != 2):
-                raise TypeError('blim should be a tuple of length 2')
-            for b in blim:
+        if bands:
+            if (not isinstance(bands, (list, tuple,range))):
+                raise TypeError('bands should be a list, tuple or range got {}'.format(type(bands)))
+            for b in bands:
                 if (not isinstance(b, (int, np.integer))) and (b < 0):
-                    raise TypeError('blim should be a tuple of length 2 of positive integers')
-            to_from = blim[0], blim[1] + 1 # +1 to include the last index which get skipped in slicing
+                    raise TypeError('bands should be a tuple/list/range of of positive integers')
+            evals = evals[:,:, (bands,)]
+            occs = occs[:,:, (bands,)]
+            bands_range = bands
         elif elim:
             if (not isinstance(elim, (list, tuple))) and (len(elim) != 2):
                 raise TypeError('elim should be a tuple of length 2')
@@ -244,31 +252,35 @@ class Vasprun(DataSource):
             
             idx_max = np.max(np.where(evals[:,:] - zero <= np.max(elim))[1]) + 1
             idx_min = np.min(np.where(evals[:,:] - zero >= np.min(elim))[1])
-            to_from = (idx_min, idx_max)
+            evals = evals[:,:, idx_min:idx_max]
+            occs = occs[:,:, idx_min:idx_max]
+            bands_range = range(idx_min, idx_max)
         
-        if to_from != (0, -1):
-            lo_ind, up_ind = to_from
-            evals = evals[:, lo_ind:up_ind]
-            occs = occs[:, lo_ind:up_ind]
-            bands = range(lo_ind, up_ind)
-        
-        out = {'spin': spin, 'evals':evals,'occs':occs, 'ezero': zero, 'evc':evc, 'kvc':kvc, 'bands':bands}
+        which_spins = tuple(range(evals.shape[0])) # which spin set to pick, defult is what is available
+        out = {'evals':evals,'occs':occs, 'ezero': zero, 'evc':evc, 'kvc':kvc, 'bands':bands_range,'spins': which_spins}
         if atoms and orbs:
-            out['pros'] = self._get_spin_set(spin, bands, atoms, orbs, info)
+            if spins is not None:
+                if not isinstance(spins, (list, tuple,range)):
+                    raise TypeError('spins should be a list, tuple or range got {}'.format(type(spins)))
+                for s in spins:
+                    if (not isinstance(s, (int, np.integer))) and (s < 0):
+                        raise TypeError('spins should be a tuple/list/range of of positive integers')
+                which_spins = spins
+                
+            pros = []
+            for ws in which_spins:
+                pros.append(self._get_spin_set(ws, bands_range, atoms, orbs, info))
+            
+            out['pros'] = np.array(pros) # (spins, kpoints, bands, atoms, orbitals)
             out['atoms'] = atoms
             out['orbs'] = orbs
+            out['spins'] = which_spins
+            
         elif (atoms, orbs) != (None, None):
             raise ValueError('atoms and orbs should be passed together')
-        out['shape'] = '(kpoints, bands, [atoms, orbitals])'
+        out['shape'] = '(spins, kpoints, bands, [atoms, orbitals])'
         return serializer.Dict2Data(out)
 
-    def get_spins(self, bands = -1, atoms = -1, orbs = -1): 
-        # Just have a loop over _get_spin_set and collect all spins, evals must be collected for both spin up and down
-        # shape should be (ISPIN, NKPOINTS, NBANDS, [NATOMS(selected), NORBS]) and atoms and bands reference should be returned
-        # include vbm property like in evals
-        # Tell user they can plot any spin using this data in splots
-        pass
-    
     def get_forces(self):
         "Reads force on each ion from vasprun.xml"
         node = ET.fromstringlist(self.read('<varray.*forces','</varray>'))

@@ -16,6 +16,7 @@ __version__ = "0.1.0"
 __all__ = []
 
 from .api import __all__ as api_all
+from .parser import Vaspout, Vasprun, minify_vasprun
 
 __all__.extend(api_all)
 

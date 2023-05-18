@@ -337,8 +337,7 @@ class POSCAR:
     @_sub_doc(sio.iplot_lattice,'poscar_data :')
     def iplot_lattice(self, sizes = 10, colors = None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
               translate = None, linewidth = 4, fig = None, ortho3d = True, mask_sites = None,
-              cell_kwargs = dict(color='black', fill = False,alpha = 0.4),
-              label_kwargs = None
+              cell_kwargs = dict(color='black', fill = False,alpha = 0.4)
         ):
         kwargs = {k:v for k,v in locals().items() if k != 'self'} # should be at top line
         return sio.iplot_lattice(self._data, **kwargs)
@@ -633,6 +632,7 @@ def _format_input(atoms_orbs_dict, sys_info):
     """
     Format input atoms, orbs and labels according to select projections in atoms_orbs_dict.
     For example: {'Ga-s':(0,[1]),'Ga-p':(0,[1,2,3]),'Ga-d':(0,[4,5,6,7,8])} #for Ga in GaAs, to pick Ga-1, use [0] instead of 0 at first place
+    In case of 3 items in tuple, the first item is spin index, the second is atoms, the third is orbs.
     """
     if not isinstance(atoms_orbs_dict,dict):
         raise TypeError("`atoms_orbs_dict` must be a dictionary, with keys as labels and values from picked projection indices.")
@@ -646,18 +646,26 @@ def _format_input(atoms_orbs_dict, sys_info):
     norbs = len(sys_info.orbs)
     
     # Set default values for different situations
-    atoms, orbs, labels = [], [], []
+    spins, atoms, orbs, labels = [], [], [], []
 
     for i, (k, v) in enumerate(atoms_orbs_dict.items()):
-        if len(v) != 2:
-            raise ValueError(f"{k!r}: {v} expects 2 items (atoms, orbs), got {len(v)}.")
+        if len(v) not in [2,3]:
+            raise ValueError(f"{k!r}: {v} expects 2 items (atoms, orbs), or 3 items (spin, atoms, orbs), got {len(v)}.")
         
         if not isinstance(k,str):
             raise TypeError(f"{k!r} is not a string. Use string as key for labels.")
         
         labels.append(k)
         
-        A, B = v # A is atom, B is orbs only two cases: (1) int (2) list of int
+        if len(v) == 2:
+            A, B = v # A is atom, B is orbs only two cases: (1) int (2) list of int
+        else:
+            S, A, B = v # 
+            
+            if not isinstance(S,(int,np.integer)):
+                raise TypeError(f"First itme in a squence of size 3 should be integer to pick spin.")
+            
+            spins.append(S) # Only add spins if given
         
         if not isinstance(A,(int,np.integer,list,tuple, range)):
             raise TypeError(f"{A!r} is not an integer or list/tuple/range of integers.")
@@ -695,15 +703,19 @@ def _format_input(atoms_orbs_dict, sys_info):
             
             atoms.append(A)
     
+    if spins and len(atoms) != len(spins):
+        raise ValueError("You should provide spin for each projection or none at all. If not provided, spin is picked from corresponding eigenvalues (up/down) for all projections.")
+    
     uatoms = np.unique([a for aa in atoms for a in aa]) # don't use set, need asceding order
     uorbs = np.unique([o for oo in orbs for o in oo])
     uorbs = tuple(uorbs) if len(uorbs) < norbs else -1 # -1 means all orbitals
     uatoms = tuple(uatoms) if len(uatoms) == (max_ind + 1) else -1 # -1 means all atoms
+    uspins = tuple(spins)
 
-    return atoms,orbs,labels, uatoms, uorbs
+    return (spins, uspins), (atoms,uatoms), (orbs,uorbs), labels
 
 _spin_doc = 'spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations.'
-_proj_doc = "atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs and return array of same shape as evals."
+_proj_doc = "atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs of shape (spin,kpoints, bands) and return array of shape (kpoints, bands)."
 
 class _BandsDosBase:
     def __init__(self, source):
@@ -731,6 +743,7 @@ class Bands(_BandsDosBase):
     """
     def __init__(self, source):
         super().__init__(source)
+        self._data_args = () # will be updated on demand
         
     def get_kticks(self, rel_path = 'KPOINTS'):
         """
@@ -744,25 +757,26 @@ class Bands(_BandsDosBase):
             return sio.read_kticks(file)
         return []
                 
-    def get_data(self, spin = 0, elim = None, ezero = None, atoms_orbs_dict: dict = None):
+    def get_data(self, elim = None, ezero = None, atoms_orbs_dict: dict = None):
         """
-        Selects bands and projections to use in plotting functions.
+        Selects bands and projections to use in plotting functions. If input arguments are same as previous call, returns cached data.
         
         Parameters
         ----------
-        spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations.
         elim : list, tuple of two floats to pick bands in this energy range. If None, picks all bands.
         ezero : float, None by default. If not None, elim is applied around this energy.
-        atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs and return array of same shape as evals.
+        atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs of shape (spin,kpoints, bands) and return array of shape (kpoints, bands).
         
         Returns
         -------
         dict : Selected bands and projections dictionary to be used in bandstructure plotting functions under this class as `data` argument.
         """
-        if spin not in [0,1]:
-            raise ValueError('spin must be 0 or 1')
+        if self.data and self._data_args == (elim, ezero, atoms_orbs_dict):
+            print('Using cached data.')
+            return self.data
         
-        atoms, orbs, labels, uatoms, uorbs, blim = None, None, None, None, None, None
+        self._data_args = (elim, ezero, atoms_orbs_dict)
+        spins, atoms, orbs, labels, uspins, uatoms, uorbs, bands = None, None, None, None, None, None, None, None
         
         funcs = []
         if isinstance(atoms_orbs_dict, dict):
@@ -772,17 +786,16 @@ class Bands(_BandsDosBase):
             elif all(_funcs):
                 funcs = [value for _, value in atoms_orbs_dict.items()]
             else:
-                atoms, orbs, labels, uatoms, uorbs = _format_input(atoms_orbs_dict, self.source.get_summary())
+                (spins, uspins), (atoms,uatoms), (orbs,uorbs), labels = _format_input(atoms_orbs_dict, self.source.get_summary())
         
         elif atoms_orbs_dict is not None:
             raise TypeError('`atoms_orbs_dict` must be a dictionary or None.')
-        
-        if self._data and (1 - self._data.spin) == spin: # if they have used other channel before
-            print('Using same bands for spin up and spin down. Run again to change and bands range and then apply same on other spin channel.')
-            blim = min(self._data.bands), max(self._data.bands)
             
         kpts = self._source.get_kpoints()
-        eigens = self._source.get_evals(spin = spin, elim = elim, ezero = ezero, atoms = uatoms, orbs = uorbs, blim = blim) # others be there
+        eigens = self._source.get_evals(elim = elim, ezero = ezero, atoms = uatoms, orbs = uorbs, spins = uspins or None, bands = bands) # picks available spins if uspins is None
+        
+        if not spins:
+            spins = eigens.spins # because they will be loaded anyway
         
         output = {'kpath': kpts.kpath, 'kpoints': kpts.kpoints, 'coords': kpts.coords, **eigens.to_dict()}
         kvc = np.unique([tuple(round(kpts.kpath[i],4) for i in kp) for kp in eigens.kvc],axis=0) # 4 digits are enough to handle 10,000 kpoints
@@ -790,36 +803,46 @@ class Bands(_BandsDosBase):
         
         if hasattr(eigens, 'pros'):
             arrays = []
-            for atom,orb in zip(atoms,orbs):
+            for sp,atom,orb in zip(spins, atoms, orbs):
                 if uatoms != -1:
                     atom = [i for i, a in enumerate(eigens.atoms) if a in atom] # indices for partial data loaded
                 if uorbs != -1:
                     orb = [i for i, o in enumerate(eigens.orbs) if o in orb]
-                _pros  = np.take(eigens.pros,atom,axis=2).sum(axis=2) # Sum over atoms leaves 3D array
-                _pros = np.take(_pros,orb,axis=2).sum(axis=2) # Sum over orbitals leaves 2D array
+                sp = list(eigens.spins).index(sp) # index for spin is single
+                _pros  = np.take(eigens.pros[sp],atom,axis = 2).sum(axis = 2) # take dimension of spin and then sum over atoms leaves 3D array
+                _pros = np.take(_pros,orb,axis = 2).sum(axis = 2) # Sum over orbitals leaves 2D array
                 arrays.append(_pros)
 
             output['pros'] = np.array(arrays)
             output['labels'] = labels
             output.pop('atoms', None) # No more needed
             output.pop('orbs', None)
+            output.pop('spins', None) # No more needed
         
         elif funcs:
             output['labels'] = list(atoms_orbs_dict.keys())
-            output['pros'] = np.array([f(eigens.evals, eigens.occs) for f in funcs])
-            
-            if output['pros'].shape[1:] != eigens.evals.shape:
-                raise ValueError('Projections returned by functions must be of same shape as input evals.')
-            
+            pros = []
+            for func in funcs:
+                out = func(eigens.evals, eigens.occs)
+                if np.shape(out) != eigens.evals.shape[1:]: # evals shape is (spin, kpoints, bands), but we need single spin
+                    raise ValueError(f'Projections returned by {func} must be of same shape as last two dimensions of input evals.')
+                pros.append(out)
+                
+            output['pros'] = np.array(pros)
             output['info'] = '"Custom projections by user"'
         
-        output['shape'] = '([selections], kpoints, bands)'
+        output['shape'] = '(spin[evals]/selection[pros], kpoints, bands)'
         
         self._data = serializer.Dict2Data(output) # Assign for later use
         return self._data
     
     def _handle_kwargs(self, kwargs):
         "Returns fixed kwargs and new elim relative to fermi energy for gettig data."
+        if kwargs.get('spin',None) not in [0,1]:
+            raise ValueError('spin must be 0 or 1')
+        
+        kwargs.pop('spin',None) # remove from kwargs as plots don't need it
+        
         if kwargs.get('kticks',None) is None:
             kwargs['kticks'] = kwargs['kticks'] or self.get_kticks() # Does not change even after interpolation, prefer user
         
@@ -828,10 +851,10 @@ class Bands(_BandsDosBase):
     
     @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': f"{_spin_doc}\n    ax :"})
     def splot_bands(self, spin = 0, ax = None, elim = None, ezero = None, kticks = None, interp = None, **kwargs):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin','kwargs']} # should be on top to avoid other loacals
+        plot_kws = {k:v for k,v in locals().items() if k not in ['self','kwargs']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(spin = spin, elim = elim, ezero = ezero)
-        return sp.splot_bands(data.kpath, data.evals - data.ezero, **plot_kws, **kwargs)
+        data = self.get_data(elim = elim, ezero = ezero)
+        return sp.splot_bands(data.kpath, data.evals[spin] - data.ezero, **plot_kws, **kwargs)
     
     @_sub_doc(sp.splot_rgb_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    ax :"})
     def splot_rgb_lines(self, atoms_orbs_dict,
@@ -846,10 +869,10 @@ class Bands(_BandsDosBase):
         colorbar   = True,
         N          = 9,
         shadow     = False):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin', 'atoms_orbs_dict']} # should be on top to avoid other loacals
+        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'atoms_orbs_dict']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(spin, elim, ezero, atoms_orbs_dict) 
-        return sp.splot_rgb_lines(data.kpath, data.evals - data.ezero, data.pros, data.labels, **plot_kws)
+        data = self.get_data(elim, ezero, atoms_orbs_dict) 
+        return sp.splot_rgb_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **plot_kws)
     
     @_sub_doc(sp.splot_color_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    ax :"})
     def splot_color_lines(self, atoms_orbs_dict,
@@ -866,10 +889,10 @@ class Bands(_BandsDosBase):
         xyc_label   = [0.2, 0.85, 'black'], # x, y, color only if showlegend = False
         **kwargs
         ):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin', 'atoms_orbs_dict','kwargs']} # should be on top to avoid other loacals
+        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'atoms_orbs_dict','kwargs']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(spin, elim, ezero, atoms_orbs_dict) # picked relative limit
-        return sp.splot_color_lines(data.kpath, data.evals - data.ezero, data.pros, data.labels, **plot_kws, **kwargs)
+        data = self.get_data(elim, ezero, atoms_orbs_dict) # picked relative limit
+        return sp.splot_color_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **plot_kws, **kwargs)
     
     @_sub_doc(ip.iplot_rgb_lines,['K :','E :', 'pros :', 'labels :','occs :','kpoints :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    fig :"})
     def iplot_rgb_lines(self, atoms_orbs_dict,
@@ -884,11 +907,11 @@ class Bands(_BandsDosBase):
         title      = None,
         **kwargs              
         ):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin', 'atoms_orbs_dict','kwargs']} # should be on top to avoid other loacals
+        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'atoms_orbs_dict','kwargs']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(spin, elim, ezero, atoms_orbs_dict) 
+        data = self.get_data(elim, ezero, atoms_orbs_dict) 
          
-        return ip.iplot_rgb_lines(data.kpath, data.evals - data.ezero, data.pros, data.labels, data.occs, data.kpoints, **plot_kws, **kwargs)
+        return ip.iplot_rgb_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, data.occs[spin], data.kpoints, **plot_kws, **kwargs)
      
      
 class DOS(_BandsDosBase):
@@ -901,17 +924,17 @@ class DOS(_BandsDosBase):
     """
     def __init__(self, source):
         super().__init__(source)
+        self._data_args =  () # updated on demand
     
-    def get_data(self, spin = 0, elim = None, ezero = None, atoms_orbs_dict: dict = None):
-        if spin not in [0,1]:
-            raise ValueError('spin must be 0 or 1')
+    def get_data(self, elim = None, ezero = None, atoms_orbs_dict: dict = None):
+        if self.data and self._data_args == (elim, ezero, atoms_orbs_dict):
+            print('Using cached data.')
+            return self.data
         
-        atoms, orbs, labels, uatoms, uorbs, gridlim = None, None, None, None, None, None
-        if atoms_orbs_dict:
-            atoms, orbs, labels, uatoms, uorbs = _format_input(atoms_orbs_dict, self.source.get_summary())
-        # NOTE: Do same as done in bands to have functions
-        if self._data and (1 - self._data.spin) == spin: # if they have used other channel before
-            print('Using same energy limit for spin up and spin down. Run again to change it, then apply same on other spin channel.')
-            gridlim = min(self._data.bands), max(self._data.bands)
+        self._data_args = (elim, ezero, atoms_orbs_dict)
+        # atoms, orbs, labels, uatoms, uorbs, gridlim = None, None, None, None, None, None
+        # if atoms_orbs_dict:
+        #     atoms, orbs, labels, uatoms, uorbs = _format_input(atoms_orbs_dict, self.source.get_summary())
         
-        data = self._source.get_dos(spin = spin, elim = elim, atoms = uatoms, orbs = uorbs, gridlim = gridlim)
+        
+        # data = self._source.get_dos(elim = elim, atoms = uatoms, orbs = uorbs, spins = uspins or None)

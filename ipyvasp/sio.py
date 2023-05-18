@@ -996,7 +996,7 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = 
     ax : Matplotlib's 2D axes if `plane=None` otherswise 3D axes.
     """
     vname = 'a' if bz_data.__class__.__name__ == 'CellData' else 'b'
-    label = r"$k_{}/2π$" if vname=='b' else "{}"
+    label = r"$k_{}/2π$" if vname == 'b' else "{}"
     if not ax: #For both 3D and 2D, initialize 2D axis.
         ax = sp.get_axes(figsize=(3.4,3.4)) #For better display
 
@@ -1336,11 +1336,18 @@ def _get_bond_length(poscar_data,given=None,tol=1e-3):
         _arr = sorted(np.linalg.norm(_coords[1:] - _coords[0],axis=1)) # Sort in ascending. returns list
         return np.mean(_arr[:2]) + tol if _arr else 1 #Between nearest and second nearest.
 
+def _masked_data(poscar_data, mask_sites):
+    "Returns indices of sites which satisfy the mask_sites function."
+    pick = []
+    for i, (x,y,z) in enumerate(poscar_data.positions):
+        if mask_sites(x,y,z):
+            pick.append(i)
+    return pick
+        
 # Cell
 def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
         translate = None, linewidth = 4, fig = None, ortho3d = True, mask_sites = None,
-        cell_kwargs = dict(color='black', fill = False,alpha = 0.4),
-        label_kwargs = None
+        cell_kwargs = dict(color='black', fill = False,alpha = 0.4), 
     ):
     """
     Plotly's interactive plot of lattice.
@@ -1350,15 +1357,20 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
     sizes : Size of sites. Either one int/float or list equal to type of ions.
     colors : Sequence of colors for each type. Automatically generated if not provided.
     bond_length : Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.
-    mask_sites : ============================================================
+    mask_sites : Provide a mask function to show only selected sites. For example, to show only sites with z > 0.5, use `mask_sites = lambda x,y,z: x > 0.5`.
     cell_kwargs : Keyword arguments for `iplot_bz` function to make cell in real space. Set it to None to avoid plotting box around lattice.
-    label_kwargs : kwargs to add sites labels. Set it to None to avoid labels.
     """
     poscar_data = fix_sites(poscar_data,tol=tol,eqv_sites=eqv_sites,translate=translate)
     bond_length = _get_bond_length(poscar_data,given=bond_length,tol=tol)
+    
+    sites = None
+    if mask_sites and callable(mask_sites):
+        sites = _masked_data(poscar_data,mask_sites)
+    
     coords, pairs = get_pairs(poscar_data,
-                        positions = poscar_data.positions,
-                        r=bond_length,tol = bond_tol) # bond tolernce shpuld be smaller than cell tolernce.
+                        positions = poscar_data.positions[sites] if sites else poscar_data.positions,
+                        r = bond_length,tol = bond_tol) # bond tolernce shpuld be smaller than cell tolernce.
+    
     if not fig:
         fig = go.Figure()
 
@@ -1374,7 +1386,7 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
         colors = ['rgb({},{},{})'.format(*[int(_c*255) for _c in c]) for c in colors]
 
     _colors = np.array([colors[i] for i,vs in enumerate(uelems.values()) for v in vs])
-    h_text = np.array( poscar_data.labels)
+    h_text = np.array(poscar_data.labels)
 
     if np.any(pairs):
         coords_p = coords[pairs] #paired points
@@ -1399,30 +1411,26 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
                 mode='lines',line_color = c,
                 legendgroup='Bonds',showlegend=showlegend,
                 name='Bonds',line_width=linewidth))
-
+    
     for (k,v),c,s in zip(uelems.items(),colors,sizes):
+        if sites:
+            v = [i for i in v if i in sites] # Only show selected sites.
+            coords = poscar_data.coords[v] # otherwise, coords are already filtered.
+
         fig.add_trace(go.Scatter3d(
-            x = coords[v][:,0].T,
-            y = coords[v][:,1].T,
-            z = coords[v][:,2].T,
+            x = coords[:,0].T,
+            y = coords[:,1].T,
+            z = coords[:,2].T,
             mode='markers',marker_color = c,
             hovertext = h_text[v],
             line_color='rgba(1,1,1,0)',line_width=0.001,
             marker_size = s,opacity=1,name=k))
-        
-    if mask_sites is not None:
-        # NOTE: Implement with list of indices or function on fractional coordinates.
-        raise NotImplementedError('mask_sites functionality is not implemented yet.')
     
-    if label_kwargs is not None:
-        raise NotImplementedError('label_kwargs functionality is not implemented yet.')
-    
-        
     if cell_kwargs is not None:
-        bz = get_bz(path_pos= poscar_data.rec_basis, primitive=True)
+        bz_data = serializer.CellData(get_bz(path_pos = poscar_data.rec_basis, primitive=True).to_dict()) # Make cell for correct vector notations
         cell_kwargs = {k:v for k,v in cell_kwargs.items() if k not in ['colormap','vectors','shade']} # those are specific to splot_bz
         cell_kwargs.update({'fig':  fig, 'ortho3d': ortho3d, 'special_kpoints': False})
-        _ = iplot_bz(bz,**cell_kwargs)
+        _ = iplot_bz(bz_data,**cell_kwargs)
     return fig
 
 # Cell
@@ -1445,12 +1453,16 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
     colors : Sequence of colors for each ion type. If None, automatically generated.
     bond_length : Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.
     alpha : Opacity of points and bonds.
-    mask_sites : =============================================================
+    mask_sites : Provide a mask function to show only selected sites. For example, to show only sites with z > 0.5, use `mask_sites = lambda x,y,z: x > 0.5`.
     cell_kwargs : Keyword arguments for `splot_bz` in real space to make cell. Set it to None to avoid plotting box around lattice.
     label_kwargs : Keyword arguments for `plt.text` to label sites. Set it to None to avoid labeling.
 
     > Tip: Use `plt.style.use('ggplot')` for better 3D perception.
     """
+    if label_kwargs is not None:
+        if not isinstance(label_kwargs,dict):
+            raise ValueError('label_kwargs expects a dict to pass to ax.text.')
+    
     #Plane fix
     if plane and plane not in 'xyzxzyx':
         raise ValueError("plane expects in 'xyzxzyx' or None.")
@@ -1458,18 +1470,24 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
         ind = 'xyzxzyx'.index(plane)
         arr = [0,1,2,0,2,1,0]
         ix,iy = arr[ind], arr[ind+1]
+        
     poscar_data = fix_sites(poscar_data,tol=tol,eqv_sites=eqv_sites,translate=translate)
     bond_length = _get_bond_length(poscar_data,given=bond_length,tol=tol)
-    coords, pairs = get_pairs(
-        poscar_data,
-        positions = poscar_data.positions,
-        r=bond_length,tol = bond_tol
-    ) # bond tolernce shpuld be smaller than cell tolernce.
+    
+    sites = None
+    if mask_sites and callable(mask_sites):
+        sites = _masked_data(poscar_data,mask_sites)
+    
+    coords, pairs = get_pairs(poscar_data,
+                        positions = poscar_data.positions[sites] if sites else poscar_data.positions,
+                        r = bond_length,tol = bond_tol) # bond tolernce shpuld be smaller than cell tolernce.
+    
+    labels = [poscar_data.labels[i] for i in sites] if sites else poscar_data.labels
     
     if cell_kwargs is not None:
-        bz = get_bz( poscar_data.rec_basis, primitive=True)
+        bz_data = serializer.CellData(get_bz(poscar_data.rec_basis, primitive=True).to_dict()) # For correct vectors
         cell_kwargs['plane'] = plane # Overwrite plane.
-        ax = splot_bz(bz,ax = ax, **cell_kwargs)
+        ax = splot_bz(bz_data,ax = ax, **cell_kwargs)
     else:
         ax = ax or sp.get_axes(axes_3d = True if plane is None else False)
 
@@ -1490,6 +1508,10 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
     # Now change colors and sizes to whole array size
     colors = np.array([colors[i] for i,vs in enumerate(uelems.values()) for v in vs])
     sizes = np.array([sizes[i] for i,vs in enumerate(uelems.values()) for v in vs])
+    
+    if sites:
+        colors = colors[sites]
+        sizes = sizes[sites]
 
     if np.any(pairs):
         coords_p = coords[pairs] #paired points
@@ -1512,20 +1534,22 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
 
     if not plane:
         ax.scatter(coords[:,0],coords[:,1],coords[:,2],c = colors ,s =sizes,depthshade=False,alpha=alpha)
+        if label_kwargs:
+            for i,coord in enumerate(coords):
+                ax.text(*coord,labels[i],**label_kwargs)
+                
     elif plane in 'xyzxzyx':
         iz, = [i for i in range(3) if i not in (ix,iy)]
         zorder = coords[:,iz].argsort()
         if plane in 'yxzy': # Left handed
             zorder = zorder[::-1]
         ax.scatter(coords[zorder][:,ix],coords[zorder][:,iy],c = colors[zorder] ,s =sizes[zorder],zorder=3, alpha= alpha)
+        
+        if label_kwargs:
+            labels = [labels[i] for i in zorder] # Reorder labels
+            for i,coord in enumerate(coords[zorder]):
+                ax.text(*coord[[ix,iy]],labels[i],**label_kwargs)
 
-    if mask_sites is not None:
-        # NOTE: Implement with list of indices or function on fractional coordinates.
-        raise NotImplementedError('mask_sites functionality is not implemented yet.')
-    
-    if label_kwargs is not None:
-        raise NotImplementedError('label_kwargs functionality is not implemented yet.')
-    
     ax.set_axis_off()
     sp.add_legend(ax)
     return ax
