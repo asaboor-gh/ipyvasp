@@ -1095,7 +1095,7 @@ def splot_dos_lines(
                    'fontsize'       : 'small',
                    'frameon'        : False
                    },
-    atoms_orbs_dict    = {}
+    projections    = {}
     ):
         """
         - Returns ax object (if ax!=False) and plot on which all matplotlib allowed actions could be performed, returns lists of energy,tdos and pdos and labels. If given,atoms,orbs colors, and labels must have same length. If not given, zeroth ions is plotted with s-orbital.
@@ -1115,7 +1115,7 @@ def splot_dos_lines(
             - spin       : Plot spin-polarized for spin {'up','down','both'}. Default is both.
             - interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
             - legend_kwargs: Dictionary to contain legend arguments to fix.
-            - atoms_orbs_dict : Dictionary with keys as label and values as list of length 2. If given, used in place of atoms, orbs and labels arguments.
+            - projections : Dictionary with keys as label and values as list of length 2. If given, used in place of atoms, orbs and labels arguments.
                         Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
         - **Returns**
             - ax         : Matplotlib axes.
@@ -1123,8 +1123,8 @@ def splot_dos_lines(
         if include_dos not in ('both','pdos','tdos'):
             raise ValueError("`include_dos` expects one of ['both','pdos','tdos'], got {}.".format(include_dos))
 
-        if atoms_orbs_dict:
-            atoms,orbs,labels=_format_input(atoms_orbs_dict,rgb=False) # prefer atoms_orbs_dict over atoms,orbs,labels
+        if projections:
+            atoms,orbs,labels = None, None, None # ._format_input(projections,rgb=False) 
 
         en,tdos,pdos,vr=None,None,None,None # Placeholders for defining. must be here.
         cl_dos=_collect_dos(path_evr=path_evr,

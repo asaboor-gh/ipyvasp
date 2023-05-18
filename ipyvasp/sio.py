@@ -299,7 +299,7 @@ def export_poscar(path = None,content = None):
 # Cell
 def _save_mp_API(api_key):
     """
-    - Save materials project api key for autoload in functions.
+    - Save materials project api key for autoload in functions. This works only for legacy API.
     """
     home = str(Path.home())
     file = os.path.join(home,'.ipyvasprc')
@@ -371,7 +371,59 @@ def _load_mp_data(formula,api_key=None,mp_id=None,max_sites = None, min_sites = 
                 return [res]
     return all_res
 
-# Cell
+
+def _cif_str_to_poscar_str(cif_str, comment = None):
+    # Using it in other places too
+    lines = [line for line in cif_str.splitlines() if line.strip()] # remove empty lines
+    
+    abc = []
+    abc_ang = []
+    index = 0
+    for ys in lines:
+        if '_cell' in ys:
+            if '_length' in ys:
+                abc.append(ys.split()[1])
+            if '_angle' in ys:
+                abc_ang.append(ys.split()[1])
+            if '_volume' in ys:
+                volume = float(ys.split()[1])
+        if '_structural' in ys:
+            top = ys.split()[1] + f" # {comment}" if comment else ys.split()[1]
+    for i,ys in enumerate(lines):
+        if '_atom_site_occupancy' in ys:
+            index = i +1 # start collecting pos.
+    poses = lines[index:]
+    pos_str = ""
+    for pos in poses:
+        s_p = pos.split()
+        pos_str += "{0:>12}  {1:>12}  {2:>12}  {3}\n".format(*s_p[3:6],s_p[0])
+    
+    names = [re.sub('\d+', '', pos.split()[1]).strip() for pos in poses]
+    types = []
+    for name in names:
+        if name not in types:
+            types.append(name) # unique types, don't use numpy here.
+
+    # ======== Cleaning ===========
+    abc_ang = [float(ang) for ang in abc_ang]
+    abc     = [float(a) for a in abc]
+    a = "{0:>22.16f} {1:>22.16f} {2:>22.16f}".format(1.0,0.0,0.0) # lattic vector a.
+    to_rad = 0.017453292519
+    gamma = abc_ang[2]*to_rad
+    bx,by = abc[1]*np.cos(gamma),abc[1]*np.sin(gamma)
+    b = "{0:>22.16f} {1:>22.16f} {2:>22.16f}".format(bx/abc[0],by/abc[0],0.0) # lattic vector b.
+    cz = volume/(abc[0]*by)
+    cx = abc[2]*np.cos(abc_ang[1]*to_rad)
+    cy = (abc[1]*abc[2]*np.cos(abc_ang[0]*to_rad)-bx*cx)/by
+    c = "{0:>22.16f} {1:>22.16f} {2:>22.16f}".format(cx/abc[0],cy/abc[0],cz/abc[0]) # lattic vector b.
+
+    elems = '\t'.join(types)
+    nums  = [str(len([n for n in names if n == t])) for t in types]
+    nums  = '\t'.join(nums)
+    content = f"{top}\n  {abc[0]}\n {a}\n {b}\n {c}\n  {elems}\n  {nums}\nDirect\n{pos_str}"
+    return content
+                
+
 class InvokeMaterialsProject:
     """Connect to materials project and get data using `api_key` from their site.
     Usage:
@@ -432,50 +484,8 @@ class InvokeMaterialsProject:
                 write_poscar(self.export_poscar(),outfile = outfile, overwrite = overwrite)
 
             def export_poscar(self):
-                lines = self._cif.split('\n')
-                if '' in lines.copy():
-                    lines.remove('')
-                abc = []
-                abc_ang = []
-                index = 0
-                for ys in lines:
-                    if '_cell' in ys:
-                        if '_length' in ys:
-                            abc.append(ys.split()[1])
-                        if '_angle' in ys:
-                            abc_ang.append(ys.split()[1])
-                        if '_volume' in ys:
-                            volume = float(ys.split()[1])
-                    if '_structural' in ys:
-                        top = ys.split()[1] + f" # [{self.mp_id!r}][{self.symbol!r}][{self.crystal!r}] Created by ipyvasp using Materials Project Database"
-                for i,ys in enumerate(lines):
-                    if '_atom_site_occupancy' in ys:
-                        index = i +1 # start collecting pos.
-                poses = lines[index:]
-                pos_str = ""
-                for pos in poses:
-                    s_p = pos.split()
-                    pos_str += "{0:>12}  {1:>12}  {2:>12}  {3}\n".format(*s_p[3:6],s_p[0])
-
-                # ======== Cleaning ===========
-                abc_ang = [float(ang) for ang in abc_ang]
-                abc     = [float(a) for a in abc]
-                a = "{0:>22.16f} {1:>22.16f} {2:>22.16f}".format(1.0,0.0,0.0) # lattic vector a.
-                to_rad = 0.017453292519
-                gamma = abc_ang[2]*to_rad
-                bx,by = abc[1]*np.cos(gamma),abc[1]*np.sin(gamma)
-                b = "{0:>22.16f} {1:>22.16f} {2:>22.16f}".format(bx/abc[0],by/abc[0],0.0) # lattic vector b.
-                cz = volume/(abc[0]*by)
-                cx = abc[2]*np.cos(abc_ang[1]*to_rad)
-                cy = (abc[1]*abc[2]*np.cos(abc_ang[0]*to_rad)-bx*cx)/by
-                c = "{0:>22.16f} {1:>22.16f} {2:>22.16f}".format(cx/abc[0],cy/abc[0],cz/abc[0]) # lattic vector b.
-
-                elems = [elem for elem in self.unit.keys()]
-                elems = '\t'.join(elems)
-                nums  = [str(int(self.unit[elem])) for elem in self.unit.keys()]
-                nums  = '\t'.join(nums)
-                content = f"{top}\n  {abc[0]}\n {a}\n {b}\n {c}\n  {elems}\n  {nums}\nDirect\n{pos_str}"
-                return export_poscar(content = content)
+                "Export poscar data form cif content."
+                return export_poscar(self._cif, comment = f"[{self.mp_id!r}][{self.symbol!r}][{self.crystal!r}] Created by ipyvasp using Materials Project Database")
 
 
         # get cifs

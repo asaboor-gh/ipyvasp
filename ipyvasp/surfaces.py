@@ -18,10 +18,10 @@ except:
     import ipyvasp.splots as splots
 
 # Cell
-def _collect_spin_data(exported_spin_data, bands = [0], atoms_orbs_dict = {'A':([0],[0])}):
+def _collect_spin_data(exported_spin_data, bands = [0], projections = {'A':([0],[0])}):
     if not isinstance(bands,(list,tuple)):
         raise TypeError('`bands` must be list/tuple of integer.')
-    atoms, orbs, *_ = api._format_input(atoms_orbs_dict, sys_info = exported_spin_data.sys_info)
+    atoms, orbs, *_ = api._format_input(projections, sys_info = exported_spin_data.sys_info)
 
     def per_band_data(band):
         kpoints = exported_spin_data.kpoints
@@ -87,7 +87,7 @@ class SpinDataFrame(pd.DataFrame):
         All other methods are inherited from pd.DataFrame. If you apply some method that do not pass metadat, then use `send_metadata` to copy metadata to traget SpinDataFrame.
     """
     _metadata = ['_current_attrs','sys_info','poscar','projection'] # These are passed after operations to new dataframe.
-    def __init__(self, *args, path = None, bands = [0], atoms_orbs_dict = {'A':([0],[0])}, elim = None, skipk=None, data = None, **kwargs):
+    def __init__(self, *args, path = None, bands = [0], projections = {'A':([0],[0])}, elim = None, skipk=None, data = None, **kwargs):
         if not (path or args): # It works fine without path given, but it is not recommended.
             path = './vasprun.xml'
         if path or data: # Don't updates args otherwise
@@ -109,7 +109,7 @@ class SpinDataFrame(pd.DataFrame):
                 out_dict = _collect_spin_data(spin_data, bands = bands, atoms = atoms, orbs = orbs)
                 super().__init__(out_dict)
                 self.sys_info = spin_data.sys_info
-                atoms, orbs, *_ =  api._format_input(atoms_orbs_dict,sys_info = self.sys_info)
+                atoms, orbs, *_ =  api._format_input(projections,sys_info = self.sys_info)
                 self.projection = serializer.Dict2Data({f'_{i}': {'ions': e, 'orbs': o} for i,(e,o) in enumerate(zip(atoms,orbs))})
                 # Path below is used to get kpoints info
                 self.poscar = api.POSCAR(path = path, data = spin_data.poscar)

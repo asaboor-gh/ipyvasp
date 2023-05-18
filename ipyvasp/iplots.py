@@ -202,7 +202,7 @@ def iplot_dos_lines(
     spin          = 'both',
     interp        = None,
     title         = None,
-    atoms_orbs_dict    = {}
+    projections   = {}
     ):
         """
         - Returns plotly's figure. If given,atoms,orbs colors, and labels must have same length. If not given, zeroth ions is plotted with s-orbital.
@@ -218,13 +218,13 @@ def iplot_dos_lines(
             - vertical   : False, If True, plots along y-axis.
             - interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
             - figsize    : Tuple(width,height) in pixels, e.g. (700,400).
-            - atoms_orbs_dict : Dictionary with keys as label and values as list of length 2. If given, used in place of atoms, orbs and labels arguments.
+            - projections : Dictionary with keys as label and values as list of length 2. If given, used in place of atoms, orbs and labels arguments.
                         Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
         - **Returns**
             - fig        : Plotly's figure object.
         """
-        if atoms_orbs_dict:
-            atoms,orbs,labels = sp._format_input(atoms_orbs_dict,rgb=False) # prefer atoms_orbs_dict over atoms,orbs,labels
+        if projections:
+            atoms,orbs,labels = sp._format_input(projections,rgb=False) 
             # These are validated inisde _collect_dos, no need here
         en,tdos,pdos,vr=None,None,None,None # Place holders for defining
         cl_dos = sp._collect_dos(path_evr=path_evr,elim=elim,

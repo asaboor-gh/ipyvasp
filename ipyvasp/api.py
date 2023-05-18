@@ -182,7 +182,9 @@ class POSCAR:
 
     @classmethod
     def from_materials_project(cls,formula, mp_id, api_key = None, save_key = False):
-        "Downloads POSCAR from materials project. `mp_id` should be string associated with a material on their website. `api_key` is optional if not saved."
+        """Downloads POSCAR from materials project. `mp_id` should be string associated with a material on their website. `api_key` is optional if not saved.
+        Get your API key from https://legacy.materialsproject.org/open and save it using `save_key` to avoid entering it everytime.
+        """
         if cls._mp_instance and cls._mp_instance['kwargs'] == {'formula':formula,'mp_id':mp_id}:
             if api_key and save_key: # If user wants to save key even if data is loaded from cache
                 sio._save_mp_API(api_key)
@@ -192,7 +194,20 @@ class POSCAR:
         instance = cls(data = download_structure(formula=formula,mp_id=mp_id,api_key=api_key,save_key=save_key)[0].export_poscar())
         cls._mp_instance = {'instance':instance,'kwargs':{'formula':formula,'mp_id':mp_id}}
         return instance
-
+    
+    @classmethod
+    def from_cif(cls, path):
+        "Load data from cif file"
+        if not os.path.isfile(path):
+            raise FileNotFoundError(f"File {path!r} does not exists")
+        
+        with open(path, 'r', encoding='utf-8') as f:
+            cif_str = f.read()
+            poscar_content = sio._cif_str_to_poscar_str(cif_str, "Exported from cif file using ipyvasp")
+        
+        return cls.from_string(poscar_content)
+        
+        
     @classmethod
     def new(cls, scale, basis, sites, name = None):
         raise NotImplementedError("This method is not implemented yet.")
@@ -628,14 +643,14 @@ get_axes.__doc__ = get_axes.__doc__ + '''
 - join_axes
 '''
 
-def _format_input(atoms_orbs_dict, sys_info):
+def _format_input(projections, sys_info):
     """
-    Format input atoms, orbs and labels according to select projections in atoms_orbs_dict.
+    Format input spins, atoms, orbs and labels according to selected `projections`.
     For example: {'Ga-s':(0,[1]),'Ga-p':(0,[1,2,3]),'Ga-d':(0,[4,5,6,7,8])} #for Ga in GaAs, to pick Ga-1, use [0] instead of 0 at first place
     In case of 3 items in tuple, the first item is spin index, the second is atoms, the third is orbs.
     """
-    if not isinstance(atoms_orbs_dict,dict):
-        raise TypeError("`atoms_orbs_dict` must be a dictionary, with keys as labels and values from picked projection indices.")
+    if not isinstance(projections,dict):
+        raise TypeError("`projections` must be a dictionary, with keys as labels and values from picked projection indices.")
     
     if not hasattr(sys_info,'orbs'): 
         raise ValueError("No orbitals found to pick from given data.")
@@ -648,7 +663,7 @@ def _format_input(atoms_orbs_dict, sys_info):
     # Set default values for different situations
     spins, atoms, orbs, labels = [], [], [], []
 
-    for i, (k, v) in enumerate(atoms_orbs_dict.items()):
+    for i, (k, v) in enumerate(projections.items()):
         if len(v) not in [2,3]:
             raise ValueError(f"{k!r}: {v} expects 2 items (atoms, orbs), or 3 items (spin, atoms, orbs), got {len(v)}.")
         
@@ -714,8 +729,8 @@ def _format_input(atoms_orbs_dict, sys_info):
 
     return (spins, uspins), (atoms,uatoms), (orbs,uorbs), labels
 
-_spin_doc = 'spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations.'
-_proj_doc = "atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs of shape (spin,kpoints, bands) and return array of shape (kpoints, bands)."
+_spin_doc = 'spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations. Data for both channel is loaded by default, so when you plot one spin channel, plotting other with same parameters will use the same data.'
+_proj_doc = "projections : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs of shape (spin,kpoints, bands) and return array of shape (kpoints, bands)."
 
 class _BandsDosBase:
     def __init__(self, source):
@@ -757,7 +772,7 @@ class Bands(_BandsDosBase):
             return sio.read_kticks(file)
         return []
                 
-    def get_data(self, elim = None, ezero = None, atoms_orbs_dict: dict = None):
+    def get_data(self, elim = None, ezero = None, projections: dict = None):
         """
         Selects bands and projections to use in plotting functions. If input arguments are same as previous call, returns cached data.
         
@@ -765,31 +780,31 @@ class Bands(_BandsDosBase):
         ----------
         elim : list, tuple of two floats to pick bands in this energy range. If None, picks all bands.
         ezero : float, None by default. If not None, elim is applied around this energy.
-        atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs of shape (spin,kpoints, bands) and return array of shape (kpoints, bands).
+        projections : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs of shape (spin,kpoints, bands) and return array of shape (kpoints, bands).
         
         Returns
         -------
-        dict : Selected bands and projections dictionary to be used in bandstructure plotting functions under this class as `data` argument.
+        data : Selected bands and projections data to be used in bandstructure plotting functions under this class as `data` argument.
         """
-        if self.data and self._data_args == (elim, ezero, atoms_orbs_dict):
+        if self.data and self._data_args == (elim, ezero, projections):
             print('Using cached data.')
             return self.data
         
-        self._data_args = (elim, ezero, atoms_orbs_dict)
+        self._data_args = (elim, ezero, projections)
         spins, atoms, orbs, labels, uspins, uatoms, uorbs, bands = None, None, None, None, None, None, None, None
         
         funcs = []
-        if isinstance(atoms_orbs_dict, dict):
-            _funcs = [callable(value) for _, value in atoms_orbs_dict.items()]
-            if any(_funcs) and not all(_funcs):
-                raise TypeError('Either all or none of the values of `atoms_orbs_dict` must be callable with two arguments evals, occs and return array of same shape as evals.')
+        if isinstance(projections, dict):
+            _funcs = [callable(value) for _, value in projections.items()]
+            if any(_funcs) and not all(_funcs): # Do not allow mixing of callable and non-callable values, as comparison will not make sense
+                raise TypeError('Either all or none of the values of `projections` must be callable with two arguments evals, occs and return array of same shape as evals.')
             elif all(_funcs):
-                funcs = [value for _, value in atoms_orbs_dict.items()]
+                funcs = [value for _, value in projections.items()]
             else:
-                (spins, uspins), (atoms,uatoms), (orbs,uorbs), labels = _format_input(atoms_orbs_dict, self.source.get_summary())
+                (spins, uspins), (atoms,uatoms), (orbs,uorbs), labels = _format_input(projections, self.source.summary)
         
-        elif atoms_orbs_dict is not None:
-            raise TypeError('`atoms_orbs_dict` must be a dictionary or None.')
+        elif projections is not None:
+            raise TypeError('`projections` must be a dictionary or None.')
             
         kpts = self._source.get_kpoints()
         eigens = self._source.get_evals(elim = elim, ezero = ezero, atoms = uatoms, orbs = uorbs, spins = uspins or None, bands = bands) # picks available spins if uspins is None
@@ -801,7 +816,19 @@ class Bands(_BandsDosBase):
         kvc = np.unique([tuple(round(kpts.kpath[i],4) for i in kp) for kp in eigens.kvc],axis=0) # 4 digits are enough to handle 10,000 kpoints
         output['kvc'] = tuple(tuple(k) for k in kvc)
         
-        if hasattr(eigens, 'pros'):
+        if funcs:
+            output['labels'] = list(projections.keys())
+            pros = []
+            for func in funcs:
+                out = func(eigens.evals, eigens.occs)
+                if np.shape(out) != eigens.evals.shape[1:]: # evals shape is (spin, kpoints, bands), but we need single spin
+                    raise ValueError(f'Projections returned by {func} must be of same shape as last two dimensions of input evals.')
+                pros.append(out)
+                
+            output['pros'] = np.array(pros)
+            output['info'] = '"Custom projections by user"'
+        
+        elif hasattr(eigens, 'pros'): # Data still could be there, but prefer if user provides projections as functions
             arrays = []
             for sp,atom,orb in zip(spins, atoms, orbs):
                 if uatoms != -1:
@@ -818,18 +845,6 @@ class Bands(_BandsDosBase):
             output.pop('atoms', None) # No more needed
             output.pop('orbs', None)
             output.pop('spins', None) # No more needed
-        
-        elif funcs:
-            output['labels'] = list(atoms_orbs_dict.keys())
-            pros = []
-            for func in funcs:
-                out = func(eigens.evals, eigens.occs)
-                if np.shape(out) != eigens.evals.shape[1:]: # evals shape is (spin, kpoints, bands), but we need single spin
-                    raise ValueError(f'Projections returned by {func} must be of same shape as last two dimensions of input evals.')
-                pros.append(out)
-                
-            output['pros'] = np.array(pros)
-            output['info'] = '"Custom projections by user"'
         
         output['shape'] = '(spin[evals]/selection[pros], kpoints, bands)'
         
@@ -857,7 +872,7 @@ class Bands(_BandsDosBase):
         return sp.splot_bands(data.kpath, data.evals[spin] - data.ezero, **plot_kws, **kwargs)
     
     @_sub_doc(sp.splot_rgb_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    ax :"})
-    def splot_rgb_lines(self, atoms_orbs_dict,
+    def splot_rgb_lines(self, projections,
         spin       = 0,   
         ax         = None, 
         elim       = None, 
@@ -869,13 +884,13 @@ class Bands(_BandsDosBase):
         colorbar   = True,
         N          = 9,
         shadow     = False):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'atoms_orbs_dict']} # should be on top to avoid other loacals
+        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(elim, ezero, atoms_orbs_dict) 
+        data = self.get_data(elim, ezero, projections) 
         return sp.splot_rgb_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **plot_kws)
     
     @_sub_doc(sp.splot_color_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    ax :"})
-    def splot_color_lines(self, atoms_orbs_dict,
+    def splot_color_lines(self, projections,
         spin       = 0, 
         axes       = None, 
         elim       = None, 
@@ -889,13 +904,13 @@ class Bands(_BandsDosBase):
         xyc_label   = [0.2, 0.85, 'black'], # x, y, color only if showlegend = False
         **kwargs
         ):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'atoms_orbs_dict','kwargs']} # should be on top to avoid other loacals
+        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(elim, ezero, atoms_orbs_dict) # picked relative limit
+        data = self.get_data(elim, ezero, projections) # picked relative limit
         return sp.splot_color_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **plot_kws, **kwargs)
     
     @_sub_doc(ip.iplot_rgb_lines,['K :','E :', 'pros :', 'labels :','occs :','kpoints :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    fig :"})
-    def iplot_rgb_lines(self, atoms_orbs_dict,
+    def iplot_rgb_lines(self, projections,
         spin       = 0,
         elim       = None,
         ezero      = None,
@@ -907,9 +922,9 @@ class Bands(_BandsDosBase):
         title      = None,
         **kwargs              
         ):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'atoms_orbs_dict','kwargs']} # should be on top to avoid other loacals
+        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(elim, ezero, atoms_orbs_dict) 
+        data = self.get_data(elim, ezero, projections) 
          
         return ip.iplot_rgb_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, data.occs[spin], data.kpoints, **plot_kws, **kwargs)
      
@@ -926,15 +941,15 @@ class DOS(_BandsDosBase):
         super().__init__(source)
         self._data_args =  () # updated on demand
     
-    def get_data(self, elim = None, ezero = None, atoms_orbs_dict: dict = None):
-        if self.data and self._data_args == (elim, ezero, atoms_orbs_dict):
+    def get_data(self, elim = None, ezero = None, projections: dict = None):
+        if self.data and self._data_args == (elim, ezero, projections):
             print('Using cached data.')
             return self.data
         
-        self._data_args = (elim, ezero, atoms_orbs_dict)
-        # atoms, orbs, labels, uatoms, uorbs, gridlim = None, None, None, None, None, None
-        # if atoms_orbs_dict:
-        #     atoms, orbs, labels, uatoms, uorbs = _format_input(atoms_orbs_dict, self.source.get_summary())
+        self._data_args = (elim, ezero, projections)
+        # atoms, orbs, labels, uatoms, uorbs = None, None, None, None, None
+        # if projections:
+        #     atoms, orbs, labels, uatoms, uorbs = _format_input(projections, self.source.summary)
         
         
         # data = self._source.get_dos(elim = elim, atoms = uatoms, orbs = uorbs, spins = uspins or None)
