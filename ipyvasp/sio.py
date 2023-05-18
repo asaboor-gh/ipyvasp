@@ -244,7 +244,7 @@ def export_poscar(path = None,content = None):
         - content: POSCAR content as string, This takes precedence to path.
     """
     if content and isinstance(content,str):
-        file_lines = content.splitlines() 
+        file_lines = [f'{line}\n' for line in content.splitlines()] # Split by lines strips \n which should be there
     else:
         if not path:
             path = './POSCAR'
@@ -495,7 +495,7 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
     Parameters   
     ----------
     ptaches : Any number of disconnected patches where a single patch is a list of points as [(x,y,z,[label],[N]), ...]
-    n : int, number of point per maximum span of `rec_basis` in cartesian space, this makes uniform steps based on distance between points. If (x,y,z,[label], N) is provided, this is ignored for that specific interval. If `rec_basis` is not provided, each interval has exactly `n` points.
+    n : int, number of point per averge length of `rec_basis`, this makes uniform steps based on distance between points. If (x,y,z,[label], N) is provided, this is ignored for that specific interval. If `rec_basis` is not provided, each interval has exactly `n` points.
     weight : Float, if None, auto generates weights.
     ibzkpt : Path to ibzkpt file, required for HSE calculations.
     outfile : Path/to/file to write kpoints.
@@ -535,17 +535,16 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
                 
         fixed_patches.append(_patch)
     
-    def add_points(p1,p2, rec_basis):
+    def add_points(p1, p2, npts, rec_basis):
         if len(p1) == 5:
             m = p1[4] # number of points given explicitly. 
         elif rec_basis is not None and np.size(rec_basis) == 9:
             basis = np.array(rec_basis)
             coords = to_R3(basis,[p1[:3],p2[:3]])
-            ptp_cart = max(np.ptp(basis,axis = 0)) # maximum span of cell in cartesian coordinates
-            m = n*np.rint(np.linalg.norm(coords[0] - coords[1])/ptp_cart)
-            m = int(m) # numpy int to python int is important
+            _mean = np.mean(np.linalg.norm(basis,axis = 1)) # average length of basis vectors
+            m = np.rint(npts*np.linalg.norm(coords[0] - coords[1])/_mean).astype(int) # number of points in interval
         else:
-            m = n # equal number of points in each interval, given by n.
+            m = npts # equal number of points in each interval, given by n.
         
         # Doing m - 1 in an interval, so along with last point, total n points are generated per interval.
         Np = max(m - 1, 1) # At least 2 points. one is given by end point of interval.
@@ -559,7 +558,7 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
     points, numbers, labels = [], [], []
     for idx, patch in enumerate(fixed_patches):
         for i,(p1,p2) in enumerate(zip(patch[:-1],patch[1:])):
-            kp, m, labs = add_points(p1,p2, rec_basis)
+            kp, m, labs = add_points(p1,p2, n, rec_basis)
             points.extend(kp)
             numbers.append(m)
             if idx != 0 and i == 0:
@@ -589,7 +588,7 @@ def get_kpath(*patches, n = 5,weight= None ,ibzkpt = None,outfile=None, rec_basi
             N = int(lines[1].strip())+N # Update N.
             slines = lines[3:N+4]
             ibz_str = ''.join(slines)
-            out_str = "{}\n{}".format(ibz_str,out_str) # Update out_str
+            out_str = "{}\n{}".format(ibz_str.strip('\n'),out_str) # Update out_str, ibz_str is stripped of trailing newline.
     
 
     path_info = ', '.join(f'{idx}:{lab}' for idx, lab in zip(numbers,labels) if lab != '')
@@ -680,7 +679,7 @@ def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec
             raise ValueError(f"There should be at least two points in a patch of path at line {a+1}!")
         patches.append(hsk_list[a:b])
 
-    return get_kpath(*patches,n=n,weight=weight,ibzkpt=ibzkpt,outfile=outfile, rec_basis = rec_basis)
+    return get_kpath(*patches,n = n,weight=weight,ibzkpt=ibzkpt,outfile=outfile, rec_basis = rec_basis)
 
 # Cell
 def _get_basis(path_pos):
@@ -997,7 +996,7 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = 
     ax : Matplotlib's 2D axes if `plane=None` otherswise 3D axes.
     """
     vname = 'a' if bz_data.__class__.__name__ == 'CellData' else 'b'
-    label = r"$k_{}$" if vname=='b' else "{}"
+    label = r"$k_{}/2π$" if vname=='b' else "{}"
     if not ax: #For both 3D and 2D, initialize 2D axis.
         ax = sp.get_axes(figsize=(3.4,3.4)) #For better display
 
@@ -1006,6 +1005,9 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = 
     
     if vectors and not isinstance(vectors,(tuple,list)):
         raise ValueError(f"`vectors` expects tuple or list, got {vectors!r}")
+    
+    if vectors is None:
+        vectors = () # Empty tuple to make things work below
     
     for v in vectors:
         if v not in [0,1,2]:
@@ -1103,7 +1105,7 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)',background = 'r
         fig = go.Figure()
     # Name fixing
     vname = 'a' if bz_data.__class__.__name__ == 'CellData' else 'b'
-    axes_text = ["<b>k</b><sub>x</sub>","","<b>k</b><sub>y</sub>","","<b>k</b><sub>z</sub>"]
+    axes_text = ["<b>k</b><sub>x</sub>/2π","","<b>k</b><sub>y</sub>/2π","","<b>k</b><sub>z</sub>/2π"]
     s_name = 'BZ'
     a_name = 'Axes'
     if vname == 'a':
@@ -1336,8 +1338,9 @@ def _get_bond_length(poscar_data,given=None,tol=1e-3):
 
 # Cell
 def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
-        translate = None, linewidth = 4, fig = None, ortho3d = True,
-        iplot_bz_kwargs = dict(color='black', fill = False,alpha = 0.4)
+        translate = None, linewidth = 4, fig = None, ortho3d = True, mask_sites = None,
+        cell_kwargs = dict(color='black', fill = False,alpha = 0.4),
+        label_kwargs = None
     ):
     """
     Plotly's interactive plot of lattice.
@@ -1347,7 +1350,9 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
     sizes : Size of sites. Either one int/float or list equal to type of ions.
     colors : Sequence of colors for each type. Automatically generated if not provided.
     bond_length : Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.
-    iplot_bz_kwargs : Keyword arguments for `iplot_bz` function to make cell in real space.
+    mask_sites : ============================================================
+    cell_kwargs : Keyword arguments for `iplot_bz` function to make cell in real space. Set it to None to avoid plotting box around lattice.
+    label_kwargs : kwargs to add sites labels. Set it to None to avoid labels.
     """
     poscar_data = fix_sites(poscar_data,tol=tol,eqv_sites=eqv_sites,translate=translate)
     bond_length = _get_bond_length(poscar_data,given=bond_length,tol=tol)
@@ -1404,19 +1409,31 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
             hovertext = h_text[v],
             line_color='rgba(1,1,1,0)',line_width=0.001,
             marker_size = s,opacity=1,name=k))
-
-    bz = get_bz(path_pos= poscar_data.rec_basis, primitive=True)
-    iplot_bz_kwargs.update({'fig':  fig, 'ortho3d': ortho3d, 'special_kpoints': False})
-    _ = iplot_bz(bz,**iplot_bz_kwargs)
+        
+    if mask_sites is not None:
+        # NOTE: Implement with list of indices or function on fractional coordinates.
+        raise NotImplementedError('mask_sites functionality is not implemented yet.')
+    
+    if label_kwargs is not None:
+        raise NotImplementedError('label_kwargs functionality is not implemented yet.')
+    
+        
+    if cell_kwargs is not None:
+        bz = get_bz(path_pos= poscar_data.rec_basis, primitive=True)
+        cell_kwargs = {k:v for k,v in cell_kwargs.items() if k not in ['colormap','vectors','shade']} # those are specific to splot_bz
+        cell_kwargs.update({'fig':  fig, 'ortho3d': ortho3d, 'special_kpoints': False})
+        _ = iplot_bz(bz,**cell_kwargs)
     return fig
 
 # Cell
 def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
-    translate = None, linewidth=1, alpha = 0.7, ax = None,
-    splot_bz_kwargs = dict(
+    translate = None, linewidth=1, alpha = 0.7, ax = None, mask_sites = None,
+    cell_kwargs = dict(
         color = ((1,0.5,0,0.4)),colormap = None, fill = False,alpha = 0.4,
         vectors = (0,1,2), shade = True
-    )):
+    ),
+    label_kwargs = None
+    ):
     """
     Matplotlib Static plot of lattice.
     
@@ -1428,7 +1445,9 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
     colors : Sequence of colors for each ion type. If None, automatically generated.
     bond_length : Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.
     alpha : Opacity of points and bonds.
-    splot_bz_kwargs : Keyword arguments for `splot_bz` in real space to make cell.
+    mask_sites : =============================================================
+    cell_kwargs : Keyword arguments for `splot_bz` in real space to make cell. Set it to None to avoid plotting box around lattice.
+    label_kwargs : Keyword arguments for `plt.text` to label sites. Set it to None to avoid labeling.
 
     > Tip: Use `plt.style.use('ggplot')` for better 3D perception.
     """
@@ -1447,9 +1466,12 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
         r=bond_length,tol = bond_tol
     ) # bond tolernce shpuld be smaller than cell tolernce.
     
-    bz = get_bz( poscar_data.rec_basis, primitive=True)
-    splot_bz_kwargs['plane'] = plane # Overwrite plane.
-    ax = splot_bz(bz,ax = ax, **splot_bz_kwargs)
+    if cell_kwargs is not None:
+        bz = get_bz( poscar_data.rec_basis, primitive=True)
+        cell_kwargs['plane'] = plane # Overwrite plane.
+        ax = splot_bz(bz,ax = ax, **cell_kwargs)
+    else:
+        ax = ax or sp.get_axes(axes_3d = True if plane is None else False)
 
     uelems = poscar_data.types.to_dict()
     if not isinstance(sizes,(list,tuple, np.ndarray)):
@@ -1497,6 +1519,13 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
             zorder = zorder[::-1]
         ax.scatter(coords[zorder][:,ix],coords[zorder][:,iy],c = colors[zorder] ,s =sizes[zorder],zorder=3, alpha= alpha)
 
+    if mask_sites is not None:
+        # NOTE: Implement with list of indices or function on fractional coordinates.
+        raise NotImplementedError('mask_sites functionality is not implemented yet.')
+    
+    if label_kwargs is not None:
+        raise NotImplementedError('label_kwargs functionality is not implemented yet.')
+    
     ax.set_axis_off()
     sp.add_legend(ax)
     return ax
@@ -1813,9 +1842,14 @@ def add_atoms(poscar_data, name, positions):
     return serializer.PoscarData(data) # Return new POSCAR
 
 def strain_poscar(poscar_data, strain_matrix):
+    "Strain a POSCAR by a given 3x3 `strain_matrix` and return a new POSCAR."
     if not isinstance(strain_matrix,np.ndarray):
         strain_matrix = np.array(strain_matrix)
     if strain_matrix.shape != (3,3):
         raise ValueError('`strain_matrix` must be a 3x3 matrix to multiply with basis.')
     raise NotImplementedError
+
+def view_poscar(poscar_data, **kwargs):
+    "View a POSCAR in a jupyter notebook."
+    raise NotImplementedError('Implement it using nglview')
     

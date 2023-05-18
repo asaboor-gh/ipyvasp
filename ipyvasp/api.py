@@ -194,6 +194,10 @@ class POSCAR:
         return instance
 
     @classmethod
+    def new(cls, scale, basis, sites, name = None):
+        raise NotImplementedError("This method is not implemented yet.")
+
+    @classmethod
     def from_clipborad(cls):
         "Read POSCAR from clipboard (based on clipboard reader impelemented by pandas library) It picks the latest from clipboard."
         try:
@@ -239,6 +243,11 @@ class POSCAR:
     @property
     def cell(self):
         return self._cell
+    
+    def view(self, **kwargs):
+        # NOTE: Need to implement a view using nglview, that can return back a widget to add in KPath or similar App as well as allow events
+        raise NotImplementedError("This method is not implemented yet. implement using nglview in sio.py")
+        # NOTE: bring it from sio.view_poscar
 
     @_sub_doc(sio.get_bz,'path_pos :')
     def get_bz(self, loop = True, primitive = False):
@@ -262,7 +271,7 @@ class POSCAR:
         self._ax = new_ax # Set ax for splot_kpath
         return new_ax
 
-    def splot_kpath(self,orderby = (1,1,1), knn_inds = None, labels = None, plot_kwargs = dict(color = 'k',linewidth=0.8,marker='.',markersize=10), **text_kwargs):
+    def splot_kpath(self,orderby = (1,1,1), knn_inds = None, labels = None, plot_kwargs = dict(color = 'blue',linewidth=0.8,marker='.',markersize=10), **label_kwargs):
         """
         Plot k-path over existing BZ.
         
@@ -273,7 +282,7 @@ class POSCAR:
         labels : list of labels for each k-point in same order as `knn_inds`.
         plot_kwargs: passed to `plt.plot` with some defaults.
 
-        text_kwargs are passed to `plt.text`.
+        label_kwargs are passed to `plt.text` to modify appearance of labels.
 
         > Tip: You can use this function multiple times to plot multiple/broken paths over same BZ.
         """
@@ -298,7 +307,7 @@ class POSCAR:
         self._ax.plot(*coords.T,**plot_kwargs)
 
         for c,text in zip(coords, labels):
-            self._ax.text(*c,text,**text_kwargs)
+            self._ax.text(*c,text,**label_kwargs)
         return self._ax
 
     def splot_cell(self, plane = None, ax = None,  color='blue', fill=True, vectors = (0,1,2), colormap='plasma', shade = True, alpha=0.4):
@@ -315,19 +324,21 @@ class POSCAR:
 
     @_sub_doc(sio.splot_lattice,'poscar_data :')
     def splot_lattice(self, plane = None, sizes = 50,colors=None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
-        translate = None, linewidth=1, alpha = 0.7, ax = None,
-        splot_bz_kwargs = dict(
+        translate = None, linewidth=1, alpha = 0.7, ax = None, mask_sites = None,
+        cell_kwargs = dict(
             color = ((1,0.5,0,0.4)),colormap = None, fill = False,alpha = 0.4,
             vectors = (0,1,2), shade = True
-        )
+        ),
+        label_kwargs = None
         ):
         kwargs = {k:v for k,v in locals().items() if k != 'self'} # should be at top line
         return sio.splot_lattice(self._data, **kwargs)
     
     @_sub_doc(sio.iplot_lattice,'poscar_data :')
     def iplot_lattice(self, sizes = 10, colors = None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
-              translate = None, linewidth = 4, fig = None, ortho3d = True,
-              iplot_bz_kwargs = dict(color='black', fill = False,alpha = 0.4)
+              translate = None, linewidth = 4, fig = None, ortho3d = True, mask_sites = None,
+              cell_kwargs = dict(color='black', fill = False,alpha = 0.4),
+              label_kwargs = None
         ):
         kwargs = {k:v for k,v in locals().items() if k != 'self'} # should be at top line
         return sio.iplot_lattice(self._data, **kwargs)
@@ -386,8 +397,12 @@ class POSCAR:
 
     @_sub_doc(sio.convert_poscar,'- poscar_data')
     def convert(self, atoms_mapping, basis_factor):
-        return self.__class__(data = sio.convert_poscar(self._data, atoms_mapping=atoms_mapping, basis_factor=basis_factor))
+        return self.__class__(data = sio.convert_poscar(self._data, atoms_mapping = atoms_mapping, basis_factor=basis_factor))
 
+    @_sub_doc(sio.strain_poscar, '- poscar_data')
+    def strain(self, strain_matrix):
+        return self.__class__(data = sio.strain_poscar(self._data, strain_matrix = strain_matrix))
+    
     def add_selective_dynamics(self, a = None, b = None, c = None, show_plot = True):
         """Returns selective dynamics included POSCAR if input is given. By default, if a direction is not given, it turns ON with others.
         Args:
@@ -437,7 +452,7 @@ class POSCAR:
 
     @_sub_doc(sio.get_kpath,'- rec_basis')
     def get_kpath(self,*patches, n = 5,weight= None ,ibzkpt = None,outfile=None):
-        return sio.get_kpath(*patches, n = n,weight= weight ,ibzkpt = weight,outfile=outfile, rec_basis = self.data.rec_basis)
+        return sio.get_kpath(*patches, n = n, weight= weight ,ibzkpt = ibzkpt,outfile=outfile, rec_basis = self.data.rec_basis)
 
     @_sub_doc(sio.str2kpath,'- rec_basis')
     def str2kpath(self, kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None):
@@ -729,7 +744,7 @@ class Bands(_BandsDosBase):
             return sio.read_kticks(file)
         return []
                 
-    def get_data(self, spin = 0, elim = None, atoms_orbs_dict: dict = None):
+    def get_data(self, spin = 0, elim = None, ezero = None, atoms_orbs_dict: dict = None):
         """
         Selects bands and projections to use in plotting functions.
         
@@ -737,6 +752,7 @@ class Bands(_BandsDosBase):
         ----------
         spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations.
         elim : list, tuple of two floats to pick bands in this energy range. If None, picks all bands.
+        ezero : float, None by default. If not None, elim is applied around this energy.
         atoms_orbs_dict : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs and return array of same shape as evals.
         
         Returns
@@ -766,10 +782,11 @@ class Bands(_BandsDosBase):
             blim = min(self._data.bands), max(self._data.bands)
             
         kpts = self._source.get_kpoints()
-        eigens = self._source.get_evals(spin = spin, elim = elim, atoms = uatoms, orbs = uorbs, blim = blim) # others be there
+        eigens = self._source.get_evals(spin = spin, elim = elim, ezero = ezero, atoms = uatoms, orbs = uorbs, blim = blim) # others be there
         
         output = {'kpath': kpts.kpath, 'kpoints': kpts.kpoints, 'coords': kpts.coords, **eigens.to_dict()}
-        output['kvc'] = tuple(tuple(round(kpts.kpath[i],4) for i in kp) for kp in eigens.kvc) # 4 digits are enough to handle 10,000 kpoints
+        kvc = np.unique([tuple(round(kpts.kpath[i],4) for i in kp) for kp in eigens.kvc],axis=0) # 4 digits are enough to handle 10,000 kpoints
+        output['kvc'] = tuple(tuple(k) for k in kvc)
         
         if hasattr(eigens, 'pros'):
             arrays = []
@@ -806,28 +823,22 @@ class Bands(_BandsDosBase):
         if kwargs.get('kticks',None) is None:
             kwargs['kticks'] = kwargs['kticks'] or self.get_kticks() # Does not change even after interpolation, prefer user
         
-        efermi = kwargs.pop('efermi',None) # remove from kwargs as plots don't need it
-        elim = kwargs.get('elim',None)
-        new_elim = [e + (efermi or 0) for e in elim] if isinstance(elim,(list, tuple)) else None
-        return kwargs, new_elim, efermi
+        ezero = kwargs.pop('ezero',None) # remove from kwargs as plots don't need it
+        return kwargs, ezero
     
     @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': f"{_spin_doc}\n    ax :"})
-    def splot_bands(self, spin = 0, ax = None, elim = None, efermi = None, kticks = None, interp = None, **kwargs):
+    def splot_bands(self, spin = 0, ax = None, elim = None, ezero = None, kticks = None, interp = None, **kwargs):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin','kwargs']} # should be on top to avoid other loacals
-        plot_kws, new_elim, fermi = self._handle_kwargs(plot_kws)
-        data = self.get_data(spin = spin, elim = new_elim) # picked relative limit
-        
-        if fermi is None:
-            fermi = data['evc'][0]
-        
-        return sp.splot_bands(data.kpath, data.evals - fermi, **plot_kws, **kwargs)
+        plot_kws, ezero = self._handle_kwargs(plot_kws)
+        data = self.get_data(spin = spin, elim = elim, ezero = ezero)
+        return sp.splot_bands(data.kpath, data.evals - data.ezero, **plot_kws, **kwargs)
     
     @_sub_doc(sp.splot_rgb_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    ax :"})
     def splot_rgb_lines(self, atoms_orbs_dict,
         spin       = 0,   
         ax         = None, 
         elim       = None, 
-        efermi     = None,
+        ezero      = None,
         kticks     = None, 
         interp     = None, 
         maxwidth   = 3,
@@ -836,20 +847,16 @@ class Bands(_BandsDosBase):
         N          = 9,
         shadow     = False):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin', 'atoms_orbs_dict']} # should be on top to avoid other loacals
-        plot_kws, new_elim, fermi = self._handle_kwargs(plot_kws)
-        data = self.get_data(spin, new_elim, atoms_orbs_dict) # picked relative limit
-        
-        if fermi is None:
-            fermi = data['evc'][0]
-            
-        return sp.splot_rgb_lines(data.kpath, data.evals - fermi, data.pros, data.labels, **plot_kws)
+        plot_kws, ezero = self._handle_kwargs(plot_kws)
+        data = self.get_data(spin, elim, ezero, atoms_orbs_dict) 
+        return sp.splot_rgb_lines(data.kpath, data.evals - data.ezero, data.pros, data.labels, **plot_kws)
     
     @_sub_doc(sp.splot_color_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    ax :"})
     def splot_color_lines(self, atoms_orbs_dict,
         spin       = 0, 
         axes       = None, 
         elim       = None, 
-        efermi     = None,
+        ezero      = None,
         kticks     = None, 
         interp     = None, 
         maxwidth   = 3,
@@ -860,19 +867,15 @@ class Bands(_BandsDosBase):
         **kwargs
         ):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin', 'atoms_orbs_dict','kwargs']} # should be on top to avoid other loacals
-        plot_kws, new_elim, fermi = self._handle_kwargs(plot_kws)
-        data = self.get_data(spin, new_elim, atoms_orbs_dict) # picked relative limit
-        
-        if fermi is None:
-            fermi = data['evc'][0]
-        
-        return sp.splot_color_lines(data.kpath, data.evals - fermi, data.pros, data.labels, **plot_kws, **kwargs)
+        plot_kws, ezero = self._handle_kwargs(plot_kws)
+        data = self.get_data(spin, elim, ezero, atoms_orbs_dict) # picked relative limit
+        return sp.splot_color_lines(data.kpath, data.evals - data.ezero, data.pros, data.labels, **plot_kws, **kwargs)
     
     @_sub_doc(ip.iplot_rgb_lines,['K :','E :', 'pros :', 'labels :','occs :','kpoints :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    fig :"})
     def iplot_rgb_lines(self, atoms_orbs_dict,
         spin       = 0,
         elim       = None,
-        efermi     = None,
+        ezero      = None,
         kticks     = None, 
         interp     = None, 
         maxwidth   = 10,   
@@ -882,13 +885,10 @@ class Bands(_BandsDosBase):
         **kwargs              
         ):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self','spin', 'atoms_orbs_dict','kwargs']} # should be on top to avoid other loacals
-        plot_kws, new_elim, fermi = self._handle_kwargs(plot_kws)
-        data = self.get_data(spin, new_elim, atoms_orbs_dict) # picked relative limit
-        
-        if fermi is None:
-            fermi = data['evc'][0]
+        plot_kws, ezero = self._handle_kwargs(plot_kws)
+        data = self.get_data(spin, elim, ezero, atoms_orbs_dict) 
          
-        return ip.iplot_rgb_lines(data.kpath, data.evals - fermi, data.pros, data.labels, data.occs, data.kpoints, **plot_kws, **kwargs)
+        return ip.iplot_rgb_lines(data.kpath, data.evals - data.ezero, data.pros, data.labels, data.occs, data.kpoints, **plot_kws, **kwargs)
      
      
 class DOS(_BandsDosBase):
@@ -902,7 +902,7 @@ class DOS(_BandsDosBase):
     def __init__(self, source):
         super().__init__(source)
     
-    def get_data(self, spin = 0, elim = None, atoms_orbs_dict: dict = None):
+    def get_data(self, spin = 0, elim = None, ezero = None, atoms_orbs_dict: dict = None):
         if spin not in [0,1]:
             raise ValueError('spin must be 0 or 1')
         

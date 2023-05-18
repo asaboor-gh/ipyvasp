@@ -165,7 +165,7 @@ class Vasprun(DataSource):
         return serializer.Dict2Data({'kpoints':kpoints,'coords':coords,'kpath': kpath, 'weights':weights,'rec_basis':rec_basis})
      
      
-    def get_dos(self, spin = 0, elim = None, atoms = None, orbs = None, gridlim = None):
+    def get_dos(self, spin = 0, elim = None, ezero = None, atoms = None, orbs = None, gridlim = None):
         # Should be as energy(NE,), total(NE,), integrated(NE,), partial(NE, NATOMS(selected), NORBS) and atoms reference should be returned
         # include vbm property as in evals, just from integrated dos and NELECT
         # check size and if nothing, throw error
@@ -188,14 +188,15 @@ class Vasprun(DataSource):
         gen = (r.strip(' \n/<>r') for r in self.read(f'spin{spin+1}',f'spin{spin+2}|</projected') if '<r>' in r) # stripping is must here to ensure that we get only numbers
         return gen2numpy(gen, shape,slices)
 
-    def get_evals(self, spin = 0, elim = None, atoms = None, orbs = None, blim = None): 
+    def get_evals(self, spin = 0, elim = None, ezero = None, atoms = None, orbs = None, blim = None): 
         """
         Returns eigenvalues and occupations of the calculation. If atoms and orbs are specified, then orbitals are included too.
         
         Parameters
         ----------
         spin : int, index of spin set to be pick. Default is 0. Can be 0 or 1.
-        elim : tuple, energy range to be returned. Default is None, which returns all eigenvalues. User should supply elim as (min + efermi, max + efermi) to get the correct eigenvalues range.
+        elim : tuple, energy range to be returned. Default is None, which returns all eigenvalues. `elim` is applied around `ezero` if specified, otherwise around VBM.
+        ezero : float, energy reference to be used. Default is None, which uses VBM as reference. ezero is ignored if elim is not specified. In output data, ezero would be VBM or ezero itself if specified.
         atoms : list, indices of atoms to be returned. Default is None, which does not return ionic projections.
         orbs : list, indices of orbitals to be returned. Default is None, which does not return orbitals.
         blim : tuple of length 2, overrides elim and returns eigenvalues in the band range. Useful to load same bands range for spin up and down channels. Plotting classes automatically handle this for spin up and down channels.
@@ -215,13 +216,14 @@ class Vasprun(DataSource):
         else:
             raise ValueError('No eigenvalues found for spin {}'.format(spin))
         evals, occs = ev[:,:,0], ev[:,:,1]
-        vbm = float(evals[occs > 0.0001].max()) # discard very small occupations
-        cbm = float(evals[occs < 0.9999].min()) # discard very small occupations
-        evc = (vbm,cbm) # Easy to plot this way like [0, np.ptp(evc)] can work for defult efermi
+        vbm = float(evals[occs > 0.5].max()) # more than half filled condition
+        cbm = float(evals[occs < 0.5].min()) # less than half filled condition
+        evc = (vbm,cbm) # Easy to plot this way like [0, np.ptp(evc)] can work for defult ezero
+        zero = vbm # default value of ezero
         
         kvbm = [k for k in np.where(evals == vbm)[0]] # keep as indices here, we don't know the cartesian coordinates of kpoints here
         kcbm = [k for k in np.where(evals == cbm)[0]]
-        kvc = tuple(set(product(kvbm,kcbm))) # make unique pairs (by set) of kpoints to plot easily
+        kvc = tuple(sorted(product(kvbm,kcbm),key = lambda K: np.ptp(K))) # bring closer points first by sorting
         
         to_from = (0, -1) # default values
         if blim:
@@ -235,8 +237,13 @@ class Vasprun(DataSource):
             if (not isinstance(elim, (list, tuple))) and (len(elim) != 2):
                 raise TypeError('elim should be a tuple of length 2')
             
-            idx_max = np.max(np.where(evals[:,:] <= np.max(elim))[1]) + 1
-            idx_min = np.min(np.where(evals[:,:] >= np.min(elim))[1])
+            if ezero is not None:
+                if not isinstance(ezero, (int, np.integer, float)):
+                    raise TypeError('ezero should be a float or integer')
+                zero = ezero
+            
+            idx_max = np.max(np.where(evals[:,:] - zero <= np.max(elim))[1]) + 1
+            idx_min = np.min(np.where(evals[:,:] - zero >= np.min(elim))[1])
             to_from = (idx_min, idx_max)
         
         if to_from != (0, -1):
@@ -245,7 +252,7 @@ class Vasprun(DataSource):
             occs = occs[:, lo_ind:up_ind]
             bands = range(lo_ind, up_ind)
         
-        out = {'spin': spin, 'evals':evals,'occs':occs, 'evc':evc, 'kvc':kvc, 'bands':bands}
+        out = {'spin': spin, 'evals':evals,'occs':occs, 'ezero': zero, 'evc':evc, 'kvc':kvc, 'bands':bands}
         if atoms and orbs:
             out['pros'] = self._get_spin_set(spin, bands, atoms, orbs, info)
             out['atoms'] = atoms
@@ -334,7 +341,7 @@ def get_tdos(xml_data,elim = []):
                     tdos_2 = [[float(entry) for entry in arr.text.split()] for arr in item]
                 tdos = np.array([tdos_1,tdos_2])
             
-    for i in xml_data.root.iter('i'): #efermi for condition required.
+    for i in xml_data.root.iter('i'): 
         if i.attrib == {'name': 'efermi'}:
             efermi = float(i.text)
     dos_dic= {'Fermi':efermi,'ISPIN':ISPIN,'tdos':tdos}
@@ -665,7 +672,7 @@ def export_locpot(path:str = None,data_set:str = 0):
         N = sum([int(v) for v in lines[6].split()])
         f.seek(0)
         poscar = []
-        for i in range(N+8):
+        for _ in range(N+8):
             poscar.append(f.readline())
         f.readline() # Empty one
         Nxyz = [int(v) for v in f.readline().split()] # Grid line read

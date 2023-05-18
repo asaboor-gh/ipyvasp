@@ -48,9 +48,9 @@ mpl.rcParams['font.family'] = "serif"
 mpl.rcParams['mathtext.fontset'] = "stix"
 
 # Cell
-def modify_axes(ax=None,xticks=[],xt_labels=[],xlim=[],\
-            yticks=[],yt_labels=[],ylim=[],xlabel=None,ylabel=None,\
-            vlines=True,zeroline=True):
+def modify_axes(ax = None,xticks = [],xt_labels = [],xlim = [],\
+            yticks = [],yt_labels = [],ylim = [],xlabel = None,ylabel = None,\
+            vlines = False,zeroline = True):
     """
     - Returns None, applies given settings on axes. Prefered to use before other plotting.
     Args:
@@ -59,7 +59,7 @@ def modify_axes(ax=None,xticks=[],xt_labels=[],xlim=[],\
         - (xt,yt)_labels : List of labels on (x,y) ticks points.
         - (x,y)lim : [min, max] of (x,y) axes.
         - (x,y)label : axes labels.
-        - vlines : If true, draw vertical lines at points of xticks.
+        - vlines : If True, draw vertical lines at points of xticks.
         - zeroline : If True, drawn when `xlim` is not empty.
     """
     if ax is None:
@@ -370,7 +370,7 @@ def splot_bands(K, E, ax = None, elim = None, kticks = None, interp = None, **kw
     _ = [line.set_label(None) for line in lines[1:]]
     
     modify_axes(ax = ax,ylabel = 'Energy (eV)', xticks = xticks, xt_labels = xticklabels,
-                xlim = [min(K),max(K)], ylim = elim, vlines=True)
+                xlim = [min(K),max(K)], ylim = elim, vlines = True)
     return ax
 
 # Cell
@@ -945,7 +945,7 @@ def splot_color_lines(K, E, pros, labels,
         xs, ys, colors = xyc_label
         _ = [add_text(ax, xs = xs, ys = ys, colors = colors, txts = lab) for ax, lab in zip(axes, labels)]
     
-    _ = [modify_axes(ax=ax,xticks=xticks,xt_labels=xticklabels,xlim=[min(K),max(K)],ylim = elim,vlines=True) for ax in axes]
+    _ = [modify_axes(ax=ax,xticks=xticks,xt_labels=xticklabels,xlim=[min(K),max(K)],ylim = elim,vlines = True) for ax in axes]
     return axes
     
 
