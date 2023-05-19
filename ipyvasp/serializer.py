@@ -244,6 +244,8 @@ class PoscarData(Dict2Data):
     @property
     def labels(self):
         "Returns the labels of the atoms in the poscar data."
+        if hasattr(self.extra_info,'eqv_labels'): # If eqv_labels are present, return them
+            return self.extra_info.eqv_labels
         return np.array([f'{k} {v - vs.start + 1}' for k,vs in self.types.items() for v in vs])
     
     def get_bond_length(self,atom1,atom2):

@@ -485,7 +485,8 @@ class InvokeMaterialsProject:
 
             def export_poscar(self):
                 "Export poscar data form cif content."
-                return export_poscar(self._cif, comment = f"[{self.mp_id!r}][{self.symbol!r}][{self.crystal!r}] Created by ipyvasp using Materials Project Database")
+                content = _cif_str_to_poscar_str(self._cif, comment = f"[{self.mp_id!r}][{self.symbol!r}][{self.crystal!r}] Created by ipyvasp using Materials Project Database")
+                return export_poscar(content = content)
 
 
         # get cifs
@@ -1270,16 +1271,16 @@ def kpoints2bz(bz_data,kpoints,sys_info = None, primitive=False, shift = 0):
     return out_coords # These may have duplicates, apply np.unique(out_coords,axis=0). do this in surface plots
 
 # Cell
-def fix_sites(poscar_data,tol=1e-2,eqv_sites=False,translate=None):
+def _fix_sites(poscar_data,tol=1e-2,eqv_sites = False,translate = None): # should not be exposed mostly be used in visualizations
     """Add equivalent sites to make a full data shape of lattice. Returns same data after fixing.
-    Args:
-        - poscar_data: Output of `export_poscar` or `export_vasprun().poscar`.
-        - tol   : Tolerance value. Default is 0.01.
-        - eqv_sites: If True, add sites on edges and faces. If False, just fix coordinates, i.e. `pos > 1 - tol -> pos - 1`, useful for merging poscars to make slabs.
-        - translate: A number(+/-) or list of three numbers to translate in a,b,c directions.
+    
+    Parameters
+    ----------
+    eqv_sites : If True, add sites on edges and faces. If False, just fix coordinates, i.e. `pos > 1 - tol -> pos - 1`, useful for merging poscars to make slabs.
+    translate : A number(+/-) or list of three numbers to translate in a,b,c directions.
     """
     pos = poscar_data.positions.copy() # We can also do poscar_data.copy().positions that copies all contents.
-    labels = poscar_data.labels
+    labels = np.array(poscar_data.labels) # We need to store equivalent labels as well
     out_dict = poscar_data.to_dict() # For output
 
     if translate and isinstance(translate,(int,np.integer,float)):
@@ -1293,23 +1294,31 @@ def fix_sites(poscar_data,tol=1e-2,eqv_sites=False,translate=None):
     out_dict['positions'] = pos
     out_dict['extra_info']['comment'] = 'Modified by ipyvasp'
 
+
     # Add equivalent sites on edges and faces if given,handle each sepecies separately
     if eqv_sites:
         new_dict, start = {}, 0
         for k,v in out_dict['types'].items():
             vpos = pos[v]
-            pos_x = vpos[((vpos[:,0] + 1) < (tol +1))] + [[1,0,0]] # Add 1 to x if within tol
-            pos_y = vpos[((vpos[:,1] + 1) < (tol +1))] + [[0,1,0]] # Add 1 to y on modified and if within tol
-            pos_z = vpos[((vpos[:,2] + 1) < (tol +1))] + [[0,0,1]] # Add 1 to z and if within tol
-            pos_xy = vpos[((vpos[:,0:2] + 1) < (tol +1)).all(axis = 1)] + [[1,1,0]] # Add 1 to x and y and if within tol
-            pos_yz = vpos[((vpos[:,1:3] + 1) < (tol +1)).all(axis = 1)] + [[0,1,1]] # Add 1 to y and z and if within tol
-            pos_zx = vpos[((vpos[:,[0,2]] + 1) < (tol +1)).all(axis = 1)] + [[1,0,1]] # Add 1 to z and x and if within tol
-            pos_xyz = vpos[((vpos + 1) < (tol +1)).all(axis=1)] + [[1,1,1]] # Add 1 to x,y,z and if within tol
-            new_dict[k] = {'pos':np.vstack([vpos,pos_x,pos_y,pos_z,pos_xy,pos_yz,pos_zx,pos_xyz])}
+            vlabs = labels[v]
+            cond_ops = [
+                (((vpos[:,0] + 1) < (tol +1)), [[1,0,0]]), # Add 1 to x if within tol
+                (((vpos[:,1] + 1) < (tol +1)), [[0,1,0]]), # Add 1 to y on modified and if within tol
+                (((vpos[:,2] + 1) < (tol +1)), [[0,0,1]]), # Add 1 to z and if within tol
+                (((vpos[:,0:2] + 1) < (tol +1)).all(axis = 1), [[1,1,0]]), # Add 1 to x and y if within tol
+                (((vpos[:,1:3] + 1) < (tol +1)).all(axis = 1), [[0,1,1]]), # Add 1 to y and z if within tol
+                (((vpos[:,[0,2]] + 1) < (tol +1)).all(axis = 1), [[1,0,1]]), # Add 1 to x and z if within tol
+                (((vpos + 1) < (tol +1)).all(axis=1), [[1,1,1]]), # Add 1 to all if within tol  
+            ]
+            spos = [vpos[c] + op for c, op in cond_ops]
+            slab = [vlabs[c] for c, op in cond_ops]
+            
+            new_dict[k] = {'pos':np.vstack([vpos,*spos]), 'lab':np.hstack([vlabs,*slab])}
             new_dict[k]['range'] = range(start,start+len(new_dict[k]['pos']))
             start += len(new_dict[k]['pos'])
 
         out_dict['positions'] = np.vstack([new_dict[k]['pos'] for k in new_dict.keys()])
+        out_dict['extra_info']['eqv_labels'] = np.hstack([new_dict[k]['lab'] for k in new_dict.keys()])
         out_dict['types'] = {k:new_dict[k]['range'] for k in new_dict.keys()}
 
     return serializer.PoscarData(out_dict)
@@ -1320,7 +1329,7 @@ def translate_poscar(poscar_data, offset):
         - poscar_data: Output of `export_poscar` or `export_vasprun().poscar`.
         - offset: A number(+/-) or list of three numbers to translate in a,b,c directions.
     """
-    return fix_sites(poscar_data, translate = offset, eqv_sites=False)
+    return _fix_sites(poscar_data, translate = offset, eqv_sites = False)
 
 def get_pairs(poscar_data, positions, r, tol=1e-3):
     """Returns a tuple of Lattice (coords,pairs), so coords[pairs] given nearest site bonds.
@@ -1370,7 +1379,7 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
     mask_sites : Provide a mask function to show only selected sites. For example, to show only sites with z > 0.5, use `mask_sites = lambda x,y,z: x > 0.5`.
     cell_kwargs : Keyword arguments for `iplot_bz` function to make cell in real space. Set it to None to avoid plotting box around lattice.
     """
-    poscar_data = fix_sites(poscar_data,tol=tol,eqv_sites=eqv_sites,translate=translate)
+    poscar_data = _fix_sites(poscar_data,tol=tol,eqv_sites=eqv_sites,translate=translate)
     bond_length = _get_bond_length(poscar_data,given=bond_length,tol=tol)
     
     sites = None
@@ -1481,7 +1490,7 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
         arr = [0,1,2,0,2,1,0]
         ix,iy = arr[ind], arr[ind+1]
         
-    poscar_data = fix_sites(poscar_data,tol=tol,eqv_sites=eqv_sites,translate=translate)
+    poscar_data = _fix_sites(poscar_data,tol=tol,eqv_sites=eqv_sites,translate=translate)
     bond_length = _get_bond_length(poscar_data,given=bond_length,tol=tol)
     
     sites = None
@@ -1493,6 +1502,7 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
                         r = bond_length,tol = bond_tol) # bond tolernce shpuld be smaller than cell tolernce.
     
     labels = [poscar_data.labels[i] for i in sites] if sites else poscar_data.labels
+    labels = ['{}$_{{{}}}$'.format(*lab.split()) for lab in labels] # labels subscripts are better
     
     if cell_kwargs is not None:
         bz_data = serializer.CellData(get_bz(poscar_data.rec_basis, primitive=True).to_dict()) # For correct vectors
@@ -1573,8 +1583,8 @@ def join_poscars(poscar1,poscar2,direction='c',tol=1e-2, system = None):
         - tol: Default is 0.01. It is used to bring sites near 1 to near zero in order to complete sites in plane. Vasp relaxation could move a point, say at 0.00100 to 0.99800 which is not useful while merging sites.
         - system: If system is given, it is written on top of file. Otherwise, it is infered from atomic species.
     """
-    _poscar1 = fix_sites(poscar1,tol=tol,eqv_sites=False)
-    _poscar2 = fix_sites(poscar2,tol=tol,eqv_sites=False)
+    _poscar1 = _fix_sites(poscar1,tol = tol,eqv_sites = False)
+    _poscar2 = _fix_sites(poscar2,tol = tol,eqv_sites = False)
     pos1 = _poscar1.positions.copy()
     pos2 = _poscar2.positions.copy()
 

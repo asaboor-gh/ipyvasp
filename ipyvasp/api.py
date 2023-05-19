@@ -373,10 +373,6 @@ class POSCAR:
     def rotate(self,angle_deg,axis_vec):
         return self.__class__(data = sio.rotate_poscar(self._data, angle_deg = angle_deg, axis_vec=axis_vec))
 
-    @_sub_doc(sio.fix_sites,'- poscar_data')
-    def fix_sites(self, tol=0.01, eqv_sites=False, translate=None):
-        return self.__class__(data = sio.fix_sites(self._data, tol=tol, eqv_sites=eqv_sites, translate=translate))
-
     @_sub_doc(sio.translate_poscar,'- poscar_data')
     def translate(self, offset):
         return self.__class__(data = sio.translate_poscar(self._data, offset=offset))
