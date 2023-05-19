@@ -54,6 +54,12 @@ class DataSource:
         from .api import DOS
         return DOS(self)
     
+    @property
+    def poscar(self):
+        "Returns a POSCAR class instance based on data from source."
+        from .api import POSCAR
+        return POSCAR(data = self.get_structure())
+    
     # Following methods should be implemented in a subclass
     def get_summary(self): raise NotImplementedError("`get_summary` should be implemented in a subclass. See Vasprun.get_summary as example.")
     
@@ -250,8 +256,8 @@ class Vasprun(DataSource):
                     raise TypeError('ezero should be a float or integer')
                 zero = ezero
             
-            idx_max = np.max(np.where(evals[:,:] - zero <= np.max(elim))[1]) + 1
-            idx_min = np.min(np.where(evals[:,:] - zero >= np.min(elim))[1])
+            idx_max = np.max(np.where(evals - zero <= np.max(elim))[2]) + 1
+            idx_min = np.min(np.where(evals - zero >= np.min(elim))[2])
             evals = evals[:,:, idx_min:idx_max]
             occs = occs[:,:, idx_min:idx_max]
             bands_range = range(idx_min, idx_max)
@@ -611,14 +617,7 @@ def export_outcar(path=None):
             first = i+1
         if 'vectors are now' in l:
             b_first = i+5
-        if 'NION' in l:
-            ion_line = l
-        if 'NKPTS' in l:
-            kpt_line =l
 
-    NKPTS,NKDIMS,NBANDS = [int(v) for v in re.findall(r"\d+",kpt_line)]
-    NEDOS,NIONS = [int(v) for v in re.findall(r"\d+",ion_line)]
-    n_kbi = (NKPTS,NBANDS,NIONS)
     # Data manipulation
     # Potential
     data = lines[start_index:stop_index]
@@ -633,7 +632,7 @@ def export_outcar(path=None):
     # positions and potential
     pos_pot = np.hstack([pos_arr,pot_arr[:,1:]])
     basis = np.loadtxt(StringIO(''.join(lines[b_first:b_first+3])))
-    final_dict = {'ion_pot':pot_arr,'positions':pos_arr,'site_pot':pos_pot,'basis':basis[:,:3],'rec_basis':basis[:,3:],'n_kbi':n_kbi}
+    final_dict = {'ion_pot':pot_arr,'positions':pos_arr,'site_pot':pos_pot,'basis':basis[:,:3],'rec_basis':basis[:,3:]}
     return serializer.OutcarData(final_dict)
 
 def export_locpot(path:str = None,data_set:str = 0):

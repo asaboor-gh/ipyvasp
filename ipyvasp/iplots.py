@@ -20,7 +20,7 @@ except:
     import ipyvasp.utils as gu
     
 
-def _format_rgb_data(K, E, pros, labels, interp, occs, kpoints, maxwidth = 10):
+def _format_rgb_data(K, E, pros, labels, interp, occs, kpoints, maxwidth = 10, indices = None):
     "Transform data to 1D for rgb lines to plot effectently. Output is a dictionary."
     data = sp._fix_data(K, E, pros, labels, interp, rgb = True, occs = occs, kpoints = kpoints)
     # Note that data['pros'] is normalized to 0-1
@@ -52,10 +52,13 @@ def _format_rgb_data(K, E, pros, labels, interp, occs, kpoints, maxwidth = 10):
     cl_max[cl_max==0.0] = 1 # avoid divide by zero. Contributions are 4 digits only.
     data['pros'] = (rgb/cl_max[:,:,np.newaxis]*255).astype(int) # Normalized per point and set rgb data back to data.
     
+    if indices is None: # make sure indices are in range
+        indices = range(np.shape(data['evals'])[1])
+        
     # Now process data to make single data for faster plotting.
     txt = 'Projection: [{}]</br>Value:'.format(', '.join(labels))
     K, E, C, S, PT, OT, KT, ET = [], [], [], [], [], [], [], []
-    for i in range(np.shape(data['evals'])[1]):
+    for i, b in enumerate(indices):
         K  = [*K, *data['kpath'], np.nan]
         E  = [*E, *data['evals'][:,i], np.nan]
         C  = [*C, *[f'rgb({r},{g},{b})' for (r,g,b) in data['pros'][:,i,:]], 'rgb(0,0,0)']
@@ -63,7 +66,7 @@ def _format_rgb_data(K, E, pros, labels, interp, occs, kpoints, maxwidth = 10):
         PT = [*PT, *[f'{txt} [{s}, {p}, {d}]' for (s,p,d) in data['norms'][:,i]], ""]
         OT = [*OT, *[f'Occ: {t:>7.4f}' for t in data['occs'][:,i]], ""]
         KT = [*KT, *[f'K<sub>{j+1}</sub>: {x:>7.3f}{y:>7.3f}{z:>7.3f}' for j, (x,y,z) in enumerate(data['kpoints'])], ""]
-        ET = [*ET, *["{}".format(i+1) for _ in data['kpath']],""] # Add subscripts to labels.
+        ET = [*ET, *["{}".format(b + 1) for _ in data['kpath']],""] # Add bands subscripts to labels.
     
     if np.shape(data['evals'])[1] == 1: # If only one band, then remove last nan.
         K, E, C, S, PT, OT, KT, ET = K[:-1], E[:-1], C[:-1], S[:-1], PT[:-1], OT[:-1], KT[:-1], ET[:-1]
@@ -159,8 +162,13 @@ def iplot_rgb_lines(K, E, pros, labels, occs, kpoints,
     -------
     fig : plotly.graph_objects.Figure that can be displayed in Jupyter notebook or saved as html using `iplot2html`.
     """
+    if isinstance(K, dict): # Provided by Bands class, don't do is yourself
+        K, indices = K['K'], K['indices']
+    else:
+        K, indices = K, range(np.shape(E)[1]) # Assume K is provided by user
+    
     K, E, xticks, xticklabels = sp._validate_data(K,E,elim,kticks,interp)
-    data = _format_rgb_data(K, E, pros, labels, interp, occs, kpoints,maxwidth = maxwidth)
+    data = _format_rgb_data(K, E, pros, labels, interp, occs, kpoints,maxwidth = maxwidth, indices = indices)
     K, E, C, S, T, labels = data['K'], data['E'], data['C'], data['S'], data['T'], data['labels']
     
     if fig is None:

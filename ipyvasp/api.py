@@ -783,7 +783,6 @@ class Bands(_BandsDosBase):
         data : Selected bands and projections data to be used in bandstructure plotting functions under this class as `data` argument.
         """
         if self.data and self._data_args == (elim, ezero, projections):
-            print('Using cached data.')
             return self.data
         
         self._data_args = (elim, ezero, projections)
@@ -796,6 +795,7 @@ class Bands(_BandsDosBase):
                 raise TypeError('Either all or none of the values of `projections` must be callable with two arguments evals, occs and return array of same shape as evals.')
             elif all(_funcs):
                 funcs = [value for _, value in projections.items()]
+                labels = list(projections.keys())
             else:
                 (spins, uspins), (atoms,uatoms), (orbs,uorbs), labels = _format_input(projections, self.source.summary)
         
@@ -807,13 +807,15 @@ class Bands(_BandsDosBase):
         
         if not spins:
             spins = eigens.spins # because they will be loaded anyway
+            if len(spins) == 1:
+                spins = [spins[0] for _ in labels] # only one spin channel is available, so use it for all projections
         
         output = {'kpath': kpts.kpath, 'kpoints': kpts.kpoints, 'coords': kpts.coords, **eigens.to_dict()}
         kvc = np.unique([tuple(round(kpts.kpath[i],4) for i in kp) for kp in eigens.kvc],axis=0) # 4 digits are enough to handle 10,000 kpoints
         output['kvc'] = tuple(tuple(k) for k in kvc)
         
+        output['labels'] = labels # works for both functions and picks
         if funcs:
-            output['labels'] = list(projections.keys())
             pros = []
             for func in funcs:
                 out = func(eigens.evals, eigens.occs)
@@ -837,7 +839,6 @@ class Bands(_BandsDosBase):
                 arrays.append(_pros)
 
             output['pros'] = np.array(arrays)
-            output['labels'] = labels
             output.pop('atoms', None) # No more needed
             output.pop('orbs', None)
             output.pop('spins', None) # No more needed
@@ -920,9 +921,9 @@ class Bands(_BandsDosBase):
         ):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(elim, ezero, projections) 
-         
-        return ip.iplot_rgb_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, data.occs[spin], data.kpoints, **plot_kws, **kwargs)
+        data = self.get_data(elim, ezero, projections)
+       # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number 
+        return ip.iplot_rgb_lines({"K": data.kpath, 'indices':data.bands}, data.evals[spin] - data.ezero, data.pros, data.labels, data.occs[spin], data.kpoints, **plot_kws, **kwargs)
      
      
 class DOS(_BandsDosBase):
@@ -939,7 +940,6 @@ class DOS(_BandsDosBase):
     
     def get_data(self, elim = None, ezero = None, projections: dict = None):
         if self.data and self._data_args == (elim, ezero, projections):
-            print('Using cached data.')
             return self.data
         
         self._data_args = (elim, ezero, projections)

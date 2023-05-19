@@ -1405,7 +1405,6 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
         colors = ['rgb({},{},{})'.format(*[int(_c*255) for _c in c]) for c in colors]
 
     _colors = np.array([colors[i] for i,vs in enumerate(uelems.values()) for v in vs])
-    h_text = np.array(poscar_data.labels)
 
     if np.any(pairs):
         coords_p = coords[pairs] #paired points
@@ -1434,14 +1433,18 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
     for (k,v),c,s in zip(uelems.items(),colors,sizes):
         if sites:
             v = [i for i in v if i in sites] # Only show selected sites.
-            coords = poscar_data.coords[v] # otherwise, coords are already filtered.
+            coords = poscar_data.coords[v] 
+            labs = poscar_data.labels[v]
+        else:
+            coords = poscar_data.coords[v]
+            labs = poscar_data.labels[v]
 
         fig.add_trace(go.Scatter3d(
             x = coords[:,0].T,
             y = coords[:,1].T,
             z = coords[:,2].T,
             mode='markers',marker_color = c,
-            hovertext = h_text[v],
+            hovertext = labs,
             line_color='rgba(1,1,1,0)',line_width=0.001,
             marker_size = s,opacity=1,name=k))
     

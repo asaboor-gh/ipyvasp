@@ -372,8 +372,14 @@ class OutcarData(Dict2Data):
     _req_keys = ('site_pot','ion_pot','basis')
     def __init__(self,d):
         super().__init__(d)
+        
+    def masked(self, mask_sites):
+        "Returns a data with only the sites given by mask function over three coordinates, e.g. mask = lambda x, y, z: x == 1"
+        if not callable(mask_sites):
+            raise TypeError("mask_sites must be callable like lambda x,y,z: x == 1")
+        raise NotImplementedError("Not implemented yet")
+        return # ion_pot, site_pot, rename these with better names
     
-
 class EncodeFromNumpy(json.JSONEncoder):
     """Serializes python/Numpy objects via customizing json encoder.
     
