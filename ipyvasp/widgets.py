@@ -1313,7 +1313,7 @@ class KPathApp:
             self._fig.data = []
             with self._fig.batch_animate():
                 self._fig.add_trace(go.Scatter3d(x = [],y = [],z = [],
-                    mode='lines+text+markers',name='path',text=[],
+                    mode='lines+text',name='path',text=[], hoverinfo='none', # dont let it block other points
                     textfont_size=18))
                 self.__update_selection() #Show previous path on current fig.
                 for trace in fig_data.data:

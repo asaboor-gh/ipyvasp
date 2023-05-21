@@ -181,140 +181,76 @@ def iplot_rgb_lines(K, E, pros, labels, occs, kpoints,
     fig.add_trace(go.Scatter(x = K, y = E, mode = mode, **kwargs))
     
     fig.update_layout(title = (title or '') + '[' + ', '.join(labels) + ']',
-            margin=go.layout.Margin(l=60,r=50,b=40,t=75,pad=0),
+            margin = go.layout.Margin(l=60,r=50,b=40,t=75,pad=0),
             yaxis = go.layout.YAxis(title_text = 'Energy (eV)',range = elim or [min(E), max(E)]),
             xaxis = go.layout.XAxis(ticktext = xticklabels, tickvals = xticks,tickmode = "array",range = [min(K), max(K)]),
             font = dict(family="stix, serif",size=14)
     )
-
-    update_args = dict(linewidth = 0.1,linecolor = 'rgba(222,222,222,0.1)', mirror = True)
-    fig.update_xaxes(showgrid = True,zeroline = False,showline = True,**update_args)
-    fig.update_yaxes(showgrid = False,zeroline = True,showline = True,**update_args)
     return fig
 
-
-# Cell
-def iplot_dos_lines(
-    path_evr      = None,
-    atoms      = [[0,],],
-    orbs          = [[0],],
-    labels        = ['s',],
-    elim          = [],
-    colormap      = 'gist_rainbow',
-    tdos_color    = (0.5,0.95,0),
-    linewidth     = 2,
-    fill_area     = True,
-    vertical      = False,
-    Fermi       = None,
-    figsize       = None,
-    spin          = 'both',
-    interp        = None,
-    title         = None,
-    projections   = {}
-    ):
-        """
-        - Returns plotly's figure. If given,atoms,orbs colors, and labels must have same length. If not given, zeroth ions is plotted with s-orbital.
-        Args:)
-            - path_evr   : Path/to/vasprun.xml or output of `export_vasprun`. Auto picks in CWD.
-            - atoms   : List [[0,],] of ions indices, by defualt plot first ion's projections.
-            - orbs       : List [[0,],] lists of indices of orbitals, could be empty.
-            - labels     : List [str,] of orbitals labels. len(labels) == len(orbs) must hold.
-            - elim       : [min,max] of energy range.
-            - Fermi    : If not given, automatically picked from `export_vasprun`.
-            - colormap   : Matplotlib's standard color maps. Default is 'gist_ranibow'. Use 'RGB' if want to compare with `iplot_rgb_lines` with 3 projection inputs (len(orbs)==3).
-            - fill_area  : Default is True and plots filled area for dos. If False, plots lines only.
-            - vertical   : False, If True, plots along y-axis.
-            - interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
-            - figsize    : Tuple(width,height) in pixels, e.g. (700,400).
-            - projections : Dictionary with keys as label and values as list of length 2. If given, used in place of atoms, orbs and labels arguments.
-                        Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
-        - **Returns**
-            - fig        : Plotly's figure object.
-        """
-        if projections:
-            atoms,orbs,labels = sp._format_input(projections,rgb=False) 
-            # These are validated inisde _collect_dos, no need here
-        en,tdos,pdos,vr=None,None,None,None # Place holders for defining
-        cl_dos = sp._collect_dos(path_evr=path_evr,elim=elim,
-                            atoms=atoms, orbs=orbs,labels=labels,
-                            Fermi=Fermi, spin='both',interp=interp)
-        try:
-            en,tdos,pdos,labels,vr = cl_dos
-        except:
-            raise ValueError("Try with large energy range.")
-
-        labels=[label.replace('$','').replace('^↑','<sup>↑</sup>').replace('^↓','<sup>↓</sup>') for label in labels]
-        # Make additional colors for spin down. Inverted colors are better.
-        if(elim):
-            ylim=[min(elim),max(elim)]
-        else:
-            ylim=[-10,10]
-        # Fix atoms and colors length
-        if colormap in plt.colormaps():
-            from matplotlib.pyplot import cm
-            if len(tdos) == 2:
-                c_map   = cm.get_cmap(colormap)
-                c_vals  = np.linspace(0,1,2*len(orbs))
-                colors  = c_map(c_vals)
-            else:
-                c_map   = cm.get_cmap(colormap)
-                c_vals  = np.linspace(0,1,len(orbs))
-                colors  = c_map(c_vals)
-            # Fix for RGB comparison
-            if len(tdos) == 2 and 'both' in spin and len(orbs)==3:
-                colors[[-1,-2]]= colors[[-2,-1]] #Flip last two colors only
-        else:
-            raise ValueError("`colormap` expects one of the follwoing:\n{}".format(plt.colormaps()))
-        # Total DOS colors
-        t_color=mpl.colors.to_rgb(tdos_color)
-        it_color=gu.transform_color(t_color,c = -1) #inverts for c = -1
-        #========Title Name========
-        SYSTEM=vr.sys_info.SYSTEM
-        if(title==None):
-            title="{}".format(SYSTEM)
-
+def iplot_dos_lines(energy, dos_arrays, labels,
+    fig = None,
+    elim = None,
+    colormap = 'tab10',
+    colors = None,
+    fill = True,
+    vertical = False,
+    stack = False, 
+    interp = None,
+    **kwargs):
+    """
+    Plot density of states (DOS) lines.
+    
+    Parameters
+    ----------
+    energy : array-like, shape (n,)
+    dos_arrays : list of array_like, each of shape (n,) or array-like (m,n)
+    labels : list of str, length = len(dos_arrays) should hold.
+    fig : plotly.graph_objects.Figure, if not provided, a new figure will be created
+    elim : list of length 2, (emin, emax), if None, (min(energy), max(energy)) is used.
+    colormap : str, default 'tab10', any valid matplotlib colormap name. Note that colormap is take from matplotlib, not plotly.
+    colors : list of str, length = len(dos_arrays) should hold if given, and will override colormap. Should be valid CSS colors. 
+    fill : bool, default True, if True, fill the area under the DOS lines.
+    vertical : bool, default False, if True, plot DOS lines vertically.
+    stack : bool, default False, if True, stack the DOS lines. Only works for horizontal plots.
+    interp : int or list/tuple of (n,k), default None, if given, interpolate the DOS lines using spline.
+    
+    keyword arguments are passed to `plotly.graph_objects.Scatter`.
+    
+    Returns
+    -------
+    fig : plotly.graph_objects.Figure
+    """
+    energy, dos_arrays, labels, colors = sp._fix_dos_data(energy, dos_arrays, labels, colors, interp)
+    if fig is None:
         fig = go.Figure()
-        fig.update_layout(title=title,margin=go.layout.Margin(l=60,r=50,b=40,t=75,pad=0),\
-                          font=dict(family="stix, serif",size=14))
-        if(figsize!=None):
-            fig.update_layout(width=figsize[0],height=figsize[1],autosize=False)
-        if(vertical==False):
-            if(fill_area==False):
-                fill=None
-            if(fill_area==True):
-                fill='tozeroy'
-            args_dic=dict(mode='lines',linewidth=linewidth,fill=fill)
-            fig.update_xaxes(range=ylim,title='Energy (eV)')
-            if(len(tdos)==2):   # Spin polarized.
-                fig.add_scatter(x=en,y=tdos[0],line_color='rgb({},{},{})'.format(*[int(255*i) for i in t_color]),\
-                                 name='TDOS<sup>↑</sup>',**args_dic)
-                fig.add_scatter(x=en,y=tdos[1],line_color='rgb({},{},{})'.format(*[int(255*i) for i in it_color]),\
-                                 name='TDOS<sup>↓</sup>',**args_dic)
-            else:   # unpolarized.
-                fig.add_trace(go.Scatter(x=en,y=tdos,line_color='rgb({},{},{})'.format(*[int(255*i) for i in t_color]),\
-                              name='TDOS',**args_dic))
-            for p,l,c in zip(pdos,labels,colors):
-                fig.add_trace(go.Scatter(x=en,y=p,line_color='rgb({},{},{})'.format(*[int(255*i) for i in c]),\
-                               name=l,**args_dic))
-        if(vertical==True):
-            if(fill_area==False):
-                fill=None
-            if(fill_area==True):
-                fill='tozerox'
-            args_dic=dict(mode='lines',linewidth=linewidth,fill=fill)
-            fig.update_yaxes(range=ylim,title='Energy (eV)')
-            if(len(tdos)==2):   # Spin polarized.
-                fig.add_scatter(y=en,x=tdos[0],line_color='rgb({},{},{})'.format(*[int(255*i) for i in t_color]),\
-                                name='TDOS<sup>↑</sup>',**args_dic)
-                fig.add_scatter(y=en,x=tdos[1],line_color='rgb({},{},{})'.format(*[int(255*i) for i in it_color]),\
-                                name='TDOS<sup>↓</sup>',**args_dic)
-            else:   # unpolarized.
-                fig.add_trace(go.Scatter(y=en,x=tdos,line_color='rgb({},{},{})'.format(*[int(255*i) for i in t_color]),\
-                                name='TDOS',**args_dic))
-            for p,l,c in zip(pdos,labels,colors):
-                fig.add_trace(go.Scatter(y=en,x=p,line_color='rgb({},{},{})'.format(*[int(255*i) for i in c]),\
-                                name=l,**args_dic))
-        fig.update_xaxes(showgrid=True, zeroline=True,showline=True, linewidth=0.1, linecolor='rgba(222,222,222,0.1)', mirror=True)
-        fig.update_yaxes(showgrid=True, zeroline=True,showline=True, linewidth=0.1, linecolor='rgba(222,222,222,0.1)', mirror=True)
-        return fig
+        fig.update_layout(margin = go.layout.Margin(l=60,r=50,b=40,t=75,pad=0),
+                          font = dict(family="stix, serif",size=14))
+    if elim:
+        ylim = [min(elim),max(elim)]
+    else:
+        ylim = [min(energy),max(energy)]
+        
+    if colors is None:
+        from matplotlib.pyplot import cm
+        _colors = cm.get_cmap(colormap)(np.linspace(0,1,2*len(labels)))
+        colors  = ['rgb({},{},{})'.format(*[int(255*x) for x in c[:3]]) for c in _colors]
+    if vertical:
+        if stack:
+            raise NotImplementedError('stack is not implemented for vertical plots')
+        
+        _fill = 'tozerox' if fill else None
+        fig.update_yaxes(range = ylim,title='Energy (eV)')
+        fig.update_xaxes(title='DOS')
+        for arr,label,color in zip(dos_arrays,labels,colors):
+                fig.add_trace(go.Scatter(y = energy,x = arr,line_color=color,fill=_fill,mode='lines',name=label,**kwargs))
+    else:
+        extra_args = {'stackgroup':'one'} if stack else {}
+        _fill = 'tozeroy' if fill else None
+        fig.update_xaxes(range = ylim,title='Energy (eV)')
+        fig.update_yaxes(title='DOS')
+        for arr,label,color in zip(dos_arrays,labels,colors):
+            fig.add_trace(go.Scatter(x = energy,y = arr,line_color=color,fill=_fill,mode='lines',name=label,**kwargs,**extra_args))
+    
+    return fig
 

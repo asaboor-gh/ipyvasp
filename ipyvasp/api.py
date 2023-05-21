@@ -320,9 +320,11 @@ class POSCAR:
 
         coords = _specials.coords[inds][:,ijk]
         self._ax.plot(*coords.T,**plot_kwargs)
-
+        
         for c,text in zip(coords, labels):
             self._ax.text(*c,text,**label_kwargs)
+            
+        
         return self._ax
 
     def splot_cell(self, plane = None, ax = None,  color='blue', fill=True, vectors = (0,1,2), colormap='plasma', shade = True, alpha=0.4):
@@ -790,6 +792,9 @@ class Bands(_BandsDosBase):
         
         funcs = []
         if isinstance(projections, dict):
+            if not projections:
+                raise ValueError('`projections` dictionary should have at least one item.')
+            
             _funcs = [callable(value) for _, value in projections.items()]
             if any(_funcs) and not all(_funcs): # Do not allow mixing of callable and non-callable values, as comparison will not make sense
                 raise TypeError('Either all or none of the values of `projections` must be callable with two arguments evals, occs and return array of same shape as evals.')
@@ -801,6 +806,7 @@ class Bands(_BandsDosBase):
         
         elif projections is not None:
             raise TypeError('`projections` must be a dictionary or None.')
+        
             
         kpts = self._source.get_kpoints()
         eigens = self._source.get_evals(elim = elim, ezero = ezero, atoms = uatoms, orbs = uorbs, spins = uspins or None, bands = bands) # picks available spins if uspins is None
@@ -834,8 +840,8 @@ class Bands(_BandsDosBase):
                 if uorbs != -1:
                     orb = [i for i, o in enumerate(eigens.orbs) if o in orb]
                 sp = list(eigens.spins).index(sp) # index for spin is single
-                _pros  = np.take(eigens.pros[sp],atom,axis = 2).sum(axis = 2) # take dimension of spin and then sum over atoms leaves 3D array
-                _pros = np.take(_pros,orb,axis = 2).sum(axis = 2) # Sum over orbitals leaves 2D array
+                _pros  = np.take(eigens.pros[sp],atom,axis = 0).sum(axis = 0) # take dimension of spin and then sum over atoms leaves 3D array
+                _pros = np.take(_pros,orb,axis = 0).sum(axis = 0) # Sum over orbitals leaves 2D array
                 arrays.append(_pros)
 
             output['pros'] = np.array(arrays)
@@ -843,7 +849,7 @@ class Bands(_BandsDosBase):
             output.pop('orbs', None)
             output.pop('spins', None) # No more needed
         
-        output['shape'] = '(spin[evals]/selection[pros], kpoints, bands)'
+        output['shape'] = '(spin[evals,occs]/selection[pros], kpoints, bands)'
         
         self._data = serializer.Dict2Data(output) # Assign for later use
         return self._data

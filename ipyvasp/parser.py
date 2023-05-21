@@ -45,20 +45,29 @@ class DataSource:
     @property
     def bands(self):
         "Returns a Bands object to access band structure data and plotting methods."
-        from .api import Bands
-        return Bands(self)
+        if not hasattr(self, '_bands'):
+            from .api import Bands
+            self._bands = Bands(self)
+        
+        return self._bands # keep same instance to avoid data loss
     
     @property
     def dos(self):
         "Returns a Dos object to access density of states data and plotting methods."
-        from .api import DOS
-        return DOS(self)
-    
+        if not hasattr(self, '_dos'):
+            from .api import DOS
+            self._dos = DOS(self)
+        
+        return self._dos # keep same instance to avoid data loss
+        
     @property
     def poscar(self):
         "Returns a POSCAR class instance based on data from source."
-        from .api import POSCAR
-        return POSCAR(data = self.get_structure())
+        if not hasattr(self, '_poscar'):
+            from .api import POSCAR
+            self._poscar = POSCAR(data = self.get_structure())
+        
+        return self._poscar # keep same instance to avoid data loss
     
     # Following methods should be implemented in a subclass
     def get_summary(self): raise NotImplementedError("`get_summary` should be implemented in a subclass. See Vasprun.get_summary as example.")
@@ -133,6 +142,7 @@ class Vasprun(DataSource):
         info_dict['NELECTS'] = int(float(ET.fromstring(next(self.read('<i.*NELECT','</i>'))).text)) # Beacuse they are poorly writtern as float, come on VASP!
         info_dict['LSORBIT'] = True if 't' in ET.fromstring(next(self.read('<i.*LSORBIT','</i>'))).text.lower() else False
         info_dict['EFERMI']  = float(ET.fromstring(next(self.read('<i.*efermi','</i>'))).text)
+        info_dict['NEDOS'] = int(ET.fromstring(next(self.read('<i.*NEDOS','</i>'))).text)
         
         # Getting ions is kind of terrbile, but it works
         atominfo = ET.fromstringlist(self.read('<atominfo','</atominfo'))
@@ -179,16 +189,80 @@ class Vasprun(DataSource):
         return serializer.Dict2Data({'kpoints':kpoints,'coords':coords,'kpath': kpath, 'weights':weights,'rec_basis':rec_basis})
      
      
-    def get_dos(self, spin = 0, elim = None, ezero = None, atoms = None, orbs = None):
-        # Should be as energy(NE,), total(NE,), integrated(NE,), partial(NE, NATOMS(selected), NORBS) and atoms reference should be returned
-        # include vbm property as in evals, just from integrated dos and NELECT
-        # check size and if nothing, throw error
-        pass 
+    def get_dos(self, elim = None, ezero = None, atoms = None, orbs = None, spins = None):
+        """
+        Returns energy, total and integrated dos of the calculation. If atoms and orbs are specified, then partial dos are included too.
+        
+        Parameters
+        ----------
+        elim : tuple, energy range to be returned. Default is None, which returns full range. `elim` is applied around `ezero` if specified, otherwise around VBM.
+        ezero : float, energy reference to be used. Default is None, which uses VBM as reference. ezero is ignored if elim is not specified. In output data, ezero would be VBM or ezero itself if specified.
+        atoms : list/tuple/range, indices of atoms to be returned. Default is None, which does not return ionic projections.
+        orbs : list/tuple/range, indices of orbitals to be returned. Default is None, which does not return orbitals.
+        spins : list/tuple/range of spin sets indices to pick. If None, spin set will be picked 0 or [0,1] if spin-polarized. Default is None.
+        
+        Returns
+        -------
+        Dict2Data : object which includes `energy`,'tdos` and `idos` as attributes, and includes `pdos` if atoms and orbs specified. Shape of arrays a is (spins, [atoms, orbs], energy).
+        """
+        ds = (r.split()[1:4] for r in self.read('<total>','</total>') if '<r>' in r)
+        ds = (d for dd in ds for d in dd) # flatten
+        ds = np.fromiter(ds, dtype = float)
+        if ds.size:
+            ds = ds.reshape(-1, self.summary.NEDOS, 3) # E, total, integrated
+        else:
+            raise ValueError('No dos data found in the file!')
+        
+        en, total, integrad = ds.transpose((2,0,1))
+        vbm  = float(en[integrad < self.summary.NELECTS].max())
+        cbm = float(en[integrad > self.summary.NELECTS].min())
+        
+        zero = vbm 
+        grid_range = range(en.shape[1]) # default range full
+        if elim is not None:
+            if (not isinstance(elim, (list, tuple))) and (len(elim) != 2):
+                raise TypeError('elim should be a tuple of length 2')
+            
+            if ezero is not None:
+                if not isinstance(ezero, (int, np.integer, float)):
+                    raise TypeError('ezero should be a float or integer')
+                zero = ezero
+                
+            _max = np.max(np.where(en - zero <= np.max(elim))[1]) + 1 # +1 to make range inclusive
+            _min = np.min(np.where(en - zero >= np.min(elim))[1])
+            en = en[_min:_max]
+            total = total[_min:_max]
+            integrad = integrad[_min:_max]
+            grid_range = range(_min, _max)
+        
+        out = {'energy':en, 'tdos':total, 'idos':integrad, 'evc' : (vbm, cbm), 'ezero':zero}
         
         if atoms and orbs:
-            pass
+            if not list(self.read('<partial','')): # no partial dos, hust check that line
+                raise ValueError('No partial dos found in the file!')
+            
+            NSETS = int(re.findall('(\d+)',[r for r in self.read('<partial>','</partial>') if 'spin ' in r][-1])[0]) # Least worse way to read sets
+            which_spins = tuple(range(en.shape[0]))
+            if spins is not None:
+                if not isinstance(spins, (list, tuple,range)):
+                    raise TypeError('spins should be a list, tuple or range got {}'.format(type(spins)))
+                for s in spins:
+                    if (not isinstance(s, (int, np.integer))) and (s < 0):
+                        raise TypeError('spins should be a tuple/list/range of of positive integers')
+                which_spins = spins
+                
+            gen = (r.strip(' \n/<>r') for r in self.read(f'<partial>',f'</partial>') if '<r>' in r) # stripping is must here to ensure that we get only numbers  
+            data = gen2numpy(gen, (self.summary.NIONS, NSETS, self.summary.NEDOS, len(self.summary.orbs) + 1),[atoms,which_spins, grid_range, [o + 1 for o in orbs]], dtype = float) # No need to pick up the first column as it is the energy
+            
+            out['pdos'] =  data.transpose((1,0,3,2)) #(spins, atoms, orbitsl,energy)  same as in Vaspout
+            out['atoms'] = atoms
+            out['orbs'] = orbs
+            out['spins'] = which_spins
+                
         elif (atoms, orbs) != (None, None):
             raise ValueError('atoms and orbs should be specified together')
+        out['shape'] = '(spin, [atoms, orbitals], energy)'
+        return serializer.Dict2Data(out)
     
     def _get_spin_set(self, spin, bands, atoms, orbs, sys_info): 
         "sys_info is the summary data of calculation, used to get the shape of the array."
@@ -199,7 +273,7 @@ class Vasprun(DataSource):
         slices = [range(self._skipk, sys_info.NKPTS), bands, atoms, orbs]
             
         gen = (r.strip(' \n/<>r') for r in self.read(f'spin{spin+1}',f'spin{spin+2}|</projected') if '<r>' in r) # stripping is must here to ensure that we get only numbers
-        return gen2numpy(gen, shape,slices)
+        return gen2numpy(gen, shape,slices).transpose((2,3,0,1)) # (atoms, orbs, kpts, bands)
 
     def get_evals(self, elim = None, ezero = None, atoms = None, orbs = None, spins = None, bands = None): 
         """
@@ -216,7 +290,7 @@ class Vasprun(DataSource):
         
         Returns
         -------
-        Dict2Data object which includes `evals` and `occs` as attributes, and `pros` if atoms and orbs specified.
+        Dict2Data object which includes `evals` and `occs` as attributes, and `pros` if atoms and orbs specified. Shape arrays is (spin, [atoms, orbitals], kpts, bands)
         """
         info = self.summary
         bands_range = range(info.NBANDS)
@@ -227,7 +301,7 @@ class Vasprun(DataSource):
         if ev.size: # if not empty
             ev = ev.reshape((-1,info.NKPTS, info.NBANDS,2))[:,self._skipk:,:, :] # shape is (NSPIN, NKPTS, NBANDS, 2)
         else:
-            raise ValueError('No eigenvalues found for spin {}'.format(spin))
+            raise ValueError('No eigenvalues found in this file!')
         evals, occs = ev[:,:,:,0], ev[:,:,:,1]
         vbm = float(evals[occs > 0.5].max()) # more than half filled condition
         cbm = float(evals[occs < 0.5].min()) # less than half filled condition
@@ -277,14 +351,14 @@ class Vasprun(DataSource):
             for ws in which_spins:
                 pros.append(self._get_spin_set(ws, bands_range, atoms, orbs, info))
             
-            out['pros'] = np.array(pros) # (spins, kpoints, bands, atoms, orbitals)
+            out['pros'] = np.array(pros) # (spins, atoms, orbitals, kpoints, bands)
             out['atoms'] = atoms
             out['orbs'] = orbs
             out['spins'] = which_spins
             
         elif (atoms, orbs) != (None, None):
             raise ValueError('atoms and orbs should be passed together')
-        out['shape'] = '(spins, kpoints, bands, [atoms, orbitals])'
+        out['shape'] = '(spins, [atoms, orbitals], kpoints, bands)'
         return serializer.Dict2Data(out)
 
     def get_forces(self):
@@ -344,72 +418,6 @@ def xml2dict(xmlnode_or_filepath):
     return {'tag': node.tag,'text': text, 'attr':node.attrib, 'nodes': nodes}
 
 
-def get_tdos(xml_data,elim = []):
-    tdos=[]; #assign for safely exit if wrong spin set entered.
-    ISPIN = get_ispin(xml_data=xml_data)
-    for neighbor in xml_data.root.iter('dos'):
-        for item in neighbor[1].iter('set'):
-            if ISPIN == 1:
-                if item.attrib == {'comment': 'spin 1'}:
-                    tdos = np.array([[[float(entry) for entry in arr.text.split()] for arr in item]])
-            if ISPIN == 2:
-                if item.attrib == {'comment': 'spin 1'}:
-                    tdos_1 = [[float(entry) for entry in arr.text.split()] for arr in item]
-                if item.attrib=={'comment': 'spin 2'}:
-                    tdos_2 = [[float(entry) for entry in arr.text.split()] for arr in item]
-                tdos = np.array([tdos_1,tdos_2])
-            
-    for i in xml_data.root.iter('i'): 
-        if i.attrib == {'name': 'efermi'}:
-            efermi = float(i.text)
-    dos_dic= {'Fermi':efermi,'ISPIN':ISPIN,'tdos':tdos}
-    #Filtering in energy range.
-    if elim: #check if elim not empty
-        up_ind = np.max(np.where(tdos[:, :, 0] - efermi <= np.max(elim))[1]) + 1
-        lo_ind = np.min(np.where(tdos[:, :, 0] - efermi >= np.min(elim))[1])
-        tdos = tdos[:,lo_ind:up_ind,:]
-        dos_dic= {'Fermi':efermi,'ISPIN':ISPIN,'grid_range':range(lo_ind,up_ind),'tdos':tdos}
-    return serializer.Dict2Data(dos_dic)
-
-
-
-def get_dos_pro_set(xml_data,spin = 0,dos_range:range=None):
-    """Returns dos projection of a spin(default 0) as numpy array. If spin-polarized calculations, gives SpinUp and SpinDown keys as well.
-    
-    Args:
-        xml_data : From ``read_asxml`` function
-        spin (int): Spin set to get, default 0.
-        dos_range (range): If elim used in ``get_tdos``,that will return dos_range to use here..
-    
-    Returns:
-        Dict2Data : ``ipyvasp.Dict2Data`` with attibutes of dos projections and related parameters.
-    """
-    if dos_range != None:
-        check_list = list(dos_range)
-        if check_list == []:
-            raise ValueError("No DOS prjections found in given energy range.")
-
-    n_ions=get_summary(xml_data=xml_data).NION
-    for pro in xml_data.root.iter('partial'):
-        dos_fields=[field.text.strip()for field in pro.iter('field')]
-        #Collecting projections.
-        dos_pro=[]; set_pro=[]; #set_pro=[] in case spin set does not exists
-        for ion in range(n_ions):
-            for node in pro.iter('set'):
-                if(node.attrib=={'comment': 'ion {}'.format(ion+1)}):
-                    for sp in node.iter('set'):
-                        if(sp.attrib=={'comment': 'spin {}'.format(spin + 1)}):
-                            set_pro=[[float(entry) for entry in r.text.split()] for r in sp.iter('r')]
-            dos_pro.append(set_pro)
-    if dos_range==None: #full grid computed.
-        dos_pro=np.array(dos_pro) # shape(NION,e_grid,pro_fields)
-    else:
-        dos_range=list(dos_range)
-        min_ind=dos_range[0]
-        max_ind=dos_range[-1]+1
-        dos_pro=np.array(dos_pro)[:,min_ind:max_ind,:]
-    final_data = np.expand_dims(dos_pro,0).transpose((0,2,1,3)) # shape(1, NE,NIONS, NORBS + 1)
-    return serializer.Dict2Data({'labels':dos_fields,'pros':final_data})
 
 
 def gen2numpy(gen, shape, slices, raw:bool = False, dtype = float, delimiter = '\s+', include:str = None,exclude:str = '#',fix_format:bool = True):

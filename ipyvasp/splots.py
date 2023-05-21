@@ -949,263 +949,115 @@ def splot_color_lines(K, E, pros, labels,
     return axes
     
 
-# Cell
-def _select_pdos(
-    tdos        = None,
-    pdos_set    = None,
-    ions        = [0,],
-    orbs        = [0,],
-    Fermi       = 0,
-    interp      = None
-     ):
-    """
-    - Returns (interpolated/orginal) enrgy(N,), tdos(N,), and pdos(N,) of selected ions/orbitals.
-    Args:
-        - tdos     : `export_vasprun`().tdos or `get_tdos`().tdos. 
-        - pdos_set : `export_vasprun().pro_dos.pros` or `get_dos_pro_set`().pros. If calculations are spin-polarized, it will be `...pros.SpinUp/SpinDown` for both.
-        - ions     : List of ions to project on, could be `range(start,stop,step)` as well, remember that `stop` is not included in python. so `range(0,2)` will generate 0 and 1 indices.
-        - orbs     : List of orbitals indices to pick.
-        - Fermi  : Here it is zero. Needs to be input.
-        - interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
+def _fix_dos_data(energy, dos_arrays, labels, colors, interp):
+    if colors is not None:
+        if len(colors) != len(labels):
+            raise ValueError(
+                "If colors is given,they must have same length as labels.")
+    if len(dos_arrays) != len(labels):
+        raise ValueError("dos_arrays and labels must have same length.")
     
-    """
-    if tdos==[]:
-        raise ValueError("Can not plot empty DOS.")
-    en = tdos[:,0]-Fermi
-    t_dos = tdos[:,1]
-    pros = np.take(pdos_set[:,:,1:],list(ions),axis=0).sum(axis=0)
-    p_dos = np.take(pros,orbs,axis=1).sum(axis=1)
+    for i, arr in enumerate(dos_arrays):
+        if len(energy) != len(arr):
+            raise ValueError(f"array {i+1} in dos_arrays must have same length as energy.")
+    if len(dos_arrays) < 1:
+        raise ValueError("dos_arrays must have at least one array.")
+        
+    if interp and not isinstance(interp, (int, np.integer,list, tuple)):
+        raise ValueError("interp must be an integer or a list/tuple of (n,k).")
+    
+    if isinstance(interp, (list,tuple)) and len(interp) != 2:
+        raise ValueError("interp must be an integer or a list/tuple of (n,k).")
+    
+    
     if interp:
-        from ipyvasp import utils as gu
-        nk = interp if isinstance(interp, (list, tuple)) else (interp, 3)
-        _en,_tdos=gu.interpolate_data(en,t_dos,*nk)
-        _tdos = _tdos.clip(min=0)
-        _pdos = gu.interpolate_data(en,p_dos,*nk)[1].clip(min=0)
-    else:
-        _en,_tdos,_pdos=pdos_set[0,:,0]-Fermi,t_dos,p_dos # reading _en from projected dos if not interpolated.
+        nk = interp if isinstance(interp,(list,tuple)) else (interp,3) # default spline order is 3.
+        en, arr1 = gu.interpolate_data(energy, dos_arrays[0], nk)
+        arrays = [arr1]
+        for a in dos_arrays[1:]:
+            arrays.append(gu.interpolate_data(energy, a, nk)[1])
 
-    return _en,_tdos,_pdos
-
-# Cell
-def _collect_dos(
-    path_evr      = None,
-    elim          = [],
-    atoms      = [[0],],
-    orbs          = [[0],],
-    labels        = ['s',],
-    Fermi         = None,
-    spin          = 'both',
-    interp        = None
-    ):
-    """
-    - Returns lists of energy,tdos, pdos and labels. If given,atoms,orbs and labels must have same length. If not given, zeroth ions is collected with s-orbital.
-    Args:)
-        - path_evr   : Path/to/vasprun.xml or output of `export_vasprun`. Auto picks in CWD.
-        - elim       : [min,max] of energy range.
-        - Fermi    : If not given, automatically picked from `export_vasprun`.
-        - atoms   : List [[0],], by defualt and plot first ion's projections.
-        - orbs       : List [[0],] lists of indices of orbitals, could be empty.
-        - labels     : List [str,] of orbitals labels. len(labels)==len(orbs) must hold.  Auto adds `↑`,`↓` for ISPIN=2.
-        - spin       : Plot spin-polarized for spin {'up','down','both'}. Default is both.
-        - interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
+        return en, arrays, labels, colors
+        
+    return energy, dos_arrays, labels, colors
     
-    - **Returns**
-        - Energy : (N,1) size.
-        - tdos   : (N,1) size or [(N,1),(N,1)] if spin polarized.
-        - pdos   : [(N,1),(N,1),...], spin polarized is auto-fixed.
-        - labels : ['label1,'label2',...] spin polarized is auto-fixed.
-        - vr     : Exported vasprun.
+
+def splot_dos_lines(energy, dos_arrays, labels,
+    ax = None,
+    elim = None,
+    colormap = 'tab10',
+    colors = None,
+    fill = True,
+    vertical = False,
+    stack = False,
+    interp = None,
+    showlegend = True,
+    legend_kwargs = {
+        'ncol': 4, 'anchor': (0, 1.0),
+        'handletextpad' : 0.5,'handlelength' : 1,
+        'fontsize' : 'small','frameon' : False
+    },
+    **kwargs):
     """
-    vr = None# its broken, can't validate path_evr now
-
-    # Fix orbitals, atoms and labels lengths very early.
-    atoms,orbs,labels = (None,None,None)# not validate thing
-    # Main working here.
-    if vr.pro_dos == None:
-        raise ValueError("Can not plot an empty DOS object.")
-    if not spin in ('up','down','both'):
-        raise ValueError(
-            "spin can take `up`,`down` or `both` values only.")
-        return
-
-    if(Fermi==None):
-        Fermi=vr.tdos.Fermi
-    nfields = len(vr.pro_dos.labels) - 1 #
-
-
-    # After All Fixing
-    ISPIN=vr.sys_info.ISPIN
-    e,ts,ps,ls=None,None,[],[] # to collect all total/projected dos.
-    for elem,orb,label in zip(atoms,orbs,labels):
-        args_dict=dict(ions=elem,orbs=orb,interp=interp,Fermi=Fermi)
-        if ISPIN==1:
-            tdos=vr.tdos.tdos[0]
-            pdos_set=vr.pro_dos.pros
-            e,t,p = _select_pdos(tdos=tdos,pdos_set=pdos_set, **args_dict)
-            ps.append(p)
-            ls.append(label)
-            ts = t
-        if ISPIN==2:
-            tdos1=vr.tdos.tdos[0]
-            tdos2=vr.tdos.tdos[1]
-            pdos_set1=vr.pro_dos.pros.SpinUp
-            pdos_set2=vr.pro_dos.pros.SpinDown
-            if spin=='up':
-                e,t1,p1 = _select_pdos(tdos=tdos1,pdos_set=pdos_set1, **args_dict)
-                ps.append(p1)
-                ls.append((label+'$^↑$' if label else ''))
-                ts = t1
-            if spin=='down':
-                e,t2,p2 = _select_pdos(tdos=tdos2,pdos_set=pdos_set2, **args_dict)
-                ps.append(p2)
-                ls.append((label+'$^↓$' if label else ''))
-                ts = t2
-            if spin=='both':
-                e,t1,p1 = _select_pdos(tdos=tdos1,pdos_set=pdos_set1, **args_dict)
-                ps.append(p1)
-                ls.append((label+'$^↑$' if label else ''))
-                e,t2,p2 = _select_pdos(tdos=tdos2,pdos_set=pdos_set2, **args_dict)
-                ps.append(-p2)
-                ls.append((label+'$^↓$' if label else ''))
-                ts=[t1,-t2]
-    return e,ts,ps,ls,vr
-
-# Cell
-def splot_dos_lines(
-    path_evr      = None,
-    atoms      = [[0],],
-    orbs          = [[0],],
-    labels        = ['s',],
-    ax            = None,
-    elim          = [],
-    include_dos   = 'both',
-    colormap      = 'gist_rainbow',
-    tdos_color    = (0.8,0.95,0.8),
-    linewidth     = 0.5,
-    fill_area     = True,
-    vertical      = False,
-    Fermi         = None,
-    spin          = 'both',
-    interp        = None,
-    showlegend    = True,
-    legend_kwargs = {'ncol'         : 4,
-                   'anchor'         : (0,1),
-                   'handletextpad'  : 0.5,
-                   'handlelength'   : 1,
-                   'fontsize'       : 'small',
-                   'frameon'        : False
-                   },
-    projections    = {}
-    ):
-        """
-        - Returns ax object (if ax!=False) and plot on which all matplotlib allowed actions could be performed, returns lists of energy,tdos and pdos and labels. If given,atoms,orbs colors, and labels must have same length. If not given, zeroth ions is plotted with s-orbital.
-        Args:)
-            - path_evr   : Path/to/vasprun.xml or output of `export_vasprun`. Auto picks in CWD.
-            - atoms      : List [[0],], by defualt and plot first ion's projection.
-            - orbs       : List [[0],] lists of indices of orbitals, could be empty.
-            - labels     : List [str,] of orbitals labels. len(labels)==len(orbs) must hold.  Auto adds `↑`,`↓` for ISPIN=2.
-            - ax         : Matplotlib axes object, if None, one is created. If False, data lists are returned.
-            - include_dos: One of {'both','tdos','pdos'}.
-            - elim       : [min,max] of energy range.
-            - Fermi    : If not given, automatically picked from `export_vasprun`.
-            - colormap   : Matplotlib's standard color maps. Default is 'gist_ranibow'.
-            - fill_area  : Default is True and plots filled area for dos. If False, plots lines only.
-            - vertical   : False, If True, plots along y-axis.
-            - showlegend : True by defualt.
-            - spin       : Plot spin-polarized for spin {'up','down','both'}. Default is both.
-            - interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
-            - legend_kwargs: Dictionary to contain legend arguments to fix.
-            - projections : Dictionary with keys as label and values as list of length 2. If given, used in place of atoms, orbs and labels arguments.
-                        Example: {'s':([0,1],[0]),'p':([0,1],[1,2,3]),'d':([0,1],[4,5,6,7,8])} will pick up s,p,d orbitals of first two ions of system.
-        - **Returns**
-            - ax         : Matplotlib axes.
-        """
-        if include_dos not in ('both','pdos','tdos'):
-            raise ValueError("`include_dos` expects one of ['both','pdos','tdos'], got {}.".format(include_dos))
-
-        if projections:
-            atoms,orbs,labels = None, None, None # ._format_input(projections,rgb=False) 
-
-        en,tdos,pdos,vr=None,None,None,None # Placeholders for defining. must be here.
-        cl_dos=_collect_dos(path_evr=path_evr,
-                            elim=elim,
-                            atoms=atoms,
-                            orbs=orbs,
-                            labels=labels,
-                            Fermi=Fermi,
-                            spin=spin,
-                            interp=interp)
-        try:
-            en,tdos,pdos,labels,vr=cl_dos # Labels updated
-        except:
-            raise ValueError("Try with large energy range.")
-
-        if len(tdos) == 2:
-            c_map   = plt.cm.get_cmap(colormap)
-            c_vals  = np.linspace(0,1,2*len(orbs))
-            colors  = c_map(c_vals)
+    Plot density of states (DOS) lines.
+    
+    Parameters
+    ----------
+    energy : array-like, shape (n,)
+    dos_arrays : list of array_like, each of shape (n,) or array-like (m,n)
+    labels : list of str, length = len(dos_arrays) should hold.
+    ax : matplotlib.axes.Axes
+    elim : list of length 2, (emin, emax), if None, (min(energy), max(energy)) is used.
+    colormap : str, default 'tab10', any valid matplotlib colormap name.
+    colors : list of str, length = len(dos_arrays) should hold if given, and will override colormap.
+    fill : bool, default True, if True, fill the area under the DOS lines.
+    vertical : bool, default False, if True, plot DOS lines vertically.
+    stack : bool, default False, if True, stack the DOS lines. Only works for horizontal plots.
+    interp : int or list/tuple of (n,k), default None, if given, interpolate the DOS lines using spline.
+    showlegend : bool, default True, if True, show legend.
+    legend_kwargs : dict, default {'ncol': 4, 'anchor': (0, 1.0), 'handletextpad' : 0.5,'handlelength' : 1,'fontsize' : 'small','frameon' : False}, only used if showlegend is True.
+    
+    keyword arguments are passed to matplotlib.axes.Axes.plot or matplotlib.axes.Axes.fill_between or matplotlib.axes.Axes.fill_betweenx.
+    
+    Returns
+    -------
+    ax : matplotlib.axes.Axes
+    """
+    energy, dos_arrays, labels, colors = _fix_dos_data(energy, dos_arrays, labels, colors, interp) # validate data brfore plotting.
+    
+    if colors is None:
+        colors = plt.cm.get_cmap(colormap)(np.linspace(0,1,len(labels)))
+    
+    if ax is None:
+        ax = get_axes()
+        
+    if 'c' in kwargs:
+        kwargs.pop('c')
+    if 'color' in kwargs:
+        kwargs.pop('color')
+          
+    if stack:
+        if vertical:
+            raise NotImplementedError("stack is not supported for vertical plots.")
         else:
-            c_map   = plt.cm.get_cmap(colormap)
-            c_vals  = np.linspace(0,1,len(orbs))
-            colors  = c_map(c_vals)
-
-        # Make additional colors for spin down. Inverted colors are better.
-        t_color=mpl.colors.to_rgb(tdos_color)
-        it_color=gu.transform_color(t_color,c=-1) # -1 contrast inverts color
-        if ax == None:
-            ax = get_axes()
-        if vertical == False:
-            if fill_area == False:
-                if include_dos != 'pdos':
-                    if len(tdos) == 2:   # Spin polarized.
-                        ax.plot(en,tdos[0],color=(t_color),label=r'TDOS$^↑$',lw=linewidth)
-                        ax.plot(en,tdos[1],color=(it_color),label=r'TDOS$^↓$',lw=linewidth)
-                    else:   # unpolarized.
-                        ax.plot(en,tdos,color=(t_color),label='TDOS',lw=linewidth)
-                if include_dos != 'tdos':
-                    for p,l,c in zip(pdos,labels,colors):
-                        ax.plot(en,p, color=(c),linewidth=linewidth,label=l)
-            if fill_area == True:
-                if include_dos != 'pdos':
-                    if len(tdos) == 2:   # Spin polarized.
-                        ax.fill_between(en,tdos[0],color=(t_color),label=r'TDOS$^↑$',lw=0)
-                        ax.fill_between(en,tdos[1],color=(it_color),label=r'TDOS$^↓$',lw=0)
-                    else:   # unpolarized.
-                        ax.fill_between(en,tdos,color=(t_color),label='TDOS',lw=0)
-                if include_dos != 'tdos':
-                    for p,l,c in zip(pdos,labels,colors):
-                        ax.fill_between(en,p,color=(mpl.colors.to_rgba(c,0.4)),linewidth=0)
-                        ax.plot(en,p, color=(c),linewidth=linewidth,label=l)
-            if elim:
-                ax.set_xlim([min(elim),max(elim)])
-        if vertical == True:
-            if fill_area == False:
-                if include_dos != 'pdos':
-                    if len(tdos) == 2:   # Spin polarized.
-                        ax.plot(tdos[0],en,color=(t_color),label=r'TDOS$^↑$',lw=linewidth)
-                        ax.plot(tdos[1],en,color=(it_color),label=r'TDOS$^↓$',lw=linewidth)
-                    else:   # unpolarized.
-                        ax.plot(tdos,en,color=(t_color),label='TDOS',lw=linewidth)
-                if include_dos != 'tdos':
-                    for p,l,c in zip(pdos,labels,colors):
-                        ax.plot(p,en, color=(c),linewidth=linewidth,label=l)
-            if fill_area == True:
-                if include_dos != 'pdos':
-                    if len(tdos) == 2:   # Spin polarized.
-                        ax.fill_betweenx(en,tdos[0],color=(t_color),label=r'TDOS$^↑$',lw=0)
-                        ax.fill_betweenx(en,tdos[1],color=(it_color),label=r'TDOS$^↓$',lw=0)
-                    else:   # unpolarized.
-                        ax.fill_betweenx(en,tdos,color=(t_color),label='TDOS',lw=0)
-                if include_dos != 'tdos':
-                    for p,l,c in zip(pdos,labels,colors):
-                        ax.fill_betweenx(en,p,color=(mpl.colors.to_rgba(c,0.4)),linewidth=0)
-                        ax.plot(p,en, color=(c),linewidth=linewidth,label=l)
-            if elim:
-                ax.set_ylim([min(elim),max(elim)])
-        if showlegend == True:
-            add_legend(ax=ax,labels=[],colors=colors,widths=linewidth,**legend_kwargs)
-        return ax
-
+            ax.stackplot(energy, *dos_arrays, labels = labels, colors = colors, **kwargs)
+    else:
+        for arr, label, color in zip(dos_arrays, labels, colors):
+            if fill:
+                fill_func = ax.fill_betweenx if vertical else ax.fill_between
+                fill_func(energy, arr,color = mpl.colors.to_rgba(color,0.4))
+            if vertical:
+                ax.plot(arr, energy, label = label, color = color, **kwargs) 
+            else:
+                ax.plot(energy, arr, label = label, color = color, **kwargs)
+        
+    if showlegend:
+        add_legend(ax, **legend_kwargs) # Labels are picked from plot
+    
+    args = dict(ylim = elim or []) if vertical else dict(xlim = elim or [])
+    modify_axes(ax, zeroline = False, **args)
+    return ax
+        
 # Cell
 def plt2html(plt_fig=None,transparent=True,dash_html=None):
     """

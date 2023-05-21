@@ -1167,9 +1167,9 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)',background = 'r
             tr.hoverinfo = 'none' # avoid overlapping with special points
         
         texts,values =[],[]
-        norms = np.round(np.linalg.norm(bz_data.specials.coords,axis=1),16)
+        norms = np.round(np.linalg.norm(bz_data.specials.coords,axis=1),8)
         sps = bz_data.specials
-        for key,value, norm in zip(sps.kpoints, sps.coords, norms):
+        for key,value, norm in zip(sps.kpoints.round(6), sps.coords, norms):
             texts.append("K = {}</br>d = {}".format(key,norm))
             values.append([[*value,norm]])
 
