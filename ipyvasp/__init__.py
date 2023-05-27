@@ -17,6 +17,7 @@ __all__ = []
 
 from .api import __all__ as api_all
 from .parser import Vaspout, Vasprun, minify_vasprun
+from .widgets import FilesWidget
 
 __all__.extend(api_all)
 

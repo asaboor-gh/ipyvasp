@@ -50,7 +50,7 @@ mpl.rcParams['mathtext.fontset'] = "stix"
 # Cell
 def modify_axes(ax = None,xticks = [],xt_labels = [],xlim = [],\
             yticks = [],yt_labels = [],ylim = [],xlabel = None,ylabel = None,\
-            vlines = False,zeroline = True):
+            vlines = False,zeroline = True, **kwargs):
     """
     - Returns None, applies given settings on axes. Prefered to use before other plotting.
     Args:
@@ -61,6 +61,8 @@ def modify_axes(ax = None,xticks = [],xt_labels = [],xlim = [],\
         - (x,y)label : axes labels.
         - vlines : If True, draw vertical lines at points of xticks.
         - zeroline : If True, drawn when `xlim` is not empty.
+    
+    kwargs are passed to `ax.tick_params`
     """
     if ax is None:
         raise ValueError("Matplotlib axes (ax) is not given.")
@@ -85,7 +87,8 @@ def modify_axes(ax = None,xticks = [],xt_labels = [],xlim = [],\
             ax.set_xlabel(xlabel)
         if ylabel!=None:
             ax.set_ylabel(ylabel)
-        ax.tick_params(direction='in', top=True,bottom=True,left=True,right=True,length=4, width=0.3, grid_alpha=0.8)
+        kwargs = {**dict(direction='in', bottom=True,left = True,length=4, width=0.3, grid_alpha=0.8),**kwargs} # Default kwargs
+        ax.tick_params(**kwargs)
     return None
 
 # Cell
@@ -361,7 +364,7 @@ def splot_bands(K, E, ax = None, elim = None, kticks = None, interp = None, **kw
 
     ax = get_axes() if ax is None else ax
     if 'color' not in kwargs and 'c' not in kwargs:
-        kwargs['color'] = '#01579b' # default color dark blue
+        kwargs['color'] = 'C0' # default color from cycler to accommodate themes
     
     if 'linewidth' not in kwargs and 'lw' not in kwargs:
         kwargs['linewidth'] = 0.9 # default linewidth to make it look good
@@ -370,7 +373,7 @@ def splot_bands(K, E, ax = None, elim = None, kticks = None, interp = None, **kw
     _ = [line.set_label(None) for line in lines[1:]]
     
     modify_axes(ax = ax,ylabel = 'Energy (eV)', xticks = xticks, xt_labels = xticklabels,
-                xlim = [min(K),max(K)], ylim = elim, vlines = True)
+                xlim = [min(K),max(K)], ylim = elim, vlines = True,top=True, right=True)
     return ax
 
 # Cell
@@ -843,7 +846,7 @@ def splot_rgb_lines(K, E, pros, labels,
     line_coll, = _make_line_collection(**pros_data,rgb=True,colors_list= None, maxwidth = maxwidth, shadow = shadow)
     ax.add_collection(line_coll)
     ax.autoscale_view()
-    modify_axes(ax,xticks = xticks,xt_labels = xticklabels,xlim = [min(K), max(K)], ylim = elim, vlines = True)
+    modify_axes(ax,xticks = xticks,xt_labels = xticklabels,xlim = [min(K), max(K)], ylim = elim, vlines = True, top=True, right=True)
     #====================================================
     
     # Add colorbar/legend etc.
@@ -945,7 +948,7 @@ def splot_color_lines(K, E, pros, labels,
         xs, ys, colors = xyc_label
         _ = [add_text(ax, xs = xs, ys = ys, colors = colors, txts = lab) for ax, lab in zip(axes, labels)]
     
-    _ = [modify_axes(ax=ax,xticks=xticks,xt_labels=xticklabels,xlim=[min(K),max(K)],ylim = elim,vlines = True) for ax in axes]
+    _ = [modify_axes(ax=ax,xticks=xticks,xt_labels=xticklabels,xlim=[min(K),max(K)],ylim = elim,vlines = True,top=True, right=True) for ax in axes]
     return axes
     
 

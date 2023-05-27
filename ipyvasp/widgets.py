@@ -4,9 +4,10 @@ __all__ = ['css_style', 'dark_colors', 'light_colors', 'simple_colors', 'default
            'generate_summary', 'VasprunApp', 'KPathApp']
 
 # Cell
-import os, textwrap
+import re, os, textwrap
 import json
 from time import sleep
+from pathlib import Path
 
 # Widgets Imports
 from IPython.display import display, Markdown
@@ -179,6 +180,108 @@ default_colors = {  # Adopt Jupyterlab theme
  'hover_bg': 'var(--jp-border-color1,lightblue)',
  'accent'  : 'var(--jp-brand-color2,navy)'
 }
+
+class FilesWidget(VBox):
+    def __init__(self, base_path : str = '.', glob :str = '*', exclude :str = None) -> None:
+        for prop in (base_path, glob, exclude):
+            if prop and not isinstance(prop, str):
+                raise ValueError(f'Expected string, got {type(prop)}')
+            
+        VBox.__init__(self,_dom_classes = ['FilesWidget']) # This makes it truely a widget
+        self._files = [] # Selections stored as Path objects
+        self._widgets = {
+            'input': Text(value = base_path, description = 'Path:'),
+            'glob' : Text(value = glob, description = 'Glob:'),
+            'exclude' : Text(value = exclude or '', description = 'Exclude:'),
+            'lock' : Checkbox(value = False, description = 'Lock selection'),
+            'files' : Dropdown(options = [], description = 'File:'),
+        }
+        self.children = [self._widgets['input'], self._widgets['glob'], self._widgets['exclude']]
+        self._widgets['lock'].observe(self._lock_selection, names = ['value'])
+        
+        for key, value in self._widgets.items():
+            if key not in ['files','lock','title']:
+                value.on_submit(self._process)
+        
+        self._process(None) # Initial processing based on given values
+                
+    def _lock_selection(self, change):
+        for key, value in self._widgets.items():
+            if key not in ['files','lock']:
+                value.disabled = self._widgets['lock'].value # Don't allow changes even programatically
+        
+        if self._widgets['lock'].value:
+            self._widgets['lock'].description = f'{len(self._files)} files selected'
+            self.children = [self._widgets['lock'], self._widgets['files']]
+        else:
+            self.children = [self._widgets['input'],self._widgets['glob'],self._widgets['exclude']]
+        
+    def _process(self,change):
+        self._widgets['lock'].description = 'Processing...'
+        path = Path(self._widgets['input'].value)
+        glob = self._widgets['glob'].value
+        exclude = self._widgets['exclude'].value
+        files = [p for p in path.glob(glob)]
+        if exclude:
+            files = [p for p in files if not re.search(exclude,str(p))]
+            
+        self._widgets['files'].options = [str(p) for p in files] # shows only relative path
+        if self._widgets['files'].options:
+            self._widgets['files'].value = self._widgets['files'].options[0] # select first item, otherwise it throws error
+        self._files = [path.absolute() for path in files] # Store as full path
+        self.children = list(self._widgets.values()) #  show all widgets
+        self._widgets['lock'].description = f'{len(self._files)} files found. Lock selection?'
+        
+    @property
+    def files(self):
+        "Returns all availble files as Path objects."
+        return tuple(self._files)
+    
+    @property
+    def selected(self) -> Path:
+        "Returns selected item in the dropdown as Path object."
+        if self._widgets['files'].value: # if not empty, otherwise it throws error
+            return Path(self._widgets['files'].value).absolute() # return full path
+        
+    def get_sibling(self, name : str) -> Path:
+        "Returns sibling of selected item by a given name as Path object. This does not check if the sibling exists."
+        if self.selected:
+            return self.selected.parent / name
+        else:
+            raise ValueError('No file selected.')
+        
+    def interact(self, manual = False, **kwargs):
+        """
+        Interact with a function that takes a Path object as first argument. kwargs are passed to ipywidgets.interactive.
+        A CSS class 'FilesWidget-Interact' is added to the final widget to let you style it.
+        
+        .. highlight:: python
+        .. code-block:: python
+        
+            fw = FilesWidget()
+            @fw.interact(x=False)
+            def f(path,x):
+                print('path:',path)
+                print('Path Type: ', type(path))
+                print('x: ',x)
+        """
+        def inner(func):
+            def interact_func(files_dd, **kwargs):
+                return func(self.selected, **kwargs) # use as path object instead of string from options
+            
+            out = ipw.interactive(interact_func, {'manual': manual}, files_dd = self._widgets['files'], **kwargs)
+            output = out.children[-1] # get output widget
+            output.clear_output(wait = True) # clear output by waiting to avoid flickering, this is important
+            myout = HBox([
+                VBox(children = [
+                    self, 
+                    ipw.HTML('<hr/><style>.FilesWidget-Interact > div:first-child {padding-right:16px;}</style>'), 
+                    *out.children[1:-1] # exclude files_dd and Output widget
+                ]), 
+                VBox(children = [output])
+            ]).add_class('FilesWidget-Interact')
+            return display(myout) # return display to show in notebook, simple return does not work
+        return inner
 
 # Cell
 def get_files_gui(auto_fill = 'vasprun.xml', theme_colors = None, height=320):
@@ -1346,23 +1449,20 @@ class KPathApp:
         return _patches
 
     def get_data(self):
-        obj = [{k:v for k,v in kp.items() if k != 'b'} for kp in self.kcsn]
         patches = self.get_patches()
-        fmt_str = "{0:>16.10f}{1:>16.10f}{2:>16.10f} !{3} {4}"
         if patches:
-            p_strs = ['\n'.join([fmt_str.format(
-                                *self.kcsn[p]['k'],self.kcsn[p]['s'],self.kcsn[p]['n']
-                                               ) for p in ps]) for ps in patches]
-            return obj, '\n\n'.join(p_strs)
+            return tuple([(*self.kcsn[p]['k'],self.kcsn[p]['s'],self.kcsn[p]['n']) 
+                          if isinstance(self.kcsn[p]['n'],(int, np.integer)) 
+                          else(*self.kcsn[p]['k'],self.kcsn[p]['s'])
+                          for p in ps] for ps in patches)
         else:
-            return obj,'\n'.join([fmt_str.format(*kp['k'],kp['s'],kp['n']) for kp in self.kcsn])
-
-    def get_kpath(self,n=5,weight=None,ibzkpt=None,outfile=None):
-        "See Docs of pp.str2kpath for details."
+            return ([(*kp['k'],kp['s'],kp['n']) if isinstance(kp['n'],(int, np.integer)) else (*kp['k'],kp['s']) for kp in self.kcsn],) # still tuple to act for unpacking
+        
+    def get_kpath(self,n = 5,weight = None,ibzkpt = None,outfile = None):
+        "See Docs of ipyvasp.POSCAR.get_kpath for details."
+        kws = {k:v for k,v in locals().items() if k != 'self'}
         from ipyvasp import POSCAR
-        kws = dict(n=n,weight=weight,ibzkpt=ibzkpt,outfile=outfile)
-        _, k_str = self.get_data()
-        return POSCAR(self.path).str2kpath(k_str,**kws)
+        return POSCAR(self.path).get_kpath(*self.get_data(),**kws)
 
     def splot(self,text_kws = {}, plot_kws ={}, **kwargs):
         """Same as `pp.splot_bz` except it also plots path on BZ.

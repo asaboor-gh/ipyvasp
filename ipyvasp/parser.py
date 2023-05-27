@@ -271,7 +271,10 @@ class Vasprun(DataSource):
             
         shape = (sys_info.NKPTS, sys_info.NBANDS, sys_info.NIONS, len(sys_info.orbs))
         slices = [range(self._skipk, sys_info.NKPTS), bands, atoms, orbs]
-            
+        
+        if not list(self.read(f'spin{spin+1}','')):
+            raise ValueError(f'Given {spin} index for spin is larger than available in the file!')
+        
         gen = (r.strip(' \n/<>r') for r in self.read(f'spin{spin+1}',f'spin{spin+2}|</projected') if '<r>' in r) # stripping is must here to ensure that we get only numbers
         return gen2numpy(gen, shape,slices).transpose((2,3,0,1)) # (atoms, orbs, kpts, bands)
 
@@ -308,8 +311,8 @@ class Vasprun(DataSource):
         evc = (vbm,cbm) # Easy to plot this way like [0, np.ptp(evc)] can work for defult ezero
         zero = vbm # default value of ezero
         
-        kvbm = [k for k in np.where(evals == vbm)[0]] # keep as indices here, we don't know the cartesian coordinates of kpoints here
-        kcbm = [k for k in np.where(evals == cbm)[0]]
+        kvbm = [k for k in np.where(evals == vbm)[1]] # keep as indices here, we don't know the cartesian coordinates of kpoints here
+        kcbm = [k for k in np.where(evals == cbm)[1]]
         kvc = tuple(sorted(product(kvbm,kcbm),key = lambda K: np.ptp(K))) # bring closer points first by sorting
         
         if bands:

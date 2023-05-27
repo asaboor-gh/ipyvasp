@@ -655,7 +655,7 @@ def _format_input(projections, sys_info):
     
     types = list(sys_info.types.values())
     names = list(sys_info.types.keys())
-    max_ind = np.max(types)
+    max_ind = np.max([t for tt in types for t in tt]) # will be error if two ranges there to compare for max
     norbs = len(sys_info.orbs)
     
     # Set default values for different situations
@@ -813,7 +813,7 @@ class Bands(_BandsDosBase):
         
         if not spins:
             spins = eigens.spins # because they will be loaded anyway
-            if len(spins) == 1:
+            if len(spins) == 1 and labels: # in case projections not given, check label
                 spins = [spins[0] for _ in labels] # only one spin channel is available, so use it for all projections
         
         output = {'kpath': kpts.kpath, 'kpoints': kpts.kpoints, 'coords': kpts.coords, **eigens.to_dict()}

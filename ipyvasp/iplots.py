@@ -180,7 +180,7 @@ def iplot_rgb_lines(K, E, pros, labels, occs, kpoints,
     
     fig.add_trace(go.Scatter(x = K, y = E, mode = mode, **kwargs))
     
-    fig.update_layout(title = (title or '') + '[' + ', '.join(labels) + ']',
+    fig.update_layout(title = (title or '') + '[' + ', '.join(labels) + ']', # Do not set autosize = False, need to be responsive in widgets boxes
             margin = go.layout.Margin(l=60,r=50,b=40,t=75,pad=0),
             yaxis = go.layout.YAxis(title_text = 'Energy (eV)',range = elim or [min(E), max(E)]),
             xaxis = go.layout.XAxis(ticktext = xticklabels, tickvals = xticks,tickmode = "array",range = [min(K), max(K)]),
@@ -196,6 +196,7 @@ def iplot_dos_lines(energy, dos_arrays, labels,
     fill = True,
     vertical = False,
     stack = False, 
+    mode = 'lines',
     interp = None,
     **kwargs):
     """
@@ -212,6 +213,7 @@ def iplot_dos_lines(energy, dos_arrays, labels,
     colors : list of str, length = len(dos_arrays) should hold if given, and will override colormap. Should be valid CSS colors. 
     fill : bool, default True, if True, fill the area under the DOS lines.
     vertical : bool, default False, if True, plot DOS lines vertically.
+    mode : str, default 'lines', plotly mode, see modes in `plotly.graph_objects.Scatter`.
     stack : bool, default False, if True, stack the DOS lines. Only works for horizontal plots.
     interp : int or list/tuple of (n,k), default None, if given, interpolate the DOS lines using spline.
     
@@ -225,7 +227,7 @@ def iplot_dos_lines(energy, dos_arrays, labels,
     if fig is None:
         fig = go.Figure()
         fig.update_layout(margin = go.layout.Margin(l=60,r=50,b=40,t=75,pad=0),
-                          font = dict(family="stix, serif",size=14))
+                          font = dict(family="stix, serif",size=14)) # Do not set autosize = False, need to be responsive in widgets boxes
     if elim:
         ylim = [min(elim),max(elim)]
     else:
@@ -237,20 +239,20 @@ def iplot_dos_lines(energy, dos_arrays, labels,
         colors  = ['rgb({},{},{})'.format(*[int(255*x) for x in c[:3]]) for c in _colors]
     if vertical:
         if stack:
-            raise NotImplementedError('stack is not implemented for vertical plots')
+            raise NotImplementedError('stack is not supported for vertical plots')
         
         _fill = 'tozerox' if fill else None
         fig.update_yaxes(range = ylim,title='Energy (eV)')
         fig.update_xaxes(title='DOS')
         for arr,label,color in zip(dos_arrays,labels,colors):
-                fig.add_trace(go.Scatter(y = energy,x = arr,line_color=color,fill=_fill,mode='lines',name=label,**kwargs))
+                fig.add_trace(go.Scatter(y = energy,x = arr,line_color=color,fill=_fill,mode=mode,name=label,**kwargs))
     else:
         extra_args = {'stackgroup':'one'} if stack else {}
         _fill = 'tozeroy' if fill else None
         fig.update_xaxes(range = ylim,title='Energy (eV)')
         fig.update_yaxes(title='DOS')
         for arr,label,color in zip(dos_arrays,labels,colors):
-            fig.add_trace(go.Scatter(x = energy,y = arr,line_color=color,fill=_fill,mode='lines',name=label,**kwargs,**extra_args))
+            fig.add_trace(go.Scatter(x = energy,y = arr,line_color=color,fill=_fill,mode=mode,name=label,**kwargs,**extra_args))
     
     return fig
 

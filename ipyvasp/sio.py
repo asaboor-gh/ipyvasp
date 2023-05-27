@@ -644,8 +644,8 @@ def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec
     rec_basis: Reciprocal basis 3x3 array to use for calculating uniform points.
 
     - **Example**
-        > str2kpath('''0 0 0 !$\Gamma$ 3
-                    0.25 0.25 0.25 !L''')
+        > str2kpath('''0 0 0 $\Gamma$ 3
+                    0.25 0.25 0.25 L''')
         > Automatically generated using ipyvasp for HSK-PATH 0:$\Gamma$, 2:L
 	    >   3
         > Reciprocal Lattice
@@ -672,7 +672,7 @@ def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec
             point = [float(i) for i in data[:3]]
             
             if len(data) == 4:
-                _4th = data[3] if re.search('\$\\\\[a-zA-Z]+\$|[a-zA-Z]+|[α-ωΑ-Ω]+|\|', line) else int(data[3])
+                _4th = data[3] if re.search('\$\\\\[a-zA-Z]+\$|[a-zA-Z]+|[α-ωΑ-Ω]+|\|_', line) else int(data[3])
                 point.append(_4th)
             elif len(data) == 5:
                 _5th = int(data[4])
@@ -681,7 +681,7 @@ def str2kpath(kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None, rec
             hsk_list.append(point)
             
     if where_blanks:
-        filtered = [w-i for i,w in enumerate(where_blanks)]
+        filtered = [w - i for i,w in enumerate(where_blanks)]
         where_blanks = np.unique([0,*filtered,len(hsk_list)]).tolist()
 
     patches = [] if where_blanks else hsk_list #Fix up both
@@ -1036,8 +1036,10 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = 
             s_basis = bz_data.basis[(vectors,)]
 
             for k,y in zip(vectors,s_basis):
-                l = "\n" + r" ${}_{}$".format(_label,k+1)
-                ax.text(0.8*y[i],0.8*y[j], l, va='center',ha='left')
+                l = r" ${}_{} $".format(_label,k+1)
+                l = l + '\n' if y[j] < 0 else '\n' + l
+                ha = 'right' if y[i] < 0 else 'left'
+                ax.text(0.8*y[i], 0.8*y[j], l, va = 'center',ha=ha)
                 ax.scatter([y[i]],[y[j]],color='w',s=0.0005) # Must be to scale below arrow.
 
             s_zero = [0 for _ in s_basis] # either 3 or 2.
@@ -1188,6 +1190,7 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)',background = 'r
         colors[0]= "rgb(255,215,0)" # Gold color at Gamma!.
         fig.add_trace(go.Scatter3d(x=values[:,0], y=values[:,1],z=values[:,2],
                 hovertext=texts,name="HSK",marker=dict(color=colors,size=4),mode='markers'))
+    
     proj = dict(projection=dict(type = "orthographic")) if ortho3d else {}
     camera = dict(center=dict(x=0.1, y=0.1, z=0.1),**proj)
     fig.update_layout(scene_camera=camera,paper_bgcolor=background, plot_bgcolor=background,
@@ -1453,6 +1456,17 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
         cell_kwargs = {k:v for k,v in cell_kwargs.items() if k not in ['colormap','vectors','shade']} # those are specific to splot_bz
         cell_kwargs.update({'fig':  fig, 'ortho3d': ortho3d, 'special_kpoints': False})
         _ = iplot_bz(bz_data,**cell_kwargs)
+    else:
+        # These thing are update in iplot_bz function, but if cell_kwargs is None, then we need to update them here.
+        proj = dict(projection = dict(type = "orthographic")) if ortho3d else {}
+        camera = dict(center = dict(x = 0.1, y = 0.1, z = 0.1),**proj)
+        fig.update_layout(scene_camera = camera, paper_bgcolor = 'rgb(255,255,255)', plot_bgcolor='rgb(255,255,255)',
+            font_family="Times New Roman",font_size= 14,
+            scene = dict(aspectmode='data',
+                        xaxis = dict(showbackground = False, visible = False),
+                        yaxis = dict(showbackground = False, visible = False),
+                        zaxis = dict(showbackground = False, visible = False)),
+                        margin=dict(r=10, l=10,b=10, t=30))
     return fig
 
 # Cell
@@ -1560,6 +1574,8 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
         if label_kwargs:
             for i,coord in enumerate(coords):
                 ax.text(*coord,labels[i],**label_kwargs)
+        # Set aspect to same as data.
+        ax.set_box_aspect(np.ptp(bz_data.vertices,axis=0))
                 
     elif plane in 'xyzxzyx':
         iz, = [i for i in range(3) if i not in (ix,iy)]
@@ -1572,6 +1588,9 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
             labels = [labels[i] for i in zorder] # Reorder labels
             for i,coord in enumerate(coords[zorder]):
                 ax.text(*coord[[ix,iy]],labels[i],**label_kwargs)
+        
+        # Set aspect to display real shape.
+        ax.set_aspect(1)
 
     ax.set_axis_off()
     sp.add_legend(ax)
