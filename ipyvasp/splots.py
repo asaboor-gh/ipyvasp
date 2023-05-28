@@ -576,12 +576,14 @@ def _make_line_collection(maxwidth   = 3,
                          colors_list = None,
                          rgb         = False,
                          shadow      = False,
+                         uniwidth    = False,
                          **pros_data):
     """
     - Returns a tuple of line collections for each given projection data.
     - **Parametrs**
         - **pros_data: Output dictionary from `_fix_data` containing kpath, evals, colors arrays.
         - maxwidth  : Default is 3. Max linewidth is scaled to maxwidth if an int of float is given.
+        - uniwidth  : Default is False. If True, linewidth is set to maxwidth/2 for all lines. Only works for rgb_lines.
         - colors_list: List of colors for multiple lines, length equal to 3rd axis length of colors.
         - rgb        : Default is False. If True and np.shape(colors)[-1] == 3, RGB line collection is returned in a tuple of length 1. Tuple is just to support iteration.
     """
@@ -627,7 +629,7 @@ def _make_line_collection(maxwidth   = 3,
     if shadow:
         path_shadow = [path_effects.SimpleLineShadow(offset=(0,-0.8),rho=0.2),path_effects.Normal()]
     if rgb and np.shape(colors)[-1] == 3:
-        return (LineCollection(marr,colors=colors,linewidths=lws, path_effects = path_shadow),)
+        return (LineCollection(marr,colors=colors,linewidths = (maxwidth/2,) if uniwidth else lws, path_effects = path_shadow),)
     else:
         lcs = [LineCollection(marr,colors=_cl,linewidths=lw, path_effects = path_shadow) for _cl,lw in zip(lc_colors,lws)]
         return tuple(lcs)
@@ -771,6 +773,7 @@ def splot_rgb_lines(K, E, pros, labels,
     kticks     = None, 
     interp     = None, 
     maxwidth   = 3,
+    uniwidth   = False,
     colormap   = None,
     colorbar   = True,
     N          = 9,
@@ -790,6 +793,7 @@ def splot_rgb_lines(K, E, pros, labels,
     kticks : [(int, str),...] for indices of high symmetry k-points. To join a broken path, use '<=' before symbol, e.g.  [(0, 'G'),(40, '<=K|M'), ...] will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').
     interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
     maxwidth : float, maximum linewidth, 3 by default
+    uniwidth : bool, if True, use same linewidth for all patches to maxwidth/2. Otherwise, use linewidth proportional to projection value.
     colormap : str, name of a matplotlib colormap
     colorbar : bool, if True, add colorbar, otherwise add attribute to ax to add colorbar or color cube later
     N : int, number of colors in colormap
@@ -819,7 +823,9 @@ def splot_rgb_lines(K, E, pros, labels,
         _sum = np.sum(colors,axis=2)
         _sum[_sum == 0] = 1 # Avoid division error
         percent_colors = colors[:,:,1]/_sum # second one is on top
-        pros_data['pros'] = plt.cm.get_cmap(colormap or 'coolwarm',N)(percent_colors)[:,:,:3] # Get colors in RGB space.
+        _colors = plt.cm.get_cmap(colormap or 'coolwarm',N)(percent_colors)[:,:,:3] # Get colors in RGB space.
+        _colors[np.sum(colors,axis=2) == 0] = [0,0,0] # Set color to black if no total projection
+        pros_data['pros'] = _colors
 
     else:
         # Normalize color at each point only for 3 projections.
@@ -843,7 +849,7 @@ def splot_rgb_lines(K, E, pros, labels,
 
         pros_data['pros'] = pros_data['pros']/c_max
 
-    line_coll, = _make_line_collection(**pros_data,rgb=True,colors_list= None, maxwidth = maxwidth, shadow = shadow)
+    line_coll, = _make_line_collection(**pros_data,rgb=True,colors_list= None, maxwidth = maxwidth, shadow = shadow, uniwidth = uniwidth)
     ax.add_collection(line_coll)
     ax.autoscale_view()
     modify_axes(ax,xticks = xticks,xt_labels = xticklabels,xlim = [min(K), max(K)], ylim = elim, vlines = True, top=True, right=True)

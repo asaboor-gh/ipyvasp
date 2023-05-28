@@ -68,9 +68,6 @@ def _format_rgb_data(K, E, pros, labels, interp, occs, kpoints, maxwidth = 10, i
         KT = [*KT, *[f'K<sub>{j+1}</sub>: {x:>7.3f}{y:>7.3f}{z:>7.3f}' for j, (x,y,z) in enumerate(data['kpoints'])], ""]
         ET = [*ET, *["{}".format(b + 1) for _ in data['kpath']],""] # Add bands subscripts to labels.
     
-    if np.shape(data['evals'])[1] == 1: # If only one band, then remove last nan.
-        K, E, C, S, PT, OT, KT, ET = K[:-1], E[:-1], C[:-1], S[:-1], PT[:-1], OT[:-1], KT[:-1], ET[:-1]
-    
     T = [f"</br>{p} </br></br>Band: {e}  {o}</br>{k}" for (p,e,o,k) in zip(PT,ET, OT,KT)]
     return {'K':K, 'E':E, 'C':C, 'S':S, 'T':T, 'labels': labels} # K, energy, marker color, marker size, text, labels that get changed
 

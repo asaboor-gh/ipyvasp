@@ -83,7 +83,7 @@ _memebers = (
     sio.to_basis,
     sio.to_R3,
     sio.periodic_table,
-    wdg.generate_summary,
+    wdg.summarize,
     vp.minify_vasprun,
     vp.xml2dict,
     ip.iplot2html,
@@ -694,7 +694,7 @@ def _format_input(projections, sys_info):
         if np.min(B) < 0:
             raise IndexError("Only positive integers are allowed for selection of orbitals.")
         
-        orbs.append(B)
+        orbs.append(np.unique(B).tolist())
         
         # Fix atoms
         if isinstance(A, (int,np.integer)):
@@ -714,7 +714,7 @@ def _format_input(projections, sys_info):
             if np.min(A) < 0:
                 raise IndexError("Only positive integers are allowed for selection of atoms.")
             
-            atoms.append(A)
+            atoms.append(np.unique(A).tolist())
     
     if spins and len(atoms) != len(spins):
         raise ValueError("You should provide spin for each projection or none at all. If not provided, spin is picked from corresponding eigenvalues (up/down) for all projections.")
@@ -883,6 +883,7 @@ class Bands(_BandsDosBase):
         kticks     = None, 
         interp     = None, 
         maxwidth   = 3,
+        uniwidth   = False,
         colormap   = None,
         colorbar   = True,
         N          = 9,
