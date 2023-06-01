@@ -124,6 +124,28 @@ def iplot2html(fig,filename = None, out_string = False, modebar = True):
             from IPython.display import HTML
             return HTML(template)
         
+def iplot2widget(fig, fig_widget = None, template = None): 
+    "Converts plotly's figure to FigureWidget by copying attributes and data. If fig_widget is provided, it will update it. Adds template if provided."
+    if not isinstance(fig,go.Figure):
+        raise ValueError("fig must be instance of plotly.graph_objects.Figure")
+    
+    if fig_widget is None:
+        fig_widget = go.FigureWidget()
+    elif not isinstance(fig_widget,go.FigureWidget):
+        raise ValueError("fig_widget must be FigureWidget")
+    
+    fig_widget.data = [] # Clear previous data
+    if template is not None:
+        fig.layout.template = template # will make white flash if not done before
+    
+    fig_widget.layout = fig.layout
+        
+    with fig_widget.batch_animate():
+        for data in fig.data:
+            fig_widget.add_trace(data)
+        
+    return fig_widget
+        
 def iplot_rgb_lines(K, E, pros, labels, occs, kpoints,
     fig        = None,
     elim       = None,
@@ -177,7 +199,7 @@ def iplot_rgb_lines(K, E, pros, labels, occs, kpoints,
     
     fig.add_trace(go.Scatter(x = K, y = E, mode = mode, **kwargs))
     
-    fig.update_layout(title = (title or '') + '[' + ', '.join(labels) + ']', # Do not set autosize = False, need to be responsive in widgets boxes
+    fig.update_layout(template = 'plotly_white', title = (title or '') + '[' + ', '.join(labels) + ']', # Do not set autosize = False, need to be responsive in widgets boxes
             margin = go.layout.Margin(l=60,r=50,b=40,t=75,pad=0),
             yaxis = go.layout.YAxis(title_text = 'Energy (eV)',range = elim or [min(E), max(E)]),
             xaxis = go.layout.XAxis(ticktext = xticklabels, tickvals = xticks,tickmode = "array",range = [min(K), max(K)]),

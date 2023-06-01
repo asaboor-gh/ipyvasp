@@ -77,16 +77,17 @@ _memebers = (
     gu.transform_color,
     gu.interpolate_data,
     sio.get_kpath,
-    sio.str2kpath,
     sio.fancy_quiver3d,
     sio.rotation,
     sio.to_basis,
     sio.to_R3,
+    sio.get_kpath,
     sio.periodic_table,
     wdg.summarize,
     vp.minify_vasprun,
     vp.xml2dict,
     ip.iplot2html,
+    ip.iplot2widget,
     sp.plt2html,
     sp.plt2text,
     sp.show,
@@ -314,12 +315,15 @@ class POSCAR:
 
         inds =  nearest if nearest else range(len(_specials.kpoints)//2) # if not given, take half of points in positive side 
         if not labels:
-            labels = ["[{0:6.3f}, {1:6.3f}, {2:6.3f}]".format(*_specials.kpoints[i]) for i in inds]
+            labels = ["[{0:5.2f}, {1:5.2f}, {2:5.2f}]".format(*_specials.kpoints[i]) for i in inds]
             if nearest:
                 labels = [f"{n}: {_lab}" for n, _lab in zip(nearest, labels)]
 
         coords = _specials.coords[inds][:,ijk]
-        self._ax.plot(*coords.T,**plot_kwargs)
+        if nearest:
+            self._ax.plot(*coords.T,**plot_kwargs)
+        else:
+            self._ax.scatter(*coords.T) # do not mess up path, also plot_kwargs are not passed to scatter as not all work
         
         for c,text in zip(coords, labels):
             self._ax.text(*c,text,**label_kwargs)
@@ -463,12 +467,8 @@ class POSCAR:
         return sio.get_kmesh(self.data, *args, shift = shift, weight = weight, cartesian = cartesian,ibzkpt= ibzkpt, outfile=outfile, endpoint = endpoint)
 
     @_sub_doc(sio.get_kpath,'- rec_basis')
-    def get_kpath(self,*patches, n = 5,weight= None ,ibzkpt = None,outfile=None):
-        return sio.get_kpath(*patches, n = n, weight= weight ,ibzkpt = ibzkpt,outfile=outfile, rec_basis = self.data.rec_basis)
-
-    @_sub_doc(sio.str2kpath,'- rec_basis')
-    def str2kpath(self, kpath_str,n = 5, weight = None, ibzkpt = None, outfile = None):
-        return sio.str2kpath(kpath_str, n = n, weight = weight, ibzkpt = ibzkpt, outfile = outfile, rec_basis = self.data.rec_basis)
+    def get_kpath(self,kpoints, n = 5,weight= None ,ibzkpt = None,outfile=None):
+        return sio.get_kpath(kpoints, n = n, weight= weight ,ibzkpt = ibzkpt,outfile=outfile, rec_basis = self.data.rec_basis)
 
 
     def bring_in_cell(self,points):

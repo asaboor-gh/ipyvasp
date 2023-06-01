@@ -6,9 +6,10 @@ __all__ = ['css_style', 'dark_colors', 'light_colors', 'simple_colors', 'default
 # Cell
 import re, os, textwrap
 import json
-from time import sleep
+from time import sleep, time
 from pathlib import Path
 from collections import Iterable
+from functools import lru_cache
 
 # Widgets Imports
 from IPython.display import display, Markdown
@@ -182,13 +183,16 @@ default_colors = {  # Adopt Jupyterlab theme
  'accent'  : 'var(--jp-brand-color2,navy)'
 }
 
-def summarize(files, func):
-    """Apply given func to each file in files and return a dataframe of the results.
+def summarize(files, func, **kwargs):
+    """
+    Apply given func to each file in files and return a dataframe of the results.
     
     Parameters
     ----------
     files: Iterable, must be an iterable of PathLike objects, a dictionary of {name: PathLike} pairs also works and name appears in the dataframe.
     func: callable with a single arguemnt path.  Must return a dictionary.
+    
+    kwargs: passed to func itself.
     """
     if not callable(func):
         raise TypeError('Argument `func` must be a function.')
@@ -202,7 +206,7 @@ def summarize(files, func):
     
     outputs = []
     for name, path in files.items():
-        output = func(path)
+        output = func(path, **kwargs)
         if not isinstance(output,dict):
             raise TypeError('Function must return a dictionary.')
         
@@ -305,73 +309,209 @@ class FilesWidget(VBox):
         else:
             raise ValueError('No file selected.')
         
-    def interact(self, *other_widgets, manual = False, **kwargs):
+    def interactive(self, func, other_widgets = None, other_controls = None, options = {'manual':False}, max_height = '90vh', **kwargs):
         """
-        Interact with a function that takes a Path object as first argument.
-        A CSS class 'FilesWidget-Interact' is added to the final widget to let you style it.    
-        
-        Parameters
-        ----------
-        other_widgets : any displayable widget. These are placed below the output widget of interact.
-            For example you can add plotly's FigureWidget that updates based on the selection, but is not part of the function, so it is displayed only once.
-        manual : bool, default is False. If True, the decorated function is not called automatically, and you have to call it manually on button press.
-        
-        kwargs are passed to ipywidgets.interactive and decorated function. Resulting widgets are placed below the file selection widget.
-        
-        The decorated function can be called later separately as well, and has .args and .kwargs attributes to access the latest arguments 
-        and .autocall() method to call the function with latest arguments without explicitly passing them. For a function `f`, `f.autocall()` is same as `f(*f.args, **f.kwargs)`.
+        Interact with a function that takes selected Path as first argument. Returns a widget that saves attributes of the function call such as .f, .args, .kwargs.
+        See docs of self.interact for more details on the parameters. kwargs are passed to ipywidgets.interactive to create controls.
         
         .. highlight:: python
         .. code-block:: python
         
             fw = FilesWidget()
-            @fw.interact(x=False)
+            out = fw.interactive(lambda path: print(path.read_text())) # prints contents of selected file on output widget
+            out.f # function
+            out.args # arguments
+            out.kwargs # keyword arguments
+            out.result # result of function call which is same as out.f(*out.args, **out.kwargs)
+            out.files_widget # reference to FilesWidget created, not the same as fw because it is a new instance
+        .. note::
+            If you don't need to interpret the result of the function call, you can use the @self.interact decorator instead.
+        """
+        # Make new FilesWidget with same parameters, to allow multiple interact calls
+        new_fw = self.__class__(base_path = self._widgets['input'].value, glob = self._widgets['glob'].value, exclude = self._widgets['exclude'].value)
+        info = ipw.HTML().add_class('FW-Progess')
+        
+        def interact_func(filename, **kwargs):
+            if filename: # This would be None if no file is selected
+                info.value = _progress_svg
+                try: 
+                    start = time()
+                    print(f'Running {func.__name__}({filename!r}, {kwargs})') # it also serves as removing the output errors
+                    func(Path(filename).absolute(), **kwargs) # Have Path object absolue if user changes directory
+                    print(f'Finished in {time() - start:.3f} seconds.')               
+                finally:
+                    info.value = ''
+        
+        out = ipw.interactive(interact_func, options, filename = new_fw._widgets['files'], **kwargs)
+        
+        out.files_widget = new_fw # save reference to FilesWidget
+        out.output_widget = out.children[-1] # save reference to output widget for other widgets to use
+        
+        if options.get('manual',False):
+            out.interact_button = out.children[-2] # save reference to interact button for other widgets to use
+        
+        output = out.children[-1] # get output widget
+        output.clear_output(wait = True) # clear output by waiting to avoid flickering, this is important
+        output.layout = ipw.Layout(overflow = 'auto', max_height = '100%', width = '100%') # make output scrollable and avoid overflow
+        
+        others = out.children[1:-1] # exclude files_dd and Output widget
+        _style = '''<style>
+        .FilesWidget-Interact {max-height:90vh;width:100%;}
+        .FilesWidget-Interact > div {overflow:auto;max-height:100%;padding:8px;}
+        .FilesWidget-Interact > div:first-child {width:40%}
+        .FilesWidget-Interact > div:last-child {width:60%}
+        .FilesWidget-Interact .FW-Progess {position:absolute !important; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1}
+        </style>'''
+        if others:
+            others = [ipw.HTML(f'<hr/>{_style}'), *others]
+        else:
+            others = [ipw.HTML(_style)]
+            
+        if other_controls and not isinstance(other_controls, (list,tuple)):
+            raise TypeError('other_controls must be a list or tuple of widgets.')
+
+        
+        if other_widgets and not isinstance(other_widgets, (list,tuple)):
+            raise TypeError('other_widgets must be a list or tuple of widgets.')
+        
+        if other_widgets:
+            out_collapser = ipw.Checkbox(description = 'Hide output widget', value = False)
+            def toggle_output(change):
+                if out_collapser.value:
+                    output.layout.height = '0px' # dont use display = 'none' as it will clear widgets and wont show again
+                else:
+                    output.layout.height = 'auto'
+            out_collapser.observe(toggle_output, 'value')
+            others.append(out_collapser)
+            
+        # This should be below output collapser
+        others = [*others, ipw.HTML(f'<hr/>'), *(other_controls or [])] # add hr to separate other controls
+            
+        out.children = [HBox([ # reset children to include new widgets
+            VBox(children = [new_fw, VBox(others)]), # other widgets in box to make scrollable independent file selection 
+            VBox(children = [Box([output]), *(other_widgets or []), info]), # output in box to make scrollable, 
+        ]).add_class('FilesWidget-Interact')]
+        out.layout.max_height = max_height # important for every widget separately
+        return out
+        
+    def interact(self, other_widgets =  None, other_controls = None, options = {'manual':False}, max_height = '90vh', **kwargs):
+        """
+        Interact with a function that takes a selected Path as first argument.
+        A CSS class 'FilesWidget-Interact' is added to the final widget to let you style it.    
+        
+        Parameters
+        ----------
+        other_widgets : list/tuple of any displayable widget. These are placed below the output widget of interact.
+            For example you can add plotly's FigureWidget that updates based on the selection, but is not part of the function, so it is displayed only once.
+        other_controls : list/tuple, default is None. If not None, these are assumed to be ipywidgets and are placed below the widgets created by kwargs. These are not passed to the decorated function.
+        options : dict, default is {'manua':False}. If True, the decorated function is not called automatically, and you have to call it manually on button press. You can pass button name as 'manual_name' in options.
+        max_height : str, default is '90vh'. Max height of the final widget. This is important to avoid very long widgets.
+        
+        kwargs are passed to ipywidgets.interactive and decorated function. Resulting widgets are placed below the file selection widget.
+        
+        `other_widgets` can be controlled by `other_controls` externally. For example, you can add a button to update a plotly's FigureWidget.
+        
+        The decorated function can be called later separately as well, and has .args and .kwargs attributes to access the latest arguments 
+        and .result method to access latest. For a function `f`, `f.result` is same as `f(*f.args, **f.kwargs)`.
+        
+        .. highlight:: python
+        .. code-block:: python
+        
+            fw = FilesWidget()
+            @fw.interact(x = False)
             def f(path,x):
                 print('path:',path)
                 print('Path Type: ', type(path))
                 print('x: ',x)
-            
-            # f(*f.args, **f.kwargs) # call function separately with latest arguments
-            # f.autocall() # retuns same as above, keeps parameters in sync automatically
+        
+        .. note::
+            Use self.interactive to get a widget that stores the argements and can be called later in a notebook cell.
         """
         def inner(func):
-            info = ipw.HTML().add_class('FW-Progess')
-            def interact_func(files_dd, **kwargs):
-                func.autocall = lambda: func(self.selected, **kwargs) # call function with latest arguments
-                func.args = (self.selected,) # store selected file as first argument
-                func.kwargs = kwargs # store recent kwargs
-                if self.selected:
-                    info.value = _progress_svg
-                    func(self.selected, **kwargs) # use as path object instead of string from options
-                    info.value = ''
-                else:
-                    print('No file selected.')
-            
-            out = ipw.interactive(interact_func, {'manual': manual}, files_dd = self._widgets['files'], **kwargs)
-            output = out.children[-1] # get output widget
-            output.clear_output(wait = True) # clear output by waiting to avoid flickering, this is important
-            
-            others = out.children[1:-1] # exclude files_dd and Output widget
-            _style = '''<style>
-            .FilesWidget-Interact > div:first-child {padding-right:16px;}
-            .FilesWidget-Interact .FW-Progess {position:absolute !important; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1}
-            </style>'''
-            if others:
-                others = [ipw.HTML(f'<hr/>{_style}'), *others]
-            else:
-                others = [ipw.HTML(_style)]
-            
-            display(HBox([
-                VBox(children = [self, *others]), 
-                VBox(children = [output,*other_widgets, info]), # output in box to make scrollable, 
-            ]).add_class('FilesWidget-Interact')) # display to show in notebook
-            
+            display(self.interactive(func, other_widgets = other_widgets, other_controls = other_controls, options = options, max_height = max_height,**kwargs))
             return func
-        return inner
+        return inner 
     
-    def summarize(self, func):
-        "Summarize the results from all selected files using a function that takes a Path object as the only argument. Returns a dataframe."
-        return summarize({key: value for key,value in zip(self._widgets['files'].options, self._files)}, func)
+    def summarize(self, func, **kwargs):
+        """Summarize the results from all selected files using a function that takes a Path object as first arguement.
+        kwargs are passed to function. Returns a dataframe."""
+        return summarize({key: value for key,value in zip(self._widgets['files'].options, self._files)}, func, **kwargs)
+
+
+class PropsPicker(ipw.VBox):
+    def __init__(self, system_summary):
+        super().__init__()
+        self._widgets = {
+            'spin': ipw.BoundedIntText(min=0,max=4), # should be fixed by summary.NSETS, define that
+            'atoms': ipw.SelectionSlider(options = ['Atom-1'],description='Atoms'),
+            'orbs': ipw.SelectionSlider(options= ['Orbs-1'],description = 'Orbs')
+        }
+        self._atoms = {}
+        self._orbs = {}
+        self._process(system_summary)
+        
+    def _process(self, system_summary):
+        if not hasattr(system_summary, 'orbs'):
+            self.children = [ipw.HTML('❌ No projection data found!')]
+            return None
+        
+        label = lambda name: ipw.Label(name,layout = ipw.Layout(width='3.5em'))
+        self.children = [
+            self._widgets['atoms'],
+            self._widgets['orbs'],
+            ipw.HBox([label('Spin:'),self._widgets['spin']]), 
+        ]
+        # self.layout.width = '17em'
+        # for w in self._widgets.values():
+        #     w.layout.width = '4.5em'
+            
+        self._orbs = {lab:idx for idx,lab in enumerate(system_summary.orbs)}
+        self._widgets['orbs'].options = system_summary.orbs
+            
+        atoms = {}
+        for key, tp in system_summary.types.to_dict().items():
+            for n, v in enumerate(tp, start = 1):
+                atoms[f'{key}{n}'] = v
+        self._atoms = atoms
+        self._widgets['atoms'].options = list(atoms.keys())
+        
+    def update(self, system_summary):
+        return self._process(system_summary)
+            
+    @property
+    def props(self):
+        items = {k:w.value for k,w in self._widgets.items()}
+        items['atoms'] = sorted([self._atoms[items['atoms']]])
+        items['orbs'] = sorted([self._orbs[ items['orbs']]])
+        items['label'] = f"{self._widgets['atoms'].value}-{self._widgets['orbs'].value}"
+        return items
+    
+class PropsPickers(ipw.VBox):
+    def __init__(self, system_summary, func, N = 3):
+        super().__init__()
+        self._modifiers = tuple(ipw.Button(description=s) for s in ['+','-'])
+        self._linked = ipw.Dropdown(options = [str(i+1) for i in range(N)] if N!=3 else ('Red', 'Green', 'Blue'),description = 'Projection' if N != 3 else 'Color')
+        self._stacked = ipw.Stack(children =  tuple(PropsPicker(system_summary) for _ in range(N)),selected_index = 0)
+        self._button = ipw.Button(description = 'Click Me')
+        self._button.on_click(func)
+        
+        for child in self._stacked.children:
+            child.children[-1].children = [*child.children[-1].children, self._button]
+        ipw.link((self._linked, 'index'), (self._stacked, 'selected_index'))
+        self.children = [self._linked, *self._modifiers,self._stacked]
+        
+    def update(self, system_summary):
+        for child in self._stacked.children:
+            child.update(system_summary)
+    
+    @property
+    def projections(self):
+        out = {}
+        for child in self._stacked.children:
+            props = child.props
+            if props['atoms'] and props['orbs']: # empty not allowed
+                out[props['label']] = (props['spin'], props['atoms'], props['orbs'])
+        return out
 
 # Cell
 def get_files_gui(auto_fill = 'vasprun.xml', theme_colors = None, height=320):
@@ -1297,7 +1437,6 @@ class KPathApp:
         self.kcsn = [] #KPOINTS, COORDS,SYMBOLS, N_per_interval and box symbol in dictionary per item
         self._buttons = {'delete':Button(description='Delete Selection'),
                         'add':Button(description='Add Point'),
-                        'patch':Button(description='Split Path'),
                         'fig_up': Button(description='Update Figure'),
                         'theme': Button(description='Dark Theme')}
         self.sm = SelectMultiple(layout=Layout(width='100%'))
@@ -1307,7 +1446,6 @@ class KPathApp:
 
         self._buttons['delete'].on_click(self.__delete)
         self._buttons['add'].on_click(self.__add)
-        self._buttons['patch'].on_click(self.__add_patch)
         self._buttons['theme'].on_click(self.__toggle_theme)
         self._buttons['fig_up'].on_click(self.__update_fig)
         self._texts['label'].on_submit(self.__label)
@@ -1371,7 +1509,7 @@ class KPathApp:
             t.layout.width='85%'
         top_row = HBox([self._files_dd,self._buttons['fig_up']]).add_class('borderless')
         _buttons1 = HBox([self._buttons[b] for b in ['add','delete']]).add_class('borderless')
-        _buttons2 = HBox([self._buttons[b] for b in ['patch','theme']]).add_class('borderless')
+        _buttons2 = HBox([self._buttons[b] for b in ['theme']]).add_class('borderless')
         self._tab.children = [self._tab.children[0],
                             HBox([
                                   VBox([self.theme_html,
@@ -1410,25 +1548,6 @@ class KPathApp:
         self.sm.options = [*self.sm.options,('You just added me',len(self.sm.options))]
         self.sm.value = (len(self.sm.options) - 1,) # make available
 
-    @_output.capture(clear_output=True,wait=True)
-    def __add_patch(self,change):
-        vs = [v for v in self.sm.value if v > 1 and v < len(self.sm.options) - 1]
-        opts = list(self.sm.options)
-        for i,v in enumerate(self.sm.options):
-            # Clean previous action
-            if i > 0 and i < len(opts) - 1: #Avoid end points
-                self.kcsn[i]['b'] = '├'
-                opts[i] = (self.__label_at(i),i)
-            #Patch before selection
-            if i in vs:
-                self.kcsn[i]['b'] = '┌'
-                self.kcsn[i-1]['b'] = '└'
-                opts[i] = (self.__label_at(i),i)
-                opts[i-1] = (self.__label_at(i-1),i-1)
-
-        self.sm.options = opts
-        self.__update_selection()
-
 
     @_output.capture(clear_output=True,wait=True)
     def get_coords_labels(self):
@@ -1439,11 +1558,13 @@ class KPathApp:
 
         coords = [kp['c'] for kp in self.kcsn]
         labels = [kp['s'] for kp in self.kcsn]
+        numbers = [kp['n'] for kp in self.kcsn]
         j = 0
-        for p in self.get_patches()[:-1]:
-            labels.insert(p.stop+j,'NaN')
-            coords.insert(p.stop+j,[np.nan,np.nan,np.nan])
-            j += 1
+        for i,n in enumerate(numbers, start = 1):
+            if isinstance(n, int) and n == 0:
+                labels.insert(i+j,'NaN')
+                coords.insert(i+j,[np.nan,np.nan,np.nan])
+                j += 1
 
         coords = np.array([c for c in coords if c])
         labels = [l for l in labels if l]
@@ -1512,40 +1633,25 @@ class KPathApp:
         self.__update_label()
         self.__update_selection()
 
-    def get_patches(self):
-        bs = [kp['b'] for kp in self.kcsn]
-        patches = [*[i for i,b in enumerate(bs) if '┌' in b],len(self.kcsn)]
-        _patches = [range(i,j) for i,j in zip(patches[:-1],patches[1:])]
-        if _patches and len(_patches) <= 1:
-            return []
-        return _patches
 
-    def get_data(self):
-        patches = self.get_patches()
-        if patches:
-            return tuple([(*self.kcsn[p]['k'],self.kcsn[p]['s'],self.kcsn[p]['n']) 
-                          if isinstance(self.kcsn[p]['n'],(int, np.integer)) 
-                          else(*self.kcsn[p]['k'],self.kcsn[p]['s'])
-                          for p in ps] for ps in patches)
-        else:
-            return ([(*kp['k'],kp['s'],kp['n']) if isinstance(kp['n'],(int, np.integer)) else (*kp['k'],kp['s']) for kp in self.kcsn],) # still tuple to act for unpacking
+    def get_selected_kpoints(self):
+        return tuple((*kp['k'],kp['s'],kp['n']) if isinstance(kp['n'],(int, np.integer)) else (*kp['k'],kp['s']) for kp in self.kcsn) #k,s,n
         
     def get_kpath(self,n = 5,weight = None,ibzkpt = None,outfile = None):
         "See Docs of ipyvasp.POSCAR.get_kpath for details."
         kws = {k:v for k,v in locals().items() if k != 'self'}
         from ipyvasp import POSCAR
-        return POSCAR(self.path).get_kpath(*self.get_data(),**kws)
+        return POSCAR(self.path).get_kpath(self.get_selected_kpoints(),**kws)
 
-    def splot(self,text_kws = {}, plot_kws ={}, **kwargs):
+    def splot(self,plane = None, text_kws = {}, plot_kws ={}, **kwargs):
         """Same as `pp.splot_bz` except it also plots path on BZ.
 
         - text_kws: dict of keyword arguments for `plt.text`
         - plot_kws: dict of keyword arguments for `plt.plot`
         `kwargs` are passed to `pp.splot_bz`"""
-        ax = sio.splot_bz(self.bz,**kwargs)
+        ax = sio.splot_bz(self.bz,plane = plane, **kwargs)
         coords,labels = self.get_coords_labels()
-        plane = kwargs.get('plane',None)
-        if plane != None and plane in 'xyzxzyx':
+        if plane is not None and plane in 'xyzxzyx':
             ind = 'xyzxzyx'.index(plane)
             arr = [0,1,2,0,2,1,0]
             ix,iy = arr[ind],arr[ind+1]

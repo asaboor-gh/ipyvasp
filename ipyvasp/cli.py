@@ -1,5 +1,5 @@
 from . import __version__, __doc__, docs, example
-from .sio import str2kpath, InvokeMaterialsProject, _save_mp_API
+from .sio import get_kpath as gkpath, InvokeMaterialsProject, _save_mp_API
 import argparse
 from argparse import RawTextHelpFormatter
 def main():
@@ -25,7 +25,7 @@ Empty lines are taken as breaks in path.''')
     
     args = parser.parse_args()
     
-    return str2kpath(args.kpath_str,weight=args.weight,n=args.n, ibzkpt=args.ibzkpt)
+    return gkpath(args.kpath_str,weight=args.weight,n=args.n, ibzkpt=args.ibzkpt)
 
 def poscar():
     parser = argparse.ArgumentParser(description='Download POSCAR from Materials Project Website.')
