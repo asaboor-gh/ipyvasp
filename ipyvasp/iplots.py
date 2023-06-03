@@ -3,6 +3,7 @@
 __all__ = ['iplot2html', 'iplot_rgb_lines', 'iplot_dos_lines']
 
 # Cell
+import re
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -71,6 +72,9 @@ def _format_rgb_data(K, E, pros, labels, interp, occs, kpoints, maxwidth = 10, i
     T = [f"</br>{p} </br></br>Band: {e}  {o}</br>{k}" for (p,e,o,k) in zip(PT,ET, OT,KT)]
     return {'K':K, 'E':E, 'C':C, 'S':S, 'T':T, 'labels': labels} # K, energy, marker color, marker size, text, labels that get changed
 
+def _fmt_labels(ticklabels):
+    labels = [re.sub(r'\$\_\{(.*)\}\$|\$\_(.*)\$', r'<sub>\1\2</sub>', lab, flags = re.DOTALL) for lab in ticklabels] # will match _{x} or _x not both at the same time.
+    return [re.sub(r'\$\^\{(.*)\}\$|\$\^(.*)\$', r'<sup>\1\2</sup>', lab, flags = re.DOTALL) for lab in labels]
 
 # Cell
 def iplot2html(fig,filename = None, out_string = False, modebar = True):
@@ -145,6 +149,58 @@ def iplot2widget(fig, fig_widget = None, template = None):
             fig_widget.add_trace(data)
         
     return fig_widget
+
+
+def iplot_bands(K, E,
+    fig    = None,
+    elim   = None,
+    kticks = None, 
+    interp = None,   
+    title  = None,
+    **kwargs
+    ):
+    """
+    Plot band structure using plotly.
+    
+    Parameters
+    ----------
+    K : array_like of shape (Nk,)
+    E : array_like of shape (Nk, Nb)
+    fig : plotly.graph_objects.Figure, created if None
+    elim : tuple, energy limits for plot
+    kticks : [(int, str),...] for indices of high symmetry k-points. To join a broken path, use '<=' before symbol, e.g.  [(0, 'G'),(40, '<=K|M'), ...] will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').
+    interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
+    title : str, title of plot
+    
+    kwargs are passed to plotly.graph_objects.Scatter
+    
+    Returns
+    -------
+    fig : plotly.graph_objects.Figure
+    """
+    if isinstance(K, dict): # Provided by Bands class, don't do is yourself
+        K, indices = K['K'], K['indices']
+    else:
+        K, indices = K, range(np.shape(E)[1]) # Assume K is provided by user
+        
+    K, E, xticks, xticklabels = sp._validate_data(K,E,elim,kticks,interp)
+    data = _format_rgb_data(K, E, [E], ['X'], interp, E, np.array([K,K,K]).reshape((-1,3)),maxwidth = 1, indices = indices) # moking other arrays, we need only 
+    K, E, T = data['K'], data['E'] , data['T'] # Fixed K and E as single line data
+    T = ['Band' + t.split('Band')[1].split('Occ')[0] for t in T] # Just Band number here
+    
+    if fig is None:
+        fig = go.Figure()
+        
+    kwargs = {'mode': 'lines', **kwargs}
+    fig.add_trace(go.Scatter(x = K, y = E, hovertext = T, **kwargs))
+    
+    fig.update_layout(template = 'plotly_white', title = (title or ''), # Do not set autosize = False, need to be responsive in widgets boxes
+            margin = go.layout.Margin(l=60,r=50,b=40,t=75,pad=0),
+            yaxis = go.layout.YAxis(title_text = 'Energy (eV)',range = elim or [min(E), max(E)]),
+            xaxis = go.layout.XAxis(ticktext = _fmt_labels(xticklabels), tickvals = xticks,tickmode = "array",range = [min(K), max(K)]),
+            font = dict(family="stix, serif",size=14)
+    )
+    return fig
         
 def iplot_rgb_lines(K, E, pros, labels, occs, kpoints,
     fig        = None,
@@ -202,7 +258,7 @@ def iplot_rgb_lines(K, E, pros, labels, occs, kpoints,
     fig.update_layout(template = 'plotly_white', title = (title or '') + '[' + ', '.join(labels) + ']', # Do not set autosize = False, need to be responsive in widgets boxes
             margin = go.layout.Margin(l=60,r=50,b=40,t=75,pad=0),
             yaxis = go.layout.YAxis(title_text = 'Energy (eV)',range = elim or [min(E), max(E)]),
-            xaxis = go.layout.XAxis(ticktext = xticklabels, tickvals = xticks,tickmode = "array",range = [min(K), max(K)]),
+            xaxis = go.layout.XAxis(ticktext = _fmt_labels(xticklabels), tickvals = xticks,tickmode = "array",range = [min(K), max(K)]),
             font = dict(family="stix, serif",size=14)
     )
     return fig

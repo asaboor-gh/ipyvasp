@@ -1,9 +1,9 @@
 import re
 import os
-import glob
 from collections import namedtuple
 from subprocess import Popen, PIPE
 from contextlib import contextmanager
+from pathlib import Path
 
 
 import numpy as np
@@ -187,47 +187,34 @@ def ps2std(ps_command :str='Get-ChildItem', exec_type:str='-Command', path_to_ps
         print(item)
     return None
 
-
-def get_child_items(path:str = os.getcwd(),depth:int = None,recursive:bool=True,include:str=None,exclude:str=None,files_only:bool=False,dirs_only:bool= False) -> tuple:
-    """Returns selected directories/files recursively from a parent directory.
-    
-    Args:
-        path (str): path to a parent directory, default is `"."`
-        depth (int): subdirectories depth to get recursively, default is None to list all down.
-        recursive (bool): If False, only list current directory items, if True,list all items recursively down the file system.
-        include (str): Default is None and includes everything. String of patterns separated by | to keep, could be a regular expression.
-        exclude (str): Default is None and removes nothing. String of patterns separated by | to drop,could be a regular expression.
-        files_only (bool): Boolean, if True, returns only files.
-        dirs_only  (bool): Boolean, if True, returns only directories.
-    
-    Returns:
-        tuple: (children,parent), children is list of selected directories/files and parent is given path. Access by index of by `get_child_items().{children,path}`.
-    
+def list_files(path = '.', glob = '*', exclude = None, files_only = False, dirs_only = False):
     """
-    path = os.path.abspath(path) # important
-    pattern = path + '**/**' # Default pattern
-    if depth != None and type(depth) == int:
-        pattern = path + '/'.join(['*' for i in range(depth+1)])
-        if glob.glob(pattern) == []: #If given depth is more, fall back.
-            pattern = path + '**/**' # Fallback to default pattern if more depth to cover all.
-    glob_files = glob.iglob(pattern, recursive=recursive)
-    if dirs_only == True:
-        glob_files = filter(lambda f: os.path.isdir(f),glob_files)
-    if files_only == True:
-        glob_files = filter(lambda f: os.path.isfile(f),glob_files)
-    list_dirs=[]
-    for g_f in glob_files:
-        list_dirs.append(os.path.relpath(g_f,path))
-    # Include check
-    if include:
-        list_dirs = [l for l in list_dirs if re.search(include,l)]
-    # Exclude check
+    Returns a tuple of files in a directory recursively based on glob pattern.
+    
+    Parameters
+    ----------
+    path : str, current directory by default
+    glob : str, glob pattern, '*' by default
+    exclude : str, regular expression pattern to exclude files
+    files_only : bool, if True, returns only files
+    dirs_only : bool, if True, returns only directories
+    
+    Returns
+    -------
+    tuple of pathlib.Path objects
+    """
+    if files_only and dirs_only:
+        raise ValueError('files_only and dirs_only cannot be both True')
+    
+    path = Path(path)
+    files = [p for p in path.glob(glob)]
     if exclude:
-        list_dirs = [l for l in list_dirs if not re.search(exclude,l)]
-    # Keep only unique
-    req_dirs = list(np.unique(list_dirs))
-    out_files = namedtuple('GLOB',['children','parent'])
-    return out_files(req_dirs,os.path.abspath(path))
+        files = [p for p in files if not re.search(exclude,str(p))]
+    if files_only:
+        files = [p for p in files if p.is_file()]
+    if dirs_only:
+        files = [p for p in files if p.is_dir()]
+    return tuple(files)
 
 def prevent_overwrite(path: str) -> str:
     """Prevents overwiting as file/directory by adding numbers in given file/directory path."""

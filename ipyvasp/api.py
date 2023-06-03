@@ -73,7 +73,7 @@ def download_structure(formula, mp_id=None, max_sites=None,min_sites=None, api_k
 # Direct function exports from modules
 _memebers = (
     gu.set_dir,
-    gu.get_child_items,
+    gu.list_files,
     gu.transform_color,
     gu.interpolate_data,
     sio.get_kpath,
@@ -803,6 +803,7 @@ class Bands(_BandsDosBase):
                 labels = list(projections.keys())
             else:
                 (spins, uspins), (atoms,uatoms), (orbs,uorbs), labels = _format_input(projections, self.source.summary)
+                        
         
         elif projections is not None:
             raise TypeError('`projections` must be a dictionary or None.')
@@ -905,7 +906,7 @@ class Bands(_BandsDosBase):
         colormap   = None,
         shadow     = False,
         showlegend = True,
-        xyc_label   = [0.2, 0.85, 'black'], # x, y, color only if showlegend = False
+        xyc_label  = [0.2, 0.85, 'black'], # x, y, color only if showlegend = False
         **kwargs
         ):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
@@ -915,23 +916,38 @@ class Bands(_BandsDosBase):
     
     @_sub_doc(ip.iplot_rgb_lines,['K :','E :', 'pros :', 'labels :','occs :','kpoints :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    fig :"})
     def iplot_rgb_lines(self, projections,
-        spin       = 0,
-        elim       = None,
-        ezero      = None,
-        kticks     = None, 
-        interp     = None, 
-        maxwidth   = 10,   
-        mode       = 'markers + lines',
-        fig        = None,
-        title      = None,
+        spin     = 0,
+        elim     = None,
+        ezero    = None,
+        kticks   = None, 
+        interp   = None, 
+        maxwidth = 10,   
+        mode     = 'markers + lines',
+        fig      = None,
+        title    = None,
         **kwargs              
         ):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
         data = self.get_data(elim, ezero, projections)
-       # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number 
+        # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number 
         return ip.iplot_rgb_lines({"K": data.kpath, 'indices':data.bands}, data.evals[spin] - data.ezero, data.pros, data.labels, data.occs[spin], data.kpoints, **plot_kws, **kwargs)
-     
+    
+    @_sub_doc(ip.iplot_bands,['K :','E :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    fig :"})
+    def iplot_bands(self,
+        spin   = 0,
+        fig    = None,
+        elim   = None,
+        ezero  = None,
+        kticks = None, 
+        interp = None,   
+        title  = None,
+        **kwargs):
+        plot_kws = {k:v for k,v in locals().items() if k not in ['self','kwargs']}
+        plot_kws, ezero = self._handle_kwargs(plot_kws)
+        data = self.get_data(elim, ezero)
+        # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number
+        return ip.iplot_bands({"K": data.kpath, 'indices':data.bands}, data.evals[spin] - data.ezero, **plot_kws, **kwargs) 
      
 class DOS(_BandsDosBase):
     """
