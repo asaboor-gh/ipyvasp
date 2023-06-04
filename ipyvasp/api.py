@@ -100,7 +100,7 @@ _memebers = (
     sp.add_legend,
     sp.add_text,
     wdg.VasprunApp,
-    wdg.KPathApp,
+    wdg.KpathWidget,
     srf.SpinDataFrame,
 )
 
@@ -336,12 +336,12 @@ class POSCAR:
         return sio.splot_bz(bz_data = self._cell, ax=ax, plane=plane, color=color, fill=fill, vectors=vectors, colormap=colormap, shade = shade, alpha=alpha)
 
     @_sub_doc(sio.iplot_bz,'bz_data :')
-    def iplot_bz(self, fill=True, color='rgba(168,204,216,0.4)', background='rgb(255,255,255)', special_kpoints = True, alpha=0.4, ortho3d=True, fig=None):
-        return sio.iplot_bz(bz_data = self._bz, fill=fill, color=color, background=background, special_kpoints=special_kpoints, alpha=alpha, ortho3d=ortho3d, fig=fig)
+    def iplot_bz(self, fill=True, color='rgba(168,204,216,0.4)',  special_kpoints = True, alpha=0.4, ortho3d=True, fig=None):
+        return sio.iplot_bz(bz_data = self._bz, fill=fill, color=color, special_kpoints=special_kpoints, alpha=alpha, ortho3d=ortho3d, fig=fig)
 
-    def iplot_cell(self, fill=True, color='rgba(168,204,216,0.4)', background='rgb(255,255,255)', alpha=0.4, ortho3d=True, fig=None):
+    def iplot_cell(self, fill=True, color='rgba(168,204,216,0.4)', alpha=0.4, ortho3d=True, fig=None):
         "See docs of `iplot_bz`, everything is same except space is iverted."
-        return sio.iplot_bz(bz_data = self._cell, fill=fill, color=color, background=background, alpha=alpha, ortho3d=ortho3d, fig=fig)
+        return sio.iplot_bz(bz_data = self._cell, fill=fill, color=color, alpha=alpha, ortho3d=ortho3d, fig=fig)
 
     @_sub_doc(sio.splot_lattice,'poscar_data :')
     def splot_lattice(self, plane = None, sizes = 50,colors=None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,

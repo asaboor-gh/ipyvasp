@@ -1059,7 +1059,7 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = 
         return ax3d
 
 # Cell
-def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)',background = 'rgb(255,255,255)', special_kpoints = True, alpha=0.4,ortho3d=True,fig=None):
+def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)', special_kpoints = True, alpha=0.4,ortho3d=True,fig=None):
     """
     Plots interactive figure showing axes,BZ surface, special points and basis, each of which could be hidden or shown.
     
@@ -1157,7 +1157,7 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)',background = 'r
     
     proj = dict(projection=dict(type = "orthographic")) if ortho3d else {}
     camera = dict(center=dict(x=0.1, y=0.1, z=0.1),**proj)
-    fig.update_layout(template = 'plotly_white', scene_camera=camera,paper_bgcolor=background, plot_bgcolor=background,
+    fig.update_layout(template = 'plotly_white', scene_camera=camera,
         font_family="Times New Roman",font_size= 14,
         scene = dict(aspectmode='data',xaxis = dict(showbackground=False,visible=False),
                         yaxis = dict(showbackground=False,visible=False),
@@ -1424,7 +1424,7 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
         # These thing are update in iplot_bz function, but if cell_kwargs is None, then we need to update them here.
         proj = dict(projection = dict(type = "orthographic")) if ortho3d else {}
         camera = dict(center = dict(x = 0.1, y = 0.1, z = 0.1),**proj)
-        fig.update_layout(template = 'plotly_white', scene_camera = camera, paper_bgcolor = 'rgb(255,255,255)', plot_bgcolor='rgb(255,255,255)',
+        fig.update_layout(template = 'plotly_white', scene_camera = camera,
             font_family="Times New Roman",font_size= 14,
             scene = dict(aspectmode='data',
                         xaxis = dict(showbackground = False, visible = False),
