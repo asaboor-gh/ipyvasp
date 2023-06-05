@@ -159,6 +159,7 @@ class Vasprun(DataSource):
         # Getting projection fields
         fields = [f.replace('field','').strip(' ></\n') for f in self.read('<partial','<set') if 'field' in f] # poor formatting again
         if fields:
+            info_dict['NSETS'] = int(re.findall('(\d+)',[r for r in self.read('<partial>','</partial>') if 'spin ' in r][-1])[0]) # Least worse way to read sets
             info_dict['orbs'] = [f for f in fields if 'energy' not in f] # projection fields
         
         info_dict['incar'] = incar # Just at end 
@@ -214,8 +215,8 @@ class Vasprun(DataSource):
             raise ValueError('No dos data found in the file!')
         
         en, total, integrad = ds.transpose((2,0,1))
-        vbm  = float(en[integrad < self.summary.NELECTS].max())
-        cbm = float(en[integrad > self.summary.NELECTS].min())
+        vbm = float(en[(integrad < self.summary.NELECTS) & (integrad > 0)].max()) # second condition is important
+        cbm = float(en[(integrad > self.summary.NELECTS) & (integrad > 0)].min())
         
         zero = vbm 
         grid_range = range(en.shape[1]) # default range full
@@ -230,29 +231,29 @@ class Vasprun(DataSource):
                 
             _max = np.max(np.where(en - zero <= np.max(elim))[1]) + 1 # +1 to make range inclusive
             _min = np.min(np.where(en - zero >= np.min(elim))[1])
-            en = en[_min:_max]
-            total = total[_min:_max]
-            integrad = integrad[_min:_max]
+            en = en[:,_min:_max]
+            total = total[:,_min:_max]
+            integrad = integrad[:,_min:_max]
             grid_range = range(_min, _max)
         
-        out = {'energy':en, 'tdos':total, 'idos':integrad, 'evc' : (vbm, cbm), 'ezero':zero}
+        out = {'energy':en, 'tdos':total, 'idos':integrad, 'evc' : (vbm, cbm), 'ezero':zero, 'elim': elim, 'spins': list(range(en.shape[0]))}
         
         if atoms and orbs:
             if not list(self.read('<partial','')): # no partial dos, hust check that line
                 raise ValueError('No partial dos found in the file!')
             
-            NSETS = int(re.findall('(\d+)',[r for r in self.read('<partial>','</partial>') if 'spin ' in r][-1])[0]) # Least worse way to read sets
             which_spins = tuple(range(en.shape[0]))
             if spins is not None:
                 if not isinstance(spins, (list, tuple,range)):
                     raise TypeError('spins should be a list, tuple or range got {}'.format(type(spins)))
                 for s in spins:
-                    if (not isinstance(s, (int, np.integer))) and (s < 0):
-                        raise TypeError('spins should be a tuple/list/range of of positive integers')
+                    if (not isinstance(s, (int, np.integer))) and (s not in range(self.summary.NSETS)):
+                        raise TypeError(f'spins should be a tuple/list/range of positive integers in {list(range(self.summary.NSETS))}')
+                
                 which_spins = spins
                 
             gen = (r.strip(' \n/<>r') for r in self.read(f'<partial>',f'</partial>') if '<r>' in r) # stripping is must here to ensure that we get only numbers  
-            data = gen2numpy(gen, (self.summary.NIONS, NSETS, self.summary.NEDOS, len(self.summary.orbs) + 1),[atoms,which_spins, grid_range, [o + 1 for o in orbs]], dtype = float) # No need to pick up the first column as it is the energy
+            data = gen2numpy(gen, (self.summary.NIONS, self.summary.NSETS, self.summary.NEDOS, len(self.summary.orbs) + 1),[atoms,which_spins, grid_range, [o + 1 for o in orbs]], dtype = float) # No need to pick up the first column as it is the energy
             
             out['pdos'] =  data.transpose((1,0,3,2)) #(spins, atoms, orbitsl,energy)  same as in Vaspout
             out['atoms'] = atoms
@@ -340,14 +341,16 @@ class Vasprun(DataSource):
             bands_range = range(idx_min, idx_max)
         
         which_spins = tuple(range(evals.shape[0])) # which spin set to pick, defult is what is available
-        out = {'evals':evals,'occs':occs, 'ezero': zero, 'evc':evc, 'kvc':kvc, 'bands':bands_range,'spins': which_spins}
+        out = {'evals':evals,'occs':occs, 'ezero': zero, 'elim': elim, 'evc':evc, 'kvc':kvc, 'bands':bands_range,'spins': which_spins}
+        
         if atoms and orbs:
             if spins is not None:
                 if not isinstance(spins, (list, tuple,range)):
                     raise TypeError('spins should be a list, tuple or range got {}'.format(type(spins)))
                 for s in spins:
-                    if (not isinstance(s, (int, np.integer))) and (s < 0):
-                        raise TypeError('spins should be a tuple/list/range of of positive integers')
+                    if (not isinstance(s, (int, np.integer))) and (s not in range(self.summary.NSETS)):
+                        raise TypeError(f'spins should be a tuple/list/range of positive integers in {list(range(self.summary.NSETS))}')
+                    
                 which_spins = spins
                 
             pros = []

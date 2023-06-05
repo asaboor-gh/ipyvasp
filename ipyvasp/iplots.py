@@ -7,6 +7,7 @@ import re
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from collections import Iterable
 
 import plotly.graph_objects as go
 
@@ -73,9 +74,10 @@ def _format_rgb_data(K, E, pros, labels, interp, occs, kpoints, maxwidth = 10, i
     return {'K':K, 'E':E, 'C':C, 'S':S, 'T':T, 'labels': labels} # K, energy, marker color, marker size, text, labels that get changed
 
 def _fmt_labels(ticklabels):
-    labels = [re.sub(r'\$\_\{(.*)\}\$|\$\_(.*)\$', r'<sub>\1\2</sub>', lab, flags = re.DOTALL) for lab in ticklabels] # will match _{x} or _x not both at the same time.
-    return [re.sub(r'\$\^\{(.*)\}\$|\$\^(.*)\$', r'<sup>\1\2</sup>', lab, flags = re.DOTALL) for lab in labels]
-
+    if isinstance(ticklabels, Iterable):
+        labels = [re.sub(r'\$\_\{(.*)\}\$|\$\_(.*)\$', r'<sub>\1\2</sub>', lab, flags = re.DOTALL) for lab in ticklabels] # will match _{x} or _x not both at the same time.
+        return [re.sub(r'\$\^\{(.*)\}\$|\$\^(.*)\$', r'<sup>\1\2</sup>', lab, flags = re.DOTALL) for lab in labels]
+    return ticklabels
 # Cell
 def iplot2html(fig,filename = None, out_string = False, modebar = True):
     """

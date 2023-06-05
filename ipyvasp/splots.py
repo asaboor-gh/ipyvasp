@@ -1064,7 +1064,10 @@ def splot_dos_lines(energy, dos_arrays, labels,
         add_legend(ax, **legend_kwargs) # Labels are picked from plot
     
     args = dict(ylim = elim or []) if vertical else dict(xlim = elim or [])
-    modify_axes(ax, zeroline = False, **args)
+    xlabel, ylabel = 'Energy (eV)', 'DOS'
+    if vertical:
+        xlabel, ylabel = ylabel, xlabel
+    modify_axes(ax, xlabel = xlabel, ylabel = ylabel, zeroline = False, **args)
     return ax
         
 # Cell

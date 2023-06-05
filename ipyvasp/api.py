@@ -99,7 +99,8 @@ _memebers = (
     sp.color_wheel,
     sp.add_legend,
     sp.add_text,
-    wdg.VasprunApp,
+    wdg.FilesWidget,
+    wdg.BandsWidget,
     wdg.KpathWidget,
     srf.SpinDataFrame,
 )
@@ -728,7 +729,7 @@ def _format_input(projections, sys_info):
     return (spins, uspins), (atoms,uatoms), (orbs,uorbs), labels
 
 _spin_doc = 'spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations. Data for both channel is loaded by default, so when you plot one spin channel, plotting other with same parameters will use the same data.'
-_proj_doc = "projections : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs of shape (spin,kpoints, bands) and return array of shape (kpoints, bands)."
+_proj_doc = "projections : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals/tdos, occs/idos of from data and should return array of shape[1:] (all but spin dimension)."
 
 class _BandsDosBase:
     def __init__(self, source):
@@ -745,6 +746,28 @@ class _BandsDosBase:
     def data(self):
         "Returns a dictionary of information about the picked data after a plotting function called."
         return self._data
+    
+    def _fix_projections(self, projections):
+        labels, spins, atoms, orbs, uspins, uatoms, uorbs =  [], None, None, None, None, None, None
+        
+        funcs = []
+        if isinstance(projections, dict):
+            if not projections:
+                raise ValueError('`projections` dictionary should have at least one item.')
+            
+            _funcs = [callable(value) for _, value in projections.items()]
+            if any(_funcs) and not all(_funcs): # Do not allow mixing of callable and non-callable values, as comparison will not make sense
+                raise TypeError('Either all or none of the values of `projections` must be callable with two arguments evals, occs and return array of same shape as evals.')
+            elif all(_funcs):
+                funcs = [value for _, value in projections.items()]
+                labels = list(projections.keys())
+            else:
+                (spins, uspins), (atoms,uatoms), (orbs,uorbs), labels = _format_input(projections, self.source.summary)           
+        elif projections is not None:
+            raise TypeError('`projections` must be a dictionary or None.')
+        
+        return (spins, uspins), (atoms,uatoms), (orbs,uorbs), (funcs, labels)
+
 
 class Bands(_BandsDosBase):
     """
@@ -788,29 +811,11 @@ class Bands(_BandsDosBase):
             return self.data
         
         self._data_args = (elim, ezero, projections)
-        spins, atoms, orbs, labels, uspins, uatoms, uorbs, bands = None, None, None, None, None, None, None, None
-        
-        funcs = []
-        if isinstance(projections, dict):
-            if not projections:
-                raise ValueError('`projections` dictionary should have at least one item.')
+
+        (spins, uspins), (atoms,uatoms), (orbs,uorbs), (funcs, labels) = self._fix_projections(projections)
             
-            _funcs = [callable(value) for _, value in projections.items()]
-            if any(_funcs) and not all(_funcs): # Do not allow mixing of callable and non-callable values, as comparison will not make sense
-                raise TypeError('Either all or none of the values of `projections` must be callable with two arguments evals, occs and return array of same shape as evals.')
-            elif all(_funcs):
-                funcs = [value for _, value in projections.items()]
-                labels = list(projections.keys())
-            else:
-                (spins, uspins), (atoms,uatoms), (orbs,uorbs), labels = _format_input(projections, self.source.summary)
-                        
-        
-        elif projections is not None:
-            raise TypeError('`projections` must be a dictionary or None.')
-        
-            
-        kpts = self._source.get_kpoints()
-        eigens = self._source.get_evals(elim = elim, ezero = ezero, atoms = uatoms, orbs = uorbs, spins = uspins or None, bands = bands) # picks available spins if uspins is None
+        kpts = self.source.get_kpoints()
+        eigens = self.source.get_evals(elim = elim, ezero = ezero, atoms = uatoms, orbs = uorbs, spins = uspins or None, bands = None) # picks available spins if uspins is None
         
         if not spins:
             spins = eigens.spins # because they will be loaded anyway
@@ -948,7 +953,9 @@ class Bands(_BandsDosBase):
         data = self.get_data(elim, ezero)
         # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number
         return ip.iplot_bands({"K": data.kpath, 'indices':data.bands}, data.evals[spin] - data.ezero, **plot_kws, **kwargs) 
-     
+    
+_multiply_doc = "multiply : float, multiplied by total dos and sign is multiply by partial dos to flip plot in case of spin down."
+_total_doc = "total : bool, True by default. If False, total dos is not plotted, sign of multiply parameter is still used for partial dos"
 class DOS(_BandsDosBase):
     """
     Class to handle and plot density of states data.
@@ -966,9 +973,134 @@ class DOS(_BandsDosBase):
             return self.data
         
         self._data_args = (elim, ezero, projections)
-        # atoms, orbs, labels, uatoms, uorbs = None, None, None, None, None
-        # if projections:
-        #     atoms, orbs, labels, uatoms, uorbs = _format_input(projections, self.source.summary)
         
+        (spins, uspins), (atoms,uatoms), (orbs,uorbs), (funcs, labels) = self._fix_projections(projections)
+        dos = self.source.get_dos(elim = elim, ezero = ezero, atoms = uatoms, orbs = uorbs, spins = uspins or None)
         
-        # data = self._source.get_dos(elim = elim, atoms = uatoms, orbs = uorbs, spins = uspins or None)
+        if not spins:
+            spins = dos.spins # because they will be loaded anyway
+            if len(spins) == 1 and labels: # in case projections not given, check label
+                spins = [spins[0] for _ in labels] # only one spin channel is available, so use it for all projections
+        
+        out = dos.to_dict()
+        out['labels'] = labels
+        
+        if funcs:
+            pdos = []
+            for func in funcs:
+                p = func(dos.tdos, dos.idos)
+                if np.shape(p) != dos.energy.shape[1:]: # energy shape is (spin, grid), but we need single spin
+                    raise ValueError(f'Projections returned by {func} must be of same shape as last dimension of input energy.')
+                pdos.append(p)
+                
+            out['pdos'] = np.array(pdos)
+            out['info'] = '"Custom projections by user"'
+        
+        elif hasattr(dos, 'pdos'): # Data still could be there, but prefer if user provides projections as functions
+            arrays = []
+            for sp,atom,orb in zip(spins, atoms, orbs):
+                if uatoms != -1:
+                    atom = [i for i, a in enumerate(dos.atoms) if a in atom] # indices for partial data loaded
+                if uorbs != -1:
+                    orb = [i for i, o in enumerate(dos.orbs) if o in orb]
+                sp = list(dos.spins).index(sp) # index for spin is single
+                _pdos  = np.take(dos.pdos[sp],atom,axis = 0).sum(axis = 0) # take dimension of spin and then sum over atoms leaves 2D array
+                _pdos = np.take(_pdos,orb,axis = 0).sum(axis = 0) # Sum over orbitals leaves 1D array
+                arrays.append(_pdos)
+
+            out['pdos'] = np.array(arrays)
+            out.pop('atoms', None) # No more needed
+            out.pop('orbs', None)
+            out.pop('spins', None) # No more needed
+        
+        out['shape'] = '(spin[energy,tdos,idos]/selection[pdos], NEDOS)'
+        
+        self._data = serializer.Dict2Data(out) # Assign for later use
+        return self._data
+    
+    def _handle_kwargs(self, kwargs):
+        "Returns fixed kwargs and new elim relative to fermi energy for gettig data."
+        if kwargs.get('spin',None) not in [0,1,2,3]:
+            raise ValueError('spin must be 0,1,2,3 for dos')
+        
+        kwargs.pop('spin',None) # remove from kwargs as plots don't need it
+        kwargs.pop('multiply', None)
+        kwargs.pop('total', None)
+        
+        ezero = kwargs.pop('ezero',None) # remove from kwargs as plots don't need it
+        return kwargs, ezero
+        
+    @_sub_doc(sp.splot_dos_lines,['energy :', 'dos_arrays :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    {_multiply_doc}\n    {_total_doc}\n    ax :"})
+    def splot_dos_lines(self, projections = None, # dos should allow only total dos as well
+        spin = 0,
+        multiply = 1,
+        total = True,
+        ax = None,
+        elim = None,
+        colormap = 'tab10',
+        colors = None,
+        fill = True,
+        vertical = False,
+        stack = False,
+        interp = None,
+        showlegend = True,
+        legend_kwargs = {
+            'ncol': 4, 'anchor': (0, 1.0),
+            'handletextpad' : 0.5,'handlelength' : 1,
+            'fontsize' : 'small','frameon' : False
+        },
+        **kwargs
+        ):
+        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
+        plot_kws, ezero = self._handle_kwargs(plot_kws)
+        data = self.get_data(elim, ezero, projections)
+        energy, labels = data['energy'][spin], data['labels']
+        
+        dos_arrays = []
+        if projections is not None:
+            dos_arrays = np.sign(multiply)*data['pdos'] # filp if asked, 
+        
+        tlab = kwargs.pop('label', None) # pop in any case
+        if total:
+            dos_arrays = [data['tdos'][spin]*multiply, *dos_arrays]
+            labels = [tlab or 'Total', *labels]
+        elif len(dos_arrays) == 0:
+            raise ValueError("Either total should be True or projections given!")
+        
+        return sp.splot_dos_lines(energy - data.ezero, dos_arrays, labels, **plot_kws, **kwargs)
+    
+    @_sub_doc(ip.iplot_dos_lines,['energy :', 'dos_arrays :', 'labels :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    {_multiply_doc}\n    {_total_doc}\n    fig :"})
+    def iplot_dos_lines(self, projections = None, # dos should allow only total dos as well
+        spin = 0,
+        multiply = 1,
+        total = True,            
+        fig = None,
+        elim = None,
+        colormap = 'tab10',
+        colors = None,
+        fill = True,
+        vertical = False,
+        stack = False, 
+        mode = 'lines',
+        interp = None,
+        **kwargs
+        ):
+        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
+        plot_kws, ezero = self._handle_kwargs(plot_kws)
+        data = self.get_data(elim, ezero, projections)
+        energy, labels = data['energy'][spin], data['labels']
+        
+        dos_arrays = []
+        if projections is not None:
+            dos_arrays = np.sign(multiply)*data['pdos'] # filp if asked
+            
+        tname = kwargs.pop('name', None) # pop in any case
+        if total:
+            dos_arrays = [data['tdos'][spin]*multiply, *dos_arrays]
+            labels = [tname or 'Total', *labels]
+        elif len(dos_arrays) == 0:
+            raise ValueError("Either total should be True or projections given!")
+        
+        return ip.iplot_dos_lines(energy - data.ezero, dos_arrays, labels, **plot_kws, **kwargs)
+            
+          

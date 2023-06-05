@@ -1,7 +1,7 @@
 import os
 import json
 import pickle
-from collections import namedtuple
+from collections import namedtuple, Iterable
 from contextlib import suppress
 from copy import deepcopy
 
