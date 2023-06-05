@@ -533,6 +533,11 @@ class BandsWidget(VBox):
         "Selected kwargs from GUI"
         return self._kwargs
     
+    @property
+    def clicked_data(self):
+        "Clicked data from graph"
+        return self._click_dict
+    
     def _update_graph(self, btn):
         self._interact.output_widget.clear_output(wait = True) # Why need again?
         with self._interact.output_widget:
