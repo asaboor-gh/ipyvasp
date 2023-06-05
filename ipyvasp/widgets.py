@@ -6,6 +6,7 @@ __all__ = ['summarize', 'FilesWidget', 'PropsPicker', 'BandsWidget', 'KpathWidge
 from time import time
 from pathlib import Path
 from collections import Iterable
+from functools import partial
 
 
 # Widgets Imports
@@ -87,23 +88,26 @@ class FilesWidget(VBox):
     
     Parameters
     ----------
-    base_path : str, default is '.'. The path to the directory to search.
+    path : str, default is '.'. The path to the directory to search.
     glob : str, default is '*'. The glob pattern to match files against. See https://docs.python.org/3/library/glob.html
     exclude : str, default is None. A regex pattern to exclude files from the selection.
+    on_file_changed : callable, default is None. 
+        A function that takes path as an argument and is called when the selected file changes. Output is displayed below the widget.
+        To add extra controls and widgets, use `.interactive`/`.interact` methods instead.
     
     Returns
     -------
     A FilesWidget object where you can filter files by typing in the text box, and select files from the dropdown.
     """
-    def __init__(self, base_path : str = '.', glob :str = '*', exclude :str = None) -> None:
-        for prop in (base_path, glob, exclude):
+    def __init__(self, path : str = '.', glob :str = '*', exclude :str = None, on_file_changed = None) -> None:
+        for prop in (path, glob, exclude):
             if prop and not isinstance(prop, str):
                 raise ValueError(f'Expected string, got {type(prop)}')
             
         VBox.__init__(self,_dom_classes = ['FilesWidget']) # This makes it truely a widget
         self._files = [] # Selections stored as Path objects
         self._widgets = {
-            'input': Text(value = base_path, description = 'Path:', tooltip = 'The path to the directory to search.'),
+            'input': Text(value = path, description = 'Path:', tooltip = 'The path to the directory to search.'),
             'glob' : Text(value = glob, description = 'Glob:', tooltip = 'The glob pattern to match files against. See https://docs.python.org/3/library/glob.html'),
             'exclude' : Text(value = exclude or '', description = 'Exclude:', tooltip = 'A regex pattern to exclude files from the selection.'),
             'lock' : Checkbox(value = False, description = 'Lock selection', tooltip = 'Lock the current selection and prevent changes.'),
@@ -115,7 +119,20 @@ class FilesWidget(VBox):
         for key, value in self._widgets.items():
             if key not in ['files','lock']:
                 value.on_submit(self._process)
-        
+                
+        if on_file_changed:
+            if not callable(on_file_changed):
+                raise TypeError('Argument `on_file_changed` must be a function that takes path as an argument.')
+            
+            out = ipw.Output()
+            self._widgets['output'] = out
+            
+            @out.capture(clear_output = True, wait = True)
+            def on_change(change):
+                on_file_changed(self.selected)
+                
+            self._widgets['files'].observe(on_change, names = ['value'])
+            
         self._process(None) # Initial processing based on given values
                 
     def _lock_selection(self, change):
@@ -128,6 +145,9 @@ class FilesWidget(VBox):
             self.children = [self._widgets['lock'], self._widgets['files']]
         else:
             self.children = [self._widgets['input'],self._widgets['glob'],self._widgets['exclude']]
+            
+        if self._widgets.get('output'):
+            self.children = [*self.children, self._widgets['output']]
         
     def _process(self,change):
         self._widgets['lock'].description = 'Processing...'   
@@ -184,7 +204,7 @@ class FilesWidget(VBox):
             Each time an underlying new FilesWidget instance is created which picks input from previous one but stays separate. You can access it with `.files_widget` attribute of interactive.
         """
         # Make new FilesWidget with same parameters, to allow multiple interact calls
-        new_fw = self.__class__(base_path = self._widgets['input'].value, glob = self._widgets['glob'].value, exclude = self._widgets['exclude'].value)
+        new_fw = self.__class__(path = self._widgets['input'].value, glob = self._widgets['glob'].value, exclude = self._widgets['exclude'].value)
         info = ipw.HTML().add_class('FW-Progess')
         
         def interact_func(filename, **kwargs):
@@ -364,18 +384,34 @@ class _PropPicker(VBox):
         return items
     
 class PropsPicker(VBox):
-    def __init__(self, func, system_summary = None, N = 3, button_text = 'Run Function'):
+    """
+    A widget to pick atoms and orbitals for plotting.
+    
+    Parameters
+    ----------
+    system_summary : (Vasprun,Vaspout).summary
+    N : int, default is 3, number of projections to pick.
+    on_button_click : callable, takes button as arguemnet. Default is None, a function to call when button is clicked.
+    on_selection_changed : callable, takes change as argument. Default is None, a function to call when selection is changed.
+    """
+    def __init__(self, system_summary = None, N = 3, on_button_click = None, on_selection_changed = None):
         super().__init__()
         self._linked = Dropdown(options = [str(i+1) for i in range(N)] if N!=3 else ('Red', 'Green', 'Blue'),description = 'Projection' if N != 3 else 'Color')
         self._stacked = Stack(children = tuple(_PropPicker(system_summary) for _ in range(N)),selected_index = 0)
-        self._button = Button(description = button_text)
-        self._button.on_click(func)
+        self._button = Button(description = 'Run Function')
+        
+        if callable(on_button_click):
+            self._button.on_click(on_button_click)
         
         for w in [self._button,self._linked]:
             w.layout.width='max-content'
         
         ipw.link((self._linked, 'index'), (self._stacked, 'selected_index'))
         self.children = [HBox([self._linked, self._button]),self._stacked]
+        
+        if callable(on_selection_changed):
+            for child in self._stacked.children:
+                child._html.observe(on_selection_changed, names = 'value')
         
     def update(self, system_summary):
         for child in self._stacked.children:
@@ -384,11 +420,6 @@ class PropsPicker(VBox):
     @property
     def button(self):
         return self._button
-    
-    def on_change(self, callback, names = 'value'):
-        "Observe a function when selections of any children widget chnage"
-        for child in self._stacked.children:
-            child._html.observe(callback, names = names)
     
     @property
     def projections(self):
@@ -399,43 +430,25 @@ class PropsPicker(VBox):
                 out[props['label']] = (props['atoms'], props['orbs'])
                 
         return out
-
-# Cell
-#mouse event handler
-def _click_data(sel_en_w,ezero,data_dict,fig):
+    
+def store_clicked_data(fig, store_dict, callback = None):
+    "Store clicked data in a dict. callback takes no argement and is called after storing data."
+    if not isinstance(fig, go.FigureWidget):
+        raise TypeError('fig must be a FigureWidget')
+    if not isinstance(store_dict, dict):
+        raise TypeError('store_dict must be a dict')
+    if not callable(callback):
+        raise TypeError('callback must be callable')
+    
     def handle_click(trace, points, state):
-        if points.ys != []:
-            v_clicked = points.ys[0]
-            y = np.round(float(v_clicked) + ezero,6) #exact value
-            x = points.xs[0]
-
-            for key in sel_en_w.options:
-                if key in sel_en_w.value and key != 'None':
-                    data_dict[key] = y # Assign value back
-                    if not key.startswith('so'): 
-                        data_dict[key + '_k'] = round(x,6) # Save x to test direct/indirect
-
-            # Update E_gap, SO etc
-            if data_dict.get('VBM',None) and data_dict.get('CBM',None):
-                data_dict['E_gap'] = np.round(data_dict['CBM'] - data_dict['VBM'], 6)
-            if data_dict.get('so_max',None) and data_dict.get('so_min',None):
-                data_dict['Δ_SO'] = np.round(data_dict['so_max'] - data_dict['so_min'], 6)
-            # Cycle energy types on graph click and chnage table as well unless it is None.
-            if sel_en_w.value == 'CBM': # Avoid accidental SO calculation
-                sel_en_w.value = 'None'
-            if sel_en_w.value != 'None': # Keep usually as None
-                _this = sel_en_w.options.index(sel_en_w.value)
-                _next = _this + 1 if _this < len(sel_en_w.options) - 1 else 0
-                sel_en_w.value = sel_en_w.options[_next] #To simulate as it changes
-
+        store_dict.clear() # Avoid random keys
+        store_dict.update({k.lstrip('_'):v for k,v in points.__dict__.items()})
+        if callback:
+            callback()
+    
     for trace in fig.data:
         trace.on_click(handle_click)
 
-
-# Send Data
-def _save_data(out_w1,data_dict):
-    out_f = Path(out_w1.value).parent/'result.json'
-    serializer.dump(data_dict,dump_to = 'json',outfile = str(out_f.absolute()))
 
 # Cell
 def _generate_summary(paths_list):
@@ -451,7 +464,7 @@ def _generate_summary(paths_list):
     
     def load_data(path):
         try:
-            return serializer.load(path)
+            return serializer.load(str(path.absolute()))
         except:
             return {} # If not found, return empty dictionary
     
@@ -459,7 +472,8 @@ def _generate_summary(paths_list):
     
 
 class BandsWidget(VBox):
-    def __init__(self, use_vaspout = False, max_height = '90vh'):
+    "Visualize band structure from VASP calculation. You can click on the graph to get the data such as VBM, CBM, etc."
+    def __init__(self, use_vaspout = False, max_height = '90vh', **file_widget_kwargs):
         super().__init__(_dom_classes = ['BandsWidget'])
         self._bands = None
         self._use_vaspout = use_vaspout
@@ -468,35 +482,44 @@ class BandsWidget(VBox):
         self._click = Dropdown(description = 'Click', options = ['None','VBM','CBM'])
         self._ktcicks = Text(description = 'kticks')
         self._elim = Text(description = 'elim', value = '-10, 10')
-        self._ppicks = PropsPicker(self._update_graph,button_text = 'Update Graph')
+        self._ppicks = PropsPicker(on_button_click = self._update_graph, on_selection_changed = self._warn_update)
+        self._ppicks.button.description = 'Update Graph'
         self._result = {} # store and save output results
+        self._click_dict = {} # store clicked data
         self._kwargs = {}
-        
-        self._interact = FilesWidget(glob = 'vapout.h5' if use_vaspout else'vasprun.xml').interactive(
+        file_widget_kwargs = {'glob' : 'vapout.h5' if use_vaspout else'vasprun.xml', **file_widget_kwargs}
+        self._interact = FilesWidget(**file_widget_kwargs).interactive(
             self._load_data, 
             other_widgets = [self._fig],
             other_controls = [self._tsd, self._elim, self._ktcicks, ipw.HTML('<hr/>'), self._ppicks, ipw.HTML('<hr/>Click on graph to read selected option.'),self._click],
             max_height = max_height
         )
+        self._interact.output_widget.layout.max_height = '200px' # Limit output height to avoid taking too much space
         self.files_widget = self._interact.files_widget
         self.children = self._interact.children
         self._tsd.observe(self._change_theme, 'value')
         self._click.observe(self._click_save_data, 'value') 
         self._ktcicks.observe(self._warn_update,'value')
         self._elim.observe(self._warn_update,'value')
-        self._ppicks.on_change(self._warn_update, names = 'value')
         
     def _load_data(self, path): # Automatically redirectes to output widget
-        self._bands = (vp.Vaspout(path) if self._use_vaspout else vp.Vasprun(path)).bands
-        self._ppicks.update(self.bands.source.summary)
-        self._ktcicks.value = ', '.join(f'{k}:{v}' for k,v in self.bands.get_kticks())
-        if self.bands.source.summary.LSORBIT:
-            self._click.options = ['None','VBM','CBM','so_max','so_min']
-        else:
-            self._click.options = ['None','VBM','CBM']
-        
-        self._click_save_data(None) # Load into table
-        self._warn_update(None)
+        self._interact.output_widget.clear_output(wait = True) # Why need again?
+        with self._interact.output_widget:
+            self._bands = (vp.Vaspout(path) if self._use_vaspout else vp.Vasprun(path)).bands
+            self._ppicks.update(self.bands.source.summary)
+            self._ktcicks.value = ', '.join(f'{k}:{v}' for k,v in self.bands.get_kticks())
+            if self.bands.source.summary.LSORBIT:
+                self._click.options = ['None','VBM','CBM','so_max','so_min']
+            else:
+                self._click.options = ['None','VBM','CBM']
+
+            if (file := self.files_widget.selected.parent/'result.json').is_file():
+                self._result = serializer.load(str(file.absolute())) # Old data loaded
+
+            pdata = self.bands.source.poscar.data
+            self._result.update({'v':round(pdata.volume,4), **{k:round(v,4) for k,v in zip('abc',pdata.norms)}, **{k:round(v,4) for k,v in zip('αβγ',pdata.angles)}})     
+            self._click_save_data(None) # Load into view
+            self._warn_update(None)
     
     @property
     def bands(self):
@@ -511,46 +534,80 @@ class BandsWidget(VBox):
         return self._kwargs
     
     def _update_graph(self, btn):
-        hsk = [[v.strip() for v in vs.split(':')] for vs in self._ktcicks.value.split(',')]
-        kticks = [(int(k),v) for k,v in hsk]
-        elim = [float(v) for v in self._elim.value.split(',') if v.strip()] or None
-        self._kwargs = {'elim': elim,'kticks': kticks}
-        
-        if self._ppicks.projections:
-            self._kwargs = {'projections': self._ppicks.projections, **self._kwargs}
-            fig = self.bands.iplot_rgb_lines(**self._kwargs, name = 'Up')
-            if self.bands.source.summary.ISPIN == 2:
-                self.bands.iplot_rgb_lines(**self._kwargs, name = 'Down', fig = fig)
-        else:
-            fig = self.bands.iplot_bands(**self._kwargs, name = 'Up')
-            if self.bands.source.summary.ISPIN == 2:
-                self.bands.iplot_bands(**self._kwargs, name = 'Down', fig = fig)
-        
-        ip.iplot2widget(fig, self._fig, template = self._tsd.value)
-        _click_data(self._click,self.bands.data.ezero, self._result,self._fig)
-        self._ppicks.button.description = '🟢 Update Graph'
+        self._interact.output_widget.clear_output(wait = True) # Why need again?
+        with self._interact.output_widget:
+            hsk = [[v.strip() for v in vs.split(':')] for vs in self._ktcicks.value.split(',')]
+            kticks = [(int(vs[0]),vs[1]) for vs in hsk if len(vs) == 2] or None
+            elim = [float(v) for v in self._elim.value.split(',') if v.strip()] or None
+            self._kwargs = {'elim': elim,'kticks': kticks}
+
+            if self._ppicks.projections:
+                self._kwargs = {'projections': self._ppicks.projections, **self._kwargs}
+                fig = self.bands.iplot_rgb_lines(**self._kwargs, name = 'Up')
+                if self.bands.source.summary.ISPIN == 2:
+                    self.bands.iplot_rgb_lines(**self._kwargs, name = 'Down', fig = fig)
+
+                self.iplot = partial(self.bands.iplot_rgb_lines, **self._kwargs)
+                self.splot = partial(self.bands.splot_rgb_lines, **self._kwargs)
+            else:
+                fig = self.bands.iplot_bands(**self._kwargs, name = 'Up')
+                if self.bands.source.summary.ISPIN == 2:
+                    self.bands.iplot_bands(**self._kwargs, name = 'Down', fig = fig)
+
+                self.iplot = partial(self.bands.iplot_bands, **self._kwargs)
+                self.splot = partial(self.bands.splot_bands, **self._kwargs)
+
+            ip.iplot2widget(fig, self._fig, template = self._tsd.value)
+            store_clicked_data(self._fig, self._click_dict, callback = lambda: self._click_save_data('CLICK')) # should not be None here
+            self._ppicks.button.description = 'Update Graph'
     
     def _change_theme(self, change):
         self._fig.layout.template = self._tsd.value
         
-    def _click_save_data(self, change):
-        if not change: # do not load on observing
-            if (file := Path(self.files_widget.dropdown.value).parent/'result.json').is_file():
-                self._result = serializer.load(str(file.absolute())) # First pick old
+    def _click_save_data(self, change = None):
+        def _show_and_save(data_dict):
+            self._interact.output_widget.clear_output(wait = True) # Why need again?
+            with self._interact.output_widget:
+                print(', '.join(f'{key} = {value}' for key, value in data_dict.items() if key not in ('so_max','so_min')))
+
+            serializer.dump(data_dict,dump_to = 'json',outfile = self.files_widget.selected.parent/'result.json')
+            
+        if change is None: # called from other functions but not from store_clicked_data
+            return _show_and_save(self._result)
+        # Should be after checking chnage
+        if self._click.value and self._click.value == 'None':
+            return # No need to act on None
         
-        self._interact.output_widget.clear_output(wait = True) # Why need again?
-        with self._interact.output_widget:
-            print(', '.join(f'{key} = {value}' for key, value in self._result.items() if key not in ('so_max','so_min')))
+        data_dict = self._result.copy() # Copy old data
+        if self._click_dict.get('ys'): # No need to make empty dict
+            x = round(self._click_dict.get('xs')[0],6)
+            y = round(float(self._click_dict.get('ys')[0]) + self.bands.data.ezero,6) # Add ezero
+
+            if (key := self._click.value):
+                data_dict[key] = y # Assign value back
+                if not key.startswith('so'): 
+                    data_dict[key + '_k'] = round(x,6) # Save x to test direct/indirect
+                
+            if data_dict.get('VBM',None) and data_dict.get('CBM',None):
+                data_dict['E_gap'] = np.round(data_dict['CBM'] - data_dict['VBM'], 6)
+            
+            if data_dict.get('so_max',None) and data_dict.get('so_min',None):
+                data_dict['Δ_SO'] = np.round(data_dict['so_max'] - data_dict['so_min'], 6)
+                
+            self._result.update(data_dict) #store new data
+            _show_and_save(self._result)
         
-        _save_data(self.files_widget.dropdown, self._result)
+        if change == 'CLICK': # Called from store_clicked_data
+            self._click.value = 'None' # Reset to None to avoid accidental click
+            
         
     def _warn_update(self,change):
         self._ppicks.button.description = '🔴 Update Graph'
         
-    def summarize(self):
+    @property
+    def summary(self):
         "Generate a summary data frame."
         return _generate_summary(self.files_widget.files)
-        
 
 class KpathWidget(VBox):
     """
@@ -565,7 +622,7 @@ class KpathWidget(VBox):
     - To break the path between two points "Γ" and "X" type "Γ 0,X" in the "Labels" box, zero means no points in interval.
     - You can manually edit the "KPOINT" box to add points to the path after having selected points from the select box.
     """
-    def __init__(self, max_height = '90vh'):
+    def __init__(self, max_height = '90vh', **files_widget_kwargs):
         super().__init__(_dom_classes = ['KpathWidget'])
         self._fig = go.FigureWidget()
         self._sm  = SelectMultiple(options = [('⋮',0),], layout = Layout(width = 'auto'))
@@ -580,7 +637,9 @@ class KpathWidget(VBox):
         other_controls = [HBox([self._add, self._del, self._tsb],layout = Layout(min_height = '24px')), 
             ipw.HTML('<style>.KpathWidget .widget-select-multiple { min-height: 180px; }\n .widget-select-multiple > select {height: 100%;}</style>'),              
             self._sm, self._lab, self._kpt]
-        self._interact = FilesWidget(glob = 'POSCAR').interactive(self._update_fig,[self._fig],other_controls, max_height = max_height)
+        files_widget_kwargs = {'glob':'POSCAR', **files_widget_kwargs}
+        self._interact = FilesWidget(**files_widget_kwargs).interactive(self._update_fig,[self._fig],other_controls, max_height = max_height)
+        self._interact.output_widget.layout.max_height = '200px' # Limit output height to avoid taking too much space
         self.children = self._interact.children
         
         self._tsb.on_click(self._update_theme)
