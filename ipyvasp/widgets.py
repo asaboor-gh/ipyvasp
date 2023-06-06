@@ -3,10 +3,12 @@
 __all__ = ['summarize', 'FilesWidget', 'PropsPicker', 'BandsWidget', 'KpathWidget']
 
 # Cell
+import inspect
 from time import time
 from pathlib import Path
 from collections import Iterable
 from functools import partial
+from inspect import signature
 
 
 # Widgets Imports
@@ -104,7 +106,7 @@ class FilesWidget(VBox):
             if prop and not isinstance(prop, str):
                 raise ValueError(f'Expected string, got {type(prop)}')
             
-        VBox.__init__(self,_dom_classes = ['FilesWidget']) # This makes it truely a widget
+        super().__init__(_dom_classes = ['FilesWidget']) # This makes it truely a widget
         self._files = [] # Selections stored as Path objects
         self._widgets = {
             'input': Text(value = path, description = 'Path:', tooltip = 'The path to the directory to search.'),
@@ -125,6 +127,7 @@ class FilesWidget(VBox):
                 raise TypeError('Argument `on_file_changed` must be a function that takes path as an argument.')
             
             out = ipw.Output()
+            self.layout.max_height = '90vh' # Only if output is present
             self._widgets['output'] = out
             
             @out.capture(clear_output = True, wait = True)
@@ -134,7 +137,8 @@ class FilesWidget(VBox):
             self._widgets['files'].observe(on_change, names = ['value'])
             
         self._process(None) # Initial processing based on given values
-                
+             
+    
     def _lock_selection(self, change):
         for key, value in self._widgets.items():
             if key not in ['files','lock']:
@@ -181,7 +185,7 @@ class FilesWidget(VBox):
         else:
             raise ValueError('No file selected.')
     
-    def interactive(self, func, other_widgets = None, other_controls = None, options = {'manual':False}, max_height = '90vh', **kwargs):
+    def interactive(self, func, other_widgets = None, other_controls = None, options = {'manual':False}, height = '90vh', **kwargs):
         """
         Interact with a function that takes selected Path as first argument. Returns a widget that saves attributes of the function call such as .f, .args, .kwargs.
         See docs of self.interact for more details on the parameters. kwargs are passed to ipywidgets.interactive to create controls.
@@ -256,6 +260,7 @@ class FilesWidget(VBox):
             raise TypeError('other_widgets must be a list or tuple of widgets.')
         
         if other_widgets:
+            output.layout.max_height = '200px'
             out_collapser = Checkbox(description = 'Hide output widget', value = False)
             def toggle_output(change):
                 if out_collapser.value:
@@ -271,11 +276,10 @@ class FilesWidget(VBox):
         out.children = [HBox([ # reset children to include new widgets
             VBox(children = [new_fw, VBox(others)]), # other widgets in box to make scrollable independent file selection 
             VBox(children = [Box([output]), *(other_widgets or []), info]), # output in box to make scrollable, 
-        ]).add_class('FilesWidget-Interact')]
-        out.layout.max_height = max_height # important for every widget separately
+        ],layout = Layout(height = height, max_height = height)).add_class('FilesWidget-Interact')] # important for every widget separately
         return out
 
-    def interact(self, other_widgets =  None, other_controls = None, options = {'manual':False}, max_height = '90vh', **kwargs):
+    def interact(self, other_widgets =  None, other_controls = None, options = {'manual':False}, height = '90vh', **kwargs):
         """
         Interact with a function that takes a selected Path as first argument.
         A CSS class 'FilesWidget-Interact' is added to the final widget to let you style it.    
@@ -286,7 +290,7 @@ class FilesWidget(VBox):
             For example you can add plotly's FigureWidget that updates based on the selection, but is not part of the function, so it is displayed only once.
         other_controls : list/tuple, default is None. If not None, these are assumed to be ipywidgets and are placed below the widgets created by kwargs. These are not passed to the decorated function.
         options : dict, default is {'manua':False}. If True, the decorated function is not called automatically, and you have to call it manually on button press. You can pass button name as 'manual_name' in options.
-        max_height : str, default is '90vh'. Max height of the final widget. This is important to avoid very long widgets.
+        height : str, default is '90vh'. height of the final widget. This is important to avoid very long widgets.
         
         kwargs are passed to ipywidgets.interactive and decorated function. Resulting widgets are placed below the file selection widget.
         
@@ -309,7 +313,7 @@ class FilesWidget(VBox):
             Use self.interactive to get a widget that stores the argements and can be called later in a notebook cell.
         """
         def inner(func):
-            display(self.interactive(func, other_widgets = other_widgets, other_controls = other_controls, options = options, max_height = max_height,**kwargs))
+            display(self.interactive(func, other_widgets = other_widgets, other_controls = other_controls, options = options, height = height,**kwargs))
             return func
         return inner 
     
@@ -317,7 +321,6 @@ class FilesWidget(VBox):
         """Summarize the results from all selected files using a function that takes a Path object as first arguement.
         kwargs are passed to function. Returns a dataframe."""
         return summarize({key: value for key,value in zip(self._widgets['files'].options, self._files)}, func, **kwargs)
-
 
 class _PropPicker(VBox):
     def __init__(self, system_summary = None):
@@ -473,7 +476,7 @@ def _generate_summary(paths_list):
 
 class BandsWidget(VBox):
     "Visualize band structure from VASP calculation. You can click on the graph to get the data such as VBM, CBM, etc."
-    def __init__(self, use_vaspout = False, max_height = '90vh', **file_widget_kwargs):
+    def __init__(self, use_vaspout = False, height = '90vh', **file_widget_kwargs):
         super().__init__(_dom_classes = ['BandsWidget'])
         self._bands = None
         self._use_vaspout = use_vaspout
@@ -492,9 +495,8 @@ class BandsWidget(VBox):
             self._load_data, 
             other_widgets = [self._fig],
             other_controls = [self._tsd, self._elim, self._ktcicks, ipw.HTML('<hr/>'), self._ppicks, ipw.HTML('<hr/>Click on graph to read selected option.'),self._click],
-            max_height = max_height
+            height = height
         )
-        self._interact.output_widget.layout.max_height = '200px' # Limit output height to avoid taking too much space
         self.files_widget = self._interact.files_widget
         self.children = self._interact.children
         self._tsd.observe(self._change_theme, 'value')
@@ -627,7 +629,7 @@ class KpathWidget(VBox):
     - To break the path between two points "Γ" and "X" type "Γ 0,X" in the "Labels" box, zero means no points in interval.
     - You can manually edit the "KPOINT" box to add points to the path after having selected points from the select box.
     """
-    def __init__(self, max_height = '90vh', **files_widget_kwargs):
+    def __init__(self, height = '90vh', **files_widget_kwargs):
         super().__init__(_dom_classes = ['KpathWidget'])
         self._fig = go.FigureWidget()
         self._sm  = SelectMultiple(options = [('⋮',0),], layout = Layout(width = 'auto'))
@@ -643,8 +645,7 @@ class KpathWidget(VBox):
             ipw.HTML('<style>.KpathWidget .widget-select-multiple { min-height: 180px; }\n .widget-select-multiple > select {height: 100%;}</style>'),              
             self._sm, self._lab, self._kpt]
         files_widget_kwargs = {'glob':'POSCAR', **files_widget_kwargs}
-        self._interact = FilesWidget(**files_widget_kwargs).interactive(self._update_fig,[self._fig],other_controls, max_height = max_height)
-        self._interact.output_widget.layout.max_height = '200px' # Limit output height to avoid taking too much space
+        self._interact = FilesWidget(**files_widget_kwargs).interactive(self._update_fig,[self._fig],other_controls, height = height)
         self.children = self._interact.children
         
         self._tsb.on_click(self._update_theme)
@@ -807,3 +808,6 @@ class KpathWidget(VBox):
         "Returns disconnected current plotly figure"
         return go.Figure(data = self._fig.data, layout = self._fig.layout)
     
+# VBox ruins signature of class, so we have to do this
+for c in [KpathWidget, BandsWidget, PropsPicker, _PropPicker, FilesWidget]:
+    c.__signature__ = inspect.signature(c.__init__)
