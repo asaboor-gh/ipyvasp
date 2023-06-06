@@ -193,7 +193,7 @@ def iplot_bands(K, E,
     if fig is None:
         fig = go.Figure()
         
-    kwargs = {'mode': 'lines', **kwargs}
+    kwargs = {'mode': 'markers + lines', 'marker': dict(size = 0.1), **kwargs} # marker so that it is selectable by box, otherwise it does not
     fig.add_trace(go.Scatter(x = K, y = E, hovertext = T, **kwargs))
     
     fig.update_layout(template = 'plotly_white', title = (title or ''), # Do not set autosize = False, need to be responsive in widgets boxes

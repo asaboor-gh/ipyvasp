@@ -442,23 +442,34 @@ class PropsPicker(VBox):
                 
         return out
     
-def store_clicked_data(fig, store_dict, callback = None):
-    "Store clicked data in a dict. callback takes no argement and is called after storing data."
+def __store_figclick_data(fig, store_dict, callback = None, selection = False):
+    "Store clicked data in a dict. callback takes trace as argument and is called after storing data."
     if not isinstance(fig, go.FigureWidget):
         raise TypeError('fig must be a FigureWidget')
     if not isinstance(store_dict, dict):
         raise TypeError('store_dict must be a dict')
-    if not callable(callback):
-        raise TypeError('callback must be callable')
+    if callback and not callable(callback):
+        raise TypeError('callback must be callable if given')
     
     def handle_click(trace, points, state):
-        store_dict.clear() # Avoid random keys
-        store_dict.update({k.lstrip('_'):v for k,v in points.__dict__.items()})
+        store_dict['data'] = points
         if callback:
-            callback()
+            callback(trace)
     
     for trace in fig.data:
-        trace.on_click(handle_click)
+        if selection:
+            trace.on_selection(handle_click)
+        else:
+            trace.on_click(handle_click)
+
+def store_clicked_data(fig, store_dict, callback = None):
+    "Store clicked point data to a store_dict. callback takes trace being clicked as argument."
+    return __store_figclick_data(fig, store_dict, callback, selection = False)
+
+def store_selected_data(fig, store_dict, callback = None):
+    "Store multipoints selected data to a store_dict. callback takes trace being clicked as argument."
+    return __store_figclick_data(fig, store_dict, callback, selection = True)
+    
 
 
 # Cell
@@ -484,7 +495,11 @@ def _generate_summary(paths_list):
 
 @fix_signature
 class BandsWidget(VBox):
-    "Visualize band structure from VASP calculation. You can click on the graph to get the data such as VBM, CBM, etc."
+    """Visualize band structure from VASP calculation. You can click on the graph to get the data such as VBM, CBM, etc.
+    Two attributes are important:
+    self.clicked_data returns the last clicked point, that can also be stored as VBM, CBM etc, using Click dropdown.
+    self.selected_data returns the last selection of points within a box or lasso. You can plot that output separately as plt.plot(data.xs, data.ys) after a selection.
+    """
     def __init__(self, use_vaspout = False, height = '90vh', **file_widget_kwargs):
         super().__init__(_dom_classes = ['BandsWidget'])
         self._bands = None
@@ -498,6 +513,7 @@ class BandsWidget(VBox):
         self._ppicks.button.description = 'Update Graph'
         self._result = {} # store and save output results
         self._click_dict = {} # store clicked data
+        self._select_dict = {} # store selection data
         self._kwargs = {}
         file_widget_kwargs = {'glob' : 'vapout.h5' if use_vaspout else'vasprun.xml', **file_widget_kwargs}
         self._interact = FilesWidget(**file_widget_kwargs).interactive(
@@ -547,8 +563,13 @@ class BandsWidget(VBox):
     @property
     def clicked_data(self):
         "Clicked data from graph"
-        return self._click_dict
+        return self._click_dict.get('data',None)
     
+    @property
+    def selected_data(self):
+        "Data selected by box or lasso selection from graph"
+        return self._select_dict.get('data',None)
+        
     def _update_graph(self, btn):
         self._interact.output_widget.clear_output(wait = True) # Why need again?
         with self._interact.output_widget:
@@ -574,8 +595,11 @@ class BandsWidget(VBox):
                 self.splot = partial(self.bands.splot_bands, **self._kwargs)
 
             ip.iplot2widget(fig, self._fig, template = self._tsd.value)
-            store_clicked_data(self._fig, self._click_dict, callback = lambda: self._click_save_data('CLICK')) # should not be None here
-            self._ppicks.button.description = 'Update Graph'
+            self._click_dict.clear() # avoid data from previous figure
+            self._select_dict.clear() # avoid data from previous figure
+            store_clicked_data(self._fig, self._click_dict, callback = lambda trace: self._click_save_data('CLICK')) # 'CLICK' is needed to inntercept in a function
+            store_selected_data(self._fig, self._select_dict, callback = None)
+            self._ppicks.button.description = 'Update Graph'    
     
     def _change_theme(self, change):
         self._fig.layout.template = self._tsd.value
@@ -595,9 +619,10 @@ class BandsWidget(VBox):
             return # No need to act on None
         
         data_dict = self._result.copy() # Copy old data
-        if self._click_dict.get('ys'): # No need to make empty dict
-            x = round(self._click_dict.get('xs')[0],6)
-            y = round(float(self._click_dict.get('ys')[0]) + self.bands.data.ezero,6) # Add ezero
+        
+        if (data := self.clicked_data): # No need to make empty dict
+            x = round(data.xs[0],6)
+            y = round(float(data.ys[0]) + self.bands.data.ezero,6) # Add ezero
 
             if (key := self._click.value):
                 data_dict[key] = y # Assign value back
@@ -633,22 +658,22 @@ class KpathWidget(VBox):
     After initialization and disply:   
     
     - Select a POSCAR file from "File:" dropdown menu. It will update the figure.
-    - Add/remove points to/from the select box by using the buttons.
-    - Select points from the select box and click on a scatter point in figure to update the path.
-    - You can also add labels to the points by typing in the "Labels" box such as "Γ,X" or "Γ 5,X" that will add 5 points in interval.
+    - Add points to select box on left by clicking on plot points. When done with points click on Lock to avoid adding more points.
+    - To update point(s), select point(s) from the select box and click on a scatter point in figure or use KPOINT input to update it manually, e.g. if a point is not available on plot.
+    - Add labels to the points by typing in the "Labels" box such as "Γ,X" or "Γ 5,X" that will add 5 points in interval.
     - To break the path between two points "Γ" and "X" type "Γ 0,X" in the "Labels" box, zero means no points in interval.
-    - You can manually edit the "KPOINT" box to add points to the path after having selected points from the select box.
     """
     def __init__(self, height = '90vh', **files_widget_kwargs):
         super().__init__(_dom_classes = ['KpathWidget'])
         self._fig = go.FigureWidget()
-        self._sm  = SelectMultiple(options = [('⋮',0),], layout = Layout(width = 'auto'))
+        self._sm  = SelectMultiple(options = [], layout = Layout(width = 'auto'))
         self._lab = Text(description='Labels',continuous_update = True)
         self._kpt = Text(description='KPOINT', continuous_update = False)
-        self._add = Button(description = '➕ Point', tooltip = 'Add point to path')
+        self._add = Button(description = 'Lock', tooltip = 'Lock/Unlock adding more points')
         self._del = Button(description = '❌ Point', tooltip = 'Delete Selected Points')
         self._tsb = Button(description = 'Dark Plot', tooltip = 'Toggle Plot Theme')
         self._poscar = None
+        self._clicktime = None
         self._kpoints = {}
         
         other_controls = [HBox([self._add, self._del, self._tsb],layout = Layout(min_height = '24px')), 
@@ -659,7 +684,7 @@ class KpathWidget(VBox):
         self.children = self._interact.children
         
         self._tsb.on_click(self._update_theme)
-        self._add.on_click(self._add_point)
+        self._add.on_click(self._toggle_lock)
         self._del.on_click(self._del_point)
         self._kpt.observe(self._take_kpt, 'value')
         self._lab.observe(self._add_label)
@@ -671,24 +696,33 @@ class KpathWidget(VBox):
         
     def _update_fig(self, path):
         from .api import POSCAR # to avoid circular import
-        template = 'plotly_dark' if 'Light' in self._tsb.description else 'plotly_white'
-        self._poscar = POSCAR(path)
-        ip.iplot2widget(self._poscar.iplot_bz(fill = False, color='red'), self._fig, template)
-        with self._fig.batch_animate():
-            self._fig.add_trace(go.Scatter3d(x = [],y = [],z = [],
-                mode='lines+text',name='path',text=[], hoverinfo='none', # dont let it block other points
-                textfont_size=18)) # add path that will be updated later
-        self._click() # handle events
+        with self._interact.output_widget:
+            template = 'plotly_dark' if 'Light' in self._tsb.description else 'plotly_white'
+            self._poscar = POSCAR(path)
+            ip.iplot2widget(self._poscar.iplot_bz(fill = False, color='red'), self._fig, template)
+            with self._fig.batch_animate():
+                self._fig.add_trace(go.Scatter3d(x = [],y = [],z = [],
+                    mode='lines+text',name='path',text=[], hoverinfo='none', # dont let it block other points
+                    textfont_size=18)) # add path that will be updated later
+            self._click() # handle events
+            print('Click points on plot to store for kpath.')
         
     def _click(self):
         def handle_click(trace, points, state):
+            if self._clicktime and (time() - self._clicktime < 1):
+                return # Avoid double clicks
+
+            self._clicktime = time() # register this click's time
+            
             if points.ys != []:
                 index = points.point_inds[0]
                 kp = trace.hovertext[index]
                 kp = [float(k) for k in kp.split('[')[1].split(']')[0].split()]
-                cp = [trace.x[index],trace.y[index],trace.z[index]]
 
-                self._take_kpt(kp) # this updates plot back as well
+                if self._sm.value:
+                    self._take_kpt(kp) # this updates plot back as well
+                elif self._add.description == 'Lock': # only add when open
+                    self._add_point(kp)  
 
         for trace in self._fig.data:
             if 'HSK' in trace.name:
@@ -750,15 +784,23 @@ class KpathWidget(VBox):
             self._fig.layout.template = 'plotly_white'
             btn.description = 'Dark Plot'
     
-    def _add_point(self, btn):
+    def _add_point(self, kpt):
         with self._interact.output_widget:
             self._sm.options = [*self._sm.options, ('⋮', len(self._sm.options))]
+            self._sm.value = (self._sm.options[-1][1],) # select to receive point as well
+            self._take_kpt(kpt) # add point, label and plot back
+    
+    def _toggle_lock(self, btn):
+        if self._add.description == 'Lock':
+            self._add.description = 'Unlock'
+        else:
+            self._add.description = 'Lock'
     
     def _del_point(self, btn):
         with self._interact.output_widget:
-            self._sm.options = [opt for opt in self._sm.options if opt[0] not in self._sm.label]
-        
-        self._update_selection() # update plot as well
+            for v in self._sm.value: # for loop here is important to update selection properly
+                self._sm.options = [opt for opt in self._sm.options if opt[1] != v]
+                self._update_selection() # update plot as well
         
     def _take_kpt(self, change_or_kpt):
         with self._interact.output_widget:
@@ -767,11 +809,10 @@ class KpathWidget(VBox):
             else:
                 point = [float(v) for v in self._kpt.value.split(',')]
                 
-            self._kpoints.update({v:point for v in self._sm.value})
-            
             if len(point) != 3:
                 raise ValueError('Expects KPOINT of 3 floats')
                 
+            self._kpoints.update({v:point for v in self._sm.value})
             label = '{:>8.4f} {:>8.4f} {:>8.4f}'.format(*point)
             self._sm.options = [(label, value) if value in self._sm.value else (lab, value) for (lab,value) in self._sm.options]
             self._add_label(None) # Re-adjust labels and update plot as well
