@@ -1,6 +1,5 @@
 import re
 import os
-from collections import namedtuple
 from subprocess import Popen, PIPE
 from contextlib import contextmanager
 from pathlib import Path
@@ -13,8 +12,8 @@ from scipy.ndimage.filters import convolve1d
 
 def get_file_size(path:str):
     """Return file size"""
-    if os.path.isfile(path):
-        size = os.stat(path).st_size
+    if (p := Path(path)).is_file():
+        size = p.stat.st_size
         for unit in ['Bytes','KB','MB','GB','TB']:
             if size < 1024.0:
                 return "%3.2f %s" % (size,unit)
@@ -25,7 +24,7 @@ def get_file_size(path:str):
 @contextmanager
 def set_dir(path:str):
     "Context manager to work in some directory and come back"
-    current = os.getcwd()
+    current = os.getcwd() # not available in pathlib yet
     try:
         os.chdir(path)
         yield
@@ -218,14 +217,13 @@ def list_files(path = '.', glob = '*', exclude = None, files_only = False, dirs_
 
 def prevent_overwrite(path: str) -> str:
     """Prevents overwiting as file/directory by adding numbers in given file/directory path."""
-    if os.path.exists(path):
-        name, ext = os.path.splitext(path)
+    if (p := Path(path)).exists():
         # Check existing files
         i = 0
-        _path = name + '-{}' + ext
-        while os.path.isfile(_path.format(i)):
-            i +=1
-        out_path = _path.format(i)
+        name = p.stem + '-{}' + p.suffix
+        while Path(name.format(i)).is_file():
+            i += 1
+        out_path = name.format(i)
         print(f"Found existing path: {path!r}\nConverting to: {out_path!r}")
         return out_path
     return path

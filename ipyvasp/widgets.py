@@ -85,6 +85,12 @@ _progress_svg = '''<svg xmlns="http://www.w3.org/2000/svg" height="5em" viewBox=
     </path>
 </svg>'''
 
+def fix_signature(cls):
+    # VBox ruins signature of subclass, let's fix it
+    cls.__signature__ = inspect.signature(cls.__init__)
+    return cls
+
+@fix_signature
 class FilesWidget(VBox):
     """A widget for selecting files from a directory and its subdirectories.
     
@@ -322,6 +328,7 @@ class FilesWidget(VBox):
         kwargs are passed to function. Returns a dataframe."""
         return summarize({key: value for key,value in zip(self._widgets['files'].options, self._files)}, func, **kwargs)
 
+@fix_signature
 class _PropPicker(VBox):
     def __init__(self, system_summary = None):
         super().__init__()
@@ -386,6 +393,7 @@ class _PropPicker(VBox):
         items['label'] = f"{self._widgets['atoms'].value or ''}-{self._widgets['orbs'].value or ''}"
         return items
     
+@fix_signature
 class PropsPicker(VBox):
     """
     A widget to pick atoms and orbitals for plotting.
@@ -474,6 +482,7 @@ def _generate_summary(paths_list):
     return summarize(result_paths,load_data)
     
 
+@fix_signature
 class BandsWidget(VBox):
     "Visualize band structure from VASP calculation. You can click on the graph to get the data such as VBM, CBM, etc."
     def __init__(self, use_vaspout = False, height = '90vh', **file_widget_kwargs):
@@ -616,6 +625,7 @@ class BandsWidget(VBox):
         "Generate a summary data frame."
         return _generate_summary(self.files_widget.files)
 
+@fix_signature
 class KpathWidget(VBox):
     """
     Interactively bulid a kpath for bandstructure calculation.
@@ -807,7 +817,6 @@ class KpathWidget(VBox):
     def iplot(self):
         "Returns disconnected current plotly figure"
         return go.Figure(data = self._fig.data, layout = self._fig.layout)
-    
-# VBox ruins signature of class, so we have to do this
-for c in [KpathWidget, BandsWidget, PropsPicker, _PropPicker, FilesWidget]:
-    c.__signature__ = inspect.signature(c.__init__)
+
+# Should be at end
+del fix_signature # no more need

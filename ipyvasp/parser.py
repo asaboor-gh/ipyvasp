@@ -1,9 +1,9 @@
 import re
-import os
 from io import StringIO
 from itertools import islice, chain, product
 from collections import namedtuple, Iterable
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 import numpy as np
 
@@ -28,13 +28,13 @@ def dict2tuple(name,d):
 class DataSource:
     "Base class for all data sources. It provides a common interface to access data from different sources. Subclass it to get data from a source."
     def __init__(self, path):
-        if not os.path.isfile(path):
+        self._path = Path(path).absolute()
+        if not self._path.is_file():
             raise FileNotFoundError("File: '{}'' does not exist!".format(path))
-        self._path = os.path.abspath(path) # Keep absolute path in case directory changes
         self._summary = self.get_summary() # summary data is read only once
     
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.path!r})"
+        return f"{self.__class__.__name__}({str(self.path)})"
     
     @property
     def path(self): return self._path
@@ -105,7 +105,7 @@ class Vasprun(DataSource):
         if '|' in start_match:
             raise ValueError("start_match should be a single match, so '|' character is not allowed.")
         
-        with open(self.path) as f:
+        with self.path.open('r') as f:
             lines = islice(f,None) # this is fast
             matched = False
             n_start = 1
@@ -393,16 +393,16 @@ class Vasprun(DataSource):
     
     def minify(self):
         "Removes partial dos and projected eigenvalues data from large vasprun.xml to make it smaller in size to save on disk."
-        path = os.path.join(os.path.split(self.path)[0], 'mini-vasprun.xml')
+        path = self.path.parent/'mini-vasprun.xml'
         lines_1 = self.read('xml','<partial',skip_last=True)
         lines_2 = islice(self.read('</partial','<projected',skip_last=True), 1, None)
         lines_3 = islice(self.read('</projected','</xml'), 1, None)
         text = ''.join(chain(lines_1, lines_2, lines_3))
         
-        with open(path,'w') as f:
+        with path.open('w') as f:
             f.write(text)
             
-        print('Minified vasprun.xml saved at {}'.format(path))
+        print('Minified vasprun.xml saved at {}'.format(str(path)))
         
 
 def xml2dict(xmlnode_or_filepath):
@@ -568,9 +568,6 @@ def export_spin_data(path = None, spins = 's', skipk = None, elim = None):
 
     xml_data = read_asxml(path = path or './vasprun.xml')
 
-    base_dir = os.path.split(os.path.abspath(path or './vasprun.xml'))[0]
-    set_paths = [os.path.join(base_dir,"_set{}.txt".format(i)) for i in (1,2,3,4)]
-
     skipk = skipk or exclude_kpts(xml_data=xml_data) #that much to skip by default
     full_dic = {'sys_info':get_summary(xml_data)}
 
@@ -597,12 +594,12 @@ def export_spin_data(path = None, spins = 's', skipk = None, elim = None):
     if ISPIN == 1:
         for n, s in enumerate('sxyz', start = 0): # spins 0,1,2,3 for s,x,y,z
             if s in spins:
-                spin_sets[s] = get_bands_pro_set(xml_data, spin = n, skipk = skipk, bands_range = bands_range, set_path = set_paths[n-1]).pros[0] # remove extra dimension
+                spin_sets[s] = get_bands_pro_set(xml_data, spin = n, skipk = skipk, bands_range = bands_range).pros[0] # remove extra dimension
 
     if ISPIN == 2:
         print(utils.color.g(f"Found ISPIN = 2, output data got attributes spins.<u,d> instead of spins.<{','.join(spins)}>"))
-        pro_1 = get_bands_pro_set(xml_data, spin = 0, skipk = skipk, bands_range = bands_range, set_path = set_paths[0])
-        pro_2 = get_bands_pro_set(xml_data, spin = 1, skipk = skipk, bands_range = bands_range, set_path = set_paths[1])
+        pro_1 = get_bands_pro_set(xml_data, spin = 0, skipk = skipk, bands_range = bands_range)
+        pro_2 = get_bands_pro_set(xml_data, spin = 1, skipk = skipk, bands_range = bands_range)
         spin_sets = {'u': pro_1.pros[0],'d': pro_2.pros[1]}
 
     full_dic['spins'] = spin_sets
@@ -614,10 +611,12 @@ def export_outcar(path=None):
     "Read potential at ionic sites from OUTCAR file."
     if path is None:
         path = './OUTCAR'
-    if not os.path.isfile(path):
+    
+    P = Path(path)
+    if not P.is_file():
         raise FileNotFoundError("{} does not exist!".format(path))
     # Raeding it
-    with open(r'{}'.format(path),'r') as f:
+    with P.open('r') as f:
         lines = f.readlines()
     # Processing
     for i,l in enumerate(lines):
@@ -665,9 +664,9 @@ def export_locpot(path:str = None,data_set:str = 0):
     .. note::
         Read `vaspwiki-CHGCAR <https://www.vasp.at/wiki/index.php/CHGCAR>`_ for more info on what data sets are available corresponding to different calculations.
     """
-    path = path or './LOCPOT'
-    if not os.path.isfile(path):
-        raise FileNotFoundError("File {!r} does not exist!".format(path))
+    path = Path(path or './LOCPOT')
+    if not path.is_file():
+        raise FileNotFoundError("File {!r} does not exist!".format(str(path)))
     
     if data_set < 0 or data_set > 3:
         raise ValueError("`data_set` should be 0 (for electrostatic),1 (for M or Mx),2 (for My),3 (for Mz)! Got {}".format(data_set))
@@ -689,7 +688,7 @@ def export_locpot(path:str = None,data_set:str = 0):
                 raise IndexError("Magnetization density may not be present in {!r}!".format(path))
     
     # Reading File
-    with open(path,'r') as f:
+    with path.open('r') as f:
         lines = []
         f.seek(0)
         for i in range(8):
@@ -725,5 +724,5 @@ def export_locpot(path:str = None,data_set:str = 0):
     # Read Info
     from .sio import export_poscar # Keep inside to avoid import loop
     poscar_data = export_poscar(content = '\n'.join(p.strip() for p in poscar))
-    final_dict = dict(SYSTEM = poscar_data.SYSTEM, path = path, **pot_dict, poscar = poscar_data)
+    final_dict = dict(SYSTEM = poscar_data.SYSTEM, path = str(path), **pot_dict, poscar = poscar_data)
     return serializer.GridData(final_dict)

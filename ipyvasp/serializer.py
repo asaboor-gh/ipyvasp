@@ -1,9 +1,9 @@
-import os
 import json
 import pickle
-from collections import namedtuple, Iterable
+from collections import namedtuple
 from contextlib import suppress
 from copy import deepcopy
+from pathlib import Path
 
 import numpy as np
 
@@ -454,13 +454,13 @@ def dump(dict_data, dump_to:str = 'pickle',outfile:str = None,indent:int=1) -> N
     if dump_to == 'pickle':
         if outfile == None:
             return pickle.dumps(dict_obj)
-        outfile = os.path.splitext(outfile)[0] + '.pickle'
+        outfile = Path(outfile).stem + '.pickle'
         with open(outfile,'wb') as f:
             pickle.dump(dict_obj,f)
     if dump_to == 'json':
         if outfile == None:
             return json.dumps(dict_obj,cls = EncodeFromNumpy,indent=indent)
-        outfile = os.path.splitext(outfile)[0] + '.json'
+        outfile = Path(outfile).stem + '.json'
         with open(outfile,'w') as f:
             json.dump(dict_obj,f,cls = EncodeFromNumpy,indent=indent)
     return None
@@ -475,13 +475,13 @@ def load(file_or_str:str):
     out = {}
     if not isinstance(file_or_str,bytes):
         try: #must try, else fails due to path length issue
-            if os.path.isfile(file_or_str):
-                if '.pickle' in file_or_str:
-                    with open(file_or_str,'rb') as f:
+            if (p := Path(file_or_str)).is_file():
+                if '.pickle' in p.suffix:
+                    with p.open('rb') as f:
                         out = pickle.load(f)
 
-                elif '.json' in file_or_str:
-                    with open(file_or_str,'r') as f:
+                elif '.json' in p.suffix:
+                    with p.open('r') as f:
                         out = json.load(f,cls = DecodeToNumpy)
 
             else: out = json.loads(file_or_str,cls = DecodeToNumpy)

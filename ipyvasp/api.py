@@ -4,9 +4,9 @@ __all__ = ['download_structure', '__all__', 'parse_text', 'POSCAR', 'LOCPOT', 'C
            'get_axes', 'Bands', 'DOS']
 
 # Cell
-import os
+from pathlib import Path
 from itertools import islice
-from contextlib import suppress
+
 import numpy as np
 import plotly.graph_objects as go
 try:
@@ -115,10 +115,11 @@ for _m in _memebers:
 def parse_text(path, shape, slices, raw:bool = False, dtype = float, delimiter = '\s+', include:str = None,exclude:str = '#',fix_format:bool = True):
     kwargs = {k:v for k,v in locals().items() if k not in ['path']}
     
-    if not os.path.isfile(path):
+    p = Path(path)
+    if not p.is_file():
         raise FileNotFoundError(f"File {path!r} does not exists")
 
-    with open(path, 'r', encoding='utf-8') as f:
+    with p.open('r', encoding='utf-8') as f:
         gen = islice(f, 0, None)
         data = vp.gen2numpy(gen, **kwargs) # should be under open file context
     return data
@@ -200,10 +201,11 @@ class POSCAR:
     @classmethod
     def from_cif(cls, path):
         "Load data from cif file"
-        if not os.path.isfile(path):
+        p = Path(path)
+        if not p.is_file():
             raise FileNotFoundError(f"File {path!r} does not exists")
         
-        with open(path, 'r', encoding='utf-8') as f:
+        with p.open('r', encoding='utf-8') as f:
             cif_str = f.read()
             poscar_content = sio._cif_str_to_poscar_str(cif_str, "Exported from cif file using ipyvasp")
         
@@ -788,9 +790,9 @@ class Bands(_BandsDosBase):
         .. note:: 
             kticks become useless when you interploate data in plotting, in that case write kticks manually.
         """
-        file = os.path.join(os.path.dirname(self.source.path),rel_path)
-        if os.path.isfile(file):
-            return sio.read_kticks(file)
+        path = Path(self.source.path).parent/rel_path
+        if path.is_file():
+            return sio.read_kticks(path)
         return []
                 
     def get_data(self, elim = None, ezero = None, projections: dict = None):

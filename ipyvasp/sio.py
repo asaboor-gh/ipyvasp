@@ -8,7 +8,7 @@ __all__ = ['atomic_number', 'atoms_color', 'periodic_table', 'Arrow3D', 'fancy_q
            'transform_poscar', 'add_vaccum', 'transpose_poscar', 'add_atoms']
 
 # Cell
-import sys, os, re
+import re
 import json
 import numpy as np
 from pathlib import Path
@@ -225,12 +225,13 @@ def write_poscar(poscar_data, outfile = None, selective_dynamics = None, overwri
         pos_list = [f"{p}   {s}" for p,s in zip(pos_list,selective_dynamics)]
     out_str += '\n'.join(pos_list)
     if outfile:
-        if not os.path.isfile(outfile):
-            with open(outfile,'w', encoding='utf-8') as f:
+        path = Path(outfile)
+        if not path.is_file():
+            with path.open('w', encoding='utf-8') as f:
                 f.write(out_str)
 
-        elif overwrite and os.path.isfile(outfile):
-            with open(outfile,'w', encoding='utf-8') as f:
+        elif overwrite and path.is_file():
+            with path.open('w', encoding='utf-8') as f:
                 f.write(out_str)
         else:
             raise FileExistsError(f"{outfile!r} exists, can not overwrite, \nuse overwrite=True if you want to chnage.")
@@ -246,12 +247,11 @@ def export_poscar(path = None,content = None):
     if content and isinstance(content,str):
         file_lines = [f'{line}\n' for line in content.splitlines()] # Split by lines strips \n which should be there
     else:
-        if not path:
-            path = './POSCAR'
-        if not os.path.isfile(path):
-            raise FileNotFoundError(f"{path!r} not found.")
+        P = Path(path or './POSCAR')
+        if not P.is_file():
+            raise FileNotFoundError(f"{str(P)} not found.")
         
-        with open(path,'r', encoding='utf-8') as f:
+        with P.open('r', encoding='utf-8') as f:
             file_lines = f.readlines()
             
     header = file_lines[0].split('#',1)
@@ -301,15 +301,14 @@ def _save_mp_API(api_key):
     """
     - Save materials project api key for autoload in functions. This works only for legacy API.
     """
-    home = str(Path.home())
-    file = os.path.join(home,'.ipyvasprc')
+    path = Path.home()/'.ipyvasprc'
     lines = []
-    if os.path.isfile(file):
-        with open(file,'r') as fr:
+    if path.is_file():
+        with path.open('r') as fr:
             lines = fr.readlines()
             lines = [line for line in lines if 'MP_API_KEY' not in line]
 
-    with open(file,'w') as fw:
+    with path.open('w') as fw:
         fw.write("MP_API_KEY = {}".format(api_key))
         for line in lines:
             fw.write(line)
@@ -327,9 +326,8 @@ def _load_mp_data(formula,api_key=None,mp_id=None,max_sites = None, min_sites = 
     """
     if api_key is None:
         try:
-            home = str(Path.home())
-            file = os.path.join(home,'.ipyvasprc')
-            with open(file,'r') as f:
+            path = Path.home()/'.ipyvasprc'
+            with path.open('r') as f:
                 lines=f.readlines()
                 for line in lines:
                     if 'MP_API_KEY' in line:
@@ -621,8 +619,8 @@ def get_kpath(kpoints, n = 5, weight= None ,ibzkpt = None,outfile=None, rec_basi
     out_str = '\n'.join(out_str)
     N = len(points)
     if ibzkpt != None:
-        if os.path.isfile(ibzkpt):
-            with open(ibzkpt,'r') as f:
+        if (PI := Path(ibzkpt)).is_file():
+            with PI.open('r') as f:
                 lines = f.readlines()
 
             N = int(lines[1].strip())+N # Update N.
@@ -644,8 +642,8 @@ def get_kpath(kpoints, n = 5, weight= None ,ibzkpt = None,outfile=None, rec_basi
 def read_kticks(kpoints_path):
     "Reads ticks values and labels in header of kpoint file. Returns dictionary of `kticks` that can be used in plotting functions. If not exist in header, returns empty values(still valid)."
     kticks = []
-    if os.path.isfile(kpoints_path):
-        with open(kpoints_path,'r', encoding='utf-8') as f: # Read header, important to use utf-8 to include greek letters.
+    if (path := Path(kpoints_path)).is_file():
+        with path.open('r', encoding='utf-8') as f: # Read header, important to use utf-8 to include greek letters.
             top_line = f.readline()
         if 'HSK-PATH' in top_line:
             head = top_line.split('HSK-PATH')[1].strip() # Only update head if HSK-PATH is found.
@@ -735,8 +733,8 @@ def get_kmesh(poscar_data, *args, shift = 0, weight = None, cartesian = False, i
     out_str = ["{0:>16.10f}{1:>16.10f}{2:>16.10f}{3:>12.6f}".format(x,y,z,weight) for x,y,z in points]
     out_str = '\n'.join(out_str)
     N = len(points)
-    if ibzkpt and os.path.isfile(ibzkpt):
-        with open(ibzkpt,'r', encoding='utf-8') as f:
+    if ibzkpt and (PI := Path(ibzkpt)):
+        with PI.open('r', encoding='utf-8') as f:
             lines = f.readlines()
 
         if (cartesian == False) and (lines[2].strip()[0] in 'cCkK'):
