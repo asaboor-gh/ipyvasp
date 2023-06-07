@@ -8,7 +8,6 @@ from pathlib import Path
 import numpy as np
 
 from . import utils, serializer
-#from ipyvasp import utils, serializer
 
 
 def dict2tuple(name,d):
