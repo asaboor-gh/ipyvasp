@@ -75,6 +75,7 @@ _memebers = (
     sio.get_kpath,
     sio.periodic_table,
     wdg.summarize,
+    wdg.load_results,
     vp.minify_vasprun,
     vp.xml2dict,
     ip.iplot2html,
@@ -368,6 +369,10 @@ class POSCAR:
     def rotate(self,angle_deg,axis_vec):
         return self.__class__(data = sio.rotate_poscar(self._data, angle_deg = angle_deg, axis_vec=axis_vec))
 
+    @_sub_doc(sio.set_zdir,'- poscar_data')
+    def set_zdir(self, hkl):
+        return self.__class__(data = sio.set_zdir(self._data, hkl=hkl))
+    
     @_sub_doc(sio.translate_poscar,'- poscar_data')
     def translate(self, offset):
         return self.__class__(data = sio.translate_poscar(self._data, offset=offset))
@@ -467,15 +472,14 @@ class POSCAR:
         return self.to_R3(points, reciprocal = False)
 
     @_sub_doc(sio.kpoints2bz,'- bz_data')
-    def bring_in_bz(self,kpoints, sys_info = None, shift = 0):
+    def bring_in_bz(self,kpoints, shift = 0):
         """Brings kpoints inside already set BZ, (primitive or regular).
         If basis is not None, returns kpoints relative to those basis.
-        If kpoints are cartesian, sys_info will take care of scaling them.
         `shift` is a number or a list of three numbers that will be added to kpoints before any other operation.
         """
         if not self._bz:
             raise RuntimeError('No BZ found. Please run `get_bz()` first.')
-        return sio.kpoints2bz(self._bz, kpoints= kpoints,primitive = self._primitive, sys_info = sys_info, shift = shift)
+        return sio.kpoints2bz(self._bz, kpoints= kpoints,primitive = self._primitive, shift = shift)
     
     def to_R3(self, points, reciprocal = False):
         "Converts points to R3 coordinates. If reciprocal is True, converts to R3 in reciprocal basis."

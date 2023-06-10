@@ -306,8 +306,8 @@ class Vasprun(DataSource):
         else:
             raise ValueError('No eigenvalues found in this file!')
         evals, occs = ev[:,:,:,0], ev[:,:,:,1]
-        vbm = float(evals[occs > 0.5].max()) # more than half filled condition
-        cbm = float(evals[occs < 0.5].min()) # less than half filled condition
+        vbm = float(evals[occs > 0.5].max()) # more than half filled
+        cbm = float(evals[occs < 0.5].min()) # less than half filled
         evc = (vbm,cbm) # Easy to plot this way like [0, np.ptp(evc)] can work for defult ezero
         zero = vbm # default value of ezero
         

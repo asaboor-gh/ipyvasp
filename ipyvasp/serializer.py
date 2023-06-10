@@ -248,16 +248,33 @@ class PoscarData(Dict2Data):
             return self.extra_info.eqv_labels
         return np.array([f'{k} {v - vs.start + 1}' for k,vs in self.types.items() for v in vs])
     
-    def get_bond_length(self,atom1,atom2):
-        "Returns the bond length between two atoms names should be as 'Ga', 'As'"
-        all_dist =[]
-        for idx in self.types[atom1]:
-            others = self.types[atom2]
-            all_dist = [*all_dist,*np.linalg.norm(self.coords[others] - self.coords[idx,:], axis = 1)] # Get the second closest distance, first is itself
+    def get_distance(self, atom1, atom2):
+        """Returns the distance between two atoms.
+        Provide atom1 and atom2 as strings such as get_distance('Ga', 'As') to get a mimimal distance between two types  
+        or as a dict with a single key as get_distance({'Ga':0}, {'As':0}) to get distance between specific atoms.
+        """
+        idx1, idx2 = [], []
+        if isinstance(atom1,str):
+            idx1 = self.types[atom1] # list or range
+        elif isinstance(atom1, dict) and len(atom1) == 1:
+            idx1 = [self.types[key][value] for key,value in atom1.items()] # keep as list
+        else:
+            raise ValueError("atom1 must be a string such as 'Ga' or a dict with a single key as {'Ga':0}")
         
-        all_dist = np.array(all_dist)
-        all_dist = all_dist[all_dist > 0] # Remove 0 distances
-        return np.min(all_dist)
+        if isinstance(atom2,str):
+            idx2 = self.types[atom2]
+        elif isinstance(atom2, dict) and len(atom2) == 1:
+            idx2 = [self.types[key][value] for key,value in atom2.items()]
+        else:
+            raise ValueError("atom2 must be a string such as 'As' or a dict with a single key as {'As':0}")
+        
+        dists = []
+        for idx in idx1:
+            dists = [*dists,*np.linalg.norm(self.coords[idx2] - self.coords[idx,:], axis = 1)] # Get the second closest distance, first is itself
+        
+        dists = np.array(dists)
+        dists = dists[dists > 0] # Remove distance with itself
+        return np.min(dists)
     
     def write(self, outfile = None, overwrite = False):
         "Writes the poscar data to a file."

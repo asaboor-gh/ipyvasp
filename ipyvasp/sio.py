@@ -13,7 +13,7 @@ import numpy as np
 from pathlib import Path
 import requests as req
 from collections import namedtuple
-from itertools import product
+from itertools import product, combinations
 from functools import lru_cache
 
 from scipy.spatial import ConvexHull, Voronoi, KDTree
@@ -605,10 +605,11 @@ def get_kpath(kpoints, n = 5, weight= None ,ibzkpt = None,outfile=None, rec_basi
         points.append(p2[:3])
 
     if weight is None and points:
-        weight = 1/len(points)
+        weight = 0 if ibzkpt else 1/len(points) # With IBZKPT, we need zero weight, still allow user to override.
 
     out_str = ["{0:>16.10f}{1:>16.10f}{2:>16.10f}{3:>12.6f}".format(x,y,z,weight) for x,y,z in points]
     out_str = '\n'.join(out_str)
+    
     N = len(points)
     if ibzkpt != None:
         if (PI := Path(ibzkpt)).is_file():
@@ -1181,22 +1182,16 @@ def to_basis(basis,coords):
     return np.dot(np.linalg.inv(basis).T,coords.T).T
 
 # Cell
-def kpoints2bz(bz_data,kpoints,sys_info = None, primitive=False, shift = 0):
+def kpoints2bz(bz_data,kpoints, primitive=False, shift = 0):
     """Brings KPOINTS inside BZ. Applies `to_R3` only if `primitive=True`.
     Args:
         - bz_data  : Output of get_bz(), make sure use same value of `primitive` there and here.
         - kpoints  : List or array of KPOINTS to transorm into BZ or R3.
-        - sys_info : If given, returns kpoints using that information. Useful If kpoints are cartesian and you need to scale those.
         - primitive: Default is False and brings kpoints into regular BZ. If True, returns `to_R3()`.
         - shift    : This value is added to kpoints before any other operation, single number of list of 3 numbers for each direction.
 
-    **Note**: If kpoints are Cartesian, provide sys_info, otherwise it will go wrong.
     """
     kpoints = np.array(kpoints) + shift
-    if sys_info is not None:
-        if sys_info.space_info.cartesian_kpoints:
-            return to_R3(bz_data.basis,kpoints) # Already relative to basis of BZ
-
     if primitive:
         return to_R3(bz_data.basis,kpoints)
 
@@ -1296,22 +1291,23 @@ def get_pairs(poscar_data, positions, r, tol=1e-3):
         - r        : Cartesian distance between the pairs in units of Angstrom e.g. 1.2 -> 1.2E-10.
         - tol      : Tolerance value. Default is 10^-3.
     """
-    basis = np.identity(3) if poscar_data.extra_info.cartesian else poscar_data.basis
-    coords = to_R3(basis,positions)
+    coords = to_R3(poscar_data.basis,positions)
     tree = KDTree(coords)
     inds = np.array([[*p] for p in tree.query_pairs(r,eps=tol)])
     return serializer.dict2tuple('Lattice',{'coords':coords,'pairs':inds})
 
-def _get_bond_length(poscar_data,given=None,tol=1e-3):
-    "tol is add to calculated bond length in order to fix small differences, paramater `given` in range [0,1] which is scaled to V^(1/3)."
-    if given != None:
-        return given*poscar_data.volume**(1/3) + tol
+def _get_bond_length(poscar_data, given = None):
+    "`given` bond length should be in range [0,1] which is scaled to V^(1/3)."
+    if given is not None:
+        return given*poscar_data.volume**(1/3)
     else:
-        basis = np.identity(3) if poscar_data.extra_info.cartesian else poscar_data.basis
-        _coords = to_R3(basis,poscar_data.positions)
-        _arr = sorted(np.linalg.norm(_coords[1:] - _coords[0],axis=1)) # Sort in ascending. returns list
-        return np.mean(_arr[:2]) + tol if _arr else 1 #Between nearest and second nearest.
-
+        keys = list(poscar_data.types.keys())
+        if len(keys) == 1:
+            keys = [*keys,*keys] # strill need it to be a list of two elements
+            
+        dists = [poscar_data.get_distance(k1,k2) for k1, k2 in combinations(keys,2)]
+        return np.mean(dists)*1.05 # Add 5% margin over mean distance, this covers same species too, and in multiple species, this will stop bonding between same species.
+        
 def _masked_data(poscar_data, mask_sites):
     "Returns indices of sites which satisfy the mask_sites function."
     pick = []
@@ -1337,7 +1333,7 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
     cell_kwargs : Keyword arguments for `iplot_bz` function to make cell in real space. Set it to None to avoid plotting box around lattice.
     """
     poscar_data = _fix_sites(poscar_data,tol=tol,eqv_sites=eqv_sites,translate=translate)
-    bond_length = _get_bond_length(poscar_data,given=bond_length,tol=tol)
+    bond_length = _get_bond_length(poscar_data,given = bond_length)
     
     sites = None
     if mask_sites and callable(mask_sites):
@@ -1462,7 +1458,7 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
         ix,iy = arr[ind], arr[ind+1]
         
     poscar_data = _fix_sites(poscar_data,tol=tol,eqv_sites=eqv_sites,translate=translate)
-    bond_length = _get_bond_length(poscar_data,given=bond_length,tol=tol)
+    bond_length = _get_bond_length(poscar_data,given = bond_length)
     
     sites = None
     if mask_sites and callable(mask_sites):
@@ -1705,9 +1701,30 @@ def rotate_poscar(poscar_data,angle_deg,axis_vec):
         - angle_deg: Rotation angle in degrees.
         - axis_vec : (x,y,z) of axis about which rotation takes place. Axis passes through origin.
     """
-    rot = rotation(angle_deg=angle_deg,axis_vec=axis_vec)
+    rot = rotation(angle_deg = angle_deg,axis_vec = axis_vec)
     p_dict = poscar_data.to_dict()
     p_dict['basis'] = rot.apply(p_dict['basis']) # Rotate basis so that they are transpose
+    p_dict['extra_info']['comment'] = f'Modified by ipyvasp'
+    return serializer.PoscarData(p_dict)
+
+def set_zdir(poscar_data, hkl):
+    """Set z-direction of POSCAR along a given hkl direction and returns new data.
+    Args:
+        - path_poscar: Path/to/POSCAR or `poscar` data object.
+        - hkl: (h,k,l) of the direction along which z-direction is to be set. Vector is constructed as h*a + k*b + l*c in cartesian coordinates.
+    """
+    if not isinstance(hkl, (list, tuple, np.ndarray)):
+        raise ValueError("hkl must be a list, tuple or numpy array.")
+    if len(hkl) != 3:
+        raise ValueError("hkl must be a list, tuple or numpy array of length 3.")
+    
+    p_dict = poscar_data.to_dict()
+    basis = p_dict['basis']
+    zvec = basis.dot(hkl) # in cartesian coordinates
+    angle = np.arccos(zvec.dot([0,0,1])/np.linalg.norm(zvec)) # Angle between zvec and z-axis
+    rot = rotation(angle_deg = np.rad2deg(angle), axis_vec = np.cross(zvec,[0,0,1])) # Rotation matrix
+    
+    p_dict['basis'] = rot.apply(basis) # Rotate basis so that they are transpose
     p_dict['extra_info']['comment'] = f'Modified by ipyvasp'
     return serializer.PoscarData(p_dict)
 

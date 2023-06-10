@@ -1,5 +1,5 @@
 
-__all__ = ['summarize', 'FilesWidget', 'PropsPicker', 'BandsWidget', 'KpathWidget']
+__all__ = ['load_results','summarize', 'FilesWidget', 'PropsPicker', 'BandsWidget', 'KpathWidget']
 
 
 import inspect
@@ -458,8 +458,8 @@ def store_selected_data(fig, store_dict, callback = None):
     return __store_figclick_data(fig, store_dict, callback, selection = True)
     
 
-def _generate_summary(paths_list):
-    # Make Data Frame
+def load_results(paths_list):
+    "Loads result.json from paths_list and returns a dataframe."
     paths_list = [Path(p) for p in paths_list]
     result_paths = []
     if paths_list:
@@ -636,9 +636,9 @@ class BandsWidget(VBox):
         self._ppicks.button.description = '🔴 Update Graph'
         
     @property
-    def summary(self):
-        "Generate a summary data frame."
-        return _generate_summary(self.files_widget.paths)
+    def results(self):
+        "Generate a data frame form result.json file in each folder."
+        return load_results(self.files_widget.paths)
 
 @fix_signature
 class KpathWidget(VBox):
