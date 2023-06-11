@@ -8,6 +8,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 
 import numpy as np
+from IPython.display import display
 from pandas.io.clipboard import clipboard_get, clipboard_set
 
 
@@ -155,6 +156,10 @@ class POSCAR:
 
     def __str__(self):
         return self.content
+    
+    @_sub_doc(sio.view_poscar)
+    def view(self, **kwargs):
+        return sio.view_poscar(self.data, **kwargs)
 
     @classmethod
     def from_file(cls,path):
@@ -249,11 +254,6 @@ class POSCAR:
     @property
     def cell(self):
         return self._cell
-    
-    def view(self, **kwargs):
-        # NOTE: Need to implement a view using nglview, that can return back a widget to add in KPath or similar App as well as allow events
-        raise NotImplementedError("This method is not implemented yet. implement using nglview in sio.py")
-        # NOTE: bring it from sio.view_poscar
 
     @_sub_doc(sio.get_bz,'path_pos :')
     def get_bz(self, loop = True, primitive = False):
@@ -271,7 +271,7 @@ class POSCAR:
         return self._cell
 
     @_sub_doc(sio.splot_bz,'bz_data :')
-    def splot_bz(self, plane=None, ax=None, color='blue', fill=True, vectors = (0,1,2), colormap='plasma', shade = True, alpha=0.4):
+    def splot_bz(self, plane=None, ax=None, color='blue', fill=True, vectors = (0,1,2), colormap=None, shade = True, alpha=0.4):
         self._plane = plane # Set plane for splot_kpath
         new_ax = sio.splot_bz(bz_data = self._bz, ax=ax, plane=plane, color=color, fill=fill, vectors=vectors, colormap=colormap, shade = shade, alpha=alpha)
         self._ax = new_ax # Set ax for splot_kpath
@@ -321,7 +321,7 @@ class POSCAR:
         
         return self._ax
 
-    def splot_cell(self, plane = None, ax = None,  color='blue', fill=True, vectors = (0,1,2), colormap='plasma', shade = True, alpha=0.4):
+    def splot_cell(self, plane = None, ax = None,  color='blue', fill=True, vectors = (0,1,2), colormap=None, shade = True, alpha=0.4):
         "See docs of `splot_bz`, everything is same except space is inverted."
         return sio.splot_bz(bz_data = self._cell, ax=ax, plane=plane, color=color, fill=fill, vectors=vectors, colormap=colormap, shade = shade, alpha=alpha)
 
@@ -370,8 +370,8 @@ class POSCAR:
         return self.__class__(data = sio.rotate_poscar(self._data, angle_deg = angle_deg, axis_vec=axis_vec))
 
     @_sub_doc(sio.set_zdir,'- poscar_data')
-    def set_zdir(self, hkl):
-        return self.__class__(data = sio.set_zdir(self._data, hkl=hkl))
+    def set_zdir(self, hkl, to_x = None):
+        return self.__class__(data = sio.set_zdir(self._data, hkl, to_x = to_x))
     
     @_sub_doc(sio.translate_poscar,'- poscar_data')
     def translate(self, offset):
@@ -389,9 +389,20 @@ class POSCAR:
     def get_transform_matrix(self, target_basis):
         return sio.get_transform_matrix(self._data, target_basis)
 
-    @_sub_doc(sio.transform_poscar,'- poscar_data')
-    def transform(self, transform_matrix, repeat_given = [2,2,2],tol = 1e-2):
-        return self.__class__(data = sio.transform_poscar(self._data, transform_matrix=transform_matrix, repeat_given=repeat_given, tol=tol))
+    def transform(self, transformation, zoom = 4, tol = 1e-2):
+        """Transform a POSCAR with a given transformation matrix or function that takes old basis and return target basis.
+        Use `get_transform_matrix` to get transformation matrix from one basis to another or function to return new basis of your choice.
+        An example of transformation function is `lambda a,b,c: a + b, a-b, c` which will give a new basis with a+b, a-b, c as basis vectors.
+
+        You may find errors due to missing atoms in the new basis, use `zoom` to increase the size of given cell to include any possible site in new cell.
+    
+        These two calls are equivalent:
+        ```python
+        self.transform(self.get_transform_matrix(target_basis))
+        self.transform(lambda a,b,c: target_basis)
+        ```
+        """
+        return self.__class__(data = sio.transform_poscar(self._data, transformation, zoom = zoom, tol=tol))
 
     @_sub_doc(sio.transpose_poscar,'- poscar_data')
     def transpose(self, axes = [1,0,2]):
@@ -479,7 +490,7 @@ class POSCAR:
         """
         if not self._bz:
             raise RuntimeError('No BZ found. Please run `get_bz()` first.')
-        return sio.kpoints2bz(self._bz, kpoints= kpoints,primitive = self._primitive, shift = shift)
+        return sio.kpoints2bz(self._bz, kpoints = kpoints,primitive = self._primitive, shift = shift)
     
     def to_R3(self, points, reciprocal = False):
         "Converts points to R3 coordinates. If reciprocal is True, converts to R3 in reciprocal basis."
@@ -487,6 +498,23 @@ class POSCAR:
         if reciprocal:
             return sio.to_R3(self.data.rec_basis, points)
         return sio.to_R3(self.data.basis, points)
+    
+    def to_basis(self, coords, reciprocal = False):
+        "Converts coords to fractional points. If reciprocal is True, converts to fractional in reciprocal basis."
+        coords = np.array(coords) # In case list of lists
+        if reciprocal:
+            return sio.to_basis(self.data.rec_basis, coords)
+        return sio.to_basis(self.data.basis, coords)
+    
+    def map_kpoints(self, other, kpoints):
+        """Map kpoints (fractional) from this to other POSCAR's Brillouin zone. This is equivalent to:
+        other.to_basis(self.to_R3(kpoints, reciprocal = True), reciprocal = True)
+        
+        This operation is useful when you do POSCAR.transform() and want to map kpoints from original POSCAR to transformed POSCAR.
+        """
+        if not isinstance(other, self.__class__):
+            raise TypeError('other must be a POSCAR object.')
+        return other.to_basis(self.to_R3(kpoints, reciprocal = True), reciprocal = True)
         
 
 
@@ -601,8 +629,8 @@ class PARCHG(LOCPOT):
 class OUTCAR:
     "Parse some required data from OUTCAR file."
     def __init__(self,path = None):
-        self._path = path # Must be
-        self._data = vp.export_outcar(path = path)
+        self._path = Path(path or 'OUTCAR')
+        self._data = vp.export_outcar(self._path)
 
     @property
     def data(self):
@@ -611,6 +639,10 @@ class OUTCAR:
     @property
     def path(self):
         return self._path
+    
+    @_sub_doc(vp.Vasprun.read)
+    def read(self, start_match, stop_match, nth_match = 1, skip_last = False):
+        return vp.Vasprun.read(**locals()) # Pass all the arguments to the function
 
 @_sub_doc(sp.get_axes,'- self',replace={'get_axes':'get_axes'})
 def get_axes(figsize=(3.4, 2.6), nrows=1, ncols=1, widths=[], heights=[], axes_off=[], axes_3d=[], sharex=False, sharey=False, azim=45, elev=15, ortho3d=True, **subplots_adjust_kwargs):

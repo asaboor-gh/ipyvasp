@@ -58,7 +58,7 @@ class Dict2Data:
             if isinstance(b,(self.__class__, Dict2Data)):
                 b = b.to_dict() # expands self instance !must here.
             
-            if a == 'poscar' and 'extra_info' in b:
+            if a == 'poscar' and 'metadata' in b:
                 setattr(self,a, PoscarData(b)) # Enables custom methods for PoscarData
             elif isinstance(b,(list,tuple,set)):
                 setattr(self,a,tuple(Dict2Data(x) if isinstance(x,dict) else x for x in b))
@@ -181,7 +181,7 @@ class SpinData(Dict2Data):
         return self.evals.Fermi
     
 class PoscarData(Dict2Data):
-    _req_keys = ('basis','types','extra_info')
+    _req_keys = ('basis','types','metadata')
     def __init__(self,d):
         super().__init__(d)
     
@@ -244,14 +244,15 @@ class PoscarData(Dict2Data):
     @property
     def labels(self):
         "Returns the labels of the atoms in the poscar data."
-        if hasattr(self.extra_info,'eqv_labels'): # If eqv_labels are present, return them
-            return self.extra_info.eqv_labels
+        if hasattr(self.metadata,'eqv_labels'): # If eqv_labels are present, return them
+            return self.metadata.eqv_labels
         return np.array([f'{k} {v - vs.start + 1}' for k,vs in self.types.items() for v in vs])
     
     def get_distance(self, atom1, atom2):
         """Returns the distance between two atoms.
         Provide atom1 and atom2 as strings such as get_distance('Ga', 'As') to get a mimimal distance between two types  
-        or as a dict with a single key as get_distance({'Ga':0}, {'As':0}) to get distance between specific atoms.
+        or as a dict with a single key as get_distance({'Ga':0}, {'As':0}) to get distance between specific atoms,
+        or mixed as get_distance('Ga', {'As':0}) to get minimum distance between a type and a specific atom.
         """
         idx1, idx2 = [], []
         if isinstance(atom1,str):
@@ -286,6 +287,14 @@ class SpecialPoints(Dict2Data):
     _req_keys = ('coords','kpoints')
     def __init__(self,d):
         super().__init__(d)
+        
+    def masked(self, func):
+        "Returns a new SpecialPoints object with the mask applied. Example: func = lambda x,y,z: x > 0 where x,y,z are fractional kpoints coordinates, not cartesian."
+        if not callable(func):
+            raise ValueError("func must be a callable function that returns a boolean and act on x,y,z fractional coordinates")
+        
+        mask = [func(x,y,z) for x,y,z in self.kpoints]
+        return SpecialPoints({'coords':self.coords[mask],'kpoints':self.kpoints[mask]})
         
 class BrZoneData(Dict2Data):
     _req_keys = ('basis','faces','vertices')
@@ -390,10 +399,10 @@ class OutcarData(Dict2Data):
     def __init__(self,d):
         super().__init__(d)
         
-    def masked(self, mask_sites):
-        "Returns a data with only the sites given by mask function over three coordinates, e.g. mask = lambda x, y, z: x == 1"
-        if not callable(mask_sites):
-            raise TypeError("mask_sites must be callable like lambda x,y,z: x == 1")
+    def masked(self, func):
+        "Returns a data with only the sites given by mask function over fractional coordinates, e.g. func = lambda x, y, z: x == 1"
+        if not callable(func):
+            raise TypeError("func must be callable like lambda x,y,z: x == 1")
         raise NotImplementedError("Not implemented yet")
         return # ion_pot, site_pot, rename these with better names
     

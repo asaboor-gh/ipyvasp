@@ -174,7 +174,7 @@ class Vasprun(DataSource):
             'rec_basis':arrays[3:6],
             'positions':arrays[6:],
             'types':info.types,
-            'extra_info': {'comment':'Exported from vasprun.xml','cartesian':False,'scale':1}
+            'metadata': {'comment':'Exported from vasprun.xml','cartesian':False,'scale':1}
             })
         
     def get_kpoints(self):
@@ -606,7 +606,7 @@ def export_spin_data(path = None, spins = 's', skipk = None, elim = None):
     full_dic['poscar'] = {'SYSTEM':full_dic['sys_info'].SYSTEM,**(get_structure(xml_data).to_dict())}
     return serializer.SpinData(full_dic)
 
-def export_outcar(path=None):
+def export_outcar(path = None):
     "Read potential at ionic sites from OUTCAR file."
     if path is None:
         path = './OUTCAR'
@@ -624,7 +624,7 @@ def export_outcar(path=None):
             nlines = np.ceil(N/5).astype(int)
         if 'electrostatic' in l:
             start_index = i+3
-            stop_index = start_index+nlines
+            stop_index = start_index + nlines
         if 'fractional' in l:
             first = i+1
         if 'vectors are now' in l:

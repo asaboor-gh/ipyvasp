@@ -197,9 +197,9 @@ def write_poscar(poscar_data, outfile = None, selective_dynamics = None, overwri
 
     **Note**: POSCAR is only written in direct format even if it was loaded from cartesian format.
     """
-    _comment = poscar_data.extra_info.comment
+    _comment = poscar_data.metadata.comment
     out_str = f'{poscar_data.SYSTEM}  # ' + (_comment or 'Created by Pivopty')
-    scale = poscar_data.extra_info.scale
+    scale = poscar_data.metadata.scale
     out_str += "\n  {:<20.14f}\n".format(scale)
     out_str += '\n'.join(["{:>22.16f}{:>22.16f}{:>22.16f}".format(*a) for a in poscar_data.basis/scale])
     uelems = poscar_data.types.to_dict()
@@ -259,7 +259,7 @@ def export_poscar(path = None,content = None):
     #rec_basis = np.linalg.inv(basis).T # general formula
     out_dict = {'SYSTEM':SYSTEM,#'volume':volume,
                 'basis':basis,#'rec_basis':rec_basis,
-                'extra_info':{'comment':comment,'scale':scale}}
+                'metadata':{'comment':comment,'scale':scale}}
 
     elems = file_lines[5].split()
     ions = [int(i) for i in file_lines[6].split()]
@@ -267,12 +267,12 @@ def export_poscar(path = None,content = None):
     inds = np.cumsum([0,*ions]).astype(int)
     # Check Cartesian and Selective Dynamics
     lines = [l.strip() for l in file_lines[7:9]] # remove whitespace or tabs
-    out_dict['extra_info']['cartesian'] = True if ((lines[0][0] in 'cCkK') or (lines[1][0] in 'cCkK')) else False
+    out_dict['metadata']['cartesian'] = True if ((lines[0][0] in 'cCkK') or (lines[1][0] in 'cCkK')) else False
 
     poslines = vp.gen2numpy(file_lines[7:],(N,6),(-1,[0,1,2]),exclude="^\s+[a-zA-Z]|^[a-zA-Z]", raw = True).splitlines() # handle selective dynamics word here
     positions = np.array([line.split()[:3] for line in poslines],dtype=float) # this makes sure only first 3 columns are taken
     
-    if out_dict['extra_info']['cartesian']:
+    if out_dict['metadata']['cartesian']:
         positions = scale*to_basis(basis, positions)
         print(("Cartesian format found in POSCAR file, converted to direct format."))
 
@@ -704,8 +704,8 @@ def get_kmesh(poscar_data, *args, shift = 0, weight = None, cartesian = False, i
     if cartesian:
         verts = get_bz(poscar_data.basis, primitive=False).vertices
         low, high = np.min(verts,axis=0), np.max(verts,axis=0)
-        low = (low * 2 * np.pi / poscar_data.extra_info.scale).round(12) # Cartesian KPOINTS are in unit of 2pi/SCALE
-        high = (high * 2 * np.pi / poscar_data.extra_info.scale).round(12)
+        low = (low * 2 * np.pi / poscar_data.metadata.scale).round(12) # Cartesian KPOINTS are in unit of 2pi/SCALE
+        high = (high * 2 * np.pi / poscar_data.metadata.scale).round(12)
 
     (lx,ly,lz),(hx,hy,hz) = low,high
     points = []
@@ -941,7 +941,7 @@ def get_bz(path_pos = None,loop = True,primitive=False):
 
 
 # Cell
-def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = (0,1,2),colormap='plasma',shade = True,alpha=0.4):
+def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = (0,1,2),colormap=None,shade = True,alpha=0.4):
     """
     Plots matplotlib's static figure of Brillouin zone.
     
@@ -1084,19 +1084,23 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)', special_kpoint
     # Axes
     _len = 0.5*np.mean(bz_data.basis)
     fig.add_trace(go.Scatter3d(x=[_len,0,0,0,0],y=[0,0,_len,0,0],z=[0,0,0,0,_len],
-        mode='lines+text',
-        text= axes_text,
-        line_color='green', legendgroup=a_name,name=a_name))
-    fig.add_trace(go.Cone(x=[0.95*_len,0,0],y=[0,0.95*_len,0],z=[0,0,0.95*_len],
-        u=[0.2*_len,0,0],v=[0,0.2*_len,0],w=[0,0,0.2*_len],showscale=False,
-        colorscale='Greens',legendgroup=a_name,name=a_name))
+        mode = 'lines+text', text = axes_text,
+        line_color='skyblue', legendgroup = a_name,name = a_name))
+    fig.add_trace(go.Cone(x=[_len,0,0],y=[0,_len,0],z=[0,0,_len],
+        u = [1,0,0],v = [0,1,0],w = [0,0,1], showscale = False,
+        sizemode='absolute',sizeref = 0.5, anchor = 'tail',
+        colorscale=['skyblue' for _ in range(3)],legendgroup = a_name,name = a_name))
+    
     # Basis
     for i,b in enumerate(bz_data.basis):
         fig.add_trace(go.Scatter3d(x=[0,b[0]], y=[0,b[1]],z=[0,b[2]],
             mode='lines+text',legendgroup="{}<sub>{}</sub>".format(vname,i+1), line_color='red',
             name="<b>{}</b><sub>{}</sub>".format(vname,i+1),text=["","<b>{}</b><sub>{}</sub>".format(vname,i+1)]))
-        fig.add_trace(go.Cone(x=[0.95*b[0]],y=[0.95*b[1]],z=[0.95*b[2]],
-            u=[0.2*b[0]],v=[0.2*b[1]],w=[0.2*b  [2]],showscale=False,colorscale='Reds',
+        
+        uvw = b/np.linalg.norm(b) # Unit vector for cones
+        fig.add_trace(go.Cone(x=[b[0]],y=[b[1]],z=[b[2]],
+            u = uvw[0:1],v = uvw[1:2],w = uvw[2:],showscale = False,colorscale = 'Reds',
+            sizemode = 'absolute', sizeref = 0.02, anchor = 'tail',
             legendgroup="{}<sub>{}</sub>".format(vname,i+1),name="<b>{}</b><sub>{}</sub>".format(vname,i+1)))
     
     # Faces
@@ -1111,11 +1115,11 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)', special_kpoint
     if fill:
         xc = bz_data.vertices[ConvexHull(bz_data.vertices).vertices]
         fig.add_trace(go.Mesh3d(x=xc[:, 0], y=xc[:, 1], z=xc[:, 2],
-                        color=color,
-                        opacity=alpha,
+                        color = color,
+                        opacity = alpha,
                         alphahull=0,
-                        lighting=dict(diffuse=0.5),
-                        legendgroup=s_name,name=s_name))
+                        lighting = dict(diffuse=0.5),
+                        legendgroup = s_name,name=s_name))
         
 
     # Special Points only if in reciprocal space.
@@ -1182,7 +1186,7 @@ def to_basis(basis,coords):
     return np.dot(np.linalg.inv(basis).T,coords.T).T
 
 # Cell
-def kpoints2bz(bz_data,kpoints, primitive=False, shift = 0):
+def kpoints2bz(bz_data,kpoints, primitive = False, shift = 0):
     """Brings KPOINTS inside BZ. Applies `to_R3` only if `primitive=True`.
     Args:
         - bz_data  : Output of get_bz(), make sure use same value of `primitive` there and here.
@@ -1206,9 +1210,7 @@ def kpoints2bz(bz_data,kpoints, primitive=False, shift = 0):
             return [] # empty for comparison
         else: # Inside
             return list(coord) # Must be in list form
-
-
-    from itertools import product
+    
     for i,p in enumerate(kpoints):
         for q in product([0,1,-1],[0,1,-1],[0,1,-1]):
             # First translate, then make coords, then feed it back
@@ -1221,6 +1223,20 @@ def kpoints2bz(bz_data,kpoints, primitive=False, shift = 0):
                 StopIteration
 
     return out_coords # These may have duplicates, apply np.unique(out_coords,axis=0). do this in surface plots
+
+def inside_convexhull(hull, points):
+    if not isinstance(hull, ConvexHull):
+        raise TypeError("hull must be a scipy.spatial.ConvexHull object")
+    
+    if np.shape(points)[-1] != hull.points.shape[-1]:
+        raise ValueError("points must have same physical dimension as hull.points")
+    
+    # A.shape = (facets, d) and b.shape = (facets, 1)
+    A, b = hull.equations[:, :-1], hull.equations[:, -1:]
+    eps = np.finfo(np.float32).eps # do not use custom tolerance here
+    
+    # Points inside CovexHull satifies equation Ax + b <= 0.
+    return np.all(A @ points.T + b < eps, axis = 0)
 
 # Cell
 def _fix_sites(poscar_data,tol=1e-2,eqv_sites = False,translate = None): # should not be exposed mostly be used in visualizations
@@ -1244,7 +1260,7 @@ def _fix_sites(poscar_data,tol=1e-2,eqv_sites = False,translate = None): # shoul
     # Fix coordinates of sites distributed on edges and faces
     pos -= (pos > (1 - tol)).astype(int) # Move towards orign for common fixing like in joining POSCARs
     out_dict['positions'] = pos
-    out_dict['extra_info']['comment'] = 'Modified by ipyvasp'
+    out_dict['metadata']['comment'] = 'Modified by ipyvasp'
 
 
     # Add equivalent sites on edges and faces if given,handle each sepecies separately
@@ -1270,7 +1286,7 @@ def _fix_sites(poscar_data,tol=1e-2,eqv_sites = False,translate = None): # shoul
             start += len(new_dict[k]['pos'])
 
         out_dict['positions'] = np.vstack([new_dict[k]['pos'] for k in new_dict.keys()])
-        out_dict['extra_info']['eqv_labels'] = np.hstack([new_dict[k]['lab'] for k in new_dict.keys()])
+        out_dict['metadata']['eqv_labels'] = np.hstack([new_dict[k]['lab'] for k in new_dict.keys()])
         out_dict['types'] = {k:new_dict[k]['range'] for k in new_dict.keys()}
 
     return serializer.PoscarData(out_dict)
@@ -1614,9 +1630,9 @@ def join_poscars(poscar1,poscar2,direction='c',tol=1e-2, system = None):
     i_all = np.cumsum([0,*i_all]) # Do it after labels
     uelems = {_u:range(i_all[i],i_all[i+1]) for i,_u in enumerate(u_all)}
     sys = system or ''.join(uelems.keys())
-    iscartesian = poscar1.extra_info.cartesian or poscar2.extra_info.cartesian
-    extra_info = {'cartesian':iscartesian, 'scale': scale, 'comment': 'Modified by ipyvasp'}
-    out_dict = {'SYSTEM':sys,'basis':basis,'extra_info':extra_info,'positions':np.array(pos_all),'types':uelems}
+    iscartesian = poscar1.metadata.cartesian or poscar2.metadata.cartesian
+    metadata = {'cartesian':iscartesian, 'scale': scale, 'comment': 'Modified by ipyvasp'}
+    out_dict = {'SYSTEM':sys,'basis':basis,'metadata':metadata,'positions':np.array(pos_all),'types':uelems}
     return serializer.PoscarData(out_dict)
 
 
@@ -1673,8 +1689,8 @@ def scale_poscar(poscar_data,scale = (1,1,1),tol=1e-2):
         basis[i] = f*basis[i] # Basis rescale for clip
 
     new_poscar['basis'] = basis
-    new_poscar['extra_info']['scale'] = np.linalg.norm(basis[0])
-    new_poscar['extra_info']['comment'] = f'Modified by ipyvasp'
+    new_poscar['metadata']['scale'] = np.linalg.norm(basis[0])
+    new_poscar['metadata']['comment'] = f'Modified by ipyvasp'
 
     uelems = poscar_data.types.to_dict()
     # Minus in below for block is because if we have 0-2 then 1 belongs to next cell not original.
@@ -1704,18 +1720,17 @@ def rotate_poscar(poscar_data,angle_deg,axis_vec):
     rot = rotation(angle_deg = angle_deg,axis_vec = axis_vec)
     p_dict = poscar_data.to_dict()
     p_dict['basis'] = rot.apply(p_dict['basis']) # Rotate basis so that they are transpose
-    p_dict['extra_info']['comment'] = f'Modified by ipyvasp'
+    p_dict['metadata']['comment'] = f'Modified by ipyvasp'
     return serializer.PoscarData(p_dict)
 
-def set_zdir(poscar_data, hkl):
+def set_zdir(poscar_data, hkl, to_x = None):
     """Set z-direction of POSCAR along a given hkl direction and returns new data.
     Args:
         - path_poscar: Path/to/POSCAR or `poscar` data object.
         - hkl: (h,k,l) of the direction along which z-direction is to be set. Vector is constructed as h*a + k*b + l*c in cartesian coordinates.
+        - to_x: (h,k,l) of the direction for which will be rotated to xz-plane, and seen along xaxis when viewed from top. 
     """
-    if not isinstance(hkl, (list, tuple, np.ndarray)):
-        raise ValueError("hkl must be a list, tuple or numpy array.")
-    if len(hkl) != 3:
+    if not isinstance(hkl, (list, tuple, np.ndarray)) and len(hkl) != 3:
         raise ValueError("hkl must be a list, tuple or numpy array of length 3.")
     
     p_dict = poscar_data.to_dict()
@@ -1723,9 +1738,20 @@ def set_zdir(poscar_data, hkl):
     zvec = basis.dot(hkl) # in cartesian coordinates
     angle = np.arccos(zvec.dot([0,0,1])/np.linalg.norm(zvec)) # Angle between zvec and z-axis
     rot = rotation(angle_deg = np.rad2deg(angle), axis_vec = np.cross(zvec,[0,0,1])) # Rotation matrix
+    new_basis = rot.apply(basis) # Rotate basis so that zvec is along z-axis
     
-    p_dict['basis'] = rot.apply(basis) # Rotate basis so that they are transpose
-    p_dict['extra_info']['comment'] = f'Modified by ipyvasp'
+    if to_x is not None:
+        if not isinstance(to_x, (list, tuple, np.ndarray)) and len(to_x) != 3:
+            raise ValueError("to_x must be a list, tuple or numpy array of length 3 for hkl value to view along xaxis when top is zaxis.")
+    
+        xzvec = new_basis.dot(to_x) # in cartesian coordinates, it can be anywhere in xz plane
+        xzvec[2] = 0 # we need to have angle phi in xy plane, not full 3D angle
+        angle = np.arccos(xzvec.dot([1,0,0])/np.linalg.norm(xzvec)) # Angle between xzvec and x-axis
+        rot = rotation(angle_deg = np.rad2deg(angle), axis_vec = [0,0,1]) # Rotate around z-axis to bring in zx plane
+        new_basis = rot.apply(new_basis) # Rotate basis so that xzvec is along x-axis
+    
+    p_dict['basis'] = rot.apply(new_basis) # Rotate basis so that they are transpose
+    p_dict['metadata']['comment'] = f'Modified by ipyvasp'
     return serializer.PoscarData(p_dict)
 
 def mirror_poscar(poscar_data, direction):
@@ -1768,44 +1794,66 @@ def get_transform_matrix(poscar_data, target_basis):
     "Returns a transformation matrix that gives `target_bsis` when applied on basis of current lattice. Useful in transforming crystal structure."
     return np.matmul(target_basis, np.linalg.inv(poscar_data.basis)).round(16)
 
-def transform_poscar(poscar_data, transform_matrix, repeat_given = [2,2,2],tol = 1e-2):
-    """Transform a POSCAR with a given transformation matrix.
-    Use `get_transform_matrix` to get transformation matrix from one basis to another.
-    `repeat_given` is used to repeat the POSCAR before applying transformation matrix to include
-    all possible sites in resultant cell."""
-    new_basis = np.matmul(transform_matrix,poscar_data.basis) # Transforms basis to target basis
-
-    if len(repeat_given) != 3:
-        raise ValueError('`repeat_given` must be a list of three integers.')
-
-    for rep in repeat_given: # Repeat if needed
-        if not isinstance(rep,(int,np.integer)) and rep >= 1:
-            raise ValueError('`repeat_given` must have all values as integer >= 1.')
-
-    for n, _dir in zip(repeat_given,'abc'): # Repeat if needed for including atoms in new cell
-        poscar_data = repeat_poscar(poscar_data,n,direction=_dir)
-
-    center_coords = poscar_data.coords - poscar_data.coords.mean(axis=0, keepdims=True) # Center around origin
-    points = to_basis(new_basis,center_coords) # Transform coordinates to new basis around origin
-
+def transform_poscar(poscar_data, transformation, zoom = 4, tol = 1e-2):
+    """Transform a POSCAR with a given transformation matrix or function that takes old basis and return target basis.
+    Use `get_transform_matrix` to get transformation matrix from one basis to another or function to return new basis of your choice.
+    An example of transformation function is `lambda a,b,c: a + b, a-b, c` which will give a new basis with a+b, a-b, c as basis vectors.
+    
+    You may find errors due to missing atoms in the new basis, use `zoom` to increase the size of given cell to include any possible site in new cell.
+    
+    These two calls are equivalent:
+    ```python
+    transform_poscar(poscar_data, get_transform_matrix(poscar_data, target_basis))
+    transform_poscar(poscar_data, lambda a,b,c: target_basis)
+    ```
+    """
+    if callable(transformation):
+        new_basis = transformation(*poscar_data.basis)
+        if not np.shape(new_basis) == (3,3):
+            raise Exception('transformation function should return a tuple equivalent to 3x3 matrix')
+    elif np.ndim(transformation) == 2 and np.shape(transformation) == (3,3):
+        new_basis = np.matmul(transformation,poscar_data.basis)
+    else:
+        raise Exception('transformation should be a function that accept 3 arguemnts or 3x3 matrix')
+    
+    def get_cell_vertices(basis):
+        verts = get_bz(np.linalg.inv(basis).T,primitive = True).vertices
+        return verts - np.mean(verts, axis = 0) # Center around origin, otherwise it never going to be inside convex hull
+    
+    old_numbers = [len(v) for v in poscar_data.types.to_dict().values()]
+    chull = ConvexHull(zoom*get_cell_vertices(new_basis)) # Convex hull of new cell, make it zoom times bigger to avoid losing sites because of translation
+    
+    while any(inside_convexhull(chull, get_cell_vertices(poscar_data.basis))): # Check if all vertices of old cell are inside new cell
+        poscar_data = scale_poscar(poscar_data, [2,2,2],tol = tol) # Repeat in all directions
+            
+    points = to_basis(new_basis,poscar_data.coords) # Transform coordinates to new basis around origin
+    points = points - np.mean(points, axis = 0) # Center around origin, to include all
+    
     new_poscar = poscar_data.to_dict() # Update in it
     new_poscar['basis'] = new_basis
-    new_poscar['extra_info']['scale'] = np.linalg.norm(new_basis[0])
-    new_poscar['extra_info']['comment'] = f'Transformed by ipyvasp'
+    new_poscar['metadata']['scale'] = np.linalg.norm(new_basis[0])
+    new_poscar['metadata']['comment'] = f'Transformed by ipyvasp'
+    new_poscar['metadata']['TM'] = get_transform_matrix(poscar_data, new_basis) # Save transformation matrix in both function and matrix given
 
     uelems = poscar_data.types.to_dict()
     positions,shift, unique_dict = [],0, {}
     for key,value in uelems.items():
-        s_p = points[value] # Get positions of key
-        s_p = s_p[((s_p > -tol) & (s_p < 1 - tol)).all(axis=1)] # Get sites within tolerance
+        s_p = points[value] # Get positions of key 
+        s_p = s_p[((s_p > -tol) & (s_p < 1 - tol)).all(axis = 1)] # Get sites within tolerance
 
-        if len(s_p) == 0:
-            raise Exception(f'No sites found for {key!r}, transformation stopped! You may need to increase `repeat_given` parameter.')
+        if s_p.size == 0:
+            raise Exception(f'No sites found for {key!r}, transformation stopped! You may need to modify `transformation` or increase zoom/`tol` value.')
 
         unique_dict[key] = range(shift,shift + len(s_p))
         positions = [*positions,*s_p] # Pick sites
         shift += len(s_p) #Update for next element
-
+        
+    # Final check if crystal is still same
+    new_numbers = [len(v) for v in unique_dict.values()]
+    ratio = [round(new/old,4) for new,old in zip(new_numbers, old_numbers)] # Round to avoid floating point errors,can cover 1 to 10000 atoms transformation
+    if len(np.unique(ratio)) != 1:
+        raise Exception(f'Transformation failed, atoms proportion changed: {old_numbers} -> {new_numbers}, if your transformation is an allowed one for this structure, increase `zoom` value.')
+    
     new_poscar['types']  = unique_dict
     new_poscar['positions'] = np.array(positions)
     return serializer.PoscarData(new_poscar)
@@ -1874,7 +1922,7 @@ def add_atoms(poscar_data, name, positions):
     data['types'] = unique # Update unique dictionary
     data['positions'] = new_pos # Update positions
     data['SYSTEM'] = f'{data["SYSTEM"]}+{name}' # Update SYSTEM
-    data['extra_info']['comment'] = f'{data["extra_info"]["comment"]} + Added {name!r}' # Update comment
+    data['metadata']['comment'] = f'{data["metadata"]["comment"]} + Added {name!r}' # Update comment
 
     return serializer.PoscarData(data) # Return new POSCAR
 
@@ -1886,7 +1934,19 @@ def strain_poscar(poscar_data, strain_matrix):
         raise ValueError('`strain_matrix` must be a 3x3 matrix to multiply with basis.')
     raise NotImplementedError
 
+from ipywidgets import interactive, HBox, VBox
+
 def view_poscar(poscar_data, **kwargs):
-    "View a POSCAR in a jupyter notebook."
-    raise NotImplementedError('Implement it using nglview')
+    "View a POSCAR in a jupyter notebook. kwargs are passed to splot_lattice. After setting a view, you can do view.f(**view.kwargs) to get same plot in a cell."
+    def view(elev = 30, azim = 30, roll = 0):
+        ax = splot_lattice(poscar_data, **kwargs)
+        ax.view_init(elev = elev, azim = azim, roll = roll)
+        
+    return interactive(view, elev = (0,180), azim = (0,360), roll=(0,360))
+    
+    
+    
+        
+    
+    
     
