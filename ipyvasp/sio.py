@@ -4,7 +4,7 @@ __all__ = ['atomic_number', 'atoms_color', 'periodic_table', 'Arrow3D', 'fancy_q
            'get_kmesh', 'order', 'rotation', 'get_bz', 'splot_bz', 'iplot_bz', 'to_R3', 'to_basis', 'kpoints2bz',
            'fix_sites', 'translate_poscar', 'get_pairs', 'iplot_lattice', 'splot_lattice', 'join_poscars', 'repeat_poscar',
            'scale_poscar', 'rotate_poscar', 'mirror_poscar', 'convert_poscar', 'get_transform_matrix',
-           'transform_poscar', 'add_vaccum', 'transpose_poscar', 'add_atoms']
+           'transform_poscar', 'add_vaccum', 'transpose_poscar', 'add_atoms','strain_poscar', 'view_poscar']
 
 
 import re
@@ -24,6 +24,7 @@ import matplotlib.colors as mplc #For viewpoint
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d import proj3d
 from matplotlib.patches import FancyArrowPatch
+from ipywidgets import interactive
 
 # Inside packages import 
 from . import parser as vp, serializer
@@ -1794,7 +1795,7 @@ def get_transform_matrix(poscar_data, target_basis):
     "Returns a transformation matrix that gives `target_bsis` when applied on basis of current lattice. Useful in transforming crystal structure."
     return np.matmul(target_basis, np.linalg.inv(poscar_data.basis)).round(16)
 
-def transform_poscar(poscar_data, transformation, zoom = 4, tol = 1e-2):
+def transform_poscar(poscar_data, transformation, zoom = 2, tol = 1e-2):
     """Transform a POSCAR with a given transformation matrix or function that takes old basis and return target basis.
     Use `get_transform_matrix` to get transformation matrix from one basis to another or function to return new basis of your choice.
     An example of transformation function is `lambda a,b,c: a + b, a-b, c` which will give a new basis with a+b, a-b, c as basis vectors.
@@ -1806,10 +1807,18 @@ def transform_poscar(poscar_data, transformation, zoom = 4, tol = 1e-2):
     transform_poscar(poscar_data, get_transform_matrix(poscar_data, target_basis))
     transform_poscar(poscar_data, lambda a,b,c: target_basis)
     ```
+    
+    Examples:
+    - FCC primitive -> 111 hexagonal cell  
+        lambda a,b,c: (a-c,b-c,a+b+c) ~ [[1,0,-1],[0,1,-1],[1,1,1]]
+    - FCC primitive --> FCC unit cell 
+        lambda a,b,c: (b+c -a,a+c-b,a+b-c) ~ [[-1,1,1],[1,-1,1],[1,1,-1]]
+    - FCC unit cell --> 110 tetragonal cell
+        lambda a,b,c: (a-b,a+b,c) ~ [[1,-1,0],[1,1,0],[0,0,1]]
     """
     if callable(transformation):
-        new_basis = transformation(*poscar_data.basis)
-        if not np.shape(new_basis) == (3,3):
+        new_basis = np.array(transformation(*poscar_data.basis)) # mostly a tuple
+        if new_basis.shape != (3,3):
             raise Exception('transformation function should return a tuple equivalent to 3x3 matrix')
     elif np.ndim(transformation) == 2 and np.shape(transformation) == (3,3):
         new_basis = np.matmul(transformation,poscar_data.basis)
@@ -1820,8 +1829,9 @@ def transform_poscar(poscar_data, transformation, zoom = 4, tol = 1e-2):
         verts = get_bz(np.linalg.inv(basis).T,primitive = True).vertices
         return verts - np.mean(verts, axis = 0) # Center around origin, otherwise it never going to be inside convex hull
     
+    TM = get_transform_matrix(poscar_data, new_basis) # Transformation matrix to save before scaling
     old_numbers = [len(v) for v in poscar_data.types.to_dict().values()]
-    chull = ConvexHull(zoom*get_cell_vertices(new_basis)) # Convex hull of new cell, make it zoom times bigger to avoid losing sites because of translation
+    chull = ConvexHull(np.max([zoom,2])*get_cell_vertices(new_basis)) # Convex hull of new cell, make it at least two times to avoid losing sites because of translation
     
     while any(inside_convexhull(chull, get_cell_vertices(poscar_data.basis))): # Check if all vertices of old cell are inside new cell
         poscar_data = scale_poscar(poscar_data, [2,2,2],tol = tol) # Repeat in all directions
@@ -1833,16 +1843,16 @@ def transform_poscar(poscar_data, transformation, zoom = 4, tol = 1e-2):
     new_poscar['basis'] = new_basis
     new_poscar['metadata']['scale'] = np.linalg.norm(new_basis[0])
     new_poscar['metadata']['comment'] = f'Transformed by ipyvasp'
-    new_poscar['metadata']['TM'] = get_transform_matrix(poscar_data, new_basis) # Save transformation matrix in both function and matrix given
+    new_poscar['metadata']['TM'] = TM # Save transformation matrix in both function and matrix given
 
     uelems = poscar_data.types.to_dict()
     positions,shift, unique_dict = [],0, {}
     for key,value in uelems.items():
-        s_p = points[value] # Get positions of key 
-        s_p = s_p[((s_p > -tol) & (s_p < 1 - tol)).all(axis = 1)] # Get sites within tolerance
+        s_p = points[value]
+        s_p = s_p[((s_p > -tol) & (s_p < 1 - tol)).all(axis = 1)] # Get sites within tolerance, for very far sites
 
         if s_p.size == 0:
-            raise Exception(f'No sites found for {key!r}, transformation stopped! You may need to modify `transformation` or increase zoom/`tol` value.')
+            raise Exception(f'No sites found for {key!r}, transformation stopped! You may need to modify `transformation` or increase `zoom` value.')
 
         unique_dict[key] = range(shift,shift + len(s_p))
         positions = [*positions,*s_p] # Pick sites
@@ -1927,14 +1937,17 @@ def add_atoms(poscar_data, name, positions):
     return serializer.PoscarData(data) # Return new POSCAR
 
 def strain_poscar(poscar_data, strain_matrix):
-    "Strain a POSCAR by a given 3x3 `strain_matrix` and return a new POSCAR."
+    "Strain a POSCAR by a given 3x3 `strain_matrix` to be multiplied with basis and return a new POSCAR."
     if not isinstance(strain_matrix,np.ndarray):
         strain_matrix = np.array(strain_matrix)
+        
     if strain_matrix.shape != (3,3):
         raise ValueError('`strain_matrix` must be a 3x3 matrix to multiply with basis.')
-    raise NotImplementedError
-
-from ipywidgets import interactive, HBox, VBox
+    
+    poscar_data = poscar_data.to_dict() #
+    poscar_data['basis'] = poscar_data['basis'].dot(strain_matrix) # Multiply basis with strain matrix
+    poscar_data['metadata']['comment'] = f'{poscar_data["metadata"]["comment"]} + Strained POSCAR' # Update comment
+    return serializer.PoscarData(poscar_data) # Return new POSCAR
 
 def view_poscar(poscar_data, **kwargs):
     "View a POSCAR in a jupyter notebook. kwargs are passed to splot_lattice. After setting a view, you can do view.f(**view.kwargs) to get same plot in a cell."

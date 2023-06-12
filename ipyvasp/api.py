@@ -134,14 +134,14 @@ class POSCAR:
 
         Prefrence order: data > content > path
         """
-        self._path = path
+        self._path = Path(path or 'POSACR') # Path to file
         self._content = content
         self._sd = None # Selective dynamics Array will be stored here if applied.
 
         if data:
             self._data = serializer.PoscarData.validated(data)
         else:
-            self._data = sio.export_poscar(path=path,content = content)
+            self._data = sio.export_poscar(path = str(self.path),content = content)
         # These after data to work with data
         self._primitive = False
         self._bz = self.get_bz(primitive = False) # Get defualt regular BZ from sio
@@ -157,9 +157,17 @@ class POSCAR:
     def __str__(self):
         return self.content
     
+    @property
+    def path(self): return self._path
+    
     @_sub_doc(sio.view_poscar)
     def view(self, **kwargs):
         return sio.view_poscar(self.data, **kwargs)
+    
+    def view_kpath(self):
+        "Initialize a KpathWidget instance to view kpath for current POSCAR, and you can select others too."
+        from .widgets import KpathWidget
+        return KpathWidget(self.data, path = str(self.path.parent), glob = self.path.name)
 
     @classmethod
     def from_file(cls,path):
@@ -389,7 +397,7 @@ class POSCAR:
     def get_transform_matrix(self, target_basis):
         return sio.get_transform_matrix(self._data, target_basis)
 
-    def transform(self, transformation, zoom = 4, tol = 1e-2):
+    def transform(self, transformation, zoom = 2, tol = 1e-2):
         """Transform a POSCAR with a given transformation matrix or function that takes old basis and return target basis.
         Use `get_transform_matrix` to get transformation matrix from one basis to another or function to return new basis of your choice.
         An example of transformation function is `lambda a,b,c: a + b, a-b, c` which will give a new basis with a+b, a-b, c as basis vectors.
@@ -401,6 +409,14 @@ class POSCAR:
         self.transform(self.get_transform_matrix(target_basis))
         self.transform(lambda a,b,c: target_basis)
         ```
+        
+        Examples:
+        - FCC primitive -> 111 hexagonal cell  
+            lambda a,b,c: (a-c,b-c,a+b+c) ~ [[1,0,-1],[0,1,-1],[1,1,1]]
+        - FCC primitive --> FCC unit cell 
+            lambda a,b,c: (b+c -a,a+c-b,a+b-c) ~ [[-1,1,1],[1,-1,1],[1,1,-1]]
+        - FCC unit cell --> 110 tetragonal cell
+            lambda a,b,c: (a-b,a+b,c) ~ [[1,-1,0],[1,1,0],[0,0,1]]
         """
         return self.__class__(data = sio.transform_poscar(self._data, transformation, zoom = zoom, tol=tol))
 
@@ -565,7 +581,7 @@ class LOCPOT:
                                     ax=ax,period=period,lr_pos=lr_pos,period_right=period_right, smoothness=smoothness,interface=interface,
                                     labels=labels,colors=colors,annotate=annotate)
 
-    def check_period(self, operation: str = 'mean_c',interface = 0.5,lr_pos = (0.25,0.75), smoothness = 2, figsize = (5,3),**kwargs):
+    def view_period(self, operation: str = 'mean_c',interface = 0.5,lr_pos = (0.25,0.75), smoothness = 2, figsize = (5,3),**kwargs):
         """Check periodicity using ipywidgets interactive plot.
         - operation: What to do, such as 'mean_c' or 'mean_a' etc.
         - interface: Interface in range [0,1] to divide left and right halves.
@@ -573,6 +589,7 @@ class LOCPOT:
         - smoothness: int. Default is 2. Smoothing parameter for rolling mean. Larger is better.
         - figsize: Tuple of (width,height) of figure. Since each time a figure is created, we can't reuse it, so we need to specify the size.
         kwargs are passed to the plt.Axes.set(kwargs) method to handle the plot styling.
+        You can use return value to retrieve information, like output.f(*output.args, **output.kwargs) in a cell to plot the current state and save it.
         """
         check = ['mean_a','min_a','max_a','mean_b','min_b','max_b','mean_c','min_c','max_c']
         if operation not in check:
@@ -608,6 +625,10 @@ class LOCPOT:
                 period = ipw.FloatSlider(min=_min,max=0.5,value=0.125,step=_step,readout_format='.4f', continuous_update=False),
                 period_right=ipw.FloatSlider(min=_min,max=0.5,value=0.125,step=_step,readout_format='.4f', continuous_update=False),
                 )
+        
+    def view_slice(self,*argse, **kwargs):
+        # Use interactive here to select the slice, digonal slices and so on..., tell user to get output results back
+        raise NotImplementedError('Coming soon...')
 
 
 class CHG(LOCPOT):
@@ -975,6 +996,12 @@ class Bands(_BandsDosBase):
         data = self.get_data(elim, ezero)
         # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number
         return ip.iplot_bands({"K": data.kpath, 'indices':data.bands}, data.evals[spin] - data.ezero, **plot_kws, **kwargs) 
+    
+    def view_bands(self):
+        "Initialize and return `ipyvasp.widgets.BandsWidget` to view bandstructure interactively."
+        from .widgets import BandsWidget
+        use_vaspout = True if isinstance(self.source, vp.Vaspout) else False
+        return BandsWidget(use_vaspout = use_vaspout, path = self.source.path.parent, glob = self.source.path.name)
     
 _multiply_doc = "multiply : float, multiplied by total dos and sign is multiply by partial dos to flip plot in case of spin down."
 _total_doc = "total : bool, True by default. If False, total dos is not plotted, sign of multiply parameter is still used for partial dos"
