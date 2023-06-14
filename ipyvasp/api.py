@@ -3,7 +3,7 @@ __all__ = ['download_structure', '__all__', 'parse_text', 'POSCAR', 'LOCPOT', 'C
            'get_axes', 'Bands', 'DOS']
 
 from pathlib import Path
-from itertools import islice
+from itertools import islice, product
 from contextlib import redirect_stdout
 from io import StringIO
 
@@ -772,6 +772,7 @@ def _format_input(projections, sys_info):
     return (spins, uspins), (atoms,uatoms), (orbs,uorbs), labels
 
 _spin_doc = 'spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations. Data for both channel is loaded by default, so when you plot one spin channel, plotting other with same parameters will use the same data.'
+_kind_doc = 'kpairs : list/tuple of pair of indices to rearrange a computed path. For example, you computed 0:L, 15:G, 25:X, 34:M path and want to plot it as X-G|M-X, use [(25,15), (34,25)] as kpairs.'
 _proj_doc = "projections : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals/tdos, occs/idos of from data and should return array of shape[1:] (all but spin dimension)."
 
 class _BandsDosBase:
@@ -835,8 +836,45 @@ class Bands(_BandsDosBase):
         if path.is_file():
             return sio.read_kticks(path)
         return []
+    
+    def get_plot_coords(self, kindices, eindices):
+        """Returns coordinates of shape (len(zip(kindices, eindices)), 2) from most recent bandstructure plot. 
+        Use in a plot command as `plt.plot(*get_plot_coords(kindices, eindices).T)`.
+        Enegy values are shifted by `ezero` from a plot command or data. Use coords[:,1] + ezero to get data values.
+        """
+        for inds in (kindices, eindices):
+            if not isinstance(inds, (list, tuple, range, np.ndarray)):
+                raise TypeError('`kindices` and `eindices` must be list, tuple, range or numpy array.')
+            
+        if not hasattr(self,'_breaks'): # There will be data when a plotting function is called, and set _breaks attribute
+            raise ValueError('You must call a plotting function first to get band gap coordinates from plot.')
+        
+        kpath = self.data.kpath
+        if self._breaks:
+            for i in self._breaks:
+                kpath[i:] -= (kpath[i] - kpath[i-1]) # remove distance
+        
+            kpath = kpath/np.max(kpath) # normalize to in this case again
+        
+        kvs = [kpath[k] for k,e in zip(kindices, eindices)] # need same size as eindices
+        evs = [self.data.evals[self._spin][k,e] - self.data.ezero for k,e in zip(kindices, eindices)]
+        return np.array([kvs, evs]).T # shape (len(kindices), 2)
+        
+    
+    def get_gap_coords(self):
+        """Retruns as array of shape (2,2) with coordinates of band gap ([k1,VBM],[k2,CBM]) from plot. 
+        Use in a plot commnads as `plt.plot(*bands.get_gap_coords().T)`.
+        To get data values of VBM and CBM, use self.data.evc instead.
+        """
+        if not self.data:
+            raise ValueError('You must call a plotting function first to get band gap coordinates from plot.')
+        
+        vs = self.get_plot_coords(self.data.kvc, [0,0])
+        if vs.size: # May not exist, but still same shape in plotting with empty arrays
+            vs[:,1] = [v - self.data.ezero for v in self.data.evc]
+        return vs
                 
-    def get_data(self, elim = None, ezero = None, projections: dict = None):
+    def get_data(self, elim = None, ezero = None, projections: dict = None, kpairs = None):
         """
         Selects bands and projections to use in plotting functions. If input arguments are same as previous call, returns cached data.
         
@@ -845,51 +883,85 @@ class Bands(_BandsDosBase):
         elim : list, tuple of two floats to pick bands in this energy range. If None, picks all bands.
         ezero : float, None by default. If not None, elim is applied around this energy.
         projections : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs of shape (spin,kpoints, bands) and return array of shape (kpoints, bands).
+        kpairs : list, tuple of integers, None by default to select all kpoints in given order. Use this to select specific kpoints intervals in specific order.
         
         Returns
         -------
         data : Selected bands and projections data to be used in bandstructure plotting functions under this class as `data` argument.
         """
-        if self.data and self._data_args == (elim, ezero, projections):
+        if self.data and self._data_args == (elim, ezero, projections, kpairs):
             return self.data
+        
+        if kpairs and not isinstance(kpairs, (list, tuple)):
+            raise TypeError('`kpairs` must be a list/tuple of pair of indices of edge kpoints of intervals.')
+        
+        kinds = [] # plain indices of kpoints to select
+        if kpairs:
+            if np.ndim(kpairs) != 2:
+                raise ValueError('`kpairs` must be a list/tuple of pairs indices to select intervals.')
+            
+            for inds in kpairs:
+                if len(inds) != 2:
+                    raise ValueError('`kpairs` must be a list/tuple of pairs indices to select intervals.')
+            
+            all_inds = [range(k1, k2, -1 if k2 < k1 else 1) for k1, k2 in kpairs]
+            kinds = [*[ind for inds in all_inds for ind in inds], kpairs[-1][-1]] # flatten and add last index
         
         self._data_args = (elim, ezero, projections)
 
         (spins, uspins), (atoms,uatoms), (orbs,uorbs), (funcs, labels) = self._fix_projections(projections)
             
         kpts = self.source.get_kpoints()
-        eigens = self.source.get_evals(elim = elim, ezero = ezero, atoms = uatoms, orbs = uorbs, spins = uspins or None, bands = None) # picks available spins if uspins is None
+        data = self.source.get_evals(elim = elim, ezero = ezero, atoms = uatoms, orbs = uorbs, spins = uspins or None, bands = None) # picks available spins if uspins is None
         
         if not spins:
-            spins = eigens.spins # because they will be loaded anyway
+            spins = data.spins # because they will be loaded anyway
             if len(spins) == 1 and labels: # in case projections not given, check label
                 spins = [spins[0] for _ in labels] # only one spin channel is available, so use it for all projections
         
-        output = {'kpath': kpts.kpath, 'kpoints': kpts.kpoints, 'coords': kpts.coords, **eigens.to_dict()}
-        kvc = np.unique([tuple(round(kpts.kpath[i],4) for i in kp) for kp in eigens.kvc],axis=0) # 4 digits are enough to handle 10,000 kpoints
-        output['kvc'] = tuple(tuple(k) for k in kvc)
+        output = {'kpath': kpts.kpath, 'kpoints': kpts.kpoints, 'coords': kpts.coords, **data.to_dict()}
+        
+        if kinds:
+            coords = output['coords'][kinds]
+            kpath = np.cumsum([0, *np.linalg.norm(coords[1:] - coords[:-1],axis = 1)])
+            output['kpath'] = kpath/np.max(kpath) # normalize to 1
+            output['kpoints'] = output['kpoints'][kinds]
+            output['coords'] = coords
+            output['evals'] = output['evals'][:,kinds,:]
+            output['occs'] = output['occs'][:,kinds,:]
+            if 'pros' in output:
+                output['pros'] = output['pros'][...,kinds,:]
+            
+            # Have to see kvc, but it makes no sense when there is some break in kpath
+            vbm, cbm = output['evc'] # evc is a tuple of two tuples
+            kvbm = [k for k in np.where(output['evals'] == vbm)[1]] # keep as indices here, we don't know the cartesian coordinates of kpoints here
+            kcbm = [k for k in np.where(output['evals'] == cbm)[1]]
+            kvc = tuple(sorted(product(kvbm,kcbm),key = lambda K: np.ptp(K))) # bring closer points first by sorting
+            output['kvc']  = kvc[0] if kvc else () # Only relative minimum indices matter
         
         output['labels'] = labels # works for both functions and picks
+        
+        data = serializer.Dict2Data(output) # replacing data with updated one
         if funcs:
             pros = []
             for func in funcs:
-                out = func(eigens.evals, eigens.occs)
-                if np.shape(out) != eigens.evals.shape[1:]: # evals shape is (spin, kpoints, bands), but we need single spin
+                out = func(data.evals, data.occs)
+                if np.shape(out) != data.evals.shape[1:]: # evals shape is (spin, kpoints, bands), but we need single spin
                     raise ValueError(f'Projections returned by {func} must be of same shape as last two dimensions of input evals.')
                 pros.append(out)
                 
             output['pros'] = np.array(pros)
             output['info'] = '"Custom projections by user"'
         
-        elif hasattr(eigens, 'pros'): # Data still could be there, but prefer if user provides projections as functions
+        elif hasattr(data, 'pros'): # Data still could be there, but prefer if user provides projections as functions
             arrays = []
             for sp,atom,orb in zip(spins, atoms, orbs):
                 if uatoms != -1:
-                    atom = [i for i, a in enumerate(eigens.atoms) if a in atom] # indices for partial data loaded
+                    atom = [i for i, a in enumerate(data.atoms) if a in atom] # indices for partial data loaded
                 if uorbs != -1:
-                    orb = [i for i, o in enumerate(eigens.orbs) if o in orb]
-                sp = list(eigens.spins).index(sp) # index for spin is single
-                _pros  = np.take(eigens.pros[sp],atom,axis = 0).sum(axis = 0) # take dimension of spin and then sum over atoms leaves 3D array
+                    orb = [i for i, o in enumerate(data.orbs) if o in orb]
+                sp = list(data.spins).index(sp) # index for spin is single
+                _pros  = np.take(data.pros[sp],atom,axis = 0).sum(axis = 0) # take dimension of spin and then sum over atoms leaves 3D array
                 _pros = np.take(_pros,orb,axis = 0).sum(axis = 0) # Sum over orbitals leaves 2D array
                 arrays.append(_pros)
 
@@ -908,24 +980,29 @@ class Bands(_BandsDosBase):
         if kwargs.get('spin',None) not in [0,1]:
             raise ValueError('spin must be 0 or 1')
         
-        kwargs.pop('spin',None) # remove from kwargs as plots don't need it
+        self._spin = kwargs.pop('spin',None) # remove from kwargs as plots don't need it, but get_plot_coords need it
         
+        kpairs = kwargs.pop('kpairs',None) # not needed for plots but need here
         if kwargs.get('kticks',None) is None:
-            kwargs['kticks'] = kwargs['kticks'] or self.get_kticks() # Does not change even after interpolation, prefer user
+            kwargs['kticks'] = kwargs['kticks'] if kpairs else (kwargs['kticks'] or self.get_kticks()) # Does not change even after interpolation, prefer user in case of kpa
+            
+        # Need to fetch data for gap and plot later
+        self._breaks = [tick[0] for tick in (kwargs['kticks'] or []) if tick[1].lstrip().startswith('<=')]   
         
         ezero = kwargs.pop('ezero',None) # remove from kwargs as plots don't need it
         return kwargs, ezero
     
-    @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': f"{_spin_doc}\n    ax :"})
-    def splot_bands(self, spin = 0, ax = None, elim = None, ezero = None, kticks = None, interp = None, **kwargs):
+    @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': f"{_spin_doc}\n    {_kind_doc}\n    ax :"})
+    def splot_bands(self, spin = 0, kpairs = None, ax = None, elim = None, ezero = None, kticks = None, interp = None, **kwargs):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self','kwargs']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(elim = elim, ezero = ezero)
+        data = self.get_data(elim = elim, ezero = ezero, kpairs = kpairs)
         return sp.splot_bands(data.kpath, data.evals[spin] - data.ezero, **plot_kws, **kwargs)
     
-    @_sub_doc(sp.splot_rgb_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    ax :"})
+    @_sub_doc(sp.splot_rgb_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    {_kind_doc}\n    ax :"})
     def splot_rgb_lines(self, projections,
         spin       = 0,   
+        kpairs     = None,
         ax         = None, 
         elim       = None, 
         ezero      = None,
@@ -939,12 +1016,13 @@ class Bands(_BandsDosBase):
         shadow     = False):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(elim, ezero, projections) 
+        data = self.get_data(elim, ezero, projections, kpairs = kpairs) 
         return sp.splot_rgb_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **plot_kws)
     
-    @_sub_doc(sp.splot_color_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    ax :"})
+    @_sub_doc(sp.splot_color_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    {_kind_doc}\n    ax :"})
     def splot_color_lines(self, projections,
         spin       = 0, 
+        kpairs     = None,
         axes       = None, 
         elim       = None, 
         ezero      = None,
@@ -959,12 +1037,13 @@ class Bands(_BandsDosBase):
         ):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(elim, ezero, projections) # picked relative limit
+        data = self.get_data(elim, ezero, projections, kpairs = kpairs) # picked relative limit
         return sp.splot_color_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **plot_kws, **kwargs)
     
-    @_sub_doc(ip.iplot_rgb_lines,['K :','E :', 'pros :', 'labels :','occs :','kpoints :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    fig :"})
+    @_sub_doc(ip.iplot_rgb_lines,['K :','E :', 'pros :', 'labels :','occs :','kpoints :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    {_kind_doc}\n    fig :"})
     def iplot_rgb_lines(self, projections,
         spin     = 0,
+        kpairs   = None,
         elim     = None,
         ezero    = None,
         kticks   = None, 
@@ -977,13 +1056,14 @@ class Bands(_BandsDosBase):
         ):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(elim, ezero, projections)
+        data = self.get_data(elim, ezero, projections, kpairs = kpairs)
         # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number 
         return ip.iplot_rgb_lines({"K": data.kpath, 'indices':data.bands}, data.evals[spin] - data.ezero, data.pros, data.labels, data.occs[spin], data.kpoints, **plot_kws, **kwargs)
     
-    @_sub_doc(ip.iplot_bands,['K :','E :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    fig :"})
+    @_sub_doc(ip.iplot_bands,['K :','E :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    {_kind_doc}\n    fig :"})
     def iplot_bands(self,
         spin   = 0,
+        kpairs = None,
         fig    = None,
         elim   = None,
         ezero  = None,
@@ -993,7 +1073,7 @@ class Bands(_BandsDosBase):
         **kwargs):
         plot_kws = {k:v for k,v in locals().items() if k not in ['self','kwargs']}
         plot_kws, ezero = self._handle_kwargs(plot_kws)
-        data = self.get_data(elim, ezero)
+        data = self.get_data(elim, ezero, kpairs = kpairs)
         # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number
         return ip.iplot_bands({"K": data.kpath, 'indices':data.bands}, data.evals[spin] - data.ezero, **plot_kws, **kwargs) 
     

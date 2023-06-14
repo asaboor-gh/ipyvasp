@@ -314,6 +314,7 @@ class Vasprun(DataSource):
         kvbm = [k for k in np.where(evals == vbm)[1]] # keep as indices here, we don't know the cartesian coordinates of kpoints here
         kcbm = [k for k in np.where(evals == cbm)[1]]
         kvc = tuple(sorted(product(kvbm,kcbm),key = lambda K: np.ptp(K))) # bring closer points first by sorting
+        kvc = kvc[0] if kvc else () # We need only relative minimim distance, so just one is enough
         
         if bands:
             if (not isinstance(bands, (list, tuple,range))):

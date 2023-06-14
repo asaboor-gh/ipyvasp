@@ -733,7 +733,7 @@ class KpathWidget(VBox):
                         trace.x = coords[:,0]
                         trace.y = coords[:,1]
                         trace.z = coords[:,2]
-                        trace.text = labels
+                        trace.text = ip._fmt_labels(labels) # convert latex to html equivalent
         
     def get_coords_labels(self):
         "Returns tuple of (coordinates, labels) to directly plot."

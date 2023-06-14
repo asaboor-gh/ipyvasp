@@ -83,6 +83,7 @@ def modify_axes(ax = None,xticks = [],xt_labels = [],xlim = [],\
             ax.set_ylabel(ylabel)
         kwargs = {**dict(direction='in', bottom=True,left = True,length=4, width=0.3, grid_alpha=0.8),**kwargs} # Default kwargs
         ax.tick_params(**kwargs)
+        ax.set_axisbelow(True) # Aoid grid lines on top of plot.
     return None
 
 def get_axes(figsize  = (3.4,2.6),

@@ -612,15 +612,14 @@ def get_kpath(kpoints, n = 5, weight= None ,ibzkpt = None,outfile=None, rec_basi
     out_str = '\n'.join(out_str)
     
     N = len(points)
-    if ibzkpt != None:
-        if (PI := Path(ibzkpt)).is_file():
-            with PI.open('r') as f:
-                lines = f.readlines()
+    if (PI := Path(ibzkpt or '')).is_file(): # handles None automatically
+        with PI.open('r') as f:
+            lines = f.readlines()
 
-            N = int(lines[1].strip())+N # Update N.
-            slines = lines[3:N+4]
-            ibz_str = ''.join(slines)
-            out_str = "{}\n{}".format(ibz_str.strip('\n'),out_str) # Update out_str, ibz_str is stripped of trailing newline.
+        N = int(lines[1].strip())+N # Update N.
+        slines = lines[3:N+4]
+        ibz_str = ''.join(slines)
+        out_str = "{}\n{}".format(ibz_str.strip('\n'),out_str) # Update out_str, ibz_str is stripped of trailing newline.
     
     path_info = ', '.join(f'{idx}:{lab}' for idx, lab in zip(numbers,labels) if lab != '')
     
