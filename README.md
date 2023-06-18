@@ -16,8 +16,9 @@ Plot 2D BZ layer on top of 3D!
 ```python
 import ipyvasp as ipv
 pos =  ipv.POSCAR('FCC POSACR FILE').rotate(35, [0,0,1])
-ax = pos.splot_bz(vectors = None,color='skyblue',lw=0.2,alpha=0.5)
-pos.splot_bz('xy', ax=ax, zoffset=0, vectors=None, lw=0.7,color='black')
+ax = pos.splot_bz(vectors = None,color='skyblue',lw=0.5,alpha=0.8)
+pos.splot_bz('xy', ax=ax, zoffset = pos.bz.vertices[:,2].max(), vectors=None, lw=1,color='red',zorder=4)
+pos.splot_bz('xy', ax=ax, zoffset = pos.bz.vertices[:,2].min(), vectors=None, lw=1,color='blue',zorder=0)
 ```
 
 ![BZ](BZ.png)
