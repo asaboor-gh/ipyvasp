@@ -10,6 +10,9 @@ import numpy as np
 from scipy.interpolate import make_interp_spline
 from scipy.ndimage.filters import convolve1d
 
+from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.pyplot as plt
+
 
 def get_file_size(path:str):
     """Return file size"""
@@ -331,18 +334,16 @@ def transform_color(arr: np.ndarray,s:float=1,c:float=1,b:float=0,mixing_matrix:
     return new_color
 
 # color_marices for quick use
-color_matrix = __np.array([[0.5,0,0.5,1],[0.5,0.5,0,1],[0,0.5,0.5,0.2],[1,1,0.2,0]]) # lights up to see colors a little bit
-rbg_matrix= __np.array([[1,0,0],[0,0,1],[0,1,0]]) # Red, Blue, Green
-cmy_matrix = __np.array([[0,0.5,0.5,1],[0.5,0,0.5,1],[0.5,0.5,0,0.2],[1,1,0.2,0]]) # Generates CMYK color palette
+color_matrix = np.array([[0.5,0,0.5,1],[0.5,0.5,0,1],[0,0.5,0.5,0.2],[1,1,0.2,0]]) # lights up to see colors a little bit
+rbg_matrix= np.array([[1,0,0],[0,0,1],[0,1,0]]) # Red, Blue, Green
+cmy_matrix = np.array([[0,0.5,0.5,1],[0.5,0,0.5,1],[0.5,0.5,0,0.2],[1,1,0.2,0]]) # Generates CMYK color palette
 
 
 # Register 'RGB' colormap in current session
-from matplotlib.colors import LinearSegmentedColormap as __LSC
-import matplotlib.pyplot as __plt, numpy as __np
-RGB = __LSC.from_list('RGB',[(0.9,0,0),(0.9,0.9,0),(0,0.9,0),(0,0.9,0.9),(0,0,0.9)])
-CMY = __LSC.from_list('CMY',[(0,0.9,0.9),(0,0,0.9),(0.9,0,0.9),(0.9,0,0),(0.9,0.9,0)])
-__plt.register_cmap('RGB',RGB)
-__plt.register_cmap('CMY',CMY)
+RGB = LinearSegmentedColormap.from_list('RGB',[(0.9,0,0),(0.9,0.9,0),(0,0.9,0),(0,0.9,0.9),(0,0,0.9)])
+CMY = LinearSegmentedColormap.from_list('CMY',[(0,0.9,0.9),(0,0,0.9),(0.9,0,0.9),(0.9,0,0),(0.9,0.9,0)])
+plt.register_cmap('RGB',RGB)
+plt.register_cmap('CMY',CMY)
 
 def create_colormap(name='RB',colors=[(0.9,0,0),(0,0,0.9)]):
     """
@@ -352,6 +353,6 @@ def create_colormap(name='RB',colors=[(0.9,0,0),(0,0,0.9)]):
     
     **Returns**: Colormap object which you can use to get colors from. like cm = create_colormap(); cm(0.5) which will return a color at center of map
     """
-    __RGB = __LSC.from_list(name,colors)
-    __plt.register_cmap(name,__RGB)
-    return __RGB
+    RB = LinearSegmentedColormap.from_list(name,colors)
+    plt.register_cmap(name,RB)
+    return RB

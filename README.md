@@ -10,7 +10,7 @@ cd ipyvasp
 pip install -e .
 ```
 
-## Showcase Example
+## Showcase Examples
 Plot 2D BZ layer on top of 3D!
 
 ```python
@@ -22,5 +22,11 @@ pos.splot_bz('xy', ax=ax, zoffset = pos.bz.vertices[:,2].min(), vectors=None, lw
 ```
 
 ![BZ](BZ.png)
+
+Interactively select bandstructure path by clicking on high symmetry points on plot!
+
+![KP](KP.png)
+
+More coming soon!
 
 
