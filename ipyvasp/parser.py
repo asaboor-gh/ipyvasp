@@ -306,16 +306,16 @@ class Vasprun(DataSource):
         else:
             raise ValueError('No eigenvalues found in this file!')
         evals, occs = ev[:,:,:,0], ev[:,:,:,1]
-        vbm = float(evals[occs > 0.5].max()) # more than half filled
-        cbm = float(evals[occs < 0.5].min()) # less than half filled
-        evc = (vbm,cbm) # Easy to plot this way like [0, np.ptp(evc)] can work for defult ezero
-        zero = vbm # default value of ezero
+        sv,kv,ev = np.where(evals == evals[occs > 0.5].max()) # more than half filled indices
+        sc,kc,ec = np.where(evals == evals[occs < 0.5].min()) # less than half filled indices
+        evc, kvc, zero = (0.0,0.0), (0,0), 0 # default values are empty
         
-        kvbm = [k for k in np.where(evals == vbm)[1]] # keep as indices here, we don't know the cartesian coordinates of kpoints here
-        kcbm = [k for k in np.where(evals == cbm)[1]]
-        kvc = tuple(sorted(product(kvbm,kcbm),key = lambda K: np.ptp(K))) # bring closer points first by sorting
-        kvc = kvc[0] if kvc else () # We need only relative minimim distance, so just one is enough
-        
+        if sv.size and sc.size: # if both are not empty
+            evc = (float(evals[sv[0],kv[0],ev[0]]), float(evals[sc[0],kc[0],ec[0]])) 
+            zero = evc[0] # default value of ezero
+            # svc = (sv[0],sc[0]) # spin indices, implement later if needed
+            kvc = tuple(sorted(product(kv,kc),key = lambda K: np.ptp(K)))[0] # bring closer points first by sorting and take closest ones
+            
         if bands:
             if (not isinstance(bands, (list, tuple,range))):
                 raise TypeError('bands should be a list, tuple or range got {}'.format(type(bands)))

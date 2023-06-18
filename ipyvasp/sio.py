@@ -1,9 +1,9 @@
 
-__all__ = ['atomic_number', 'atoms_color', 'periodic_table', 'Arrow3D', 'fancy_quiver3d', 'get_selective_dynamics',
+__all__ = ['atomic_number', 'atoms_color', 'periodic_table', 'Arrow3D', 'quiver3d',
            'write_poscar', 'export_poscar', 'InvokeMaterialsProject', 'get_kpath', 'read_kticks',
            'get_kmesh', 'order', 'rotation', 'get_bz', 'splot_bz', 'iplot_bz', 'to_R3', 'to_basis', 'kpoints2bz',
            'fix_sites', 'translate_poscar', 'get_pairs', 'iplot_lattice', 'splot_lattice', 'join_poscars', 'repeat_poscar',
-           'scale_poscar', 'rotate_poscar', 'mirror_poscar', 'convert_poscar', 'get_transform_matrix',
+           'scale_poscar', 'rotate_poscar', 'mirror_poscar', 'convert_poscar', 'get_TM',
            'transform_poscar', 'add_vaccum', 'transpose_poscar', 'add_atoms','strain_poscar', 'view_poscar']
 
 
@@ -12,6 +12,7 @@ import json
 import numpy as np
 from pathlib import Path
 import requests as req
+import inspect
 from collections import namedtuple
 from itertools import product, combinations
 from functools import lru_cache
@@ -116,7 +117,7 @@ class Arrow3D(FancyArrowPatch):
     def on(self,ax):
         ax.add_artist(self)
 
-def fancy_quiver3d(X,Y,Z,U,V,W,ax=None,C = 'r',L = 0.7,mutation_scale=10,**kwargs):
+def quiver3d(X,Y,Z,U,V,W,ax=None,C = 'r',L = 0.7,mutation_scale=10,**kwargs):
     """Plots 3D arrows on a given ax. See [FancyArrowPatch](https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.patches.FancyArrowPatch.html).
     Args:
         - X, Y, Z : 1D arrays of coordinates of arrows' tail point.
@@ -141,60 +142,16 @@ def fancy_quiver3d(X,Y,Z,U,V,W,ax=None,C = 'r',L = 0.7,mutation_scale=10,**kwarg
 
     return ax
 
-# Cell
-def get_selective_dynamics(poscar_data, *, a = None, b = None, c = None) -> np.ndarray:
-    """Returns selective dynamics array for a given POSCAR or None if no inputb given. By default, if a direction is not given, it turns ON with others.
-    Args:
-        - poscar_data: POSCAR data.
-        - a, b, c: Arrays of shape (N,2) that contain ranges in fractional coordinates to turn selective dynamics on.
-
-    - **Usage**
-        - `get_selective_dynamics(poscar_data, a = [(0,0.1),(0.9,1)])` will turn selective dynamics on for the first and last 10% of the unit cell in a-direction as T T T.
-        - `get_selective_dynamics(poscar_data, a = [(0,0.1),(0.9,1)], b = [(0,0.1),(0.9,1)])` will turn selective dynamics on for the first and last 10% of the unit cell in ab-plane in form of T T T, F T T and T F T whichever applies.
-    """
-    if (a is None) and (b is None) and (c is None):
-        return None
-
-    out_array = np.array([['F','F','F'] for a in poscar_data.positions]) # Default array
-    x, y, z = poscar_data.positions.T
-
-    if (np.ndim(a) == 2) and (np.shape(a)[1] == 2):
-        for left, right in a:
-            out_array[(x >= left) & (x <= right),0] = 'T'
-    elif a is not None:
-        raise ValueError(f'`a` should be None or array of ranges of shape (N,2) to turn on selective dynamics. got {a!r}')
-
-    if (np.ndim(b) == 2) and (np.shape(b)[1] == 2):
-        for left, right in b:
-            out_array[(y >= left) & (y <= right),1] = 'T'
-    elif b is not None:
-        raise ValueError(f'`b` should be None or array of ranges of shape (N,2) to turn on selective dynamics. got {b!r}')
-
-    if (np.ndim(c) == 2) and (np.shape(c)[1] == 2):
-        for left, right in c:
-            out_array[(z >= left) & (z <= right),2] = 'T'
-    elif c is not None:
-        raise ValueError(f'`c` should be None or array of ranges of shape (N,2) to turn on selective dynamics. got {c!r}')
-
-    # Now Turn ON what is not given but present in other directions
-    if a is None:
-        out_array[(out_array[:,1] == 'T')|(out_array[:,2] == 'T'), 0] = 'T'
-
-    if b is None:
-        out_array[(out_array[:,0] == 'T')|(out_array[:,2] == 'T'), 1] = 'T'
-
-    if c is None:
-        out_array[(out_array[:,0] == 'T')|(out_array[:,1] == 'T'), 2] = 'T'
-
-    return np.array(['  '.join(arr) for arr in out_array])
 
 def write_poscar(poscar_data, outfile = None, selective_dynamics = None, overwrite = False):
     """Writes poscar data object to a file or returns string
-    Args:
-        - poscar_data: Output of `export_poscar`,`join_poscars` etc.
-        - outfile  : str,file path to write on.
-        - selective_dynamics  : A list ['T T T','F F F',...] strings to turn on selective dynamics at required sites. Use `get_selective_dynamics` to build this list precisely.
-        - overwrite: bool, if file already exists, overwrite=True changes it.
+    Parameters
+    ----------
+    poscar_data : Output of `export_poscar`,`join_poscars` etc.
+    outfile : str,file path to write on.
+    selective_dynamics : callable, if given, should be a function like `f(index,x,y,z) -> (bool, bool, bool)` 
+        which turns on/off selective dynamics for each atom based in each dimension. See `ipyvasp.POSCAR.data.get_selective_dynamics` for more info.
+    overwrite: bool, if file already exists, overwrite=True changes it.
 
     **Note**: POSCAR is only written in direct format even if it was loaded from cartesian format.
     """
@@ -206,16 +163,18 @@ def write_poscar(poscar_data, outfile = None, selective_dynamics = None, overwri
     uelems = poscar_data.types.to_dict()
     out_str += "\n  " + '    '.join(uelems.keys())
     out_str += "\n  " + '    '.join([str(len(v)) for v in uelems.values()])
+    
     if selective_dynamics is not None:
         out_str += "\nSelective Dynamics"
 
     out_str += "\nDirect\n"
     positions = poscar_data.positions
     pos_list = ["{:>21.16f}{:>21.16f}{:>21.16f}".format(*a) for a in positions]
+    
     if selective_dynamics is not None:
-        if len(pos_list) != len(selective_dynamics):
-            raise ValueError("len(selective_dynamics) != len(sites).")
-        pos_list = [f"{p}   {s}" for p,s in zip(pos_list,selective_dynamics)]
+        sd = poscar_data.get_selective_dynamics(selective_dynamics).values()
+        pos_list = [f"{p}   {s}" for p,s in zip(pos_list,sd)]
+    
     out_str += '\n'.join(pos_list)
     if outfile:
         path = Path(outfile)
@@ -571,8 +530,10 @@ def get_kpath(kpoints, n = 5, weight= None ,ibzkpt = None,outfile=None, rec_basi
         fixed_patches.append(cpt)
     
     def add_points(p1, p2, npts, rec_basis):
+        lab = p2[3] # end point label
         if len(p1) == 5:
             m = p1[4] # number of points given explicitly. 
+            lab = f'<={p1[3]}|{lab}' # merge labels in case user wants to break path
         elif rec_basis is not None and np.size(rec_basis) == 9:
             basis = np.array(rec_basis)
             coords = to_R3(basis,[p1[:3],p2[:3]])
@@ -588,21 +549,17 @@ def get_kpath(kpoints, n = 5, weight= None ,ibzkpt = None,outfile=None, rec_basi
         Z = np.linspace(p1[2],p2[2],Np,endpoint = False)
         
         kpts = [(x,y,z) for x,y,z in zip(X,Y,Z)]
-        return kpts, Np, (p1[3], p2[3]) # return kpoints, number of points, labels
+        return kpts, Np, lab # return kpoints, number of points, label of end of interval
 
-    points, numbers, labels = [fixed_patches[0][:3]], [0], [fixed_patches[0][3]]
-    for i,(p1,p2) in enumerate(zip(fixed_patches[:-1],fixed_patches[1:])):
-        kp, m, labs = add_points(p1,p2, n, rec_basis)
-        points.extend(kp)
-            
-        if isinstance(p1[-1], (int, np.integer)) and p1[-1] == 0:
-            labels[-1] = (f'<={labels[-1]}|{labs[1]}') # indicate connecting path to next
-            numbers[-1] = numbers[-1] + 1 # disconnected by a single point
-        else:
-            numbers.append(numbers[-1] + m)
-            labels.append(labs[1])
+    points, numbers, labels = [], [0], [fixed_patches[0][3]]
+    for p1,p2 in zip(fixed_patches[:-1],fixed_patches[1:]):
+        kp, m, lab = add_points(p1,p2, n, rec_basis)
+        points.extend(kp) 
+        numbers.append(numbers[-1] + m)
+        labels.append(lab)
+        if lab.startswith('<='):
+            labels[-2] = '' # remove label for end of interval if broken, added here
     else: # Add last point at end of for loop
-        numbers[-1] = numbers[-1] + 1
         points.append(p2[:3])
 
     if weight is None and points:
@@ -941,9 +898,9 @@ def get_bz(path_pos = None,loop = True,primitive=False):
 
 
 # Cell
-def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = (0,1,2),colormap=None,shade = True,alpha=0.4):
+def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = (0,1,2),colormap=None,shade = True, alpha = 0.4, zoffset = 0, **kwargs):
     """
-    Plots matplotlib's static figure of Brillouin zone.
+    Plots matplotlib's static figure of Brillouin zone. You can also plot in 2D on a 3D axes.
     
     Parameters
     ----------
@@ -956,6 +913,9 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = 
     colormap : If None, single color is applied, only works in 3D and `fill=True`. Colormap is applied along z.
     shade : Shade polygons or not. Only works in 3D and `fill=True`.
     alpha : Opacity of filling in range [0,1]. Increase for clear viewpoint.
+    zoffset : Only used if plotting in 2D over a 3D axis. Default is 0. Any plane 'xy','yz' etc. can be plotted but it will be in xy plane of 3D axes.
+    
+    kwargs are passed to `plt.plot` or `Poly3DCollection` if `fill=True`.
     
     Returns
     -------
@@ -981,12 +941,20 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = 
     
     if plane and plane not in valid_planes:
         raise ValueError(f"`plane` expects value in 'xyzxzyx' or None, got {plane!r}")
-    elif plane and plane in valid_planes: #Project 2D
+    
+    name = kwargs.pop('label',None) # will set only on single line
+    kwargs.pop('zdir',None) # 2D plot on 3D axes is only supported in xy plane.
+    
+    if plane: #Project 2D, works on 3D axes as well
         ind = valid_planes.index(plane)
         arr = [0,1,2,0,2,1,0]
         i, j = arr[ind], arr[ind+1]
-        _ = [ax.plot(f[:,i],f[:,j],color=(color),lw=0.7) for f in bz_data.faces_coords]
-
+        for idx, f in enumerate(bz_data.faces_coords):
+            XYZ = (f[:,i],f[:,j], zoffset*np.ones_like(f[:,i])) if getattr(ax,'name','') == '3d' else (f[:,i],f[:,j])
+            line, = ax.plot(*XYZ,color = (color),**kwargs)
+            if idx == 0:
+                line.set_label(name) # only one line
+        
         if vectors:
             s_basis = bz_data.basis[(vectors,)]
 
@@ -994,15 +962,29 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = 
                 l = r" ${}_{} $".format(_label,k+1)
                 l = l + '\n' if y[j] < 0 else '\n' + l
                 ha = 'right' if y[i] < 0 else 'left'
-                ax.text(0.8*y[i], 0.8*y[j], l, va = 'center',ha=ha)
-                ax.scatter([y[i]],[y[j]],color='w',s=0.0005) # Must be to scale below arrow.
-
-            s_zero = [0 for _ in s_basis] # either 3 or 2.
-            ax.quiver(s_zero,s_zero,*s_basis.T[[i,j]],lw=0.9,color='navy',angles='xy', scale_units='xy', scale=1)
+                xyz = (0.8*y[i], 0.8*y[j], zoffset) if getattr(ax,'name','') == '3d' else (0.8*y[i], 0.8*y[j])
+                ax.text(*xyz, l, va = 'center',ha=ha,clip_on = True) # must clip to have limits of axes working.
+                ax.scatter(*[0.8*v if i < 2 else v for i, v in enumerate(xyz)],color='w',s=0.0005) # Must be to scale below arrow.
+            if getattr(ax,'name','') == '3d':
+                XYZ,UVW = (np.ones_like(s_basis)*[0,0,zoffset]).T, s_basis.T
+                quiver3d(*XYZ,*UVW,C='k',L=0.7,ax = ax,arrowstyle="-|>",mutation_scale=7)
+            else:
+                s_zero = [0 for _ in s_basis] # either 3 or 2.
+                ax.quiver(s_zero,s_zero,*s_basis.T[[i,j]],lw=0.9,color='navy',angles='xy', scale_units='xy', scale=1)
 
         ax.set_xlabel(label.format(valid_planes[i]))
         ax.set_ylabel(label.format(valid_planes[j]))
-        ax.set_aspect(1) # Must for 2D axes to show actual lengths of BZ
+        if getattr(ax,'name','') == '3d':
+            ax.set_zlabel(label.format(valid_planes[ind+2]))
+            ax.set_aspect('equal')
+            zmin, zmax = ax.get_zlim()
+            if zoffset > zmax:
+                zmax = zoffset
+            elif zoffset < zmin:
+                zmin = zoffset
+            ax.set_zlim([zmin,zmax])
+        else:
+            ax.set_aspect(1) # Must for 2D axes to show actual lengths of BZ
         return ax
     else: # Plot 3D
         if ax and ax.name == "3d":
@@ -1022,18 +1004,20 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = 
             else:
                 colors = np.array([[*mplc.to_rgb(color)] for f in bz_data.faces_coords]) # Single color.
             
-            poly = Poly3DCollection(bz_data.faces_coords,edgecolors=[color,],facecolors=colors, alpha=alpha, shade = shade)
+            poly = Poly3DCollection(bz_data.faces_coords,edgecolors = [color,],facecolors = colors, alpha=alpha, shade = shade, label = name, **kwargs)
+            
             ax3d.add_collection(poly)
             ax3d.autoscale_view()
         else:
-            _ = [ax3d.plot3D(f[:,0],f[:,1],f[:,2],color=(color),lw=0.7) for f in bz_data.faces_coords]
+            line, = [ax3d.plot3D(f[:,0],f[:,1],f[:,2],color=(color),**kwargs) for f in bz_data.faces_coords][0]
+            line.set_label(name) # only one line
 
         if vectors:
             for k,v in enumerate(0.35*bz_data.basis):
                 ax3d.text(*v,r"${}_{}$".format(_label,k+1),va='center',ha='center')
 
             XYZ,UVW = [[0,0,0],[0,0,0],[0,0,0]], 0.3*bz_data.basis.T
-            fancy_quiver3d(*XYZ,*UVW,C='k',L=0.7,ax=ax3d,arrowstyle="-|>",mutation_scale=7)
+            quiver3d(*XYZ,*UVW,C='k',L=0.7,ax=ax3d,arrowstyle="-|>",mutation_scale=7)
 
         l_ = np.min(bz_data.vertices,axis=0)
         h_ = np.max(bz_data.vertices,axis=0)
@@ -1050,14 +1034,14 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = 
         return ax3d
 
 # Cell
-def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)', special_kpoints = True, alpha=0.4,ortho3d=True,fig=None):
+def iplot_bz(bz_data, fill = False,color = 'rgba(168,204,216,0.4)', special_kpoints = True, alpha = 0.4,ortho3d=True,fig = None, **kwargs):
     """
     Plots interactive figure showing axes,BZ surface, special points and basis, each of which could be hidden or shown.
     
     Parameters
     ----------
     bz_data : Output of `get_bz`.
-    fill : True by defult, determines whether to fill surface of BZ or not.
+    fill : False by defult, determines whether to fill surface of BZ or not.
     color : color to fill surface 'rgba(168,204,216,0.4)` by default.
     background : Plot background color, default is 'rgb(255,255,255)'.
     special_kpoints : True by default, determines whether to plot special points or not.
@@ -1065,6 +1049,7 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)', special_kpoint
     ortho3d : Default is True, decides whether x,y,z are orthogonal or perspective.
     fig : (Optional) Plotly's `go.Figure`. If you want to plot on another plotly's figure, provide that.
     
+    kwargs are passed to `plotly.graph_objects.Scatter3d` for BZ lines.
     Returns
     -------
     fig : plotly.graph_object's Figure instance.
@@ -1074,22 +1059,19 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)', special_kpoint
     # Name fixing
     vname = 'a' if bz_data.__class__.__name__ == 'CellData' else 'b'
     axes_text = ["<b>k</b><sub>x</sub>/2π","","<b>k</b><sub>y</sub>/2π","","<b>k</b><sub>z</sub>/2π"]
-    s_name = 'BZ'
-    a_name = 'Axes'
     if vname == 'a':
         axes_text = ["<b>x</b>","","<b>y</b>","","<b>z</b>"] # Real space
-        s_name = 'Lattice'
-        a_name = 'RealAxes'
-
+       
+    zone_name = kwargs.pop('name','BZ' if vname == 'b' else 'Lattice')
     # Axes
     _len = 0.5*np.mean(bz_data.basis)
     fig.add_trace(go.Scatter3d(x=[_len,0,0,0,0],y=[0,0,_len,0,0],z=[0,0,0,0,_len],
         mode = 'lines+text', text = axes_text,
-        line_color='skyblue', legendgroup = a_name,name = a_name))
+        line_color='skyblue', legendgroup = 'Axes',name = 'Axes'))
     fig.add_trace(go.Cone(x=[_len,0,0],y=[0,_len,0],z=[0,0,_len],
         u = [1,0,0],v = [0,1,0],w = [0,0,1], showscale = False,
         sizemode='absolute',sizeref = 0.5, anchor = 'tail',
-        colorscale=['skyblue' for _ in range(3)],legendgroup = a_name,name = a_name))
+        colorscale=['skyblue' for _ in range(3)],legendgroup = 'Axes',name = 'Axes'))
     
     # Basis
     for i,b in enumerate(bz_data.basis):
@@ -1107,8 +1089,8 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)', special_kpoint
     legend = True
     for pts in bz_data.faces_coords:
         fig.add_trace(go.Scatter3d(x=pts[:,0], y=pts[:,1],z=pts[:,2],
-            mode='lines',line_color=color, legendgroup=s_name,name=s_name,
-            showlegend=legend)) 
+            mode='lines',line_color=color, legendgroup = zone_name,name = zone_name,
+            showlegend = legend, **kwargs)) 
         
         legend = False # Only first legend to show for all
 
@@ -1119,7 +1101,7 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)', special_kpoint
                         opacity = alpha,
                         alphahull=0,
                         lighting = dict(diffuse=0.5),
-                        legendgroup = s_name,name=s_name))
+                        legendgroup = zone_name,name=zone_name))
         
 
     # Special Points only if in reciprocal space.
@@ -1163,27 +1145,29 @@ def iplot_bz(bz_data,fill = True,color = 'rgba(168,204,216,0.4)', special_kpoint
 # Cell
 def to_R3(basis,points):
     """Transforms coordinates of points (relative to non-othogonal basis) into orthogonal space.
-    Args:
-        - basis : Non-orthogonal basis of real or reciprocal space.
-        - points: 3D points relative to basis, such as KPOINTS and Lattice Points.
+    Parameters
+    ----------
+    basis : 3x3 matrix with basis vectors as rows like [[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]].
+    points : Nx3 points relative to basis, such as KPOINTS and Lattice Points.
+        
+    Conversion formula:   
+    [x,y,z] = n1*b1 + n2*b2 +n3*b3 = [n1, n2, n3] @ [[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]]
 
     **Note**: Do not use this function if points are Cartesian or provide identity basis.
     """
-    rec_basis = np.array(basis)
-    points = np.array(points)
-    # Formula to make coordinates from relative points.
-    # kx, ky, kz = n1*b1 + n2*b2 +n3*b3
-    #            = [n1, n2, n3].dot(rec_basis)
-    coords = points.dot(rec_basis)
-    return coords
+    return np.array(points) @ basis
 
 def to_basis(basis,coords):
     """Transforms coordinates of points (relative to othogonal basis) into basis space.
-    Args:
-        - basis : Non-orthogonal basis of real or reciprocal space.
-        - points: 3D points relative to cartesian axes, such as KPOINTS and Lattice Points.
+    Parameters
+    ---------
+    basis : 3x3 matrix with basis vectors as rows like [[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]].
+    coords : Nx3 points relative to cartesian axes.
+    
+    Conversion formula:     
+    [n1, n2, n3] = [x,y,z] @ inv([[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]])
     """
-    return np.dot(np.linalg.inv(basis).T,coords.T).T
+    return np.array(coords) @ np.linalg.inv(basis)
 
 # Cell
 def kpoints2bz(bz_data,kpoints, primitive = False, shift = 0):
@@ -1326,17 +1310,25 @@ def _get_bond_length(poscar_data, given = None):
         
 def _masked_data(poscar_data, mask_sites):
     "Returns indices of sites which satisfy the mask_sites function."
+    if not callable(mask_sites):
+        raise TypeError('`mask_sites` should be a callable function.')
+    
+    if len(inspect.signature(mask_sites).parameters) != 4:
+        raise ValueError("`mask_sites` takes exactly 4 arguments: (index,x,y,z) in fractional coordinates")
+    
+    if not isinstance(mask_sites(0,0,0,0),bool):
+        raise TypeError('`mask_sites` should return a boolean value.')
+    
+    
     pick = []
-    for i, (x,y,z) in enumerate(poscar_data.positions):
-        if mask_sites(x,y,z):
+    for i, pos in enumerate(poscar_data.positions):
+        if mask_sites(i,*pos):
             pick.append(i)
     return pick
         
 # Cell
 def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
-        translate = None, linewidth = 4, fig = None, ortho3d = True, mask_sites = None,
-        cell_kwargs = dict(color='black', fill = False,alpha = 0.4), 
-    ):
+    translate = None, fig = None, ortho3d = True, mask_sites = None, bond_kws = dict(line_width = 4),site_kws = dict(line_color='rgba(1,1,1,0)',line_width=0.001, opacity = 1), plot_cell = True, **kwargs):
     """
     Plotly's interactive plot of lattice.
     Parameters
@@ -1345,19 +1337,25 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
     sizes : Size of sites. Either one int/float or list equal to type of ions.
     colors : Sequence of colors for each type. Automatically generated if not provided.
     bond_length : Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.
-    mask_sites : Provide a mask function to show only selected sites. For example, to show only sites with z > 0.5, use `mask_sites = lambda x,y,z: x > 0.5`.
-    cell_kwargs : Keyword arguments for `iplot_bz` function to make cell in real space. Set it to None to avoid plotting box around lattice.
+    mask_sites : Provide a mask function `f(index, x,y,z) -> bool` to show only selected sites. For example, to show only sites with z > 0.5, use `mask_sites = lambda i, x,y,z: x > 0.5`.
+    bond_kws : Keyword arguments passed to `plotly.graph_objects.Scatter3d` for bonds. Default is jus hint, you can use any keyword argument that is accepted by `plotly.graph_objects.Scatter3d`.
+    site_kws : Keyword arguments passed to `plotly.graph_objects.Scatter3d` for sites. Default is jus hint, you can use any keyword argument that is accepted by `plotly.graph_objects.Scatter3d`.
+    plot_cell : bool, defult is True. Plot unit cell with default settings. If you want to customize, use `POSCAR.iplot_cell(fig = <return of iplot_lattice>)` function.
+    
+    kwargs are passed to `iplot_bz`.
     """
     poscar_data = _fix_sites(poscar_data,tol=tol,eqv_sites=eqv_sites,translate=translate)
     bond_length = _get_bond_length(poscar_data,given = bond_length)
     
     sites = None
-    if mask_sites and callable(mask_sites):
+    pos = poscar_data.positions
+    if mask_sites is not None: # not None is important, as it can be False given by user
         sites = _masked_data(poscar_data,mask_sites)
+        pos = poscar_data.positions[sites]
+        if not sites:
+            raise ValueError('No sites found with given mask_sites function.')
     
-    coords, pairs = get_pairs(poscar_data,
-                        positions = poscar_data.positions[sites] if sites else poscar_data.positions,
-                        r = bond_length,tol = bond_tol) # bond tolernce shpuld be smaller than cell tolernce.
+    coords, pairs = get_pairs(poscar_data, pos, r = bond_length,tol = bond_tol) # bond tolernce should be smaller than cell tolernce.
     
     if not fig:
         fig = go.Figure()
@@ -1388,6 +1386,8 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
 
         coords_n = np.array(coords_n)
         colors_n = np.array(colors_n)
+        
+        bond_kws = dict(line_width = 4) | bond_kws
 
         for (i, cp),c in zip(enumerate(coords_n),colors_n):
             showlegend = True if i == 0 else False
@@ -1395,10 +1395,10 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
                 x = cp[:,0].T,
                 y = cp[:,1].T,
                 z = cp[:,2].T,
-                mode='lines',line_color = c,
-                legendgroup='Bonds',showlegend=showlegend,
-                name='Bonds',line_width=linewidth))
+                mode='lines',line_color = c, legendgroup='Bonds',showlegend = showlegend,
+                name='Bonds',**bond_kws))
     
+    site_kws = dict(line_color='rgba(1,1,1,0)',line_width=0.001, opacity = 1) | site_kws
     for (k,v),c,s in zip(uelems.items(),colors,sizes):
         if sites:
             v = [i for i in v if i in sites] # Only show selected sites.
@@ -1412,18 +1412,16 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
             x = coords[:,0].T,
             y = coords[:,1].T,
             z = coords[:,2].T,
-            mode='markers',marker_color = c,
-            hovertext = labs,
-            line_color='rgba(1,1,1,0)',line_width=0.001,
-            marker_size = s,opacity=1,name=k))
+            mode='markers',marker_color = c, hovertext = labs,
+            marker_size = s,name = k, **site_kws))
     
-    if cell_kwargs is not None:
+    if plot_cell:
         bz_data = serializer.CellData(get_bz(path_pos = poscar_data.rec_basis, primitive=True).to_dict()) # Make cell for correct vector notations
-        cell_kwargs = {k:v for k,v in cell_kwargs.items() if k not in ['colormap','vectors','shade']} # those are specific to splot_bz
-        cell_kwargs.update({'fig':  fig, 'ortho3d': ortho3d, 'special_kpoints': False})
-        _ = iplot_bz(bz_data,**cell_kwargs)
+        iplot_bz(bz_data,fig = fig, ortho3d = ortho3d, special_kpoints = False, **kwargs)
     else:
-        # These thing are update in iplot_bz function, but if cell_kwargs is None, then we need to update them here.
+        if kwargs:
+            print('Warning: kwargs are ignored as plot_cell is False.')
+        # These thing are update in iplot_bz function, but if plot_cell is False, then we need to update them here.
         proj = dict(projection = dict(type = "orthographic")) if ortho3d else {}
         camera = dict(center = dict(x = 0.1, y = 0.1, z = 0.1),**proj)
         fig.update_layout(template = 'plotly_white', scene_camera = camera,
@@ -1435,15 +1433,31 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
                         margin=dict(r=10, l=10,b=10, t=30))
     return fig
 
+def _validate_label_func(fmt_label, parameter):
+    if not callable(fmt_label):
+        raise ValueError('fmt_label must be a callable function.')
+    if len(inspect.signature(fmt_label).parameters.values()) != 1:
+        raise ValueError('fmt_label must have only one argument.')
+    
+    test_out = fmt_label(parameter)
+    if isinstance(test_out,(list,tuple)):
+        if len(test_out) != 2:
+            raise ValueError('fmt_label must return string or a list/tuple of length 2.')
+        
+        if not isinstance(test_out[0],str):
+            raise ValueError('Fisrt item in return of `fmt_label` must return a string! got {}'.format(type(test_out[0])))
+        
+        if not isinstance(test_out[1],dict):
+            raise ValueError('Second item in return of `fmt_label` must return a dictionary of keywords to pass to `plt.text`! got {}'.format(type(test_out[1])))
+    
+    elif not isinstance(test_out, str):
+        raise ValueError('fmt_label must return a string or a list/tuple of length 2.')
+
 # Cell
 def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
-    translate = None, linewidth=1, alpha = 0.7, ax = None, mask_sites = None,
-    cell_kwargs = dict(
-        color = ((1,0.5,0,0.4)),colormap = None, fill = False,alpha = 0.4,
-        vectors = (0,1,2), shade = True
-    ),
-    label_kwargs = None
-    ):
+    translate = None, ax = None, mask_sites = None, showlegend = True, fmt_label = None,
+    site_kws = dict(alpha = 0.7), bond_kws = dict(alpha = 0.7, lw = 1),
+    plot_cell = True, **kwargs):
     """
     Matplotlib Static plot of lattice.
     
@@ -1455,16 +1469,17 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
     colors : Sequence of colors for each ion type. If None, automatically generated.
     bond_length : Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.
     alpha : Opacity of points and bonds.
-    mask_sites : Provide a mask function to show only selected sites. For example, to show only sites with z > 0.5, use `mask_sites = lambda x,y,z: x > 0.5`.
-    cell_kwargs : Keyword arguments for `splot_bz` in real space to make cell. Set it to None to avoid plotting box around lattice.
-    label_kwargs : Keyword arguments for `plt.text` to label sites. Set it to None to avoid labeling.
-
+    mask_sites : Provide a mask function `f(index, x,y,z) -> bool` to show only selected sites. For example, to show only sites with z > 0.5, use `mask_sites = lambda i,x,y,z: x > 0.5`.
+    showlegend : bool, default is True, show legend for each ion type.
+    site_kws : Keyword arguments to pass to `plt.scatter` for plotting sites. Default is just hint, you can pass any keyword argument that `plt.scatter` accepts.
+    bond_kws : Keyword arguments to pass to `plt.plot` for plotting bonds. Default is just hint, you can pass any keyword argument that `plt.plot` accepts.
+    fmt_label : If given, each site label is passed to it like fmt_label('Ga 1'). It must return a string or a list/tuple of length 2. First item is the label and second item is a dictionary of keywords to pass to `plt.text`.
+    plot_cell : bool, default is True, plot unit cell with default settings. To customize options, use `plot_cell = False` and do `POSCAR.splot_cell(ax = <return of splot_lattice>)`.
+    
+    kwargs are passed to `splot_bz`.
+    
     > Tip: Use `plt.style.use('ggplot')` for better 3D perception.
     """
-    if label_kwargs is not None:
-        if not isinstance(label_kwargs,dict):
-            raise ValueError('label_kwargs expects a dict to pass to ax.text.')
-    
     #Plane fix
     if plane and plane not in 'xyzxzyx':
         raise ValueError("plane expects in 'xyzxzyx' or None.")
@@ -1477,22 +1492,26 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
     bond_length = _get_bond_length(poscar_data,given = bond_length)
     
     sites = None
-    if mask_sites and callable(mask_sites):
+    pos = poscar_data.positions # take all sites
+    if mask_sites is not None: # not None is important, user can give anything
         sites = _masked_data(poscar_data,mask_sites)
+        pos = poscar_data.positions[sites]
+        if not sites:
+            raise ValueError('No sites found with given mask_sites function.')
     
-    coords, pairs = get_pairs(poscar_data,
-                        positions = poscar_data.positions[sites] if sites else poscar_data.positions,
-                        r = bond_length,tol = bond_tol) # bond tolernce shpuld be smaller than cell tolernce.
+    coords, pairs = get_pairs(poscar_data,positions = pos,r = bond_length,tol = bond_tol) # bond tolernce should be smaller than cell tolernce.
     
     labels = [poscar_data.labels[i] for i in sites] if sites else poscar_data.labels
-    labels = ['{}$_{{{}}}$'.format(*lab.split()) for lab in labels] # labels subscripts are better
+    if fmt_label is not None:
+        _validate_label_func(fmt_label, labels[0])
     
-    if cell_kwargs is not None:
+    if plot_cell:
         bz_data = serializer.CellData(get_bz(poscar_data.rec_basis, primitive=True).to_dict()) # For correct vectors
-        cell_kwargs['plane'] = plane # Overwrite plane.
-        ax = splot_bz(bz_data,ax = ax, **cell_kwargs)
+        ax = splot_bz(bz_data,plane = plane, ax = ax, **kwargs)
     else:
         ax = ax or sp.get_axes(axes_3d = True if plane is None else False)
+        if kwargs:
+            print('Warning: kwargs are not used when plot_cell = False.')
 
     uelems = poscar_data.types.to_dict()
     if not isinstance(sizes,(list,tuple, np.ndarray)):
@@ -1530,49 +1549,62 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
         coords_n = np.array(coords_n)
         colors_n = np.array(colors_n)
 
+        bond_kws = dict(alpha = 0.7) | bond_kws # bond_kws overrides alpha only
         if not plane:
-            _ = [ax.plot(*c.T,c=_c,lw=linewidth, alpha = alpha) for c,_c in zip(coords_n,colors_n)]
+            _ = [ax.plot(*c.T,c=_c,**bond_kws) for c,_c in zip(coords_n,colors_n)]
         elif plane in 'xyzxzyx':
-            _ = [ax.plot(c[:,ix],c[:,iy],c=_c,lw=linewidth, alpha = alpha) for c,_c in zip(coords_n,colors_n)]
-
+            _ = [ax.plot(c[:,ix],c[:,iy],c=_c,**bond_kws) for c,_c in zip(coords_n,colors_n)]
+    
     if not plane:
-        ax.scatter(coords[:,0],coords[:,1],coords[:,2],c = colors ,s =sizes,depthshade=False,alpha=alpha)
-        if label_kwargs:
+        site_kws = dict(alpha = 0.7, depthshade = False) | site_kws # site_kws overrides alpha only
+        ax.scatter(coords[:,0],coords[:,1],coords[:,2],c = colors ,s = sizes,**site_kws)
+        if fmt_label:
             for i,coord in enumerate(coords):
-                ax.text(*coord,labels[i],**label_kwargs)
+                lab, textkws = fmt_label(labels[i]), {}
+                if isinstance(lab, (list,tuple)):
+                    lab, textkws = lab
+                ax.text(*coord,lab,**textkws)
         # Set aspect to same as data.
         ax.set_box_aspect(np.ptp(bz_data.vertices,axis=0))
                 
     elif plane in 'xyzxzyx':
+        site_kws = dict(alpha = 0.7, zorder = 3) | site_kws 
         iz, = [i for i in range(3) if i not in (ix,iy)]
         zorder = coords[:,iz].argsort()
         if plane in 'yxzy': # Left handed
             zorder = zorder[::-1]
-        ax.scatter(coords[zorder][:,ix],coords[zorder][:,iy],c = colors[zorder] ,s =sizes[zorder],zorder=3, alpha= alpha)
+        ax.scatter(coords[zorder][:,ix],coords[zorder][:,iy],c = colors[zorder] ,s =sizes[zorder],**site_kws)
         
-        if label_kwargs:
+        if fmt_label:
             labels = [labels[i] for i in zorder] # Reorder labels
             for i,coord in enumerate(coords[zorder]):
-                ax.text(*coord[[ix,iy]],labels[i],**label_kwargs)
+                lab, textkws = fmt_label(labels[i]), {}
+                if isinstance(lab, (list,tuple)):
+                    lab, textkws = lab
+                ax.text(*coord[[ix,iy]],lab,**textkws)
         
         # Set aspect to display real shape.
         ax.set_aspect(1)
 
     ax.set_axis_off()
-    sp.add_legend(ax)
+    if showlegend:
+        sp.add_legend(ax)
     return ax
 
 # Cell
-def join_poscars(poscar1,poscar2,direction='c',tol=1e-2, system = None):
-    """Joins two POSCARs in a given direction. In-plane lattice parameters are kept from `poscar1` and basis of `poscar2` parallel to `direction` is modified while volume is kept same.
-    Args:
-        - poscar1, poscar2:  Base and secondary POSCARs respectivly. Output of `export_poscar` or similar object from other functions.
-        - direction: The joining direction. It is general and can join in any direction along basis. Expect one of ['a','b','c'].
-        - tol: Default is 0.01. It is used to bring sites near 1 to near zero in order to complete sites in plane. Vasp relaxation could move a point, say at 0.00100 to 0.99800 which is not useful while merging sites.
-        - system: If system is given, it is written on top of file. Otherwise, it is infered from atomic species.
+def join_poscars(poscar_data,other,direction='c',tol=1e-2, system = None):
+    """Joins two POSCARs in a given direction. In-plane lattice parameters are kept from first poscar and out of plane basis vector of other is modified while volume is kept same.
+    
+    Parameters
+    ----------
+    poscar_data :  Base POSCAR. Output of `export_poscar` or similar object from other functions.
+    other : Other POSCAR to be joined with this POSCAR.
+    direction : The joining direction. It is general and can join in any direction along basis. Expect one of ['a','b','c'].
+    tol : Default is 0.01. It is used to bring sites near 1 to near zero in order to complete sites in plane. Vasp relaxation could move a point, say at 0.00100 to 0.99800 which is not useful while merging sites.
+    system : If system is given, it is written on top of file. Otherwise, it is infered from atomic species.
     """
-    _poscar1 = _fix_sites(poscar1,tol = tol,eqv_sites = False)
-    _poscar2 = _fix_sites(poscar2,tol = tol,eqv_sites = False)
+    _poscar1 = _fix_sites(poscar_data,tol = tol,eqv_sites = False)
+    _poscar2 = _fix_sites(other,tol = tol,eqv_sites = False)
     pos1 = _poscar1.positions.copy()
     pos2 = _poscar2.positions.copy()
 
@@ -1790,22 +1822,25 @@ def convert_poscar(poscar_data, atoms_mapping, basis_factor):
 
     return serializer.PoscarData(poscar_data) # Return new POSCAR
 
-def get_transform_matrix(poscar_data, target_basis):
-    "Returns a transformation matrix that gives `target_bsis` when applied on basis of current lattice. Useful in transforming crystal structure."
-    return np.matmul(target_basis, np.linalg.inv(poscar_data.basis)).round(16)
+def get_TM(basis1, basis2):
+    """Returns a transformation matrix that gives `basis2` when applied on `basis1`.
+    basis are 3x3 matrices with basis vectors as rows like [[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]].
+    
+    ```python
+    TM = get_TM(basis1, basis2)
+    assert np.allclose(basis2, TM @ basis1)
+    Q = P @ TM.T # Transform points from P in basis1 to Q in basis2
+    # Both P and Q are N x D matrices where N is number of points and D is dimension of space
+    ```
+    """
+    return to_basis(basis2, basis1) # basis1 in basis2 is simply the transformation matrix
 
 def transform_poscar(poscar_data, transformation, zoom = 2, tol = 1e-2):
     """Transform a POSCAR with a given transformation matrix or function that takes old basis and return target basis.
-    Use `get_transform_matrix` to get transformation matrix from one basis to another or function to return new basis of your choice.
+    Use `get_TM(basis1, basis2)` to get transformation matrix from one basis to another or function to return new basis of your choice.
     An example of transformation function is `lambda a,b,c: a + b, a-b, c` which will give a new basis with a+b, a-b, c as basis vectors.
     
     You may find errors due to missing atoms in the new basis, use `zoom` to increase the size of given cell to include any possible site in new cell.
-    
-    These two calls are equivalent:
-    ```python
-    transform_poscar(poscar_data, get_transform_matrix(poscar_data, target_basis))
-    transform_poscar(poscar_data, lambda a,b,c: target_basis)
-    ```
     
     Examples:
     - FCC primitive -> 111 hexagonal cell  
@@ -1828,7 +1863,7 @@ def transform_poscar(poscar_data, transformation, zoom = 2, tol = 1e-2):
         verts = get_bz(np.linalg.inv(basis).T,primitive = True).vertices
         return verts - np.mean(verts, axis = 0) # Center around origin, otherwise it never going to be inside convex hull
     
-    TM = get_transform_matrix(poscar_data, new_basis) # Transformation matrix to save before scaling
+    TM = get_TM(poscar_data.basis, new_basis) # Transformation matrix to save before scaling
     old_numbers = [len(v) for v in poscar_data.types.to_dict().values()]
     chull = ConvexHull(np.max([zoom,2])*get_cell_vertices(new_basis)) # Convex hull of new cell, make it at least two times to avoid losing sites because of translation
     
@@ -1936,7 +1971,7 @@ def add_atoms(poscar_data, name, positions):
     return serializer.PoscarData(data) # Return new POSCAR
 
 def strain_poscar(poscar_data, strain_matrix):
-    "Strain a POSCAR by a given 3x3 `strain_matrix` to be multiplied with basis and return a new POSCAR."
+    "Strain a POSCAR by a given 3x3 `strain_matrix` to be multiplied with basis (elementwise) and return a new POSCAR."
     if not isinstance(strain_matrix,np.ndarray):
         strain_matrix = np.array(strain_matrix)
         
@@ -1944,7 +1979,7 @@ def strain_poscar(poscar_data, strain_matrix):
         raise ValueError('`strain_matrix` must be a 3x3 matrix to multiply with basis.')
     
     poscar_data = poscar_data.to_dict() #
-    poscar_data['basis'] = poscar_data['basis'].dot(strain_matrix) # Multiply basis with strain matrix
+    poscar_data['basis'] = poscar_data['basis'] * strain_matrix# Update basis by elemetwise multiplication
     poscar_data['metadata']['comment'] = f'{poscar_data["metadata"]["comment"]} + Strained POSCAR' # Update comment
     return serializer.PoscarData(poscar_data) # Return new POSCAR
 
@@ -1955,8 +1990,6 @@ def view_poscar(poscar_data, **kwargs):
         ax.view_init(elev = elev, azim = azim, roll = roll)
         
     return interactive(view, elev = (0,180), azim = (0,360), roll=(0,360))
-    
-    
     
         
     

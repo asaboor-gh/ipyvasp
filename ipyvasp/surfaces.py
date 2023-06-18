@@ -353,7 +353,7 @@ class SpinDataFrame(pd.DataFrame):
             - norm: normalization factor for size of arrows.
             - marker: marker to use for scatter, use s as another argument to change size.
             - ax: matplotlib 3d axes to plot on (defaults to auto create one).
-            - quiver_kws: these are passed to ipyvasp.fancy_quiver3d.
+            - quiver_kws: these are passed to ipyvasp.quiver3d.
             - shift: A number or a list of three numbers that will be added to kpoints before any other operation.
 
         **kwargs are passed to matplotlib.pyplot.scatter.
@@ -396,9 +396,9 @@ class SpinDataFrame(pd.DataFrame):
                 quiver_kws['C'] = plt.get_cmap(cmap)(array)
 
             if 'cmap' in quiver_kws:
-                quiver_kws.pop('cmap') # It is not in fancy_quiver3d
+                quiver_kws.pop('cmap') # It is not in quiver3d
 
-            api.fancy_quiver3d(*kxyz[::every].T[kij],*(norm*arrows_data[::every].T[:3]), **quiver_kws,ax=ax)
+            api.quiver3d(*kxyz[::every].T[kij],*(norm*arrows_data[::every].T[:3]), **quiver_kws,ax=ax)
 
         else:
             _C = self[args[-1]] # Most righht arg is color mapped

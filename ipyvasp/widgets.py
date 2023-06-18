@@ -25,6 +25,7 @@ from . import iplots as ip
 from . import splots as sp
 from . import sio
 from . import serializer
+from .utils import _sig_kwargs, _sub_doc
 
 
 def summarize(files, func, **kwargs):
@@ -822,33 +823,31 @@ class KpathWidget(VBox):
             self._sm.options = [(v.split('⋮')[0].strip() + lab,idx) for (v,idx), lab in zip(self._sm.options, labs)]
         
             self._update_selection() # Update plot in both cases, by click or manual input
-        
-    def get_kpath(self,n = 5,weight = None,ibzkpt = None,outfile = None):
-        "See Docs of ipyvasp.POSCAR.get_kpath for details."
-        kws = {k:v for k,v in locals().items() if k != 'self'}
-        return self.poscar.get_kpath(self.get_kpoints(),**kws)
+    
+    @_sub_doc(sio.get_kpath, 'kpoints :')
+    @_sig_kwargs(sio.get_kpath, ('kpoints',))
+    def get_kpath(self,n = 5,**kwargs):
+        return self.poscar.get_kpath(self.get_kpoints(),n = n, **kwargs)
 
-    def splot(self,plane = None, text_kws = {}, plot_kws ={}, **kwargs):
+    def splot(self, plane = None, fmt_label = lambda x: x, plot_kws = {}, **kwargs):
         """
         Same as `ipyvasp.POSCAR.splot_bz` except it also plots path on BZ.
 
         Parameters
         ----------
-        text_kws : dict of keyword arguments for `plt.text`
-        plot_kws : dict of keyword arguments for `plt.plot`
+        plane : str of plane like 'xy' to plot in 2D or None to plot in 3D
+        fmt_label : function, should take a string and return a string or (str, dict) of which dict is passed to `plt.text`.
+        plot_kws : dict of keyword arguments for `plt.plot` for kpath.
         
-        kwargs are passed to `ipyvasp.POSCAR.splot_bz`
+        kwargs are passed to `ipyvasp.POSCAR.splot_bz`.
         """
+        if not isinstance(plot_kws, dict):
+            raise TypeError('plot_ks should be a dict')
+        
         ax = self.poscar.splot_bz(plane = plane, **kwargs)
+        kpoints = self.poscar.to_basis(coords, reciprocal = True)
         coords,labels = self.get_coords_labels()
-        if plane is not None and plane in 'xyzxzyx':
-            ind = 'xyzxzyx'.index(plane)
-            arr = [0,1,2,0,2,1,0]
-            ix,iy = arr[ind],arr[ind+1]
-            coords = coords[:,[ix,iy]]
-        if coords.any(): #To avoid errors if not coords
-            ax.plot(*coords.T,'-o',**plot_kws)
-            _ = [ax.text(*vs,lab, **text_kws) for vs,lab in zip(coords,labels) if lab!='NaN']
+        self.poscar.splot_kpath(kpoints,labels = labels, fmt_label = fmt_label, **plot_kws) # plots on ax automatically
         return ax
     
     def iplot(self):

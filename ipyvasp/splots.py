@@ -368,10 +368,10 @@ def splot_bands(K, E, ax = None, elim = None, kticks = None, interp = None, **kw
                 xlim = [min(K),max(K)], ylim = elim, vlines = True,top=True, right=True)
     return ax
 
-def add_legend(ax=None,colors=[],labels=[],styles='solid',\
+def add_legend(ax = None, colors = [],labels = [],styles='solid',\
                 widths=0.7,anchor=(0,1), ncol=3,loc='lower left',fontsize='small',frameon=False,**kwargs):
     """
-    - Adds custom legeneds on a given axes,returns None.
+    - Adds custom legeneds on a given axes, returns None.
     Args:
         - ax       : Matplotlib axes.
         - colors   : List of colors.
@@ -382,7 +382,7 @@ def add_legend(ax=None,colors=[],labels=[],styles='solid',\
     kwargs are passed to plt.legend. Given arguments like anchor,ncol etc are preferred.
     """
     kwargs.update(dict(bbox_to_anchor=anchor,ncol=ncol,loc=loc,fontsize=fontsize,frameon=frameon))
-    if ax==None:
+    if ax == None:
         raise ValueError("Matplotlib axes (ax) is not given.")
     else:
         if type(widths)==float or type(widths)==int:
@@ -934,7 +934,7 @@ def splot_color_lines(K, E, pros, labels,
     
     if showlegend:
         # Default values for legend_kwargs are overwritten by **kwargs
-        legend_kwargs = {'ncol': 4, 'anchor': (0, 1.05), 'handletextpad': 0.5, 'handlelength': 1,'fontsize': 'small', 'frameon': False, **kwargs}
+        legend_kws = {'ncol': 4, 'anchor': (0, 1.05), 'handletextpad': 0.5, 'handlelength': 1,'fontsize': 'small', 'frameon': False, **kwargs}
         add_legend(ax=axes[0],colors = colors,labels = labels,widths = maxwidth, **legend_kwargs)
         
     else:
@@ -988,11 +988,7 @@ def splot_dos_lines(energy, dos_arrays, labels,
     stack = False,
     interp = None,
     showlegend = True,
-    legend_kwargs = {
-        'ncol': 4, 'anchor': (0, 1.0),
-        'handletextpad' : 0.5,'handlelength' : 1,
-        'fontsize' : 'small','frameon' : False
-    },
+    legend_kws = {'ncol': 4, 'anchor': (0, 1.0),},
     **kwargs):
     """
     Plot density of states (DOS) lines.
@@ -1011,7 +1007,7 @@ def splot_dos_lines(energy, dos_arrays, labels,
     stack : bool, default False, if True, stack the DOS lines. Only works for horizontal plots.
     interp : int or list/tuple of (n,k), default None, if given, interpolate the DOS lines using spline.
     showlegend : bool, default True, if True, show legend.
-    legend_kwargs : dict, default {'ncol': 4, 'anchor': (0, 1.0), 'handletextpad' : 0.5,'handlelength' : 1,'fontsize' : 'small','frameon' : False}, only used if showlegend is True.
+    legend_kws : dict, default is just hint, anything that `ipyvasp.add_legend` accepts can be passed, only used if showlegend is True.
     
     keyword arguments are passed to matplotlib.axes.Axes.plot or matplotlib.axes.Axes.fill_between or matplotlib.axes.Axes.fill_betweenx.
     
@@ -1048,7 +1044,9 @@ def splot_dos_lines(energy, dos_arrays, labels,
                 ax.plot(energy, arr, label = label, color = color, **kwargs)
         
     if showlegend:
-        add_legend(ax, **legend_kwargs) # Labels are picked from plot
+        kwargs = {'ncol': 4, 'anchor': (0, 1.0),'handletextpad' : 0.5,'handlelength' : 1,
+        'fontsize' : 'small','frameon' : False, **legend_kws}
+        add_legend(ax, **kwargs) # Labels are picked from plot
     
     args = dict(ylim = elim or []) if vertical else dict(xlim = elim or [])
     xlabel, ylabel = 'Energy (eV)', 'DOS'
@@ -1184,7 +1182,7 @@ def plot_potential(
         - lr_pos: Locations around which averages are taken.Default (0.25,0.75). Provide in fraction between 0 and 1. Center of period is located at these given fractions. Work only if period is given.
         - interface: Default is 0.5 if not given, you may have slabs which have different lengths on left and right side. Provide in fraction between 0 and 1 where slab is divided in left and right halves.
         - smoothness: Default is 3. Large value will smooth the curve of potential. Only works if period is given.
-        - labels: List of three labels for legend. Use plt.legend() or pp.add_legend() for labels to appear. First entry is data plot, second is its convolution and third is complete average.
+        - labels: List of three labels for legend. Use plt.legend() or ipv.add_legend() for labels to appear. First entry is data plot, second is its convolution and third is complete average.
         - colors: List of three colors for lines.
         - annotate: True by default, writes difference of right and left averages on plot.
     """

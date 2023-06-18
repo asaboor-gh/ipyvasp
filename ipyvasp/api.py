@@ -20,23 +20,7 @@ from . import widgets as wdg
 from . import utils as gu
 from . import serializer
 from . import surfaces as srf
-
-
-def _sub_doc(from_func,skip_param = None, replace = {}):
-    """Assing __doc__ from other function. Replace words in docs where need."""
-    def wrapper(func):
-        docs = from_func.__doc__.splitlines()
-        if isinstance(skip_param, (list, tuple)):
-            for param in skip_param:
-                docs = [line for line in docs if param not in line]
-        elif isinstance(skip_param, str):
-            docs = [line for line in docs if skip_param not in line]
-        docs = '\n'.join(docs)
-        for k,v in replace.items():
-            docs = docs.replace(k,v)
-        func.__doc__ = docs
-        return func
-    return wrapper
+from .utils import _sig_kwargs, _sub_doc
 
 
 def download_structure(formula, mp_id=None, max_sites=None,min_sites=None, api_key=None,save_key = False):
@@ -67,9 +51,10 @@ _memebers = (
     gu.set_dir,
     gu.list_files,
     gu.transform_color,
+    gu.create_colormap,
     gu.interpolate_data,
     sio.get_kpath,
-    sio.fancy_quiver3d,
+    sio.quiver3d,
     sio.rotation,
     sio.to_basis,
     sio.to_R3,
@@ -103,17 +88,16 @@ __all__ = [*[_m.__name__ for _m in _memebers],*[a for a in __all__ if a != '__al
 for _m in _memebers:
     locals()[_m.__name__] = _m # Assign to local namespace that can be exported, classes only have __name__, not name
 
-@_sub_doc(vp.gen2numpy,skip_param= 'gen :', replace= {'shape :':'path : Path to file containing data.\nshape :'})
-def parse_text(path, shape, slices, raw:bool = False, dtype = float, delimiter = '\s+', include:str = None,exclude:str = '#',fix_format:bool = True):
-    kwargs = {k:v for k,v in locals().items() if k not in ['path']}
-    
+@_sig_kwargs(vp.gen2numpy,skip_params = ('gen',))
+@_sub_doc(vp.gen2numpy,'gen :', replace= {'shape :':'path : Path to file containing data.\nshape :'})
+def parse_text(path, shape, slice, **kwargs):
     p = Path(path)
     if not p.is_file():
         raise FileNotFoundError(f"File {path!r} does not exists")
 
     with p.open('r', encoding='utf-8') as f:
         gen = islice(f, 0, None)
-        data = vp.gen2numpy(gen, **kwargs) # should be under open file context
+        data = vp.gen2numpy(gen, shape, slice, **kwargs) # should be under open file context
     return data
 
 
@@ -160,14 +144,39 @@ class POSCAR:
     @property
     def path(self): return self._path
     
-    @_sub_doc(sio.view_poscar)
-    def view(self, **kwargs):
-        return sio.view_poscar(self.data, **kwargs)
+    def to_ase(self):
+        """Convert to ase.Atoms format. You need to have ase installed.
+        You can apply all ase methods on this object after conversion.
+        
+        Example
+        -------
+        ```python
+        from ase.visualize import view
+        structure = poscar.to_ase()
+        view(structure) # POSCAR.view() also uses this method if viewer is given.
+        reciprocal_lattice = structure.cell.get_bravais_lattice()
+        reciprocal_lattice.plt_bz() # Plot BZ usinn ase, it also plots suggested band path.
+        ```
+        """
+        from ase import Atoms
+        symbols = [lab.split()[0] for lab in self.data.labels] # Remove numbers from labels
+        return Atoms(symbols = symbols, positions = self.data.positions,cell = self.data.basis)
+    
+    def view(self, viewer = None, **kwargs):
+        """View POSCAR in notebook. If viewer is given it will be passed ase.visualize.view. You need to have ase installed.
+        
+        kwargs are passed to self.splot_lattice if viewer is None, otherwise a  single keyword argument `data` is passed to ase viewer.
+        data should be volumetric data for ase.visualize.view, such as charge density, spin density, etc.
+        """
+        if viewer is None:
+            return sio.view_poscar(self.data, **kwargs)
+        else:
+            from ase.visualize import view
+            return view(self.to_ase(), viewer = viewer, data = kwargs.get('data',None))
     
     def view_kpath(self):
         "Initialize a KpathWidget instance to view kpath for current POSCAR, and you can select others too."
-        from .widgets import KpathWidget
-        return KpathWidget(self.data, path = str(self.path.parent), glob = self.path.name)
+        return wdg.KpathWidget(path = str(self.path.parent), glob = self.path.name)
 
     @classmethod
     def from_file(cls,path):
@@ -264,122 +273,123 @@ class POSCAR:
         return self._cell
 
     @_sub_doc(sio.get_bz,'path_pos :')
-    def get_bz(self, loop = True, primitive = False):
-        self._bz = sio.get_bz(path_pos = self._data.basis, loop=loop, primitive=primitive)
-        self._primitive = primitive
+    @_sig_kwargs(sio.get_bz,('path_pos',))
+    def get_bz(self, **kwargs):
+        self._bz = sio.get_bz(path_pos = self._data.basis, **kwargs)
+        self._primitive = kwargs.get('primitive',False)
         return self._bz
 
-    def set_bz(self,primitive = False,loop = True):
-        """Set BZ in primitive or regular shape. returns None, just set self.bz"""
-        self.get_bz(primitive=primitive,loop=loop)
+    @_sig_kwargs(sio.get_bz,('path_pos',))
+    def set_bz(self,**kwargs):
+        """Set BZ in primitive or regular shape. returns None, just set self.bz, Useful in switching between primitive and regular BZ during plotting."""
+        self.get_bz(**kwargs)
 
-    def get_cell(self, loop=True):
+    def get_cell(self, loop = True):
         "See docs of `get_bz`, same except space is inverted and no factor of 2pi."
-        self._cell = serializer.CellData(sio.get_bz(path_pos=self._data.rec_basis,loop=loop, primitive=True).to_dict()) # cell must be primitive
+        self._cell = serializer.CellData(sio.get_bz(path_pos = self._data.rec_basis,loop = loop, primitive = True).to_dict()) # cell must be primitive
         return self._cell
 
     @_sub_doc(sio.splot_bz,'bz_data :')
-    def splot_bz(self, plane=None, ax=None, color='blue', fill=True, vectors = (0,1,2), colormap=None, shade = True, alpha=0.4):
+    @_sig_kwargs(sio.splot_bz,('bz_data',))
+    def splot_bz(self, plane = None, **kwargs):
         self._plane = plane # Set plane for splot_kpath
-        new_ax = sio.splot_bz(bz_data = self._bz, ax=ax, plane=plane, color=color, fill=fill, vectors=vectors, colormap=colormap, shade = shade, alpha=alpha)
+        new_ax = sio.splot_bz(bz_data = self._bz, plane = plane, **kwargs)
         self._ax = new_ax # Set ax for splot_kpath
         return new_ax
 
-    def splot_kpath(self,orderby = (1,1,1), knn_inds = None, labels = None, plot_kwargs = dict(color = 'blue',linewidth=0.8,marker='.',markersize=10), **label_kwargs):
+    def splot_kpath(self, kpoints, labels = None, fmt_label = lambda x: (x, {'color': 'blue'}), **kwargs):
         """
         Plot k-path over existing BZ.
         
         Parameters
         ----------
-        orderby : point relative to which k-points are ordered in fractional coordinates. e.g. (1,1,1) will order k-points by distance from (1,1,1) in fractional coordinates.
-        knn_inds : list of indices of k nearest points e.g. [2,3,1] will trace path linking as 2-3-1. Points are taken internally from BZ, by using `self.bz.get_special_points`.
+        kpoints : list of k-points in fractional coordinates. e.g. [(0,0,0),(0.5,0.5,0.5),(1,1,1)] in order of path.
         labels : list of labels for each k-point in same order as `knn_inds`.
-        plot_kwargs: passed to `plt.plot` with some defaults.
+        fmt_label : function, takes a label from labels and should return a string or (str, dict) of which dict is passed to `plt.text`.
+        
+        kwargs are passed to `plt.plot` with some defaults.
 
-        label_kwargs are passed to `plt.text` to modify appearance of labels.
+        You can get `kpoints = POSCAR.get_bz().specials.masked(lambda x,y,z : (-0.1 < z 0.1) & (x >= 0) & (y >= 0))` to get k-points in positive xy plane.
+        Then you can reorder them by an indexer like `kpoints = kpoints[[0,1,2,0,7,6]]`, note double brackets, and also that point at zero index is taken twice.
 
         > Tip: You can use this function multiple times to plot multiple/broken paths over same BZ.
         """
         if not self._bz or not self._ax:
             raise ValueError("BZ not found, use `splot_bz` first")
-
-        _specials = self._bz.get_special_points(orderby = orderby)
-        nearest = knn_inds
+        
+        if not np.ndim(kpoints) == 2 and np.shape(kpoints)[-1] == 3:
+            raise ValueError("kpoints must be 2D array of shape (N,3)")
 
         ijk = [0,1,2]
         _mapping = {'xy':[0,1],'xz':[0,2],'yz':[1,2],'zx':[2,0],'zy':[2,1],'yx':[1,0]}
         if isinstance(self._plane, str) and self._plane in _mapping:
             ijk = _mapping[self._plane]
 
-        inds =  nearest if nearest else range(len(_specials.kpoints)//2) # if not given, take half of points in positive side 
         if not labels:
-            labels = ["[{0:5.2f}, {1:5.2f}, {2:5.2f}]".format(*_specials.kpoints[i]) for i in inds]
-            if nearest:
-                labels = [f"{n}: {_lab}" for n, _lab in zip(nearest, labels)]
-
-        coords = _specials.coords[inds][:,ijk]
-        if nearest:
-            self._ax.plot(*coords.T,**plot_kwargs)
-        else:
-            self._ax.scatter(*coords.T) # do not mess up path, also plot_kwargs are not passed to scatter as not all work
+            labels = ["[{0:5.2f}, {1:5.2f}, {2:5.2f}]".format(x,y,z) for x,y,z in kpoints]
+            
+        sio._validate_label_func(fmt_label, labels[0])
+            
+        coords = self.to_R3(kpoints, reciprocal = True)[:,ijk]
+        kwargs = dict(color = 'blue',linewidth=0.8,marker='.',markersize=10) | kwargs # need some defaults
+        self._ax.plot(*coords.T,**kwargs)
         
         for c,text in zip(coords, labels):
-            self._ax.text(*c,text,**label_kwargs)
+            lab, textkws = fmt_label(text), {}
+            if isinstance(lab, (list,tuple)):
+                lab, textkws = lab
+            self._ax.text(*c,lab,**textkws)
             
-        
         return self._ax
 
-    def splot_cell(self, plane = None, ax = None,  color='blue', fill=True, vectors = (0,1,2), colormap=None, shade = True, alpha=0.4):
+    @_sig_kwargs(sio.splot_bz,('bz_data',))
+    def splot_cell(self, plane = None, **kwargs):
         "See docs of `splot_bz`, everything is same except space is inverted."
-        return sio.splot_bz(bz_data = self._cell, ax=ax, plane=plane, color=color, fill=fill, vectors=vectors, colormap=colormap, shade = shade, alpha=alpha)
+        return sio.splot_bz(bz_data = self._cell,plane = plane, **kwargs)
 
     @_sub_doc(sio.iplot_bz,'bz_data :')
-    def iplot_bz(self, fill=True, color='rgba(168,204,216,0.4)',  special_kpoints = True, alpha=0.4, ortho3d=True, fig=None):
-        return sio.iplot_bz(bz_data = self._bz, fill=fill, color=color, special_kpoints=special_kpoints, alpha=alpha, ortho3d=ortho3d, fig=fig)
+    @_sig_kwargs(sio.iplot_bz,('bz_data',))
+    def iplot_bz(self, **kwargs):
+        return sio.iplot_bz(bz_data = self._bz, **kwargs)
 
-    def iplot_cell(self, fill=True, color='rgba(168,204,216,0.4)', alpha=0.4, ortho3d=True, fig=None):
+    @_sig_kwargs(sio.iplot_bz,('bz_data','special_kpoints'))
+    def iplot_cell(self, **kwargs):
         "See docs of `iplot_bz`, everything is same except space is iverted."
-        return sio.iplot_bz(bz_data = self._cell, fill=fill, color=color, alpha=alpha, ortho3d=ortho3d, fig=fig)
+        return sio.iplot_bz(bz_data = self._cell, special_kpoints = False, **kwargs)
 
     @_sub_doc(sio.splot_lattice,'poscar_data :')
-    def splot_lattice(self, plane = None, sizes = 50,colors=None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
-        translate = None, linewidth=1, alpha = 0.7, ax = None, mask_sites = None,
-        cell_kwargs = dict(
-            color = ((1,0.5,0,0.4)),colormap = None, fill = False,alpha = 0.4,
-            vectors = (0,1,2), shade = True
-        ),
-        label_kwargs = None
-        ):
-        kwargs = {k:v for k,v in locals().items() if k != 'self'} # should be at top line
-        return sio.splot_lattice(self._data, **kwargs)
+    @_sig_kwargs(sio.splot_lattice, ('poscar_data','plane'))
+    def splot_lattice(self, plane = None, **kwargs):
+        return sio.splot_lattice(self._data, plane = plane, **kwargs)
     
     @_sub_doc(sio.iplot_lattice,'poscar_data :')
-    def iplot_lattice(self, sizes = 10, colors = None, bond_length = None,tol = 1e-2,bond_tol = 1e-3,eqv_sites = True,
-              translate = None, linewidth = 4, fig = None, ortho3d = True, mask_sites = None,
-              cell_kwargs = dict(color='black', fill = False,alpha = 0.4)
-        ):
-        kwargs = {k:v for k,v in locals().items() if k != 'self'} # should be at top line
+    @_sig_kwargs(sio.iplot_lattice, ('poscar_data',))
+    def iplot_lattice(self, **kwargs):
         return sio.iplot_lattice(self._data, **kwargs)
 
-    def write(self, outfile=None, overwrite=False):
-        "Write POSCAR data to file."
-        return sio.write_poscar(self._data, outfile=outfile, selective_dynamics= self._sd, overwrite=overwrite)
+    @_sub_doc(sio.write_poscar,'poscar_data :')
+    @_sig_kwargs(sio.write_poscar, ('poscar_data',))
+    def write(self, outfile = None, **kwargs):
+        return sio.write_poscar(self._data, outfile = outfile, **kwargs)
 
-    @_sub_doc(sio.join_poscars,'- poscar1',replace={'poscar2':'other'})
-    def join(self,other, direction='c', tol=0.01, system = None):
-        return self.__class__(data = sio.join_poscars(poscar1=self._data, poscar2=other.data, direction=direction, tol=tol,system = system))
+    @_sub_doc(sio.join_poscars,'poscar_data :')
+    @_sig_kwargs(sio.join_poscars, ('poscar_data','other'))
+    def join(self,other, direction = 'c', **kwargs):
+        return self.__class__(data = sio.join_poscars(poscar_data = self._data, other = other.data, direction = direction,**kwargs))
 
     @_sub_doc(sio.scale_poscar,'- poscar_data')
-    def scale(self, scale=(1, 1, 1), tol=0.01):
-        return self.__class__(data = sio.scale_poscar(self._data, scale=scale, tol=tol))
+    @_sig_kwargs(sio.scale_poscar, ('poscar_data',))
+    def scale(self, scale = (1,1,1), **kwargs):
+        return self.__class__(data = sio.scale_poscar(self._data, scale, **kwargs))
 
     @_sub_doc(sio.rotate_poscar,'- poscar_data')
-    def rotate(self,angle_deg,axis_vec):
-        return self.__class__(data = sio.rotate_poscar(self._data, angle_deg = angle_deg, axis_vec=axis_vec))
+    def rotate(self,angle_deg, axis_vec):
+        return self.__class__(data = sio.rotate_poscar(self._data, angle_deg = angle_deg, axis_vec = axis_vec)) 
 
     @_sub_doc(sio.set_zdir,'- poscar_data')
-    def set_zdir(self, hkl, to_x = None):
-        return self.__class__(data = sio.set_zdir(self._data, hkl, to_x = to_x))
+    @_sig_kwargs(sio.set_zdir, ('poscar_data','hkl'))
+    def set_zdir(self, hkl, **kwargs):
+        return self.__class__(data = sio.set_zdir(self._data, hkl, **kwargs))
     
     @_sub_doc(sio.translate_poscar,'- poscar_data')
     def translate(self, offset):
@@ -393,31 +403,11 @@ class POSCAR:
     def mirror(self, direction):
         return self.__class__(data = sio.mirror_poscar(self._data, direction=direction))
 
-    @_sub_doc(sio.get_transform_matrix,'- poscar_data')
-    def get_transform_matrix(self, target_basis):
-        return sio.get_transform_matrix(self._data, target_basis)
-
+    @_sub_doc(sio.get_TM,'- poscar_data')
+    def get_TM(self, target_basis):
+        return sio.get_TM(self._data.basis, target_basis)
+    @_sub_doc(sio.transform_poscar)
     def transform(self, transformation, zoom = 2, tol = 1e-2):
-        """Transform a POSCAR with a given transformation matrix or function that takes old basis and return target basis.
-        Use `get_transform_matrix` to get transformation matrix from one basis to another or function to return new basis of your choice.
-        An example of transformation function is `lambda a,b,c: a + b, a-b, c` which will give a new basis with a+b, a-b, c as basis vectors.
-
-        You may find errors due to missing atoms in the new basis, use `zoom` to increase the size of given cell to include any possible site in new cell.
-    
-        These two calls are equivalent:
-        ```python
-        self.transform(self.get_transform_matrix(target_basis))
-        self.transform(lambda a,b,c: target_basis)
-        ```
-        
-        Examples:
-        - FCC primitive -> 111 hexagonal cell  
-            lambda a,b,c: (a-c,b-c,a+b+c) ~ [[1,0,-1],[0,1,-1],[1,1,1]]
-        - FCC primitive --> FCC unit cell 
-            lambda a,b,c: (b+c -a,a+c-b,a+b-c) ~ [[-1,1,1],[1,-1,1],[1,1,-1]]
-        - FCC unit cell --> 110 tetragonal cell
-            lambda a,b,c: (a-b,a+b,c) ~ [[1,-1,0],[1,1,0],[0,0,1]]
-        """
         return self.__class__(data = sio.transform_poscar(self._data, transformation, zoom = zoom, tol=tol))
 
     @_sub_doc(sio.transpose_poscar,'- poscar_data')
@@ -440,56 +430,15 @@ class POSCAR:
     def strain(self, strain_matrix):
         return self.__class__(data = sio.strain_poscar(self._data, strain_matrix = strain_matrix))
     
-    def add_selective_dynamics(self, a = None, b = None, c = None, show_plot = True):
-        """Returns selective dynamics included POSCAR if input is given. By default, if a direction is not given, it turns ON with others.
-        Args:
-            - a, b, c: Arrays of shape (N,2) that contain ranges in fractional coordinates to turn selective dynamics on.
-            - show_plot: Plots the selective dynamics included sites in fractional orthogonal space to have an idea quickly.
-
-        - **Usage**
-            - `add_selective_dynamics(a = [(0,0.1),(0.9,1)])` will turn selective dynamics on for the first and last 10% of the unit cell in a-direction as T T T.
-            - `add_selective_dynamics(a = [(0,0.1),(0.9,1)], b = [(0,0.1),(0.9,1)])` will turn selective dynamics on for the first and last 10% of the unit cell in ab-plane in form of T T T, F T T and T F T whichever applies.
-
-        > Returns POSCAR with selective dynamics included. You can write it to file or send to clipboard, but any other transformation will result in loss of selective dynamics information.
-        """
-        if (a is None) and (b is None) and (c is None):
-            return print ('No selective dynamics added. Please provide any of a, b, c to fix sites.')
-
-        sd_poscar = self.__class__(data = self._data) # Create new, don't change original
-        sd_poscar._sd = sio.get_selective_dynamics(sd_poscar.data, a = a, b = b, c = c)
-
-        if show_plot:
-            import matplotlib.pyplot as plt
-            ax1,ax2,ax3 = sp.get_axes((8,3),ncols=3)
-            _sel = [i for i,_s in enumerate(sd_poscar._sd) if 'T' in _s]
-            _sel_text = [_a.split() for _a in sd_poscar._sd[_sel]]
-            _xy = [_sel[i] for i, _s in enumerate(_sel_text) if (_s[0] == 'T' and _s[1] == 'T')]
-            _yz = [_sel[i] for i, _s in enumerate(_sel_text) if (_s[1] == 'T' and _s[2] == 'T')]
-            _zx = [_sel[i] for i, _s in enumerate(_sel_text) if (_s[2] == 'T' and _s[0] == 'T')]
-
-            ax1.scatter(*sd_poscar.data.positions[_xy][:,[0,1]].T,marker='.')
-            ax2.scatter(*sd_poscar.data.positions[_xy][:,[1,2]].T,marker='.')
-            ax3.scatter(*sd_poscar.data.positions[_xy][:,[2,0]].T,marker='.')
-
-            for ax, lx,ly in zip([ax1,ax2,ax3],['a','b','c'],['b','c','a']):
-                ax.set_xlabel(lx)
-                ax.set_ylabel(ly)
-                ax.set_xlim([-0.01,1.01]) # For view in place
-                ax.set_ylim([-0.01,1.01])
-
-            ax1.get_figure().suptitle('Selective dynamics included sites in fractional coordinates')
-            plt.tight_layout()
-            plt.show() # From scripts it should pop up automatically
-
-        return sd_poscar
-
     @_sub_doc(sio.get_kmesh,'- poscar_data')
-    def get_kmesh(self, *args, shift = 0, weight=None, cartesian = False, ibzkpt=None, outfile=None,endpoint = True):
-        return sio.get_kmesh(self.data, *args, shift = shift, weight = weight, cartesian = cartesian,ibzkpt= ibzkpt, outfile=outfile, endpoint = endpoint)
+    @_sig_kwargs(sio.get_kmesh, ('poscar_data',))
+    def get_kmesh(self, *args, **kwargs):
+        return sio.get_kmesh(self.data, *args, **kwargs)
 
     @_sub_doc(sio.get_kpath,'- rec_basis')
-    def get_kpath(self,kpoints, n = 5,weight= None ,ibzkpt = None,outfile=None):
-        return sio.get_kpath(kpoints, n = n, weight= weight ,ibzkpt = ibzkpt,outfile=outfile, rec_basis = self.data.rec_basis)
+    @_sig_kwargs(sio.get_kpath, ('rec_basis',))
+    def get_kpath(self,kpoints, n = 5, **kwargs):
+        return sio.get_kpath(kpoints, n = n, **kwargs, rec_basis = self.data.rec_basis)
 
 
     def bring_in_cell(self,points):
@@ -498,7 +447,6 @@ class POSCAR:
         # Cartesain POSCAR is also loaded as relative to basis in memeory, so both same
         return self.to_R3(points, reciprocal = False)
 
-    @_sub_doc(sio.kpoints2bz,'- bz_data')
     def bring_in_bz(self,kpoints, shift = 0):
         """Brings kpoints inside already set BZ, (primitive or regular).
         If basis is not None, returns kpoints relative to those basis.
@@ -509,14 +457,14 @@ class POSCAR:
         return sio.kpoints2bz(self._bz, kpoints = kpoints,primitive = self._primitive, shift = shift)
     
     def to_R3(self, points, reciprocal = False):
-        "Converts points to R3 coordinates. If reciprocal is True, converts to R3 in reciprocal basis."
+        "Converts points relative to basis/rec_basis of POSCAR to R3 coordinates. If reciprocal is True, converts to R3 in reciprocal basis."
         points = np.array(points) # In case list of lists
         if reciprocal:
             return sio.to_R3(self.data.rec_basis, points)
         return sio.to_R3(self.data.basis, points)
     
     def to_basis(self, coords, reciprocal = False):
-        "Converts coords to fractional points. If reciprocal is True, converts to fractional in reciprocal basis."
+        "Converts coords to fractional points in basis/rec_basis of POSCAR. If reciprocal is True, converts to fractional in reciprocal basis."
         coords = np.array(coords) # In case list of lists
         if reciprocal:
             return sio.to_basis(self.data.rec_basis, coords)
@@ -573,13 +521,9 @@ class LOCPOT:
         return self._data
 
     @_sub_doc(sp.plot_potential,'- values')
-    def splot(self,operation='mean_c',ax=None,period=None, period_right=None,
-                 lr_pos=(0.25,0.75),interface=None, smoothness=2,
-                 labels=(r'$V(z)$',r'$\langle V \rangle _{roll}(z)$',r'$\langle V \rangle $'),
-                 colors = ((0,0.2,0.7),'b','r'),annotate=True):
-        return sp.plot_potential(basis=self._data.poscar.basis,values=self._data.values,operation=operation,
-                                    ax=ax,period=period,lr_pos=lr_pos,period_right=period_right, smoothness=smoothness,interface=interface,
-                                    labels=labels,colors=colors,annotate=annotate)
+    @_sig_kwargs(sp.plot_potential,('values',))
+    def splot(self, operation = 'mean_c', **kwargs):
+        return sp.plot_potential(basis = self._data.poscar.basis,values = self._data.values, operation = operation, **kwargs)
 
     def view_period(self, operation: str = 'mean_c',interface = 0.5,lr_pos = (0.25,0.75), smoothness = 2, figsize = (5,3),**kwargs):
         """Check periodicity using ipywidgets interactive plot.
@@ -662,12 +606,14 @@ class OUTCAR:
         return self._path
     
     @_sub_doc(vp.Vasprun.read)
-    def read(self, start_match, stop_match, nth_match = 1, skip_last = False):
-        return vp.Vasprun.read(**locals()) # Pass all the arguments to the function
+    @_sig_kwargs(vp.Vasprun.read, ('self',))
+    def read(self, start_match, stop_match, **kwargs):
+        return vp.Vasprun.read(self, start_match, stop_match, **kwargs) # Pass all the arguments to the function
 
-@_sub_doc(sp.get_axes,'- self',replace={'get_axes':'get_axes'})
-def get_axes(figsize=(3.4, 2.6), nrows=1, ncols=1, widths=[], heights=[], axes_off=[], axes_3d=[], sharex=False, sharey=False, azim=45, elev=15, ortho3d=True, **subplots_adjust_kwargs):
-    axes = sp.get_axes(figsize=figsize, nrows=nrows, ncols=ncols, widths=widths, heights=heights, axes_off=axes_off, axes_3d=axes_3d, sharex=sharex, sharey=sharey, azim=azim, elev=elev, ortho3d=ortho3d, **subplots_adjust_kwargs)
+@_sub_doc(sp.get_axes)
+@_sig_kwargs(sp.get_axes)
+def get_axes(figsize = (3.4,2.6), **kwargs):
+    axes = sp.get_axes(figsize, **kwargs)
     for ax in np.array([axes]).flatten():
         for f in [sp.add_text,sp.add_legend,sp.add_colorbar,sp.color_wheel,sp.break_spines,sp.modify_axes,sp.append_axes, sp.join_axes]:
             if ax.name != '3d':
@@ -860,19 +806,33 @@ class Bands(_BandsDosBase):
         evs = [self.data.evals[self._spin][k,e] - self.data.ezero for k,e in zip(kindices, eindices)]
         return np.array([kvs, evs]).T # shape (len(kindices), 2)
         
-    
-    def get_gap_coords(self):
-        """Retruns as array of shape (2,2) with coordinates of band gap ([k1,VBM],[k2,CBM]) from plot. 
-        Use in a plot commnads as `plt.plot(*bands.get_gap_coords().T)`.
-        To get data values of VBM and CBM, use self.data.evc instead.
+    @property
+    def gap(self): # no need for get_here, useful as .gap.coords immediately after a plot
+        """Retruns band gap data with following attributes:
+        
+        coords : array of shape (2, 2) -> (K,E) band gap in coordinates of most recent plot if exists, otherwise in data coordinates. `X,Y = coords.T` for plotting purpose.
+        vbm, cbm : valence and conduction band energies in data coordinates. No shift is applied.
+        kvbm, kcbm : kpoints of vbm and cbm in fractional coordinates. Useful to know which kpoint is at the band gap.
+        
+        These attributes will be None if band gap cannot be found. coords will be empty array of size (0,2) in that case.
         """
         if not self.data:
-            raise ValueError('You must call a plotting function first to get band gap coordinates from plot.')
+            self.get_data() # This assigns back to self._data
         
-        vs = self.get_plot_coords(self.data.kvc, [0,0])
+        if not hasattr(self,'_breaks'): # even if no plot
+            vs = np.array([self.data.kpath[self.data.kvc,], self.data.evc]).T # shape (K,E) -> (2,2)
+        else:
+            vs = self.get_plot_coords(self.data.kvc, [0,0])
+        
+        out = {'coords': vs, 'vbm': None, 'cbm': None, 'gap': None, 'kvbm': None, 'kcbm': None} # will be updated below if vs.size > 0
         if vs.size: # May not exist, but still same shape in plotting with empty arrays
-            vs[:,1] = [v - self.data.ezero for v in self.data.evc]
-        return vs
+            if hasattr(self,'_breaks'): # only shift by ezero if plot exists
+                vs[:,1] = [v - self.data.ezero for v in self.data.evc] 
+            vbm, cbm = self.data.evc
+            kvbm, kcbm = self.data.kpoints[self.data.kvc,]
+            out.update({'coords': vs, 'vbm': vbm, 'cbm': cbm, 'gap': cbm - vbm, 'kvbm': tuple(kvbm), 'kcbm': tuple(kcbm)})
+        
+        return serializer.Dict2Data(out)
                 
     def get_data(self, elim = None, ezero = None, projections: dict = None, kpairs = None):
         """
@@ -937,7 +897,7 @@ class Bands(_BandsDosBase):
             kvbm = [k for k in np.where(output['evals'] == vbm)[1]] # keep as indices here, we don't know the cartesian coordinates of kpoints here
             kcbm = [k for k in np.where(output['evals'] == cbm)[1]]
             kvc = tuple(sorted(product(kvbm,kcbm),key = lambda K: np.ptp(K))) # bring closer points first by sorting
-            output['kvc']  = kvc[0] if kvc else () # Only relative minimum indices matter
+            output['kvc']  = kvc[0] if kvc else (0,0) # Only relative minimum indices matter, set to (0,0) if no kvc found
         
         output['labels'] = labels # works for both functions and picks
         
@@ -975,113 +935,62 @@ class Bands(_BandsDosBase):
         self._data = serializer.Dict2Data(output) # Assign for later use
         return self._data
     
-    def _handle_kwargs(self, kwargs):
+    def _handle_kwargs(self, **kwargs):
         "Returns fixed kwargs and new elim relative to fermi energy for gettig data."
         if kwargs.get('spin',None) not in [0,1]:
             raise ValueError('spin must be 0 or 1')
         
         self._spin = kwargs.pop('spin',None) # remove from kwargs as plots don't need it, but get_plot_coords need it
-        
         kpairs = kwargs.pop('kpairs',None) # not needed for plots but need here
-        if kwargs.get('kticks',None) is None:
-            kwargs['kticks'] = kwargs['kticks'] if kpairs else (kwargs['kticks'] or self.get_kticks()) # Does not change even after interpolation, prefer user in case of kpa
-            
+        
+        if kpairs is None:
+            kwargs['kticks'] = kwargs.get('kticks', None) or self.get_kticks() # User can provide kticks, but if not, use default
+        
         # Need to fetch data for gap and plot later
         self._breaks = [tick[0] for tick in (kwargs['kticks'] or []) if tick[1].lstrip().startswith('<=')]   
-        
-        ezero = kwargs.pop('ezero',None) # remove from kwargs as plots don't need it
-        return kwargs, ezero
+        return kwargs, kwargs.get('elim',None) # need in plots
     
-    @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': f"{_spin_doc}\n    {_kind_doc}\n    ax :"})
-    def splot_bands(self, spin = 0, kpairs = None, ax = None, elim = None, ezero = None, kticks = None, interp = None, **kwargs):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self','kwargs']} # should be on top to avoid other loacals
-        plot_kws, ezero = self._handle_kwargs(plot_kws)
+    @_sub_doc(sp.splot_bands,['K :','E :'],replace = {'ax :': f"{_spin_doc}\n{_kind_doc}\nax :"})
+    @_sig_kwargs(sp.splot_bands, ('K','E'))
+    def splot_bands(self, spin = 0, kpairs = None, ezero = None, **kwargs):
+        kwargs, elim = self._handle_kwargs(spin = spin, **kwargs)
         data = self.get_data(elim = elim, ezero = ezero, kpairs = kpairs)
-        return sp.splot_bands(data.kpath, data.evals[spin] - data.ezero, **plot_kws, **kwargs)
+        return sp.splot_bands(data.kpath, data.evals[spin] - data.ezero, **kwargs)
     
-    @_sub_doc(sp.splot_rgb_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    {_kind_doc}\n    ax :"})
-    def splot_rgb_lines(self, projections,
-        spin       = 0,   
-        kpairs     = None,
-        ax         = None, 
-        elim       = None, 
-        ezero      = None,
-        kticks     = None, 
-        interp     = None, 
-        maxwidth   = 3,
-        uniwidth   = False,
-        colormap   = None,
-        colorbar   = True,
-        N          = 9,
-        shadow     = False):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections']} # should be on top to avoid other loacals
-        plot_kws, ezero = self._handle_kwargs(plot_kws)
+    @_sub_doc(sp.splot_rgb_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\nax :"})
+    @_sig_kwargs(sp.splot_rgb_lines, ('K','E','pros','labels'))
+    def splot_rgb_lines(self, projections, spin = 0, kpairs = None,ezero = None,**kwargs):
+        kwargs, elim = self._handle_kwargs(spin = spin, **kwargs)
         data = self.get_data(elim, ezero, projections, kpairs = kpairs) 
-        return sp.splot_rgb_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **plot_kws)
+        return sp.splot_rgb_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **kwargs)
     
-    @_sub_doc(sp.splot_color_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    {_kind_doc}\n    ax :"})
-    def splot_color_lines(self, projections,
-        spin       = 0, 
-        kpairs     = None,
-        axes       = None, 
-        elim       = None, 
-        ezero      = None,
-        kticks     = None, 
-        interp     = None, 
-        maxwidth   = 3,
-        colormap   = None,
-        shadow     = False,
-        showlegend = True,
-        xyc_label  = [0.2, 0.85, 'black'], # x, y, color only if showlegend = False
-        **kwargs
-        ):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
-        plot_kws, ezero = self._handle_kwargs(plot_kws)
+    @_sub_doc(sp.splot_color_lines,['K :','E :', 'pros :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\nax :"})
+    @_sig_kwargs(sp.splot_color_lines, ('K','E','pros','labels'))
+    def splot_color_lines(self, projections, spin = 0,  kpairs = None, ezero = None, **kwargs ):
+        kwargs, elim = self._handle_kwargs(spin = spin, **kwargs)
         data = self.get_data(elim, ezero, projections, kpairs = kpairs) # picked relative limit
-        return sp.splot_color_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **plot_kws, **kwargs)
+        return sp.splot_color_lines(data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **kwargs)
     
-    @_sub_doc(ip.iplot_rgb_lines,['K :','E :', 'pros :', 'labels :','occs :','kpoints :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    {_kind_doc}\n    fig :"})
-    def iplot_rgb_lines(self, projections,
-        spin     = 0,
-        kpairs   = None,
-        elim     = None,
-        ezero    = None,
-        kticks   = None, 
-        interp   = None, 
-        maxwidth = 10,   
-        mode     = 'markers + lines',
-        fig      = None,
-        title    = None,
-        **kwargs              
-        ):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
-        plot_kws, ezero = self._handle_kwargs(plot_kws)
+    @_sub_doc(ip.iplot_rgb_lines,['K :','E :', 'pros :', 'labels :','occs :','kpoints :'], replace = {'fig :': f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\nfig :"})
+    @_sig_kwargs(ip.iplot_rgb_lines, ('K','E', 'pros', 'labels', 'occs', 'kpoints'))
+    def iplot_rgb_lines(self, projections, spin = 0, kpairs = None, ezero = None, **kwargs):
+        kwargs, elim = self._handle_kwargs(spin = spin, **kwargs)
         data = self.get_data(elim, ezero, projections, kpairs = kpairs)
         # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number 
-        return ip.iplot_rgb_lines({"K": data.kpath, 'indices':data.bands}, data.evals[spin] - data.ezero, data.pros, data.labels, data.occs[spin], data.kpoints, **plot_kws, **kwargs)
+        return ip.iplot_rgb_lines({"K": data.kpath, 'indices':data.bands}, data.evals[spin] - data.ezero, data.pros, data.labels, data.occs[spin], data.kpoints, **kwargs)
     
-    @_sub_doc(ip.iplot_bands,['K :','E :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    {_kind_doc}\n    fig :"})
-    def iplot_bands(self,
-        spin   = 0,
-        kpairs = None,
-        fig    = None,
-        elim   = None,
-        ezero  = None,
-        kticks = None, 
-        interp = None,   
-        title  = None,
-        **kwargs):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self','kwargs']}
-        plot_kws, ezero = self._handle_kwargs(plot_kws)
+    @_sub_doc(ip.iplot_bands,['K :','E :'], replace = {'fig :': f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\nfig :"})
+    @_sig_kwargs(ip.iplot_bands, ('K','E'))
+    def iplot_bands(self,spin   = 0,kpairs = None,ezero  = None,**kwargs):
+        kwargs, elim = self._handle_kwargs(spin = spin, **kwargs)
         data = self.get_data(elim, ezero, kpairs = kpairs)
         # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number
-        return ip.iplot_bands({"K": data.kpath, 'indices':data.bands}, data.evals[spin] - data.ezero, **plot_kws, **kwargs) 
+        return ip.iplot_bands({"K": data.kpath, 'indices':data.bands}, data.evals[spin] - data.ezero, **kwargs) 
     
     def view_bands(self):
         "Initialize and return `ipyvasp.widgets.BandsWidget` to view bandstructure interactively."
-        from .widgets import BandsWidget
         use_vaspout = True if isinstance(self.source, vp.Vaspout) else False
-        return BandsWidget(use_vaspout = use_vaspout, path = self.source.path.parent, glob = self.source.path.name)
+        return wdg.BandsWidget(use_vaspout = use_vaspout, path = self.source.path.parent, glob = self.source.path.name)
     
 _multiply_doc = "multiply : float, multiplied by total dos and sign is multiply by partial dos to flip plot in case of spin down."
 _total_doc = "total : bool, True by default. If False, total dos is not plotted, sign of multiply parameter is still used for partial dos"
@@ -1147,41 +1056,20 @@ class DOS(_BandsDosBase):
         self._data = serializer.Dict2Data(out) # Assign for later use
         return self._data
     
-    def _handle_kwargs(self, kwargs):
+    def _handle_kwargs(self, **kwargs):
         "Returns fixed kwargs and new elim relative to fermi energy for gettig data."
         if kwargs.get('spin',None) not in [0,1,2,3]:
             raise ValueError('spin must be 0,1,2,3 for dos')
         
         kwargs.pop('spin',None) # remove from kwargs as plots don't need it
-        kwargs.pop('multiply', None)
-        kwargs.pop('total', None)
+        return kwargs, kwargs.get('elim', None)
         
-        ezero = kwargs.pop('ezero',None) # remove from kwargs as plots don't need it
-        return kwargs, ezero
-        
-    @_sub_doc(sp.splot_dos_lines,['energy :', 'dos_arrays :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n    {_spin_doc}\n    {_multiply_doc}\n    {_total_doc}\n    ax :"})
+    @_sub_doc(sp.splot_dos_lines,['energy :', 'dos_arrays :', 'labels :'], replace = {'ax :': f"{_proj_doc}\n{_spin_doc}\n{_multiply_doc}\n{_total_doc}\nax :"})
+    @_sig_kwargs(sp.splot_dos_lines, ('energy', 'dos_arrays', 'labels'))
     def splot_dos_lines(self, projections = None, # dos should allow only total dos as well
-        spin = 0,
-        multiply = 1,
-        total = True,
-        ax = None,
-        elim = None,
-        colormap = 'tab10',
-        colors = None,
-        fill = True,
-        vertical = False,
-        stack = False,
-        interp = None,
-        showlegend = True,
-        legend_kwargs = {
-            'ncol': 4, 'anchor': (0, 1.0),
-            'handletextpad' : 0.5,'handlelength' : 1,
-            'fontsize' : 'small','frameon' : False
-        },
-        **kwargs
+        spin = 0,multiply = 1,total = True,ezero = None, **kwargs
         ):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
-        plot_kws, ezero = self._handle_kwargs(plot_kws)
+        kwargs, elim = self._handle_kwargs(spin = spin, **kwargs)
         data = self.get_data(elim, ezero, projections)
         energy, labels = data['energy'][spin], data['labels']
         
@@ -1196,26 +1084,14 @@ class DOS(_BandsDosBase):
         elif len(dos_arrays) == 0:
             raise ValueError("Either total should be True or projections given!")
         
-        return sp.splot_dos_lines(energy - data.ezero, dos_arrays, labels, **plot_kws, **kwargs)
+        return sp.splot_dos_lines(energy - data.ezero, dos_arrays, labels, **kwargs)
     
-    @_sub_doc(ip.iplot_dos_lines,['energy :', 'dos_arrays :', 'labels :'], replace = {'fig :': f"{_proj_doc}\n    {_spin_doc}\n    {_multiply_doc}\n    {_total_doc}\n    fig :"})
+    @_sub_doc(ip.iplot_dos_lines,['energy :', 'dos_arrays :', 'labels :'], replace = {'fig :': f"{_proj_doc}\n{_spin_doc}\n{_multiply_doc}\n{_total_doc}\nfig :"})
+    @_sig_kwargs(ip.iplot_dos_lines, ('energy', 'dos_arrays', 'labels'))
     def iplot_dos_lines(self, projections = None, # dos should allow only total dos as well
-        spin = 0,
-        multiply = 1,
-        total = True,            
-        fig = None,
-        elim = None,
-        colormap = 'tab10',
-        colors = None,
-        fill = True,
-        vertical = False,
-        stack = False, 
-        mode = 'lines',
-        interp = None,
-        **kwargs
+        spin = 0,multiply = 1,total = True, ezero = None, **kwargs
         ):
-        plot_kws = {k:v for k,v in locals().items() if k not in ['self', 'projections','kwargs']} # should be on top to avoid other loacals
-        plot_kws, ezero = self._handle_kwargs(plot_kws)
+        kwargs, elim = self._handle_kwargs(spin = spin, **kwargs)
         data = self.get_data(elim, ezero, projections)
         energy, labels = data['energy'][spin], data['labels']
         

@@ -1,5 +1,6 @@
 import json
 import pickle
+import inspect
 from collections import namedtuple
 from contextlib import suppress
 from copy import deepcopy
@@ -180,6 +181,7 @@ class SpinData(Dict2Data):
         "Fermi energy given in vasprun.xml."
         return self.evals.Fermi
     
+    
 class PoscarData(Dict2Data):
     _req_keys = ('basis','types','metadata')
     def __init__(self,d):
@@ -277,11 +279,37 @@ class PoscarData(Dict2Data):
         dists = dists[dists > 0] # Remove distance with itself
         return np.min(dists)
     
-    def write(self, outfile = None, overwrite = False):
-        "Writes the poscar data to a file."
-        from .sio import write_poscar # To avoid circular import
-        return write_poscar(self,outfile = outfile,overwrite = overwrite)
-    
+    def get_selective_dynamics(self, func):
+        """Returns a dictionary of {'Ga 1': 'T T T', 'As 1': 'T F F',...} for each atom in the poscar data.
+        
+        `func` should be a callable like `f(index,x,y,z) -> (bool, bool, bool)` which turns on/off selective dynamics for each atom based in each dimension.
+        
+        You can visualize selective dynamics sites by their labels as follows:
+        
+        ```python
+        poscar = POSCAR.from_file('POSCAR')
+        sd = poscar.data.get_selective_dynamics(lambda i,x,y,z: (True, False, True) if i % 2 == 0 else (False, True, False)) # Just an example
+        poscar.splot_lattice(..., fmt_label = lambda lab: sd[lab]) # This will label sites as T T T, F F F, ... and so so on
+        ```
+        """
+        if not callable(func):
+            raise TypeError("`func` should be a callable function(index, [point in fractional coordinates])!")
+        
+        if len(inspect.signature(func).parameters) != 4:
+            raise ValueError("`func` should be a callable function with four paramters (index, x,y,z) in fractional coordinates.")
+        
+        test_output = func(0,0,0,0)
+        if not isinstance(test_output, (list, tuple, np.ndarray)) or len(test_output) != 3:
+            raise ValueError("`func` should return a list/tuple/array of three booleans for each direction like (True, False, True)")
+        
+        for out in test_output:
+            if not isinstance(out, bool):
+                raise ValueError("`func` should return boolean values in list/tuple/array like (True, False, True)")
+        
+        sd_list = ['  '.join("T" if s else "F" for s in func(i, *p)) for i, p in enumerate(self.positions)] 
+        labels = np.array([f'{k} {v - vs.start + 1}' for k,vs in self.types.items() for v in vs])
+        return {k:v for k,v in zip(labels, sd_list)} # We can't use self.labels here because it can be for equivalent sites as well
+        
 
 class SpecialPoints(Dict2Data):
     _req_keys = ('coords','kpoints')
@@ -292,6 +320,12 @@ class SpecialPoints(Dict2Data):
         "Returns a new SpecialPoints object with the mask applied. Example: func = lambda x,y,z: x > 0 where x,y,z are fractional kpoints coordinates, not cartesian."
         if not callable(func):
             raise ValueError("func must be a callable function that returns a boolean and act on x,y,z fractional coordinates")
+        
+        if len(inspect.signature(func).parameters) != 3:
+            raise ValueError("func takes exactly 3 arguments as x,y,z in fractional coordinates")
+        
+        if not isinstance(func(0,0,0),bool):
+            raise ValueError("func must return a boolean")
         
         mask = [func(x,y,z) for x,y,z in self.kpoints]
         return SpecialPoints({'coords':self.coords[mask],'kpoints':self.kpoints[mask]})
@@ -403,6 +437,13 @@ class OutcarData(Dict2Data):
         "Returns a data with only the sites given by mask function over fractional coordinates, e.g. func = lambda x, y, z: x == 1"
         if not callable(func):
             raise TypeError("func must be callable like lambda x,y,z: x == 1")
+        
+        if len(inspect.signature(func).parameters) != 3:
+            raise ValueError("func takes exactly 3 arguments as x,y,z in fractional coordinates")
+        
+        if not isinstance(func(0,0,0),bool):
+            raise ValueError("func must return a boolean value")
+        
         raise NotImplementedError("Not implemented yet")
         return # ion_pot, site_pot, rename these with better names
     

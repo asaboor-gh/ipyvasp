@@ -3,6 +3,7 @@ import os
 from subprocess import Popen, PIPE
 from contextlib import contextmanager
 from pathlib import Path
+from inspect import signature, getdoc
 
 
 import numpy as np
@@ -20,6 +21,44 @@ def get_file_size(path:str):
             size /= 1024.0
     else:
         return ''
+    
+def _sig_kwargs(from_func,skip_params = ()):
+    "Add signature to decorated function form other function"
+    def wrapper(func, skip_params = skip_params):
+        sig = signature(from_func)
+        if not isinstance(skip_params, (list, tuple)):
+            raise TypeError('skip_params must be list or tuple')
+            
+        this_sig = signature(func)
+        all_params = list(this_sig.parameters.values())
+        other_params = [value for value in  all_params if value.kind.name != 'VAR_KEYWORD']
+        
+        if other_params == all_params: # no **kwargs
+            return func
+        
+        skip_params = list(skip_params) + [value.name for value in other_params] # skip params already in func as positional or keyword
+        target_params = [value for value in  sig.parameters.values() if value.name not in skip_params]
+        target_sig = sig.replace(parameters=other_params + target_params)
+        func.__signature__ = target_sig
+        return func
+    return wrapper
+
+def _sub_doc(from_func,skip_matches = None, replace = {}):
+    """Assing __doc__ from other function. Replace words in docs where need."""
+    def wrapper(func):
+        docs = getdoc(from_func).splitlines()
+        if isinstance(skip_matches, (list, tuple)):
+            for param in skip_matches:
+                docs = [line for line in docs if param not in line]
+        elif isinstance(skip_matches, str):
+            docs = [line for line in docs if skip_matches not in line]
+        docs = '\n'.join(docs)
+        for k,v in replace.items():
+            docs = docs.replace(k,v)
+        func.__doc__ = docs
+        return func
+    return wrapper
+
 
 @contextmanager
 def set_dir(path:str):
@@ -258,7 +297,7 @@ def transform_color(arr: np.ndarray,s:float=1,c:float=1,b:float=0,mixing_matrix:
         c (float): contrast, default is 1. Can be a float in [-1,1].
         s (float): saturation, default is 1. Can be a float in [-1,1]. If s = 0, you get a gray scale image.
         b (float): brightness, default is 0. Can be a float in [-1,1] or list of three brightnesses for RGB components.
-        mixing_matrix (ndarray): A 3x3 matrix to mix RGB values, such as `pp.color_matrix`.
+        mixing_matrix (ndarray): A 3x3 matrix to mix RGB values, such as `ipyvas.utils.color_matrix`.
 
     Returns:
         ndarray: Transformed color array of same shape as input array.
@@ -290,3 +329,29 @@ def transform_color(arr: np.ndarray,s:float=1,c:float=1,b:float=0,mixing_matrix:
         axis = len(np.shape(arr))-1 #Add back Alpha value if present
         new_color = np.concatenate([new_color,arr[...,3:]],axis=axis)
     return new_color
+
+# color_marices for quick use
+color_matrix = __np.array([[0.5,0,0.5,1],[0.5,0.5,0,1],[0,0.5,0.5,0.2],[1,1,0.2,0]]) # lights up to see colors a little bit
+rbg_matrix= __np.array([[1,0,0],[0,0,1],[0,1,0]]) # Red, Blue, Green
+cmy_matrix = __np.array([[0,0.5,0.5,1],[0.5,0,0.5,1],[0.5,0.5,0,0.2],[1,1,0.2,0]]) # Generates CMYK color palette
+
+
+# Register 'RGB' colormap in current session
+from matplotlib.colors import LinearSegmentedColormap as __LSC
+import matplotlib.pyplot as __plt, numpy as __np
+RGB = __LSC.from_list('RGB',[(0.9,0,0),(0.9,0.9,0),(0,0.9,0),(0,0.9,0.9),(0,0,0.9)])
+CMY = __LSC.from_list('CMY',[(0,0.9,0.9),(0,0,0.9),(0.9,0,0.9),(0.9,0,0),(0.9,0.9,0)])
+__plt.register_cmap('RGB',RGB)
+__plt.register_cmap('CMY',CMY)
+
+def create_colormap(name='RB',colors=[(0.9,0,0),(0,0,0.9)]):
+    """
+    Create and register a custom colormap from a list of RGB colors. and then use it's name in plottoing functions to get required colors.
+    - name: str, name of the colormap
+    - colors: list of RGB colors, e.g. [(0.9,0,0),(0,0,0.9)] or named colors, e.g. ['red','blue'], add as many colors as you want.
+    
+    **Returns**: Colormap object which you can use to get colors from. like cm = create_colormap(); cm(0.5) which will return a color at center of map
+    """
+    __RGB = __LSC.from_list(name,colors)
+    __plt.register_cmap(name,__RGB)
+    return __RGB
