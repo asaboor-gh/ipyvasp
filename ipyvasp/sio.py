@@ -809,6 +809,16 @@ def _rad_angle(v1,v2):
     angle = np.arccos(dot_p)
     return angle
 
+def to_plane(normal, points):
+    "Project points to a plane defined by `normal`. shape of normal should be (3,) and of points (N,3)."
+    if np.ndim(normal) + 1 != np.ndim(points):
+        raise ValueError("Shape of points should be (N,3) and of normal (3,).")
+    points = np.array(points)
+    nu = normal/np.linalg.norm(normal) # Normal unit vector
+    along_normal = points.dot(nu) 
+    points = points - along_normal[:,None]*nu # v - (v.n)n
+    return points
+
 from scipy.spatial.transform import Rotation
 def rotation(angle_deg,axis_vec):
     """Get a scipy Rotation object at given `angle_deg` around `axis_vec`.
@@ -939,43 +949,50 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = 
         if v not in [0,1,2]:
             raise ValueError(f"`vectors` expects values in [0,1,2], got {vectors!r}")
     
-    if plane and plane not in valid_planes:
-        raise ValueError(f"`plane` expects value in 'xyzxzyx' or None, got {plane!r}")
-    
     name = kwargs.pop('label',None) # will set only on single line
     kwargs.pop('zdir',None) # 2D plot on 3D axes is only supported in xy plane.
     
     if plane: #Project 2D, works on 3D axes as well
         ind = valid_planes.index(plane)
+        
         arr = [0,1,2,0,2,1,0]
         i, j = arr[ind], arr[ind+1]
+        is3d = getattr(ax,'name','') == '3d'
+        normals = {'xy' : (0,0,1), 'yz' : (1,0,0), 'zx' : (0,1,0), 'yx' : (0,0,-1), 'zy' : (-1,0,0), 'xz' : (0,-1,0)}
+        if plane not in normals:
+            raise ValueError(f"`plane` expects value in 'xyzxzyx' or None, got {plane!r}")
+    
+        z0 = [0,0,zoffset] if plane in 'xyx' else [0,zoffset,0] if plane in 'xzx' else [zoffset,0,0]
+        idxs = {'xy' : [0,1], 'yz' : [1,2], 'zx' : [2,0], 'yx' : [1,0], 'zy' : [2,1], 'xz' : [0,2]}
         for idx, f in enumerate(bz_data.faces_coords):
-            XYZ = (f[:,i],f[:,j], zoffset*np.ones_like(f[:,i])) if getattr(ax,'name','') == '3d' else (f[:,i],f[:,j])
-            line, = ax.plot(*XYZ,color = (color),**kwargs)
+            g = to_plane(normals[plane],f) + z0
+            line, = ax.plot(*(g.T if is3d else g[:,idxs[plane]].T),color = color,**kwargs)
             if idx == 0:
                 line.set_label(name) # only one line
         
         if vectors:
-            s_basis = bz_data.basis[(vectors,)]
+            s_basis = to_plane(normals[plane],bz_data.basis[(vectors,)])
 
-            for k,y in zip(vectors,s_basis):
+            for k,b in zip(vectors,s_basis):
+                x,y = b[idxs[plane]]
                 l = r" ${}_{} $".format(_label,k+1)
-                l = l + '\n' if y[j] < 0 else '\n' + l
-                ha = 'right' if y[i] < 0 else 'left'
-                xyz = (0.8*y[i], 0.8*y[j], zoffset) if getattr(ax,'name','') == '3d' else (0.8*y[i], 0.8*y[j])
+                l = l + '\n' if y < 0 else '\n' + l
+                ha = 'right' if x < 0 else 'left'
+                xyz = 0.8*b + z0 if is3d else (0.8*x,0.8*y)
                 ax.text(*xyz, l, va = 'center',ha=ha,clip_on = True) # must clip to have limits of axes working.
-                ax.scatter(*[0.8*v if i < 2 else v for i, v in enumerate(xyz)],color='w',s=0.0005) # Must be to scale below arrow.
-            if getattr(ax,'name','') == '3d':
-                XYZ,UVW = (np.ones_like(s_basis)*[0,0,zoffset]).T, s_basis.T
+                ax.scatter(*(xyz if is3d else 0.8*xyz),color='w',s=0.0005) # Must be to scale below arrow.
+            if is3d:
+                XYZ,UVW = (np.ones_like(s_basis)*z0).T, s_basis.T
                 quiver3d(*XYZ,*UVW,C='k',L=0.7,ax = ax,arrowstyle="-|>",mutation_scale=7)
             else:
                 s_zero = [0 for _ in s_basis] # either 3 or 2.
-                ax.quiver(s_zero,s_zero,*s_basis.T[[i,j]],lw=0.9,color='navy',angles='xy', scale_units='xy', scale=1)
+                ax.quiver(s_zero,s_zero,*s_basis[:,idxs[plane]].T,lw=0.9,color='navy',angles='xy', scale_units='xy', scale=1)
 
-        ax.set_xlabel(label.format(valid_planes[i]))
-        ax.set_ylabel(label.format(valid_planes[j]))
-        if getattr(ax,'name','') == '3d':
-            ax.set_zlabel(label.format(valid_planes[ind+2]))
+        ax.set_xlabel(label.format(idxs[plane][0]))
+        ax.set_ylabel(label.format(idxs[plane][1]))
+        if is3d:
+            ind = [i for i in range(3) if i not in idxs[plane]][0]
+            ax.set_zlabel(label.format(ind))
             ax.set_aspect('equal')
             zmin, zmax = ax.get_zlim()
             if zoffset > zmax:
@@ -987,7 +1004,7 @@ def splot_bz(bz_data, plane = None, ax = None, color='blue',fill=True,vectors = 
             ax.set_aspect(1) # Must for 2D axes to show actual lengths of BZ
         return ax
     else: # Plot 3D
-        if ax and ax.name == "3d":
+        if getattr(ax, 'name', '') == "3d": # handle None or 2D axes passed.
             ax3d = ax
         else:
             pos = ax.get_position()
@@ -1387,7 +1404,7 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
         coords_n = np.array(coords_n)
         colors_n = np.array(colors_n)
         
-        bond_kws = dict(line_width = 4) | bond_kws
+        bond_kws = {'line_width': 4, **bond_kws}
 
         for (i, cp),c in zip(enumerate(coords_n),colors_n):
             showlegend = True if i == 0 else False
@@ -1398,7 +1415,7 @@ def iplot_lattice(poscar_data, sizes = 10, colors = None, bond_length = None,tol
                 mode='lines',line_color = c, legendgroup='Bonds',showlegend = showlegend,
                 name='Bonds',**bond_kws))
     
-    site_kws = dict(line_color='rgba(1,1,1,0)',line_width=0.001, opacity = 1) | site_kws
+    site_kws = {**dict(line_color='rgba(1,1,1,0)',line_width=0.001, opacity = 1), **site_kws}
     for (k,v),c,s in zip(uelems.items(),colors,sizes):
         if sites:
             v = [i for i in v if i in sites] # Only show selected sites.
@@ -1549,14 +1566,14 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
         coords_n = np.array(coords_n)
         colors_n = np.array(colors_n)
 
-        bond_kws = dict(alpha = 0.7) | bond_kws # bond_kws overrides alpha only
+        bond_kws = {'alpha':0.7, **bond_kws} # bond_kws overrides alpha only
         if not plane:
             _ = [ax.plot(*c.T,c=_c,**bond_kws) for c,_c in zip(coords_n,colors_n)]
         elif plane in 'xyzxzyx':
             _ = [ax.plot(c[:,ix],c[:,iy],c=_c,**bond_kws) for c,_c in zip(coords_n,colors_n)]
     
     if not plane:
-        site_kws = dict(alpha = 0.7, depthshade = False) | site_kws # site_kws overrides alpha only
+        site_kws = {**dict(alpha = 0.7, depthshade = False), **site_kws} # site_kws overrides alpha only
         ax.scatter(coords[:,0],coords[:,1],coords[:,2],c = colors ,s = sizes,**site_kws)
         if fmt_label:
             for i,coord in enumerate(coords):
@@ -1568,7 +1585,7 @@ def splot_lattice(poscar_data, plane = None, sizes = 50, colors = None, bond_len
         ax.set_box_aspect(np.ptp(bz_data.vertices,axis=0))
                 
     elif plane in 'xyzxzyx':
-        site_kws = dict(alpha = 0.7, zorder = 3) | site_kws 
+        site_kws = {**dict(alpha = 0.7, zorder = 3), **site_kws} 
         iz, = [i for i in range(3) if i not in (ix,iy)]
         zorder = coords[:,iz].argsort()
         if plane in 'yxzy': # Left handed
@@ -1662,7 +1679,7 @@ def join_poscars(poscar_data,other,direction='c',tol=1e-2, system = None):
     i_all = np.cumsum([0,*i_all]) # Do it after labels
     uelems = {_u:range(i_all[i],i_all[i+1]) for i,_u in enumerate(u_all)}
     sys = system or ''.join(uelems.keys())
-    iscartesian = poscar1.metadata.cartesian or poscar2.metadata.cartesian
+    iscartesian = poscar_data.metadata.cartesian or other.metadata.cartesian
     metadata = {'cartesian':iscartesian, 'scale': scale, 'comment': 'Modified by ipyvasp'}
     out_dict = {'SYSTEM':sys,'basis':basis,'metadata':metadata,'positions':np.array(pos_all),'types':uelems}
     return serializer.PoscarData(out_dict)
@@ -1755,36 +1772,37 @@ def rotate_poscar(poscar_data,angle_deg,axis_vec):
     p_dict['metadata']['comment'] = f'Modified by ipyvasp'
     return serializer.PoscarData(p_dict)
 
-def set_zdir(poscar_data, hkl, to_x = None):
-    """Set z-direction of POSCAR along a given hkl direction and returns new data.
-    Args:
-        - path_poscar: Path/to/POSCAR or `poscar` data object.
-        - hkl: (h,k,l) of the direction along which z-direction is to be set. Vector is constructed as h*a + k*b + l*c in cartesian coordinates.
-        - to_x: (h,k,l) of the direction for which will be rotated to xz-plane, and seen along xaxis when viewed from top. 
+def set_zdir(poscar_data, hkl, phi = 0):
+    """
+    Set z-direction of POSCAR along a given hkl direction and returns new data.
+    
+    Parameters
+    ----------
+    path_poscar : Path/to/POSCAR or `poscar` data object.
+    hkl : (h,k,l) of the direction along which z-direction is to be set. Vector is constructed as h*a + k*b + l*c in cartesian coordinates.
+    phi: Rotation angle in degrees about z-axis to set a desired rotated view.
+    
+    Returns
+    -------
+    New instance of poscar with z-direction set along hkl.
     """
     if not isinstance(hkl, (list, tuple, np.ndarray)) and len(hkl) != 3:
         raise ValueError("hkl must be a list, tuple or numpy array of length 3.")
     
     p_dict = poscar_data.to_dict()
     basis = p_dict['basis']
-    zvec = basis.dot(hkl) # in cartesian coordinates
+    zvec = to_R3(basis, [hkl])[0] # in cartesian coordinates
     angle = np.arccos(zvec.dot([0,0,1])/np.linalg.norm(zvec)) # Angle between zvec and z-axis
     rot = rotation(angle_deg = np.rad2deg(angle), axis_vec = np.cross(zvec,[0,0,1])) # Rotation matrix
     new_basis = rot.apply(basis) # Rotate basis so that zvec is along z-axis
-    
-    if to_x is not None:
-        if not isinstance(to_x, (list, tuple, np.ndarray)) and len(to_x) != 3:
-            raise ValueError("to_x must be a list, tuple or numpy array of length 3 for hkl value to view along xaxis when top is zaxis.")
-    
-        xzvec = new_basis.dot(to_x) # in cartesian coordinates, it can be anywhere in xz plane
-        xzvec[2] = 0 # we need to have angle phi in xy plane, not full 3D angle
-        angle = np.arccos(xzvec.dot([1,0,0])/np.linalg.norm(xzvec)) # Angle between xzvec and x-axis
-        rot = rotation(angle_deg = np.rad2deg(angle), axis_vec = [0,0,1]) # Rotate around z-axis to bring in zx plane
-        new_basis = rot.apply(new_basis) # Rotate basis so that xzvec is along x-axis
-    
-    p_dict['basis'] = rot.apply(new_basis) # Rotate basis so that they are transpose
+    p_dict['basis'] = new_basis
     p_dict['metadata']['comment'] = f'Modified by ipyvasp'
-    return serializer.PoscarData(p_dict)
+    new_pos = serializer.PoscarData(p_dict)
+    
+    if phi:
+        return rotate_poscar(new_pos,angle_deg = phi,axis_vec = [0,0,1]) # Rotate around z-axis 
+        
+    return new_pos
 
 def mirror_poscar(poscar_data, direction):
     "Mirror a POSCAR in a given direction. Sometime you need it before joining two POSCARs"

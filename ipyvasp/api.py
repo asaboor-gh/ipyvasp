@@ -295,6 +295,7 @@ class POSCAR:
         self._plane = plane # Set plane for splot_kpath
         new_ax = sio.splot_bz(bz_data = self._bz, plane = plane, **kwargs)
         self._ax = new_ax # Set ax for splot_kpath
+        self._zoffset = kwargs.get('zoffset',0) # Set zoffset for splot_kpath
         return new_ax
 
     def splot_kpath(self, kpoints, labels = None, fmt_label = lambda x: (x, {'color': 'blue'}), **kwargs):
@@ -322,16 +323,26 @@ class POSCAR:
 
         ijk = [0,1,2]
         _mapping = {'xy':[0,1],'xz':[0,2],'yz':[1,2],'zx':[2,0],'zy':[2,1],'yx':[1,0]}
+        _zoffset = [0,0,0]
+        if self._plane:
+            _zoffset = [0,0,self._zoffset] if self._plane in 'xyx' else [0,self._zoffset,0] if self._plane in 'xzx' else [self._zoffset,0,0]
+        
         if isinstance(self._plane, str) and self._plane in _mapping:
-            ijk = _mapping[self._plane]
+            if getattr(self._ax, 'name', None) != '3d':
+                ijk = _mapping[self._plane] # only change indices if axes is not 3d, even if plane is given
 
         if not labels:
             labels = ["[{0:5.2f}, {1:5.2f}, {2:5.2f}]".format(x,y,z) for x,y,z in kpoints]
             
         sio._validate_label_func(fmt_label, labels[0])
             
-        coords = self.to_R3(kpoints, reciprocal = True)[:,ijk]
-        kwargs = dict(color = 'blue',linewidth=0.8,marker='.',markersize=10) | kwargs # need some defaults
+        coords = self.to_R3(kpoints, reciprocal = True)
+        if _zoffset and self._plane:
+            normal = [0,0,1] if self._plane in 'xyx' else [0,1,0] if self._plane in 'xzx' else [1,0,0]
+            coords = sio.to_plane(normal, coords) + _zoffset
+            
+        coords = coords[:,ijk] # select only required indices
+        kwargs = {**dict(color = 'blue',linewidth=0.8,marker='.',markersize=10), **kwargs} # need some defaults
         self._ax.plot(*coords.T,**kwargs)
         
         for c,text in zip(coords, labels):
@@ -386,10 +397,9 @@ class POSCAR:
     def rotate(self,angle_deg, axis_vec):
         return self.__class__(data = sio.rotate_poscar(self._data, angle_deg = angle_deg, axis_vec = axis_vec)) 
 
-    @_sub_doc(sio.set_zdir,'- poscar_data')
-    @_sig_kwargs(sio.set_zdir, ('poscar_data','hkl'))
-    def set_zdir(self, hkl, **kwargs):
-        return self.__class__(data = sio.set_zdir(self._data, hkl, **kwargs))
+    @_sub_doc(sio.set_zdir,'poscar_data :')
+    def set_zdir(self, hkl, phi = 0):
+        return self.__class__(data = sio.set_zdir(self._data, hkl, phi = phi))
     
     @_sub_doc(sio.translate_poscar,'- poscar_data')
     def translate(self, offset):
