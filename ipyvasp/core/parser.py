@@ -1,26 +1,15 @@
+__all__ = ["Vasprun", "Vaspout", "minify_vasprun", "xml2dict"]
+
 import re
 from io import StringIO
 from itertools import islice, chain, product
-from collections import namedtuple, Iterable
+from collections import Iterable
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import numpy as np
 
-from . import utils, serializer
-
-
-def dict2tuple(name, d):
-    """Converts a dictionary (nested as well) to namedtuple, accessible via index and dot notation as well as by unpacking.
-
-    Parameters
-    ----------
-    name : str, Name of the namedtuple
-    d : dict, Dictionary to be converted to namedtuple. It can be nested as well.
-    """
-    return namedtuple(name, d.keys())(
-        *(dict2tuple(k.upper(), v) if isinstance(v, dict) else v for k, v in d.items())
-    )
+from . import serializer
 
 
 class DataSource:
@@ -47,7 +36,7 @@ class DataSource:
     def bands(self):
         "Returns a Bands object to access band structure data and plotting methods."
         if not hasattr(self, "_bands"):
-            from .api import Bands
+            from ..bsdos import Bands
 
             self._bands = Bands(self)
 
@@ -57,7 +46,7 @@ class DataSource:
     def dos(self):
         "Returns a Dos object to access density of states data and plotting methods."
         if not hasattr(self, "_dos"):
-            from .api import DOS
+            from ..bsdos import DOS
 
             self._dos = DOS(self)
 
@@ -67,7 +56,7 @@ class DataSource:
     def poscar(self):
         "Returns a POSCAR class instance based on data from source."
         if not hasattr(self, "_poscar"):
-            from .api import POSCAR
+            from ..lattice import POSCAR
 
             self._poscar = POSCAR(data=self.get_structure())
 
@@ -611,10 +600,8 @@ class Vasprun(DataSource):
 
 
 def xml2dict(xmlnode_or_filepath):
-    """Convert xml node or xml file content to dictionary. All output text is in string format, so further processing is required to convert into data types/split etc.
-
-    Args:
-        xmlnode_or_filepath: It is either a path to an xml file or an ``xml.etree.ElementTree.Element`` object.
+    """Convert xml node or xml file content to dictionary.
+    All output text is in string format, so further processing is required to convert into data types/split etc.
 
     Each node has ``tag,text,attr,nodes`` attributes. Every text element can be accessed via
     ``xml2dict()['nodes'][index]['nodes'][index]...`` tree which makes it simple.
@@ -916,7 +903,7 @@ def export_locpot(path: str = None, data_set: str = 0):
             )
 
     # Read Info
-    from .sio import export_poscar  # Keep inside to avoid import loop
+    from .._lattice import export_poscar  # Keep inside to avoid import loop
 
     poscar_data = export_poscar(content="\n".join(p.strip() for p in poscar))
     final_dict = dict(

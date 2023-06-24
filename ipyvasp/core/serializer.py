@@ -1,12 +1,15 @@
+__all__ = ["dump", "load", "dict2tuple", "Dict2Data"]
+
 import json
 import pickle
 import inspect
 from collections import namedtuple
-from contextlib import suppress
 from copy import deepcopy
 from pathlib import Path
 
 import numpy as np
+
+from .spatial_toolkit import angle_deg, to_basis, to_R3, kpoints2bz
 
 
 def dict2tuple(name: str, d: dict):
@@ -81,7 +84,7 @@ class Dict2Data:
     @classmethod
     def validated(cls, data):
         "Validate data like it's own or from json/pickle file/string."
-        if isinstance(data, cls):
+        if type(data) is cls:  # if same type, return as is
             return data
 
         if isinstance(data, (str, bytes)):
@@ -231,8 +234,6 @@ class PoscarData(Dict2Data):
     @property
     def coords(self):
         """Returns the lattice coordinates in cartesian space of the atoms in the poscar data."""
-        from .sio import to_R3  # To avoid circular import
-
         return to_R3(self.basis, self.positions)
 
     @property
@@ -253,53 +254,24 @@ class PoscarData(Dict2Data):
     @property
     def angles(self):
         "Returns the angles of the lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed."
-        norms = self.norms  # Calculate once
-        rad_angles = np.array(
+        return np.array(
             [
-                np.abs(
-                    np.arccos(
-                        np.dot(self.basis[2], self.basis[1]) / norms[2] / norms[1]
-                    )
-                ),
-                np.abs(
-                    np.arccos(
-                        np.dot(self.basis[2], self.basis[0]) / norms[2] / norms[0]
-                    )
-                ),
-                np.abs(
-                    np.arccos(
-                        np.dot(self.basis[1], self.basis[0]) / norms[1] / norms[0]
-                    )
-                ),
+                angle_deg(self.basis[2], self.basis[1]),
+                angle_deg(self.basis[2], self.basis[0]),
+                angle_deg(self.basis[1], self.basis[0]),
             ]
         )
-        return np.degrees(rad_angles)
 
     @property
     def rec_angles(self):
         "Returns the angles of reciprocal lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed."
-        rec_norms = self.rec_norms  # Calculate once
-        rec_basis = self.rec_basis  # Calculate once
-        rad_angles = np.array(
+        return np.array(
             [
-                np.abs(
-                    np.arccos(
-                        np.dot(rec_basis[2], rec_basis[1]) / rec_norms[2] / rec_norms[1]
-                    )
-                ),
-                np.abs(
-                    np.arccos(
-                        np.dot(rec_basis[2], rec_basis[0]) / rec_norms[2] / rec_norms[0]
-                    )
-                ),
-                np.abs(
-                    np.arccos(
-                        np.dot(rec_basis[1], rec_basis[0]) / rec_norms[1] / rec_norms[0]
-                    )
-                ),
+                angle_deg(self.rec_basis[2], self.rec_basis[1]),
+                angle_deg(self.rec_basis[2], self.rec_basis[0]),
+                angle_deg(self.rec_basis[1], self.rec_basis[0]),
             ]
         )
-        return np.degrees(rad_angles)
 
     @property
     def volume(self):
@@ -356,7 +328,9 @@ class PoscarData(Dict2Data):
         for idx in idx1:
             dists = [
                 *dists,
-                *np.linalg.norm(self.coords[idx2] - self.coords[idx, :], axis=1),
+                *np.linalg.norm(
+                    self.coords[tuple(idx2),] - self.coords[idx, :], axis=1
+                ),
             ]  # Get the second closest distance, first is itself
 
         dists = np.array(dists)
@@ -444,7 +418,7 @@ class SpecialPoints(Dict2Data):
 
 
 class BrZoneData(Dict2Data):
-    _req_keys = ("basis", "faces", "vertices")
+    _req_keys = ("basis", "faces", "vertices", "metadata")
 
     def __init__(self, d):
         super().__init__(d)
@@ -519,6 +493,36 @@ class BrZoneData(Dict2Data):
             *centers.T, *other_points.T
         )  # Keep this as somewhere it will be used _asdict()
 
+    def to_fractional(self, coords):
+        "Converts cartesian coordinates to fractional coordinates in the basis of the brillouin zone."
+        return to_basis(self.basis, coords)
+
+    def to_cartesian(self, points):
+        "Converts fractional coordinates in the basis of the brillouin zone to cartesian coordinates."
+        return to_R3(self.basis, points)
+
+    def map_kpoints(self, other, kpoints):
+        """Map kpoints (fractional) from this to other Brillouin zone.
+        This operation is useful when you do POSCAR.transform() and want to map kpoints between given and transformed BZ.
+        """
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"other must be a {self.__class__} object, got {type(other)}"
+            )
+        return other.to_fractional(self.to_cartesian(kpoints))
+
+    def translate_inside(self, kpoints, shift=0):
+        """Brings kpoints inside BZ. Mostly useful for regular kmesh to bring all kpoints inside BZ.
+        `shift` is a number or a list of three numbers that will be added to kpoints before any other operation, in case points are not symmetric around origin.
+        """
+        return kpoints2bz(self, kpoints, shift=shift)
+
+    def get_region(self, func):
+        # Disclaimer: Reuduction totally depends on given function, we only test for volume to satify the condition V_old = N * V_new
+        # This should add an attrivute to not recalculate special points, just return old points including in this zone
+        # How to plot the reduced zone, as it will be nowhere? or make this a plotting function? or add new namespace to POSACR? like splot_bzr(func), thing?
+        raise NotImplementedError("Not implemented yet")
+
 
 class CellData(Dict2Data):
     _req_keys = ("basis", "faces", "vertices")
@@ -535,6 +539,14 @@ class CellData(Dict2Data):
     def normals(self):
         "Get normal vectors to the faces of Cell. Returns a tuple of 6 arrays as (X,Y,Z,U,V,W) where (X,Y,Z) is the center of the faces and (U,V,W) is the normal direction."
         return BrZoneData.normals.fget(self)
+
+    def to_fractional(self, coords):
+        "Converts cartesian coordinates to fractional coordinates in the basis of the cell."
+        return BrZoneData.to_fractional(self, coords)
+
+    def to_cartesian(self, points):
+        "Converts fractional coordinates in the basis of the cell to cartesian coordinates."
+        return BrZoneData.to_cartesian(self, points)
 
 
 class GridData(Dict2Data):

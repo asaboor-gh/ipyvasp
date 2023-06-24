@@ -1,6 +1,16 @@
+__all__ = [
+    "get_file_size",
+    "set_dir",
+    "interpolate_data",
+    "rolling_mean",
+    "list_files",
+    "color",
+    "transform_color",
+    "create_colormap",
+]
+
 import re
 import os
-from subprocess import Popen, PIPE
 from contextlib import contextmanager
 from pathlib import Path
 from inspect import signature, getdoc
@@ -14,40 +24,51 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
 
 
-def get_file_size(path:str):
+def get_file_size(path: str):
     """Return file size"""
     if (p := Path(path)).is_file():
         size = p.stat.st_size
-        for unit in ['Bytes','KB','MB','GB','TB']:
+        for unit in ["Bytes", "KB", "MB", "GB", "TB"]:
             if size < 1024.0:
-                return "%3.2f %s" % (size,unit)
+                return "%3.2f %s" % (size, unit)
             size /= 1024.0
     else:
-        return ''
-    
-def _sig_kwargs(from_func,skip_params = ()):
+        return ""
+
+
+def _sig_kwargs(from_func, skip_params=()):
     "Add signature to decorated function form other function"
-    def wrapper(func, skip_params = skip_params):
+
+    def wrapper(func, skip_params=skip_params):
         sig = signature(from_func)
         if not isinstance(skip_params, (list, tuple)):
-            raise TypeError('skip_params must be list or tuple')
-            
+            raise TypeError("skip_params must be list or tuple")
+
         this_sig = signature(func)
         all_params = list(this_sig.parameters.values())
-        other_params = [value for value in  all_params if value.kind.name != 'VAR_KEYWORD']
-        
-        if other_params == all_params: # no **kwargs
+        other_params = [
+            value for value in all_params if value.kind.name != "VAR_KEYWORD"
+        ]
+
+        if other_params == all_params:  # no **kwargs
             return func
-        
-        skip_params = list(skip_params) + [value.name for value in other_params] # skip params already in func as positional or keyword
-        target_params = [value for value in  sig.parameters.values() if value.name not in skip_params]
+
+        skip_params = list(skip_params) + [
+            value.name for value in other_params
+        ]  # skip params already in func as positional or keyword
+        target_params = [
+            value for value in sig.parameters.values() if value.name not in skip_params
+        ]
         target_sig = sig.replace(parameters=other_params + target_params)
         func.__signature__ = target_sig
         return func
+
     return wrapper
 
-def _sub_doc(from_func,skip_matches = None, replace = {}):
+
+def _sub_doc(from_func, skip_matches=None, replace={}):
     """Assing __doc__ from other function. Replace words in docs where need."""
+
     def wrapper(func):
         docs = getdoc(from_func).splitlines()
         if isinstance(skip_matches, (list, tuple)):
@@ -55,183 +76,175 @@ def _sub_doc(from_func,skip_matches = None, replace = {}):
                 docs = [line for line in docs if param not in line]
         elif isinstance(skip_matches, str):
             docs = [line for line in docs if skip_matches not in line]
-        docs = '\n'.join(docs)
-        for k,v in replace.items():
-            docs = docs.replace(k,v)
+        docs = "\n".join(docs)
+        for k, v in replace.items():
+            docs = docs.replace(k, v)
         func.__doc__ = docs
         return func
+
     return wrapper
 
 
 @contextmanager
-def set_dir(path:str):
+def set_dir(path: str):
     "Context manager to work in some directory and come back"
-    current = os.getcwd() # not available in pathlib yet
+    current = os.getcwd()  # not available in pathlib yet
     try:
         os.chdir(path)
         yield
     finally:
         os.chdir(current)
 
-def interpolate_data(x:np.ndarray,y:np.ndarray,n:int=10,k:int=3) -> tuple:
-    """Returns interpolated xnew,ynew. If two points are same, it will add 0.1*min(dx>0) to compensate it.
-    
-    Args:
-        x (ndarry): 1D array of size p,
-        y (ndarray): ndarray of size p*q*r,....
-        n (int): Number of points to add between two given points.
-        k (int): Polynomial order to interpolate.
+
+def interpolate_data(x: np.ndarray, y: np.ndarray, n: int = 10, k: int = 3) -> tuple:
+    """
+    Returns interpolated xnew,ynew. If two points are same, it will add 0.1*min(dx>0) to compensate it.
+
+    Parameters
+    ----------
+    x : ndarry, 1D array of size p,
+    y : ndarray, ndarray of size p*q*r,....
+    n : int, Number of points to add between two given points.
+    k : int, Polynomial order to interpolate.
 
 
-    Example: 
-        For ``K(p),E(p,q)`` input from bandstructure, do ``Knew, Enew = interpolate_data(K,E,n=10,k=3)`` for cubic interploation.
-    
-    Returns:
-        tuple: (xnew, ynew) after interpolation.
-        
+    Example
+    -------
+    For ``K(p),E(p,q)`` input from bandstructure, do ``Knew, Enew = interpolate_data(K,E,n=10,k=3)`` for cubic interploation.
+
+    Returns
+    -------
+    tuple: (xnew, ynew) after interpolation.
+
     .. note::
         Only axis 0 will be interpolated. If you want general interploation, use ``from scipy.interpolate import make_interp_spline, BSpline``.
     """
-    #Avoid adding points between same points, like in kpath patches
-    inds = [i for i in range(0,len(x)) if x[i-1] == x[i]] #Duplicate indices
+    # Avoid adding points between same points, like in kpath patches
+    inds = [i for i in range(0, len(x)) if x[i - 1] == x[i]]  # Duplicate indices
     if inds:
-        inds = [0,*inds,len(x)] #Indices to split x
-        ranges = list(zip(inds[:-1],inds[1:])) #we are using this twice,so make list
-        for p,q in ranges:
-            if q - p == 1: # means three consecutive points have same value
-                raise ValueError(f'Three or more duplicate values found at index {p} in array `x`, at most two allowed for broken kpath like scenario.')
-        arrays = [[x[i:j],y[i:j]] for i,j in ranges] #Split x,y into arrays
+        inds = [0, *inds, len(x)]  # Indices to split x
+        ranges = list(zip(inds[:-1], inds[1:]))  # we are using this twice,so make list
+        for p, q in ranges:
+            if q - p == 1:  # means three consecutive points have same value
+                raise ValueError(
+                    f"Three or more duplicate values found at index {p} in array `x`, at most two allowed for broken kpath like scenario."
+                )
+        arrays = [[x[i:j], y[i:j]] for i, j in ranges]  # Split x,y into arrays
     else:
-        arrays = [(x,y)]
-    
+        arrays = [(x, y)]
+
     new_as, new_bs = [], []
-    for a,b in arrays:
-        anew = [np.linspace(a[i],a[i+1],n) for i in range(len(a)-1)]
-        anew = np.reshape(anew,(-1))
-        spl = make_interp_spline(a, b, k=k) #BSpline object
+    for a, b in arrays:
+        anew = [np.linspace(a[i], a[i + 1], n) for i in range(len(a) - 1)]
+        anew = np.reshape(anew, (-1))
+        spl = make_interp_spline(a, b, k=k)  # BSpline object
         bnew = spl(anew)
-        new_as.append(anew) 
+        new_as.append(anew)
         new_bs.append(bnew)
-    
+
     if len(new_as) == 1:
         return new_as[0], new_bs[0]
-        
-    return np.concatenate(new_as, axis = 0), np.concatenate(new_bs, axis = 0)
 
-def rolling_mean(X:np.ndarray, period:float, period_right:float = None, interface:float = None, mode:str = 'wrap', smoothness:int = 2) -> np.ndarray:
-    """Caluate rolling mean of array X using scipy.ndimage.filters.convolve1d.
-    
-    Args:
-        X (ndarray): 1D numpy array.
-        period (float): In range [0,1]. Period of rolling mean. Applies left side of X from center if period_right is given.
-        period_right (float): In range [0,1]. Period of rolling mean on right side of X from center.
-        interface (float): In range [0,1]. The point that divides X into left and right, like in a slab calculation.
-        mode (string): Mode of convolution. Default is wrap to keep periodcity of crystal in slab caluation. Read scipy.ndimage.filters.convolve1d for more info.
-        smoothness (int): Default is 2. Order of making the output smoother. Larger is better but can't be too large as there will be points lost at each convolution.
-    
-    Returns:
-        ndarray: convolved array of same size as X if mode is 'wrap'. May be smaller if mode is something else.
+    return np.concatenate(new_as, axis=0), np.concatenate(new_bs, axis=0)
+
+
+def rolling_mean(
+    X: np.ndarray,
+    period: float,
+    period_right: float = None,
+    interface: float = None,
+    mode: str = "wrap",
+    smoothness: int = 2,
+) -> np.ndarray:
+    """
+    Caluate rolling mean of array X using scipy.ndimage.filters.convolve1d.
+
+    Parameters
+    ----------
+    X : ndarray, 1D numpy array.
+    period : float, In range [0,1]. Period of rolling mean. Applies left side of X from center if period_right is given.
+    period_right : float, In range [0,1]. Period of rolling mean on right side of X from center.
+    interface : float, In range [0,1]. The point that divides X into left and right, like in a slab calculation.
+    mode : string, Mode of convolution. Default is wrap to keep periodcity of crystal in slab caluation. Read scipy.ndimage.filters.convolve1d for more info.
+    smoothness : int, Default is 2. Order of making the output smoother. Larger is better but can't be too large as there will be points lost at each convolution.
+
+    Returns
+    -------
+    ndarray: convolved array of same size as X if mode is 'wrap'. May be smaller if mode is something else.
     """
     if period_right is None:
         period_right = period
-    
+
     if interface is None:
         interface = 0.5
-        
+
     if smoothness < 1:
-        raise ValueError('smoothness must be >= 1')
-    
-    wx = np.linspace(0, 1, X.size, endpoint = False) # x-axis for making weights for convolution, 0 to 1 - (last point is not included in VASP grid).
-    x1, x2, x3, x4 = period_right, interface - period, interface + period_right, 1 - period
-    m1, m2, m3 = 0.5/x1, 1/(x2-x3), 0.5/(1-x4) # Slopes
-    weights_L = np.piecewise(wx,  # .----.____. Looks like this
-                [
-                    wx < x1, # left side reflected by right side
-                    (wx >= x1) & (wx <= x2), # left side
-                    (wx > x2) & (wx<x3), # middle contribution from left and right
-                    (wx>=x3) & (wx<=x4), # right side
-                    wx > x4 # right side reflected by left side
-                ], 
-                [
-                    lambda z:  m1*(z-x1)+1,
-                    1, 
-                    lambda z: m2*(z-x2) + 1,
-                    0, 
-                    lambda z: m3*(z-x4)
-                ])
-    
-    weights_R =  1 - weights_L # .____.----. Looks like this
-    
-    L = int(period*X.size) # Left periodictity
-    R = int(period_right*X.size) # Right Periodicity
-    
-    kernel_L = np.ones((L,))/L
-    kernel_R = np.ones((R,))/R
-    
-    mean_L = convolve1d(X,kernel_L,mode = mode)
-    mean_R = convolve1d(X,kernel_R,mode = mode)
-    
-    mean_all = weights_L*mean_L + weights_R*mean_R
-    
+        raise ValueError("smoothness must be >= 1")
+
+    wx = np.linspace(
+        0, 1, X.size, endpoint=False
+    )  # x-axis for making weights for convolution, 0 to 1 - (last point is not included in VASP grid).
+    x1, x2, x3, x4 = (
+        period_right,
+        interface - period,
+        interface + period_right,
+        1 - period,
+    )
+    m1, m2, m3 = 0.5 / x1, 1 / (x2 - x3), 0.5 / (1 - x4)  # Slopes
+    weights_L = np.piecewise(
+        wx,  # .----.____. Looks like this
+        [
+            wx < x1,  # left side reflected by right side
+            (wx >= x1) & (wx <= x2),  # left side
+            (wx > x2) & (wx < x3),  # middle contribution from left and right
+            (wx >= x3) & (wx <= x4),  # right side
+            wx > x4,  # right side reflected by left side
+        ],
+        [
+            lambda z: m1 * (z - x1) + 1,
+            1,
+            lambda z: m2 * (z - x2) + 1,
+            0,
+            lambda z: m3 * (z - x4),
+        ],
+    )
+
+    weights_R = 1 - weights_L  # .____.----. Looks like this
+
+    L = int(period * X.size)  # Left periodictity
+    R = int(period_right * X.size)  # Right Periodicity
+
+    kernel_L = np.ones((L,)) / L
+    kernel_R = np.ones((R,)) / R
+
+    mean_L = convolve1d(X, kernel_L, mode=mode)
+    mean_R = convolve1d(X, kernel_R, mode=mode)
+
+    mean_all = weights_L * mean_L + weights_R * mean_R
+
     if smoothness > 1:
-        p_l, p_r = period/2, period_right/2 # Should be half of period for smoothing each time
+        p_l, p_r = (
+            period / 2,
+            period_right / 2,
+        )  # Should be half of period for smoothing each time
         for _ in range(smoothness - 1):
-            mean_all = rolling_mean(mean_all, period = p_l, period_right = p_r, interface = interface, mode = mode, smoothness = 1)
-            p_l, p_r = p_l/2, p_r/2
-    
+            mean_all = rolling_mean(
+                mean_all,
+                period=p_l,
+                period_right=p_r,
+                interface=interface,
+                mode=mode,
+                smoothness=1,
+            )
+            p_l, p_r = p_l / 2, p_r / 2
+
     return mean_all
 
-def ps2py(ps_command :str ='Get-ChildItem', exec_type :str='-Command', path_to_ps:str='powershell.exe') -> list:
-    """Captures powershell output in python.
-    
-    Args:
-        ps_command (str): enclose ps_command in ' ' or " ".
-        exec_type  (str): type of execution, default '-Command', could be '-File'.
-        path_to_ps (str): path to powerhell.exe if not added to PATH variables.
-    
-    Returns:
-        list: list of lines of output.
-    """
-    try: # Works on Linux and Windows if PS version > 5.
-        cmd = ['pwsh', '-ExecutionPolicy', 'Bypass', exec_type, ps_command]
-        proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    except FileNotFoundError:
-        try: # Works only on Windows.
-            cmd = ['powershell', '-ExecutionPolicy', 'Bypass', exec_type, ps_command]
-            proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        except FileNotFoundError:
-            # Works in case nothing above works and you know where is executable.
-            cmd = [path_to_ps, '-ExecutionPolicy', 'Bypass', exec_type, ps_command]
-            proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
 
-    out=[]; #save to out.
-    while True:
-        line = proc.stdout.readline()
-        if line!=b'':
-            line=line.strip()
-            u_line=line.decode("utf-8")
-            out.append(u_line)
-        else:
-            break
-    out=[item for item in out if item!=''] #filter out empty lines
-    return out
-
-def ps2std(ps_command :str='Get-ChildItem', exec_type:str='-Command', path_to_ps:str='powershell.exe') -> None:
-    """Prints powershell output in python std.
-    Args:
-        ps_command (str): enclose ps_command in ' ' or " ".
-        exec_type  (str): type of execution, default '-Command', could be '-File'.
-        path_to_ps (str): path to powerhell.exe if not added to PATH variables.
-    """
-    out = ps2py(path_to_ps=path_to_ps,exec_type=exec_type,ps_command=ps_command)
-    for item in out:
-        print(item)
-    return None
-
-def list_files(path = '.', glob = '*', exclude = None, files_only = False, dirs_only = False):
+def list_files(path=".", glob="*", exclude=None, files_only=False, dirs_only=False):
     """
     Returns a tuple of files in a directory recursively based on glob pattern.
-    
+
     Parameters
     ----------
     path : str, current directory by default
@@ -239,30 +252,31 @@ def list_files(path = '.', glob = '*', exclude = None, files_only = False, dirs_
     exclude : str, regular expression pattern to exclude files
     files_only : bool, if True, returns only files
     dirs_only : bool, if True, returns only directories
-    
+
     Returns
     -------
     tuple of pathlib.Path objects
     """
     if files_only and dirs_only:
-        raise ValueError('files_only and dirs_only cannot be both True')
-    
+        raise ValueError("files_only and dirs_only cannot be both True")
+
     path = Path(path)
     files = [p for p in path.glob(glob)]
     if exclude:
-        files = [p for p in files if not re.search(exclude,str(p))]
+        files = [p for p in files if not re.search(exclude, str(p))]
     if files_only:
         files = [p for p in files if p.is_file()]
     if dirs_only:
         files = [p for p in files if p.is_dir()]
     return tuple(files)
 
+
 def prevent_overwrite(path: str) -> str:
     """Prevents overwiting as file/directory by adding numbers in given file/directory path."""
     if (p := Path(path)).exists():
         # Check existing files
         i = 0
-        name = p.stem + '-{}' + p.suffix
+        name = p.stem + "-{}" + p.suffix
         while Path(name.format(i)).is_file():
             i += 1
         out_path = name.format(i)
@@ -270,89 +284,121 @@ def prevent_overwrite(path: str) -> str:
         return out_path
     return path
 
+
 class color:
-     def bg(text,r,g,b):
-          """Provide r,g,b component in range 0-255"""
-          return f"\033[48;2;{r};{g};{b}m{text}\033[00m"
-     def fg(text,r,g,b):
-          """Provide r,g,b component in range 0-255"""
-          return f"\033[38;2;{r};{g};{b}m{text}\033[00m"
-     # Usual Colos
-     r  = lambda text: f"\033[0;91m {text}\033[00m"
-     rb = lambda text: f"\033[1;91m {text}\033[00m"
-     g  = lambda text: f"\033[0;92m {text}\033[00m"
-     gb = lambda text: f"\033[1;92m {text}\033[00m"
-     b  = lambda text: f"\033[0;34m {text}\033[00m"
-     bb = lambda text: f"\033[1;34m {text}\033[00m"
-     y  = lambda text: f"\033[0;93m {text}\033[00m"
-     yb = lambda text: f"\033[1;93m {text}\033[00m"
-     m  = lambda text: f"\033[0;95m {text}\033[00m"
-     mb = lambda text: f"\033[1;95m {text}\033[00m"
-     c  = lambda text: f"\033[0;96m {text}\033[00m"
-     cb = lambda text: f"\033[1;96m {text}\033[00m"
+    def bg(text, r, g, b):
+        """Provide r,g,b component in range 0-255"""
+        return f"\033[48;2;{r};{g};{b}m{text}\033[00m"
+
+    def fg(text, r, g, b):
+        """Provide r,g,b component in range 0-255"""
+        return f"\033[38;2;{r};{g};{b}m{text}\033[00m"
+
+    # Usual Colos
+    r = lambda text: f"\033[0;91m {text}\033[00m"
+    rb = lambda text: f"\033[1;91m {text}\033[00m"
+    g = lambda text: f"\033[0;92m {text}\033[00m"
+    gb = lambda text: f"\033[1;92m {text}\033[00m"
+    b = lambda text: f"\033[0;34m {text}\033[00m"
+    bb = lambda text: f"\033[1;34m {text}\033[00m"
+    y = lambda text: f"\033[0;93m {text}\033[00m"
+    yb = lambda text: f"\033[1;93m {text}\033[00m"
+    m = lambda text: f"\033[0;95m {text}\033[00m"
+    mb = lambda text: f"\033[1;95m {text}\033[00m"
+    c = lambda text: f"\033[0;96m {text}\033[00m"
+    cb = lambda text: f"\033[1;96m {text}\033[00m"
 
 
-def transform_color(arr: np.ndarray,s:float=1,c:float=1,b:float=0,mixing_matrix:np.ndarray=None) -> np.ndarray:
-    """Color transformation such as brightness, contrast, saturation and mixing of an input color array. ``c = -1`` would invert color,keeping everything else same.
-    
-    Args:
-        arr (ndarray): input array, a single RGB/RGBA color or an array with inner most dimension equal to 3 or 4. e.g. [[[0,1,0,1],[0,0,1,1]]].
-        c (float): contrast, default is 1. Can be a float in [-1,1].
-        s (float): saturation, default is 1. Can be a float in [-1,1]. If s = 0, you get a gray scale image.
-        b (float): brightness, default is 0. Can be a float in [-1,1] or list of three brightnesses for RGB components.
-        mixing_matrix (ndarray): A 3x3 matrix to mix RGB values, such as `ipyvas.utils.color_matrix`.
-
-    Returns:
-        ndarray: Transformed color array of same shape as input array.
-    `Recoloring <https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-recoloring-use?redirectedfrom=MSDN>`_
-    
-    `Rainmeter <https://docs.rainmeter.net/tips/colormatrix-guide/>`_
+def transform_color(
+    arr: np.ndarray,
+    s: float = 1,
+    c: float = 1,
+    b: float = 0,
+    mixing_matrix: np.ndarray = None,
+) -> np.ndarray:
     """
-    arr = np.array(arr) # Must
-    t = (1-c)/2 # For fixing gray scale when contrast is 0.
-    whiteness = np.array(b)+t # need to clip to 1 and 0 after adding to color.
-    sr = (1-s)*0.2125 #red saturation from red luminosity
-    sg = (1-s)*0.7154 #green saturation from green luminosity
-    sb = (1-s)*0.0721 #blue saturation from blue luminosity
+    Color transformation such as brightness, contrast, saturation and mixing of an input color array. ``c = -1`` would invert color,keeping everything else same.
+
+    Parameters
+    ----------
+    arr : ndarray, input array, a single RGB/RGBA color or an array with inner most dimension equal to 3 or 4. e.g. [[[0,1,0,1],[0,0,1,1]]].
+    c : float, contrast, default is 1. Can be a float in [-1,1].
+    s : float, saturation, default is 1. Can be a float in [-1,1]. If s = 0, you get a gray scale image.
+    b : float, brightness, default is 0. Can be a float in [-1,1] or list of three brightnesses for RGB components.
+    mixing_matrix : ndarray, A 3x3 matrix to mix RGB values, such as `ipyvas.utils.color_matrix`.
+
+    Returns
+    -------
+    ndarray: Transformed color array of same shape as input array.
+
+    See `Recoloring <https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-recoloring-use?redirectedfrom=MSDN>`_
+    and `Rainmeter <https://docs.rainmeter.net/tips/colormatrix-guide/>`_ for useful information on color transformation.
+    """
+    arr = np.array(arr)  # Must
+    t = (1 - c) / 2  # For fixing gray scale when contrast is 0.
+    whiteness = np.array(b) + t  # need to clip to 1 and 0 after adding to color.
+    sr = (1 - s) * 0.2125  # red saturation from red luminosity
+    sg = (1 - s) * 0.7154  # green saturation from green luminosity
+    sb = (1 - s) * 0.0721  # blue saturation from blue luminosity
     # trans_matrix is multiplied from left, or multiply its transpose from right.
     # trans_matrix*color is not normalized but value --> value - int(value) to keep in [0,1].
-    trans_matrix = np.array([
-        [c*(sr+s), c*sg,      c*sb],
-        [c*sr,   c*(sg+s),    c*sb],
-        [c*sr,     c*sg,  c*(sb+s)]])
+    trans_matrix = np.array(
+        [
+            [c * (sr + s), c * sg, c * sb],
+            [c * sr, c * (sg + s), c * sb],
+            [c * sr, c * sg, c * (sb + s)],
+        ]
+    )
     if np.ndim(arr) == 1:
-        new_color = np.dot(trans_matrix,arr)
+        new_color = np.dot(trans_matrix, arr)
     else:
-        new_color = np.dot(arr[...,:3],trans_matrix.T)
-    if mixing_matrix is not None and np.size(mixing_matrix)==9:
-        new_color = np.dot(new_color,np.transpose(mixing_matrix))
-    new_color[new_color > 1] = new_color[new_color > 1] - new_color[new_color > 1].astype(int)
-    new_color = np.clip(new_color + whiteness,a_max=1,a_min=0)
-    if np.shape(arr)[-1]==4:
-        axis = len(np.shape(arr))-1 #Add back Alpha value if present
-        new_color = np.concatenate([new_color,arr[...,3:]],axis=axis)
+        new_color = np.dot(arr[..., :3], trans_matrix.T)
+    if mixing_matrix is not None and np.size(mixing_matrix) == 9:
+        new_color = np.dot(new_color, np.transpose(mixing_matrix))
+    new_color[new_color > 1] = new_color[new_color > 1] - new_color[
+        new_color > 1
+    ].astype(int)
+    new_color = np.clip(new_color + whiteness, a_max=1, a_min=0)
+    if np.shape(arr)[-1] == 4:
+        axis = len(np.shape(arr)) - 1  # Add back Alpha value if present
+        new_color = np.concatenate([new_color, arr[..., 3:]], axis=axis)
     return new_color
 
+
 # color_marices for quick use
-color_matrix = np.array([[0.5,0,0.5,1],[0.5,0.5,0,1],[0,0.5,0.5,0.2],[1,1,0.2,0]]) # lights up to see colors a little bit
-rbg_matrix= np.array([[1,0,0],[0,0,1],[0,1,0]]) # Red, Blue, Green
-cmy_matrix = np.array([[0,0.5,0.5,1],[0.5,0,0.5,1],[0.5,0.5,0,0.2],[1,1,0.2,0]]) # Generates CMYK color palette
+color_matrix = np.array(
+    [[0.5, 0, 0.5, 1], [0.5, 0.5, 0, 1], [0, 0.5, 0.5, 0.2], [1, 1, 0.2, 0]]
+)  # lights up to see colors a little bit
+rbg_matrix = np.array([[1, 0, 0], [0, 0, 1], [0, 1, 0]])  # Red, Blue, Green
+cmy_matrix = np.array(
+    [[0, 0.5, 0.5, 1], [0.5, 0, 0.5, 1], [0.5, 0.5, 0, 0.2], [1, 1, 0.2, 0]]
+)  # Generates CMYK color palette
 
 
 # Register 'RGB' colormap in current session
-RGB = LinearSegmentedColormap.from_list('RGB',[(0.9,0,0),(0.9,0.9,0),(0,0.9,0),(0,0.9,0.9),(0,0,0.9)])
-CMY = LinearSegmentedColormap.from_list('CMY',[(0,0.9,0.9),(0,0,0.9),(0.9,0,0.9),(0.9,0,0),(0.9,0.9,0)])
-plt.register_cmap('RGB',RGB)
-plt.register_cmap('CMY',CMY)
+RGB = LinearSegmentedColormap.from_list(
+    "RGB", [(0.9, 0, 0), (0.9, 0.9, 0), (0, 0.9, 0), (0, 0.9, 0.9), (0, 0, 0.9)]
+)
+CMY = LinearSegmentedColormap.from_list(
+    "CMY", [(0, 0.9, 0.9), (0, 0, 0.9), (0.9, 0, 0.9), (0.9, 0, 0), (0.9, 0.9, 0)]
+)
+plt.register_cmap("RGB", RGB)
+plt.register_cmap("CMY", CMY)
 
-def create_colormap(name='RB',colors=[(0.9,0,0),(0,0,0.9)]):
+
+def create_colormap(name="RB", colors=[(0.9, 0, 0), (0, 0, 0.9)]):
     """
     Create and register a custom colormap from a list of RGB colors. and then use it's name in plottoing functions to get required colors.
-    - name: str, name of the colormap
-    - colors: list of RGB colors, e.g. [(0.9,0,0),(0,0,0.9)] or named colors, e.g. ['red','blue'], add as many colors as you want.
-    
-    **Returns**: Colormap object which you can use to get colors from. like cm = create_colormap(); cm(0.5) which will return a color at center of map
+
+    Parameters
+    ----------
+    name: str, name of the colormap
+    colors: list of RGB colors, e.g. [(0.9,0,0),(0,0,0.9)] or named colors, e.g. ['red','blue'], add as many colors as you want.
+
+    Returns
+    -------
+    Colormap object which you can use to get colors from. like cm = create_colormap(); cm(0.5) which will return a color at center of map
     """
-    RB = LinearSegmentedColormap.from_list(name,colors)
-    plt.register_cmap(name,RB)
+    RB = LinearSegmentedColormap.from_list(name, colors)
+    plt.register_cmap(name, RB)
     return RB

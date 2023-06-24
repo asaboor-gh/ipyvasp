@@ -8,49 +8,56 @@ Links
     [docs](https://massgh.github.io/ipyvasp/)     
 """
 
-links = """[github](https://github.com/massgh/ipyvasp)             
-[docs](https://massgh.github.io/ipyvasp/)"""
-
 __version__ = "0.1.0"
 
-__all__ = []
+from .core.parser import *
+from .core.serializer import *
+from .misc import *
+from .lattice import *
+from .bsdos import *
+from .potential import *
+from .surface import *
+from .utils import *
+from .widgets import summarize, BandsWidget, KpathWidget, FilesWidget
+from .core import plot_toolkit, spatial_toolkit
+from .core.spatial_toolkit import to_basis, to_R3, get_TM, get_bz, rotation
+from .core.plot_toolkit import (
+    get_axes,  # other options are available as attributes of get_axes
+    global_matplotlib_settings,
+    plt2text,
+    plt2html,
+    iplot2html,
+    iplot2widget,
+    webshow,
+)
 
-from .api import __all__ as api_all
-from .parser import Vaspout, Vasprun, minify_vasprun
 
-__all__.extend(api_all)
-
-
-
-# Access all functions through root modile ipyvasp
-from .api import *
-    
-from matplotlib.pyplot import show as _show,savefig as _savefig
-
-mpl_imported=['_show','_savefig']
-__all__.extend(mpl_imported)
-
-
-# Edit rcParams here
-import matplotlib as __mpl
+# Set global matplotlib settings for notebook.
 from cycler import cycler as __cycler
-__mpl.rcParams.update(
+
+global_matplotlib_settings(
     {
-        'figure.dpi': 144, #Better to See
-        'figure.figsize': [4,2.8],
-        'axes.prop_cycle': __cycler(color=['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52']),
-        'axes.linewidth': 0.4, #set the value globally
-        'font.serif': "STIXGeneral",
-        'font.family': "serif",
-        'mathtext.fontset': "stix"
+        "figure.dpi": 144,  # Better to See
+        "figure.figsize": [4, 2.8],
+        "axes.prop_cycle": __cycler(
+            color=[
+                "#636EFA",
+                "#EF553B",
+                "#00CC96",
+                "#AB63FA",
+                "#FFA15A",
+                "#19D3F3",
+                "#FF6692",
+                "#B6E880",
+                "#FF97FF",
+                "#FECB52",
+            ]
+        ),
     }
 )
 
+
 def docs():
-    from IPython.display import display, Markdown
-    return display(Markdown('[ipyvasp-docs](https://massgh.github.io/ipyvasp/)'))
+    from IPython.display import Markdown
 
-
-__all__ = ['docs',*__all__]
-    
-    
+    return Markdown("[ipyvasp-docs](https://massgh.github.io/ipyvasp/)")

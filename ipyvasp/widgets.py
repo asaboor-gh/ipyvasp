@@ -20,12 +20,10 @@ import plotly.graph_objects as go
 
 # Internal imports  
 from . import utils as gu
-from . import parser as vp
-from . import iplots as ip
-from . import splots as sp
-from . import sio
-from . import serializer
+from . import lattice as lat
+from .core import serializer, parser as vp, plot_toolkit as ptk
 from .utils import _sig_kwargs, _sub_doc
+from ._enplots import _fmt_labels
 
 
 def summarize(files, func, **kwargs):
@@ -585,7 +583,7 @@ class BandsWidget(VBox):
                 self.iplot = partial(self.bands.iplot_bands, **self._kwargs)
                 self.splot = partial(self.bands.splot_bands, **self._kwargs)
 
-            ip.iplot2widget(fig, self._fig, template = self._tsd.value)
+            ptk.iplot2widget(fig, self._fig, template = self._tsd.value)
             self._click_dict.clear() # avoid data from previous figure
             self._select_dict.clear() # avoid data from previous figure
             store_clicked_data(self._fig, self._click_dict, callback = lambda trace: self._click_save_data('CLICK')) # 'CLICK' is needed to inntercept in a function
@@ -692,11 +690,11 @@ class KpathWidget(VBox):
         return self._poscar
         
     def _update_fig(self, path):
-        from .api import POSCAR # to avoid circular import
+        from .misc import POSCAR # to avoid circular import
         with self._interact.output_widget:
             template = 'plotly_dark' if 'Light' in self._tsb.description else 'plotly_white'
             self._poscar = POSCAR(path)
-            ip.iplot2widget(self._poscar.iplot_bz(fill = False, color='red'), self._fig, template)
+            ptk.iplot2widget(self._poscar.iplot_bz(fill = False, color='red'), self._fig, template)
             with self._fig.batch_animate():
                 self._fig.add_trace(go.Scatter3d(x = [],y = [],z = [],
                     mode='lines+text',name='path',text=[], hoverinfo='none', # dont let it block other points
@@ -734,13 +732,14 @@ class KpathWidget(VBox):
                         trace.x = coords[:,0]
                         trace.y = coords[:,1]
                         trace.z = coords[:,2]
-                        trace.text = ip._fmt_labels(labels) # convert latex to html equivalent
+                        trace.text = _fmt_labels(labels) # convert latex to html equivalent
         
     def get_coords_labels(self):
         "Returns tuple of (coordinates, labels) to directly plot."
         with self._interact.output_widget:
             points = self.get_kpoints()
-            coords = sio.to_R3(self._poscar.data.rec_basis,[p[:3] for p in points]).tolist() if points else []
+
+            coords = self.poscar.bz.to_cartesian([p[:3] for p in points]).tolist() if points else []
             labels = [p[3] if (len(p) >= 4 and isinstance(p[3],str)) else '' for p in points]
             numbers = [p[4] if len(p) == 5 else p[3] if (len(p) == 4 and isinstance(p[3],int)) else '' for p in points]
 
@@ -824,14 +823,14 @@ class KpathWidget(VBox):
         
             self._update_selection() # Update plot in both cases, by click or manual input
     
-    @_sub_doc(sio.get_kpath, 'kpoints :')
-    @_sig_kwargs(sio.get_kpath, ('kpoints',))
+    @_sub_doc(lat.get_kpath, 'kpoints :')
+    @_sig_kwargs(lat.get_kpath, ('kpoints',))
     def get_kpath(self,n = 5,**kwargs):
         return self.poscar.get_kpath(self.get_kpoints(),n = n, **kwargs)
 
     def splot(self, plane = None, fmt_label = lambda x: x, plot_kws = {}, **kwargs):
         """
-        Same as `ipyvasp.POSCAR.splot_bz` except it also plots path on BZ.
+        Same as `ipyvasp.lattice.POSCAR.splot_bz` except it also plots path on BZ.
 
         Parameters
         ----------
@@ -839,7 +838,7 @@ class KpathWidget(VBox):
         fmt_label : function, should take a string and return a string or (str, dict) of which dict is passed to `plt.text`.
         plot_kws : dict of keyword arguments for `plt.plot` for kpath.
         
-        kwargs are passed to `ipyvasp.POSCAR.splot_bz`.
+        kwargs are passed to `ipyvasp.lattice.POSCAR.splot_bz`.
         """
         if not isinstance(plot_kws, dict):
             raise TypeError('plot_ks should be a dict')

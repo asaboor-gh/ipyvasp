@@ -6,15 +6,17 @@ from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 
 # Inside packages import
-from . import parser as vp
-from . import api, serializer, splots
+from .core import parser as vp, serializer
+from .core import plot_toolkit as ptk
+from .lattice import POSCAR
+from .bsdos import _format_input
 
 
 # Need to get it from source like Vasprun, and then get_evals
 def _collect_spin_data(source, bands=[0], projections={"A": ([0], [0])}):
     if not isinstance(bands, (list, tuple)):
         raise TypeError("`bands` must be list/tuple of integer.")
-    atoms, orbs, *_ = api._format_input(projections, sys_info = source.summary)
+    atoms, orbs, *_ = _format_input(projections, sys_info=source.summary)
 
     def per_band_data(band):
         kpoints = source.kpoints
@@ -65,29 +67,34 @@ def _collect_spin_data(source, bands=[0], projections={"A": ([0], [0])}):
 
 
 class SpinDataFrame(pd.DataFrame):
-    """Spin data from vasprun.xml is converted to a dataframe.
-    Args::
-        - path: path to `vasprun.xml` or auto picks in current directory.
-        - bands: list of band indices [zero based here], In output data frame you will see corresponding band number based on full data.
-        - atoms: list of atoms to plot. inner list contains ions indices. Can leave empty to discard projection data.
-        - orbs: list of orbitals to plot. inner list contains orbitals indices. Can leave empty to discard projection data
-        - skipk: if not None, auto skipped unnecessary k-points.
-        - elim: if not None, filtered out unnecessary bands.
-        - data: if not None, data is loaded from given data/pickle/json/dict and validated. Many other parameters are ignored when data is given.
+    """
+    Spin data from vasprun.xml is converted to a dataframe.
 
-    - **Returns**:
-        - SpinDataFrame: dataframe with colums as k-points, eigenvalues[with fermi energy subtracted], spin components projected over selected ions and orbtials.
+    Parameters
+    ----------
+    path : path to `vasprun.xml` or auto picks in current directory.
+    bands : list of band indices [zero based here], In output data frame you will see corresponding band number based on full data.
+    atoms : list of atoms to plot. inner list contains ions indices. Can leave empty to discard projection data.
+    orbs : list of orbitals to plot. inner list contains orbitals indices. Can leave empty to discard projection data
+    skipk : if not None, auto skipped unnecessary k-points.
+    elim : if not None, filtered out unnecessary bands.
+    data : if not None, data is loaded from given data/pickle/json/dict and validated. Many other parameters are ignored when data is given.
 
-    - **Methods**:
-        - sliced: Slice data in a plane orthogonal to given `column` at given `value`.
-        - masked: Mask data over a constant value in a given column. Useful for plotting fermi level/surface.
-        - splot: plot data in a 2D plot.
-        - splot3d: plot data in a 3D plot.
-        - join/append/concat/+/+=: Append another SpinDataFrame to this one with same columns and copy metadata.
-        - send_metadata: Copy metadata from this to another SpinDataFrame, some methods may not carry over metadata, useful in that case.
-        - get_data: Return data as collection of numpy arrays with kpoints already sent to BZ. Use .to_json() to export to json for plotting in other libraries/languages like Mathematica.
+    Returns
+    -------
+    SpinDataFrame : dataframe with colums as k-points, eigenvalues[with fermi energy subtracted], spin components projected over selected ions and orbtials.
 
-        All other methods are inherited from pd.DataFrame. If you apply some method that do not pass metadat, then use `send_metadata` to copy metadata to traget SpinDataFrame.
+    Methods
+    -------
+    sliced : Slice data in a plane orthogonal to given `column` at given `value`.
+    masked : Mask data over a constant value in a given column. Useful for plotting fermi level/surface.
+    splot : plot data in a 2D plot.
+    splot3d : plot data in a 3D plot.
+    join/append/concat/+/+= : Append another SpinDataFrame to this one with same columns and copy metadata.
+    send_metadata : Copy metadata from this to another SpinDataFrame, some methods may not carry over metadata, useful in that case.
+    get_data : Return data as collection of numpy arrays with kpoints already sent to BZ. Use .to_json() to export to json for plotting in other libraries/languages like Mathematica.
+
+    All other methods are inherited from pd.DataFrame. If you apply some method that do not pass metadat, then use `send_metadata` to copy metadata to traget SpinDataFrame.
     """
 
     _metadata = [
@@ -137,7 +144,7 @@ class SpinDataFrame(pd.DataFrame):
                 )
                 super().__init__(out_dict)
                 self.sys_info = spin_data.sys_info
-                atoms, orbs, *_ = api._format_input(projections, sys_info=self.sys_info)
+                atoms, orbs, *_ = _format_input(projections, sys_info=self.sys_info)
                 self.projection = serializer.Dict2Data(
                     {
                         f"_{i}": {"ions": e, "orbs": o}
@@ -145,7 +152,7 @@ class SpinDataFrame(pd.DataFrame):
                     }
                 )
                 # Path below is used to get kpoints info
-                self.poscar = api.POSCAR(path=path, data=spin_data.poscar)
+                self.poscar = POSCAR(path=path, data=spin_data.poscar)
                 self._current_attrs = {
                     "cmap": "viridis"
                 }  # To store attributes of current plot for use in colorbar.
@@ -375,23 +382,25 @@ class SpinDataFrame(pd.DataFrame):
         shift=0,
         **kwargs,
     ):
-        """Plot energy in 2D with/without arrows.
-        Args::
-            - *args: 3 or 4 names of columns, representing [X,Y,Energy,[Anything]], from given args, last one is colormapped. If kwargs has color, that takes precedence.
-            - arrows: 2 or 3 names of columns, representing [U,V,[color]]. If quiver_kws has color, that takes precedence.
-            - every: every nth point is plotted as arrow.
-            - norm: normalization factor for size of arrows.
-            - marker: marker to use for scatter, use s as another argument to change size.
-            - ax: matplotlib axes to plot on (defaults to auto create one).
-            - quiver_kws: these are passed to matplotlib.pyplot.quiver.
-            - shift: A number or a list of three numbers that will be added to kpoints before any other operation.
+        """
+        Plot energy in 2D with/without arrows.
+
+        Parameters
+        ----------
+        *args : 3 or 4 names of columns, representing [X,Y,Energy,[Anything]], from given args, last one is colormapped. If kwargs has color, that takes precedence.
+        arrows : 2 or 3 names of columns, representing [U,V,[color]]. If quiver_kws has color, that takes precedence.
+        every : every nth point is plotted as arrow.
+        norm : normalization factor for size of arrows.
+        marker : marker to use for scatter, use s as another argument to change size.
+        ax : matplotlib axes to plot on (defaults to auto create one).
+        quiver_kws : these are passed to matplotlib.pyplot.quiver.
+        shift : A number or a list of three numbers that will be added to kpoints before any other operation.
 
         **kwargs are passed to matplotlib.pyplot.scatter.
 
-        - **Returns**:
-            - ax: matplotlib axes. It has additinal method `colorbar` to plot colorbar from most recent plot.
-
-        See examples at https://massgh.github.io/ipyvasp/
+        Returns
+        --------
+        ax : matplotlib axes. It has additinal method `colorbar` to plot colorbar from most recent plot.
         """
         if arrows and len(arrows) not in [2, 3]:
             raise ValueError(
@@ -404,7 +413,7 @@ class SpinDataFrame(pd.DataFrame):
 
         self._validate_columns(*args)
         kxyz, kij = self._collect_kxyz(*args[:2], shift=shift)
-        ax = ax or api.get_axes()
+        ax = ax or ptk.get_axes()
         minmax_c = [0, 1]
         cmap = kwargs.get("cmap", self._current_attrs["cmap"])
 
@@ -448,23 +457,25 @@ class SpinDataFrame(pd.DataFrame):
         shift=0,
         **kwargs,
     ):
-        """Plot energy in 3D with/without arrows.
-        Args::
-            - *args: 3, 4 or 5 names of columns, representing [X,Y,[Z or Energy],Energy, [Anything]], out of given args, last one is color mapped. if kwargs has color, that takes precedence.
-            - arrows: 3 or 4 names of columns, representing [U,V,W,[color]]. If color is not given, magnitude of arrows is color mapped. If quiver_kws has color, that takes precedence.
-            - every: every nth point is plotted as arrow.
-            - norm: normalization factor for size of arrows.
-            - marker: marker to use for scatter, use s as another argument to change size.
-            - ax: matplotlib 3d axes to plot on (defaults to auto create one).
-            - quiver_kws: these are passed to ipyvasp.quiver3d.
-            - shift: A number or a list of three numbers that will be added to kpoints before any other operation.
+        """
+        Plot energy in 3D with/without arrows.
+
+        Parameters
+        ----------
+        *args : 3, 4 or 5 names of columns, representing [X,Y,[Z or Energy],Energy, [Anything]], out of given args, last one is color mapped. if kwargs has color, that takes precedence.
+        arrows : 3 or 4 names of columns, representing [U,V,W,[color]]. If color is not given, magnitude of arrows is color mapped. If quiver_kws has color, that takes precedence.
+        every : every nth point is plotted as arrow.
+        norm : normalization factor for size of arrows.
+        marker : marker to use for scatter, use s as another argument to change size.
+        ax : matplotlib 3d axes to plot on (defaults to auto create one).
+        quiver_kws : these are passed to ipyvasp.quiver3d.
+        shift : A number or a list of three numbers that will be added to kpoints before any other operation.
 
         **kwargs are passed to matplotlib.pyplot.scatter.
 
-        - **Returns**:
-            - ax: matplotlib 3d axes. It has additinal method `colorbar` to plot colorbar from most recent plot.
-
-        See examples at https://massgh.github.io/ipyvasp/
+        Returns
+        -------
+        ax : matplotlib 3d axes. It has additinal method `colorbar` to plot colorbar from most recent plot.
         """
         if arrows and len(arrows) not in [3, 4]:
             raise ValueError(
@@ -480,7 +491,7 @@ class SpinDataFrame(pd.DataFrame):
 
         self._validate_columns(*args)
         kxyz, kij = self._collect_kxyz(*args[:3], shift=shift)
-        ax = ax or api.get_axes(axes_3d=True)
+        ax = ax or ptk.get_axes(axes_3d=True)
         minmax_c = [0, 1]
         cmap = kwargs.get("cmap", self._current_attrs["cmap"])
 
@@ -505,7 +516,7 @@ class SpinDataFrame(pd.DataFrame):
             if "cmap" in quiver_kws:
                 quiver_kws.pop("cmap")  # It is not in quiver3d
 
-            api.quiver3d(
+            ptk.quiver3d(
                 *kxyz[::every].T[kij],
                 *(norm * arrows_data[::every].T[:3]),
                 **quiver_kws,
@@ -544,7 +555,7 @@ class SpinDataFrame(pd.DataFrame):
         if ax.name == "3d":
             cax = cax or plt.gcf().add_axes([0.85, 0.15, 0.03, 0.7])
 
-        return splots.add_colorbar(
+        return ptk.add_colorbar(
             ax,
             cmap,
             cax=cax,

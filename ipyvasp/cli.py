@@ -1,5 +1,5 @@
 from . import __version__, __doc__, docs, example
-from .sio import get_kpath as gkpath, InvokeMaterialsProject, _save_mp_API
+from ._lattice import get_kpath as gkpath, InvokeMaterialsProject, _save_mp_API
 import argparse
 from argparse import RawTextHelpFormatter
 
