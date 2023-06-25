@@ -93,24 +93,51 @@ def _validate_data(K, E, elim, kticks, interp):
     return K, E, xticks, xticklabels
 
 
-def splot_bands(K, E, ax=None, elim=None, kticks=None, interp=None, **kwargs):
-    """
-    Plot band structure for a single spin channel and return the matplotlib axes which can be used to add other channel if spin polarized.
-
+_docs = dict(
+    params="""
     Parameters
-    ----------
-    K : array-like of shape (nkpts,)
-    E : array-like of shape (nkpts, nbands)
-    ax : matplotlib axes
-    elim : list of length 2
-    kticks : [(int, str),...] for indices of high symmetry k-points. To join a broken path, use '<=' before symbol, e.g.  [(0, 'G'),(40, '<=K|M'), ...] will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').
-    interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
-
-    kwargs are passed to matplotlib's command `ax.plot`.
-
+    ----------""",
+    kticks="""kticks : list
+        List of pairs [(int, str),...] for indices of high symmetry k-points. 
+        To join a broken path, use '<=' before symbol, e.g.  [(0, 'G'),(40, '<=K|M'), ...] 
+        will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').""",
+    interp="""interp : int or list/tuple
+        If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.""",
+    return_ax="""
     Returns
     -------
-    ax : matplotlib axes
+    matplotlib.pyplot.Axes""",
+    return_fig="""
+    Returns
+    -------
+    plotly.graph_objects.Figure""",
+    K="""K : array-like
+        Array of kpoints with shape (nkpts,)""",
+    E="""E : array-like
+        Array of eigenvalues with shape (nkpts, nbands)""",
+    ax="""ax : matplotlib.pyplot.Axes
+        Matplotlib axes to plot on. If None, a new figure and axes will be created.""",
+    elim="""elim : list or tuple
+        A list or tuple of length 2 for energy limits.""",
+    pros="""pros : array-like
+        Projections of shape (m,nk,nb), m is the number of projections. m <= 3 in rgb case.""",
+    labels="""labels : list
+        As many labels for as projections.""",
+    colormap="""colormap : str
+        A valid matplotlib colormap name.""",
+    maxwidth="""maxwidth : float
+        Maximum linewidth to which the projections line width will be scaled. Default is 3.""",
+)
+
+
+@gu._fmt_doc(_docs)
+def splot_bands(K, E, ax=None, elim=None, kticks=None, interp=None, **kwargs):
+    """Plot band structure for a single spin channel and return the matplotlib axes which can be used to add other channel if spin polarized.
+    {params}\n    {K}\n    {E}\n    {ax}\n    {elim}\n    {kticks}\n    {interp}
+
+
+    kwargs are passed to matplotlib's command `plt.plot`.
+    {return_ax}
     """
     K, E, xticks, xticklabels = _validate_data(K, E, elim, kticks, interp)
 
@@ -152,7 +179,7 @@ def _make_line_collection(
 ):
     """
     Returns a tuple of line collections for each given projection data.
-    
+
     Parametrs
     ---------
     maxwidth  : Default is 3. Max linewidth is scaled to maxwidth if an int of float is given.
@@ -293,6 +320,7 @@ def _fix_data(K, E, pros, labels, interp, rgb=False, **others):
     return data
 
 
+@gu._fmt_doc(_docs)
 def splot_rgb_lines(
     K,
     E,
@@ -309,29 +337,20 @@ def splot_rgb_lines(
     N=9,
     shadow=False,
 ):
-    """
-    Plot projected band structure for a given projections.
+    """Plot projected band structure for a given projections.
+    {params}\n    {K}\n    {E}\n    {pros}\n    {labels}\n    {ax}\n    {elim}\n    {kticks}\n    {interp}\n    {maxwidth}
+    uniwidth : bool
+        If True, use same linewidth for all patches to maxwidth/2. Otherwise, use linewidth proportional to projection value.
+    {colormap}
+    colorbar : bool
+        If True, add colorbar, otherwise add attribute to ax to add colorbar or color cube later
+    N : int
+        Number of colors in colormap
+    shadow : bool
+        If True, add shadow to lines
 
-    Parameters
-    ----------
-    K : array-like, shape (nk,)
-    E : array-like, shape (nk,nb)
-    pros : array-like, shape (m,nk,nb), m is the number of projections <= 3 in rgb case.
-    labels : list of str, length m
-    ax : matplotlib.axes.Axes
-    elim : tuple of min and max values
-    kticks : [(int, str),...] for indices of high symmetry k-points. To join a broken path, use '<=' before symbol, e.g.  [(0, 'G'),(40, '<=K|M'), ...] will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').
-    interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
-    maxwidth : float, maximum linewidth, 3 by default
-    uniwidth : bool, if True, use same linewidth for all patches to maxwidth/2. Otherwise, use linewidth proportional to projection value.
-    colormap : str, name of a matplotlib colormap
-    colorbar : bool, if True, add colorbar, otherwise add attribute to ax to add colorbar or color cube later
-    N : int, number of colors in colormap
-    shadow : bool, if True, add shadow to lines
-
-    Returns
-    -------
-    ax : matplotlib.axes.Axes which has additional attributes:
+    {return_ax}
+        Returned ax has additional attributes:
         .add_colorbar() : Add colorbar that represents most recent plot
         .color_cube()   : Add color cube that represents most recent plot if `pros` is 3 components
     """
@@ -479,6 +498,7 @@ def splot_rgb_lines(
     return ax
 
 
+@gu._fmt_doc(_docs)
 def splot_color_lines(
     K,
     E,
@@ -495,30 +515,24 @@ def splot_color_lines(
     xyc_label=[0.2, 0.85, "black"],  # x, y, color only if showlegend = False
     **kwargs,
 ):
-    """
-    Plot projected band structure for a given projections.
+    """Plot projected band structure for a given projections.
+    {params}\n    {K}\n    {E}\n    {pros}\n    {labels}
+    axes : matplotlib.axes.Axes or list of Axes
+        Number of axes should be 1 or equal to the number of projections to plot separately. If None, creates new axes.
+    {elim}\n    {kticks}\n    {interp}\n    {maxwidth}\n    {colormap}
+    shadow : bool
+        If True, add shadow to lines
+    showlegend : bool
+        If True, add legend, otherwise adds a label to the plot.
+    xyc_label : list or tuple
+        List of (x, y, color) for the label. Used only if showlegend = False
 
-    Parameters
-    ----------
-    K : array-like, shape (nk,)
-    E : array-like, shape (nk,nb)
-    pros : array-like, shape (m,nk,nb), m is the number of projections
-    labels : list of str, length m
-    axes : matplotlib.axes.Axes or list of Axes equal to the number of projections to plot separately. If None, create new axes.
-    elim : tuple of min and max values
-    kticks : [(int, str),...] for indices of high symmetry k-points. To join a broken path, use '<=' before symbol, e.g.  [(0, 'G'),(40, '<=K|M'), ...] will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').
-    interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
-    maxwidth : float, maximum linewidth, 3 by default
-    colormap : str, name of a matplotlib colormap
-    shadow : bool, if True, add shadow to lines
-    showlegend : bool, if True, add legend, otherwise adds a label to the plot.
-    xyc_label : list of x, y, color for the label. Used only if showlegend = False
 
     kwargs are passed to matplotlib's command `ax.legend`.
 
     Returns
     -------
-    ax : matplotlib.axes.Axes. Use ax.subplots_adjust to adjust the plot if needed.
+    One or as many matplotlib.axes.Axes as given by `axes` parameter.
     """
     K, E, xticks, xticklabels = _validate_data(K, E, elim, kticks, interp)
     pros_data = _fix_data(K, E, pros, labels, interp, rgb=False)
@@ -565,7 +579,7 @@ def splot_color_lines(
             **kwargs,
         }
         add_legend(
-            ax=axes[0], colors=colors, labels=labels, widths=maxwidth, **legend_kwargs
+            ax=axes[0], colors=colors, labels=labels, widths=maxwidth, **legend_kws
         )
 
     else:
@@ -626,6 +640,7 @@ def _fix_dos_data(energy, dos_arrays, labels, colors, interp):
     return energy, dos_arrays, labels, colors
 
 
+@gu._fmt_doc(_docs)
 def splot_dos_lines(
     energy,
     dos_arrays,
@@ -645,31 +660,23 @@ def splot_dos_lines(
     },
     **kwargs,
 ):
-    """
-    Plot density of states (DOS) lines.
-
-    Parameters
-    ----------
+    """Plot density of states (DOS) lines.
+    {params}
     energy : array-like, shape (n,)
     dos_arrays : list of array_like, each of shape (n,) or array-like (m,n)
     labels : list of str, length = len(dos_arrays) should hold.
-    ax : matplotlib.axes.Axes
-    elim : list of length 2, (emin, emax), if None, (min(energy), max(energy)) is used.
-    colormap : str, default 'tab10', any valid matplotlib colormap name.
+    {ax}\n    {elim}\n    {colormap}
     colors : list of str, length = len(dos_arrays) should hold if given, and will override colormap.
     fill : bool, default True, if True, fill the area under the DOS lines.
     vertical : bool, default False, if True, plot DOS lines vertically.
     stack : bool, default False, if True, stack the DOS lines. Only works for horizontal plots.
-    interp : int or list/tuple of (n,k), default None, if given, interpolate the DOS lines using spline.
+    {interp}
     showlegend : bool, default True, if True, show legend.
     legend_kws : dict, default is just hint, anything that `ipyvasp.add_legend` accepts can be passed, only used if showlegend is True.
 
     keyword arguments are passed to matplotlib.axes.Axes.plot or matplotlib.axes.Axes.fill_between or matplotlib.axes.Axes.fill_betweenx.
 
-    Returns
-    -------
-    ax : matplotlib.axes.Axes
-    """
+    {return_ax}"""
     energy, dos_arrays, labels, colors = _fix_dos_data(
         energy, dos_arrays, labels, colors, interp
     )  # validate data brfore plotting.
@@ -826,28 +833,20 @@ def _fmt_labels(ticklabels):
     return ticklabels
 
 
+@gu._fmt_doc(_docs)
 def iplot_bands(
     K, E, fig=None, elim=None, kticks=None, interp=None, title=None, **kwargs
 ):
-    """
-    Plot band structure using plotly.
-
-    Parameters
-    ----------
-    K : array_like of shape (Nk,)
-    E : array_like of shape (Nk, Nb)
-    fig : plotly.graph_objects.Figure, created if None
-    elim : tuple, energy limits for plot
-    kticks : [(int, str),...] for indices of high symmetry k-points. To join a broken path, use '<=' before symbol, e.g.  [(0, 'G'),(40, '<=K|M'), ...] will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').
-    interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
+    """Plot band structure using plotly.
+    {params}\n    {K}\n    {E}
+    fig : plotly.graph_objects.Figure
+        If not given, create a new figure.
+    {elim}\n    {kticks}\n    {interp}
     title : str, title of plot
 
-    kwargs are passed to plotly.graph_objects.Scatter
 
-    Returns
-    -------
-    fig : plotly.graph_objects.Figure
-    """
+    kwargs are passed to plotly.graph_objects.Scatter
+    {return_fig}"""
     if isinstance(K, dict):  # Provided by Bands class, don't do is yourself
         K, indices = K["K"], K["indices"]
     else:

@@ -1,0 +1,988 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
+
+    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+        <title>ipyvasp.bsdos - ipyvasp 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">ipyvasp 0.1.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  
+  <span class="sidebar-brand-text">ipyvasp 0.1.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../apidoc.html">API</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for ipyvasp.bsdos</h1><div class="highlight"><pre>
+<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;splot_bands&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;iplot_bands&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;splot_rgb_lines&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;iplot_rgb_lines&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;splot_color_lines&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;splot_dos_lines&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;iplot_dos_lines&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Bands&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DOS&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">widgets</span> <span class="k">as</span> <span class="n">wdg</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">gu</span>
+<span class="kn">from</span> <span class="nn">.core</span> <span class="kn">import</span> <span class="n">parser</span> <span class="k">as</span> <span class="n">vp</span>
+<span class="kn">from</span> <span class="nn">.core</span> <span class="kn">import</span> <span class="n">serializer</span>
+
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">_sig_kwargs</span><span class="p">,</span> <span class="n">_sub_doc</span>
+<span class="kn">from</span> <span class="nn">._enplots</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">splot_bands</span><span class="p">,</span>
+    <span class="n">iplot_bands</span><span class="p">,</span>
+    <span class="n">splot_rgb_lines</span><span class="p">,</span>
+    <span class="n">iplot_rgb_lines</span><span class="p">,</span>
+    <span class="n">splot_color_lines</span><span class="p">,</span>
+    <span class="n">splot_dos_lines</span><span class="p">,</span>
+    <span class="n">iplot_dos_lines</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_format_input</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="n">sys_info</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Format input spins, atoms, orbs and labels according to selected `projections`.</span>
+<span class="sd">    For example: {&#39;Ga-s&#39;:(0,[1]),&#39;Ga-p&#39;:(0,[1,2,3]),&#39;Ga-d&#39;:(0,[4,5,6,7,8])} #for Ga in GaAs, to pick Ga-1, use [0] instead of 0 at first place</span>
+<span class="sd">    In case of 3 items in tuple, the first item is spin index, the second is atoms, the third is orbs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;`projections` must be a dictionary, with keys as labels and values from picked projection indices.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sys_info</span><span class="p">,</span> <span class="s2">&quot;orbs&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No orbitals found to pick from given data.&quot;</span><span class="p">)</span>
+
+    <span class="n">types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys_info</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys_info</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">max_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">types</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tt</span><span class="p">]</span>
+    <span class="p">)</span>  <span class="c1"># will be error if two ranges there to compare for max</span>
+    <span class="n">norbs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys_info</span><span class="o">.</span><span class="n">orbs</span><span class="p">)</span>
+
+    <span class="c1"># Set default values for different situations</span>
+    <span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">orbs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">projections</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">!r}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2"> expects 2 items (atoms, orbs), or 3 items (spin, atoms, orbs), got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">!r}</span><span class="s2"> is not a string. Use string as key for labels.&quot;</span><span class="p">)</span>
+
+        <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">A</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="n">v</span>  <span class="c1"># A is atom, B is orbs only two cases: (1) int (2) list of int</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">S</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="n">v</span>  <span class="c1">#</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;First itme in a squence of size 3 should be integer to pick spin.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">spins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>  <span class="c1"># Only add spins if given</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">range</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">A</span><span class="si">!r}</span><span class="s2"> is not an integer or list/tuple/range of integers.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">range</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">B</span><span class="si">!r}</span><span class="s2"> is not an integer or list/tuple/range of integers.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Fix orbs</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="p">[</span><span class="n">B</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="k">else</span> <span class="n">B</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">B</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">norbs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="s2">&quot;index </span><span class="si">{}</span><span class="s2"> is out of bound for </span><span class="si">{}</span><span class="s2"> orbs&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">B</span><span class="p">),</span> <span class="n">norbs</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">B</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="s2">&quot;Only positive integers are allowed for selection of orbitals.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">orbs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">B</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+        <span class="c1"># Fix atoms</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">A</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                    <span class="s2">&quot;Only positive integers are allowed for selection of atoms.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">A</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">types</span><span class="p">):</span>
+                <span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">types</span><span class="p">[</span><span class="n">A</span><span class="p">])</span>
+                <span class="n">info</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Given </span><span class="si">{</span><span class="n">A</span><span class="si">}</span><span class="s2"> at position </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> of sequence =&gt; </span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">A</span><span class="p">]</span><span class="si">!r}</span><span class="s2">: </span><span class="si">{</span><span class="n">atoms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">gu</span><span class="o">.</span><span class="n">color</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">info</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;To just pick one ion, write it as [</span><span class="si">{</span><span class="n">A</span><span class="si">}</span><span class="s2">].&quot;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;index </span><span class="si">{</span><span class="n">A</span><span class="si">}</span><span class="s2">  at is out of bound for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">types</span><span class="p">)</span><span class="si">}</span><span class="s2"> types of ions. Wrap </span><span class="si">{</span><span class="n">A</span><span class="si">}</span><span class="s2"> in [] to pick single ion if that was what you meant.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_ind</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;index </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="si">}</span><span class="s2"> is out of bound for </span><span class="si">{</span><span class="n">max_ind</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> ions&quot;</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                    <span class="s2">&quot;Only positive integers are allowed for selection of atoms.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">spins</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;You should provide spin for each projection or none at all. If not provided, spin is picked from corresponding eigenvalues (up/down) for all projections.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">uatoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">atoms</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">aa</span><span class="p">]</span>
+    <span class="p">)</span>  <span class="c1"># don&#39;t use set, need asceding order</span>
+    <span class="n">uorbs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">([</span><span class="n">o</span> <span class="k">for</span> <span class="n">oo</span> <span class="ow">in</span> <span class="n">orbs</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">oo</span><span class="p">])</span>
+    <span class="n">uorbs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">uorbs</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uorbs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">norbs</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># -1 means all orbitals</span>
+    <span class="n">uatoms</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">uatoms</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uatoms</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">max_ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># -1 means all atoms</span>
+    <span class="n">uspins</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">spins</span><span class="p">,</span> <span class="n">uspins</span><span class="p">),</span> <span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">uatoms</span><span class="p">),</span> <span class="p">(</span><span class="n">orbs</span><span class="p">,</span> <span class="n">uorbs</span><span class="p">),</span> <span class="n">labels</span>
+
+
+<span class="n">_spin_doc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;spin : int</span>
+<span class="s2">    0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations. </span>
+<span class="s2">    Data for both channel is loaded by default, so when you plot one spin channel, </span>
+<span class="s2">    plotting other with same parameters will use the same data.&quot;&quot;&quot;</span>
+<span class="n">_kind_doc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;kpairs : list/tuple</span>
+<span class="s2">    List of pair of indices to rearrange a computed path. For example, if you computed</span>
+<span class="s2">    0:L, 15:G, 25:X, 34:M path and want to plot it as X-G|M-X, use [(25,15), (34,25)] as kpairs.&quot;&quot;&quot;</span>
+<span class="n">_proj_doc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;projections : dict</span>
+<span class="s2">    Mapping from str -&gt; [atoms, orbs]. Use dict to select specific projections, </span>
+<span class="s2">    e.g. {&#39;Ga-s&#39;: (0,[0]), &#39;Ga1-p&#39;: ([0],[1,2,3])} in case of GaAs. If values of the dict </span>
+<span class="s2">    are callable, they must accept two arguments evals/tdos, occs/idos of from data and </span>
+<span class="s2">    should return array of shape[1:] (all but spin dimension).&quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">_BandsDosBase</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">vp</span><span class="o">.</span><span class="n">DataSource</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;`source` must be a subclass of `ipyvasp.core.parser.DataSource`.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_source</span> <span class="o">=</span> <span class="n">source</span>  <span class="c1"># source is instance of DataSource</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># will be updated on demand</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">source</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Returns a dictionary of information about the picked data after a plotting function called.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+    <span class="k">def</span> <span class="nf">_fix_projections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projections</span><span class="p">):</span>
+        <span class="n">labels</span><span class="p">,</span> <span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">orbs</span><span class="p">,</span> <span class="n">uspins</span><span class="p">,</span> <span class="n">uatoms</span><span class="p">,</span> <span class="n">uorbs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[],</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">funcs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">projections</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;`projections` dictionary should have at least one item.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">callable</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">projections</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">_funcs</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="n">_funcs</span>
+            <span class="p">):</span>  <span class="c1"># Do not allow mixing of callable and non-callable values, as comparison will not make sense</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Either all or none of the values of `projections` must be callable with two arguments evals, occs and return array of same shape as evals.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">_funcs</span><span class="p">):</span>
+                <span class="n">funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">projections</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">projections</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">spins</span><span class="p">,</span> <span class="n">uspins</span><span class="p">),</span> <span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">uatoms</span><span class="p">),</span> <span class="p">(</span><span class="n">orbs</span><span class="p">,</span> <span class="n">uorbs</span><span class="p">),</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">_format_input</span><span class="p">(</span>
+                    <span class="n">projections</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">summary</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">projections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`projections` must be a dictionary or None.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">spins</span><span class="p">,</span> <span class="n">uspins</span><span class="p">),</span> <span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">uatoms</span><span class="p">),</span> <span class="p">(</span><span class="n">orbs</span><span class="p">,</span> <span class="n">uorbs</span><span class="p">),</span> <span class="p">(</span><span class="n">funcs</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_read_kticks</span><span class="p">(</span><span class="n">kpoints_path</span><span class="p">):</span>
+    <span class="s2">&quot;Reads ticks values and labels in header of kpoint file. Returns dictionary of `kticks` that can be used in plotting functions. If not exist in header, returns empty values(still valid).&quot;</span>
+    <span class="n">kticks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">path</span> <span class="o">:=</span> <span class="n">Path</span><span class="p">(</span><span class="n">kpoints_path</span><span class="p">))</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>  <span class="c1"># allow unicode greek letters</span>
+            <span class="n">top_line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;HSK-PATH&quot;</span> <span class="ow">in</span> <span class="n">top_line</span><span class="p">:</span>
+            <span class="n">head</span> <span class="o">=</span> <span class="n">top_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;HSK-PATH&quot;</span><span class="p">)[</span>
+                <span class="mi">1</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># Only update head if HSK-PATH is found.</span>
+
+            <span class="n">hsk</span> <span class="o">=</span> <span class="p">[[</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)]</span> <span class="k">for</span> <span class="n">vs</span> <span class="ow">in</span> <span class="n">head</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hsk</span><span class="p">:</span>
+                <span class="n">kticks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">v</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">kticks</span>
+
+
+<div class="viewcode-block" id="Bands"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands">[docs]</a><span class="k">class</span> <span class="nc">Bands</span><span class="p">(</span><span class="n">_BandsDosBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to handle and plot bandstructure data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    source : instance of `ipyvasp.DataSource` such as `ipyvasp.Vasprun` or `ipyvasp.Vaspout`. You can define your own class to parse data with same attributes and methods by subclassing `ipyvasp.DataSource`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_args</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># will be updated on demand</span>
+
+<div class="viewcode-block" id="Bands.get_kticks"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands.get_kticks">[docs]</a>    <span class="k">def</span> <span class="nf">get_kticks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rel_path</span><span class="o">=</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads associated KPOINTS file form a relative path of calculations and returns kticks. If KPOINTS file does not exist or was not created by this module, returns empty dict.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            kticks become useless when you interploate data in plotting, in that case write kticks manually.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">rel_path</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">_read_kticks</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="Bands.get_plot_coords"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands.get_plot_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_plot_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kindices</span><span class="p">,</span> <span class="n">eindices</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns coordinates of shape (len(zip(kindices, eindices)), 2) from most recent bandstructure plot.</span>
+<span class="sd">        Use in a plot command as `plt.plot(*get_plot_coords(kindices, eindices).T)`.</span>
+<span class="sd">        Enegy values are shifted by `ezero` from a plot command or data. Use coords + [0, ezero] to get data values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">inds</span> <span class="ow">in</span> <span class="p">(</span><span class="n">kindices</span><span class="p">,</span> <span class="n">eindices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;`kindices` and `eindices` must be list, tuple, range or numpy array.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_breaks&quot;</span>
+        <span class="p">):</span>  <span class="c1"># There will be data when a plotting function is called, and set _breaks attribute</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;You must call a plotting function first to get band gap coordinates from plot.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">kpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">kpath</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_breaks</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_breaks</span><span class="p">:</span>
+                <span class="n">kpath</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span> <span class="o">-=</span> <span class="n">kpath</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">kpath</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># remove distance</span>
+
+            <span class="n">kpath</span> <span class="o">=</span> <span class="n">kpath</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">kpath</span><span class="p">)</span>  <span class="c1"># normalize to in this case again</span>
+
+        <span class="n">kvs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">kpath</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">kindices</span><span class="p">,</span> <span class="n">eindices</span><span class="p">)</span>
+        <span class="p">]</span>  <span class="c1"># need same size as eindices</span>
+        <span class="n">evs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">evals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_spin</span><span class="p">][</span><span class="n">k</span><span class="p">,</span> <span class="n">e</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ezero</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">kindices</span><span class="p">,</span> <span class="n">eindices</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">kvs</span><span class="p">,</span> <span class="n">evs</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># shape (len(kindices), 2)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gap</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>  <span class="c1"># no need for get_here, useful as .gap.coords immediately after a plot</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retruns band gap data with following attributes:</span>
+
+<span class="sd">        coords : array of shape (2, 2) -&gt; (K,E) band gap in coordinates of most recent plot if exists, otherwise in data coordinates. `X,Y = coords.T` for plotting purpose.</span>
+<span class="sd">        value : band gap value in eV given by E_gap = cbm - vbm.</span>
+<span class="sd">        vbm, cbm : valence and conduction band energies in data coordinates. No shift is applied.</span>
+<span class="sd">        kvbm, kcbm : kpoints of vbm and cbm in fractional coordinates. Useful to know which kpoint is at the band gap.</span>
+
+<span class="sd">        These attributes will be None if band gap cannot be found. coords will be empty array of size (0,2) in that case.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>  <span class="c1"># This assigns back to self._data</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_breaks&quot;</span><span class="p">):</span>  <span class="c1"># even if no plot</span>
+            <span class="n">vs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">kpath</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">kvc</span><span class="p">,],</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">evc</span><span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># shape (K,E) -&gt; (2,2)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_plot_coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">kvc</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;coords&quot;</span><span class="p">:</span> <span class="n">vs</span><span class="p">,</span>
+            <span class="s2">&quot;vbm&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;cbm&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;kvbm&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;kcbm&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">}</span>  <span class="c1"># will be updated below if vs.size &gt; 0</span>
+        <span class="k">if</span> <span class="n">vs</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>  <span class="c1"># May not exist, but still same shape in plotting with empty arrays</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_breaks&quot;</span><span class="p">):</span>  <span class="c1"># only shift by ezero if plot exists</span>
+                <span class="n">vs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ezero</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">evc</span><span class="p">]</span>
+            <span class="n">vbm</span><span class="p">,</span> <span class="n">cbm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">evc</span>
+            <span class="n">kvbm</span><span class="p">,</span> <span class="n">kcbm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">kpoints</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">kvc</span><span class="p">,]</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;coords&quot;</span><span class="p">:</span> <span class="n">vs</span><span class="p">,</span>
+                    <span class="s2">&quot;vbm&quot;</span><span class="p">:</span> <span class="n">vbm</span><span class="p">,</span>
+                    <span class="s2">&quot;cbm&quot;</span><span class="p">:</span> <span class="n">cbm</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">cbm</span> <span class="o">-</span> <span class="n">vbm</span><span class="p">,</span>
+                    <span class="s2">&quot;kvbm&quot;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">kvbm</span><span class="p">),</span>
+                    <span class="s2">&quot;kcbm&quot;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">kcbm</span><span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">Dict2Data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Bands.get_data"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ezero</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">projections</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">kpairs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Selects bands and projections to use in plotting functions. If input arguments are same as previous call, returns cached data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        elim : list, tuple of two floats to pick bands in this energy range. If None, picks all bands.</span>
+<span class="sd">        ezero : float, None by default. If not None, elim is applied around this energy.</span>
+<span class="sd">        projections : dict, str -&gt; [atoms, orbs]. Use dict to select specific projections, e.g. {&#39;Ga-s&#39;: (0,[0]), &#39;Ga1-p&#39;: ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs of shape (spin,kpoints, bands) and return array of shape (kpoints, bands).</span>
+<span class="sd">        kpairs : list, tuple of integers, None by default to select all kpoints in given order. Use this to select specific kpoints intervals in specific order.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        data : Selected bands and projections data to be used in bandstructure plotting functions under this class as `data` argument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_args</span> <span class="o">==</span> <span class="p">(</span><span class="n">elim</span><span class="p">,</span> <span class="n">ezero</span><span class="p">,</span> <span class="n">projections</span><span class="p">,</span> <span class="n">kpairs</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">if</span> <span class="n">kpairs</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kpairs</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;`kpairs` must be a list/tuple of pair of indices of edge kpoints of intervals.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">kinds</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># plain indices of kpoints to select</span>
+        <span class="k">if</span> <span class="n">kpairs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">kpairs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;`kpairs` must be a list/tuple of pairs indices to select intervals.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">inds</span> <span class="ow">in</span> <span class="n">kpairs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inds</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;`kpairs` must be a list/tuple of pairs indices to select intervals.&quot;</span>
+                    <span class="p">)</span>
+
+            <span class="n">all_inds</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">k2</span> <span class="o">&lt;</span> <span class="n">k1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">k1</span><span class="p">,</span> <span class="n">k2</span> <span class="ow">in</span> <span class="n">kpairs</span><span class="p">]</span>
+            <span class="n">kinds</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="o">*</span><span class="p">[</span><span class="n">ind</span> <span class="k">for</span> <span class="n">inds</span> <span class="ow">in</span> <span class="n">all_inds</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">],</span>
+                <span class="n">kpairs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">]</span>  <span class="c1"># flatten and add last index</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">elim</span><span class="p">,</span> <span class="n">ezero</span><span class="p">,</span> <span class="n">projections</span><span class="p">)</span>
+
+        <span class="p">(</span>
+            <span class="p">(</span><span class="n">spins</span><span class="p">,</span> <span class="n">uspins</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">uatoms</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">orbs</span><span class="p">,</span> <span class="n">uorbs</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">funcs</span><span class="p">,</span> <span class="n">labels</span><span class="p">),</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fix_projections</span><span class="p">(</span><span class="n">projections</span><span class="p">)</span>
+
+        <span class="n">kpts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">get_kpoints</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">get_evals</span><span class="p">(</span>
+            <span class="n">elim</span><span class="o">=</span><span class="n">elim</span><span class="p">,</span>
+            <span class="n">ezero</span><span class="o">=</span><span class="n">ezero</span><span class="p">,</span>
+            <span class="n">atoms</span><span class="o">=</span><span class="n">uatoms</span><span class="p">,</span>
+            <span class="n">orbs</span><span class="o">=</span><span class="n">uorbs</span><span class="p">,</span>
+            <span class="n">spins</span><span class="o">=</span><span class="n">uspins</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">bands</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># picks available spins if uspins is None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">spins</span><span class="p">:</span>
+            <span class="n">spins</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">spins</span>  <span class="c1"># because they will be loaded anyway</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">labels</span><span class="p">:</span>  <span class="c1"># in case projections not given, check label</span>
+                <span class="n">spins</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">spins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">labels</span>
+                <span class="p">]</span>  <span class="c1"># only one spin channel is available, so use it for all projections</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;kpath&quot;</span><span class="p">:</span> <span class="n">kpts</span><span class="o">.</span><span class="n">kpath</span><span class="p">,</span>
+            <span class="s2">&quot;kpoints&quot;</span><span class="p">:</span> <span class="n">kpts</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+            <span class="s2">&quot;coords&quot;</span><span class="p">:</span> <span class="n">kpts</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">kinds</span><span class="p">:</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="n">kinds</span><span class="p">]</span>
+            <span class="n">kpath</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;kpath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kpath</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">kpath</span><span class="p">)</span>  <span class="c1"># normalize to 1</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;kpoints&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s2">&quot;kpoints&quot;</span><span class="p">][</span><span class="n">kinds</span><span class="p">]</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">coords</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;evals&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s2">&quot;evals&quot;</span><span class="p">][:,</span> <span class="n">kinds</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;occs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s2">&quot;occs&quot;</span><span class="p">][:,</span> <span class="n">kinds</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="s2">&quot;pros&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+                <span class="n">output</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">,</span> <span class="n">kinds</span><span class="p">,</span> <span class="p">:]</span>
+
+            <span class="c1"># Have to see kvc, but it makes no sense when there is some break in kpath</span>
+            <span class="n">vbm</span><span class="p">,</span> <span class="n">cbm</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s2">&quot;evc&quot;</span><span class="p">]</span>  <span class="c1"># evc is a tuple of two tuples</span>
+            <span class="n">kvbm</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s2">&quot;evals&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">vbm</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">]</span>  <span class="c1"># keep as indices here, we don&#39;t know the cartesian coordinates of kpoints here</span>
+            <span class="n">kcbm</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s2">&quot;evals&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">cbm</span><span class="p">)[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">kvc</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="nb">sorted</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="n">kvbm</span><span class="p">,</span> <span class="n">kcbm</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">K</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">K</span><span class="p">))</span>
+            <span class="p">)</span>  <span class="c1"># bring closer points first by sorting</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;kvc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">kvc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">kvc</span> <span class="k">else</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>  <span class="c1"># Only relative minimum indices matter, set to (0,0) if no kvc found</span>
+
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span>  <span class="c1"># works for both functions and picks</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">serializer</span><span class="o">.</span><span class="n">Dict2Data</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>  <span class="c1"># replacing data with updated one</span>
+        <span class="k">if</span> <span class="n">funcs</span><span class="p">:</span>
+            <span class="n">pros</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">funcs</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">evals</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">occs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data</span><span class="o">.</span><span class="n">evals</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="p">):</span>  <span class="c1"># evals shape is (spin, kpoints, bands), but we need single spin</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Projections returned by </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s2"> must be of same shape as last two dimensions of input evals.&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">pros</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pros</span><span class="p">)</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&quot;Custom projections by user&quot;&#39;</span>
+
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="s2">&quot;pros&quot;</span>
+        <span class="p">):</span>  <span class="c1"># Data still could be there, but prefer if user provides projections as functions</span>
+            <span class="n">arrays</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">sp</span><span class="p">,</span> <span class="n">atom</span><span class="p">,</span> <span class="n">orb</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">orbs</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">uatoms</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">atom</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span> <span class="k">if</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">atom</span>
+                    <span class="p">]</span>  <span class="c1"># indices for partial data loaded</span>
+                <span class="k">if</span> <span class="n">uorbs</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">orb</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">orbs</span><span class="p">)</span> <span class="k">if</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">orb</span><span class="p">]</span>
+                <span class="n">sp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">spins</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>  <span class="c1"># index for spin is single</span>
+                <span class="n">_pros</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pros</span><span class="p">[</span><span class="n">sp</span><span class="p">],</span> <span class="n">atom</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+                <span class="p">)</span>  <span class="c1"># take dimension of spin and then sum over atoms leaves 3D array</span>
+                <span class="n">_pros</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">_pros</span><span class="p">,</span> <span class="n">orb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+                <span class="p">)</span>  <span class="c1"># Sum over orbitals leaves 2D array</span>
+                <span class="n">arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_pros</span><span class="p">)</span>
+
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;atoms&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># No more needed</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;orbs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;spins&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># No more needed</span>
+
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;shape&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;(spin[evals,occs]/selection[pros], kpoints, bands)&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">serializer</span><span class="o">.</span><span class="n">Dict2Data</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>  <span class="c1"># Assign for later use</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div>
+
+    <span class="k">def</span> <span class="nf">_handle_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="s2">&quot;Returns fixed kwargs and new elim relative to fermi energy for gettig data.&quot;</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;spin&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;spin must be 0 or 1&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spin</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
+            <span class="s2">&quot;spin&quot;</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="p">)</span>  <span class="c1"># remove from kwargs as plots don&#39;t need it, but get_plot_coords need it</span>
+        <span class="n">kpairs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;kpairs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># not needed for plots but need here</span>
+
+        <span class="k">if</span> <span class="n">kpairs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;kticks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kticks&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kticks</span><span class="p">()</span>
+            <span class="p">)</span>  <span class="c1"># User can provide kticks, but if not, use default</span>
+
+        <span class="c1"># Need to fetch data for gap and plot later</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_breaks</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">tick</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;kticks&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="p">[])</span>
+            <span class="k">if</span> <span class="n">tick</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;=&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;elim&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># need in plots</span>
+
+<div class="viewcode-block" id="Bands.splot_bands"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands.splot_bands">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span>
+        <span class="n">splot_bands</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;K :.*ax :&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_spin_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_kind_doc</span><span class="si">}</span><span class="se">\n</span><span class="s2">ax :&quot;</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">splot_bands</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">splot_bands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">kpairs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ezero</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">,</span> <span class="n">elim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_kwargs</span><span class="p">(</span><span class="n">spin</span><span class="o">=</span><span class="n">spin</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">elim</span><span class="o">=</span><span class="n">elim</span><span class="p">,</span> <span class="n">ezero</span><span class="o">=</span><span class="n">ezero</span><span class="p">,</span> <span class="n">kpairs</span><span class="o">=</span><span class="n">kpairs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">splot_bands</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">kpath</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">evals</span><span class="p">[</span><span class="n">spin</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">ezero</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Bands.splot_rgb_lines"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands.splot_rgb_lines">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span>
+        <span class="n">splot_rgb_lines</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;K :.*ax :&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_proj_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_spin_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_kind_doc</span><span class="si">}</span><span class="se">\n</span><span class="s2">ax :&quot;</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">splot_rgb_lines</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;pros&quot;</span><span class="p">,</span> <span class="s2">&quot;labels&quot;</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">splot_rgb_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projections</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">kpairs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ezero</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">,</span> <span class="n">elim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_kwargs</span><span class="p">(</span><span class="n">spin</span><span class="o">=</span><span class="n">spin</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">elim</span><span class="p">,</span> <span class="n">ezero</span><span class="p">,</span> <span class="n">projections</span><span class="p">,</span> <span class="n">kpairs</span><span class="o">=</span><span class="n">kpairs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">splot_rgb_lines</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">kpath</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">evals</span><span class="p">[</span><span class="n">spin</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">ezero</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">pros</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Bands.splot_color_lines"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands.splot_color_lines">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span>
+        <span class="n">splot_color_lines</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;K :.*axes :&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_proj_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_spin_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_kind_doc</span><span class="si">}</span><span class="se">\n</span><span class="s2">axes :&quot;</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">splot_color_lines</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;pros&quot;</span><span class="p">,</span> <span class="s2">&quot;labels&quot;</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">splot_color_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projections</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">kpairs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ezero</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">,</span> <span class="n">elim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_kwargs</span><span class="p">(</span><span class="n">spin</span><span class="o">=</span><span class="n">spin</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+            <span class="n">elim</span><span class="p">,</span> <span class="n">ezero</span><span class="p">,</span> <span class="n">projections</span><span class="p">,</span> <span class="n">kpairs</span><span class="o">=</span><span class="n">kpairs</span>
+        <span class="p">)</span>  <span class="c1"># picked relative limit</span>
+        <span class="k">return</span> <span class="n">splot_color_lines</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">kpath</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">evals</span><span class="p">[</span><span class="n">spin</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">ezero</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">pros</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Bands.iplot_rgb_lines"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands.iplot_rgb_lines">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span>
+        <span class="n">iplot_rgb_lines</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;K :.*fig :&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_proj_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_spin_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_kind_doc</span><span class="si">}</span><span class="se">\n</span><span class="s2">fig :&quot;</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">iplot_rgb_lines</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;pros&quot;</span><span class="p">,</span> <span class="s2">&quot;labels&quot;</span><span class="p">,</span> <span class="s2">&quot;occs&quot;</span><span class="p">,</span> <span class="s2">&quot;kpoints&quot;</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">iplot_rgb_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projections</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">kpairs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ezero</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">,</span> <span class="n">elim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_kwargs</span><span class="p">(</span><span class="n">spin</span><span class="o">=</span><span class="n">spin</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">elim</span><span class="p">,</span> <span class="n">ezero</span><span class="p">,</span> <span class="n">projections</span><span class="p">,</span> <span class="n">kpairs</span><span class="o">=</span><span class="n">kpairs</span><span class="p">)</span>
+        <span class="c1"># Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number</span>
+        <span class="k">return</span> <span class="n">iplot_rgb_lines</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;K&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">kpath</span><span class="p">,</span> <span class="s2">&quot;indices&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">},</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">evals</span><span class="p">[</span><span class="n">spin</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">ezero</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">pros</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">labels</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">occs</span><span class="p">[</span><span class="n">spin</span><span class="p">],</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">kpoints</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Bands.iplot_bands"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands.iplot_bands">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span>
+        <span class="n">iplot_bands</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;K :.*fig :&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_spin_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_kind_doc</span><span class="si">}</span><span class="se">\n</span><span class="s2">fig :&quot;</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">iplot_bands</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">iplot_bands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">kpairs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ezero</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">,</span> <span class="n">elim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_kwargs</span><span class="p">(</span><span class="n">spin</span><span class="o">=</span><span class="n">spin</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">elim</span><span class="p">,</span> <span class="n">ezero</span><span class="p">,</span> <span class="n">kpairs</span><span class="o">=</span><span class="n">kpairs</span><span class="p">)</span>
+        <span class="c1"># Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number</span>
+        <span class="k">return</span> <span class="n">iplot_bands</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;K&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">kpath</span><span class="p">,</span> <span class="s2">&quot;indices&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">bands</span><span class="p">},</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">evals</span><span class="p">[</span><span class="n">spin</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">ezero</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Bands.view_bands"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands.view_bands">[docs]</a>    <span class="k">def</span> <span class="nf">view_bands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Initialize and return `ipyvasp.widgets.BandsWidget` to view bandstructure interactively.&quot;</span>
+        <span class="n">use_vaspout</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">vp</span><span class="o">.</span><span class="n">Vaspout</span><span class="p">)</span> <span class="k">else</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">wdg</span><span class="o">.</span><span class="n">BandsWidget</span><span class="p">(</span>
+            <span class="n">use_vaspout</span><span class="o">=</span><span class="n">use_vaspout</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+            <span class="n">glob</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+
+
+<span class="n">_multiply_doc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;multiply : float</span>
+<span class="s2">    A float number to be multiplied by total dos and its sign is multiplied </span>
+<span class="s2">    by partial dos to flip plot in case of spin down.&quot;&quot;&quot;</span>
+<span class="n">_total_doc</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;total : bool</span>
+<span class="s2">    True by default. If False, total dos is not plotted, but sign of multiply </span>
+<span class="s2">    parameter is still used for partial dos&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="DOS"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.DOS">[docs]</a><span class="k">class</span> <span class="nc">DOS</span><span class="p">(</span><span class="n">_BandsDosBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to handle and plot density of states data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    source : instance of `ipyvasp.DataSource` such as `ipyvasp.Vasprun` or `ipyvasp.Vaspout`. You can define your own class to parse data with same attributes and methods by subclassing `ipyvasp.DataSource`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_args</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># updated on demand</span>
+
+<div class="viewcode-block" id="DOS.get_data"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.DOS.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ezero</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">projections</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_args</span> <span class="o">==</span> <span class="p">(</span><span class="n">elim</span><span class="p">,</span> <span class="n">ezero</span><span class="p">,</span> <span class="n">projections</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">elim</span><span class="p">,</span> <span class="n">ezero</span><span class="p">,</span> <span class="n">projections</span><span class="p">)</span>
+
+        <span class="p">(</span>
+            <span class="p">(</span><span class="n">spins</span><span class="p">,</span> <span class="n">uspins</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">uatoms</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">orbs</span><span class="p">,</span> <span class="n">uorbs</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">funcs</span><span class="p">,</span> <span class="n">labels</span><span class="p">),</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fix_projections</span><span class="p">(</span><span class="n">projections</span><span class="p">)</span>
+        <span class="n">dos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">get_dos</span><span class="p">(</span>
+            <span class="n">elim</span><span class="o">=</span><span class="n">elim</span><span class="p">,</span> <span class="n">ezero</span><span class="o">=</span><span class="n">ezero</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">uatoms</span><span class="p">,</span> <span class="n">orbs</span><span class="o">=</span><span class="n">uorbs</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="n">uspins</span> <span class="ow">or</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">spins</span><span class="p">:</span>
+            <span class="n">spins</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">spins</span>  <span class="c1"># because they will be loaded anyway</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spins</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">labels</span><span class="p">:</span>  <span class="c1"># in case projections not given, check label</span>
+                <span class="n">spins</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">spins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">labels</span>
+                <span class="p">]</span>  <span class="c1"># only one spin channel is available, so use it for all projections</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="n">out</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span>
+
+        <span class="k">if</span> <span class="n">funcs</span><span class="p">:</span>
+            <span class="n">pdos</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">funcs</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">dos</span><span class="o">.</span><span class="n">tdos</span><span class="p">,</span> <span class="n">dos</span><span class="o">.</span><span class="n">idos</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">!=</span> <span class="n">dos</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="p">):</span>  <span class="c1"># energy shape is (spin, grid), but we need single spin</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Projections returned by </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s2"> must be of same shape as last dimension of input energy.&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">pdos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+            <span class="n">out</span><span class="p">[</span><span class="s2">&quot;pdos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pdos</span><span class="p">)</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&quot;Custom projections by user&quot;&#39;</span>
+
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span>
+            <span class="n">dos</span><span class="p">,</span> <span class="s2">&quot;pdos&quot;</span>
+        <span class="p">):</span>  <span class="c1"># Data still could be there, but prefer if user provides projections as functions</span>
+            <span class="n">arrays</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">sp</span><span class="p">,</span> <span class="n">atom</span><span class="p">,</span> <span class="n">orb</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">spins</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">orbs</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">uatoms</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">atom</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dos</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span> <span class="k">if</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">atom</span>
+                    <span class="p">]</span>  <span class="c1"># indices for partial data loaded</span>
+                <span class="k">if</span> <span class="n">uorbs</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">orb</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dos</span><span class="o">.</span><span class="n">orbs</span><span class="p">)</span> <span class="k">if</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">orb</span><span class="p">]</span>
+                <span class="n">sp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dos</span><span class="o">.</span><span class="n">spins</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>  <span class="c1"># index for spin is single</span>
+                <span class="n">_pdos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">dos</span><span class="o">.</span><span class="n">pdos</span><span class="p">[</span><span class="n">sp</span><span class="p">],</span> <span class="n">atom</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+                <span class="p">)</span>  <span class="c1"># take dimension of spin and then sum over atoms leaves 2D array</span>
+                <span class="n">_pdos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">_pdos</span><span class="p">,</span> <span class="n">orb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+                <span class="p">)</span>  <span class="c1"># Sum over orbitals leaves 1D array</span>
+                <span class="n">arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_pdos</span><span class="p">)</span>
+
+            <span class="n">out</span><span class="p">[</span><span class="s2">&quot;pdos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;atoms&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># No more needed</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;orbs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;spins&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># No more needed</span>
+
+        <span class="n">out</span><span class="p">[</span><span class="s2">&quot;shape&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;(spin[energy,tdos,idos]/selection[pdos], NEDOS)&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">serializer</span><span class="o">.</span><span class="n">Dict2Data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>  <span class="c1"># Assign for later use</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div>
+
+    <span class="k">def</span> <span class="nf">_handle_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="s2">&quot;Returns fixed kwargs and new elim relative to fermi energy for gettig data.&quot;</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;spin&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;spin must be 0,1,2,3 for dos&quot;</span><span class="p">)</span>
+
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;spin&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># remove from kwargs as plots don&#39;t need it</span>
+        <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;elim&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DOS.splot_dos_lines"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.DOS.splot_dos_lines">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span>
+        <span class="n">splot_dos_lines</span><span class="p">,</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;energy :.*ax :&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_proj_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_spin_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_multiply_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_total_doc</span><span class="si">}</span><span class="se">\n</span><span class="s2">ax :&quot;</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">splot_dos_lines</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;energy&quot;</span><span class="p">,</span> <span class="s2">&quot;dos_arrays&quot;</span><span class="p">,</span> <span class="s2">&quot;labels&quot;</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">splot_dos_lines</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">projections</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># dos should allow only total dos as well</span>
+        <span class="n">spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">multiply</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">total</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">ezero</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">,</span> <span class="n">elim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_kwargs</span><span class="p">(</span><span class="n">spin</span><span class="o">=</span><span class="n">spin</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">elim</span><span class="p">,</span> <span class="n">ezero</span><span class="p">,</span> <span class="n">projections</span><span class="p">)</span>
+        <span class="n">energy</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">][</span><span class="n">spin</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span>
+
+        <span class="n">dos_arrays</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">projections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dos_arrays</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">multiply</span><span class="p">)</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pdos&quot;</span><span class="p">]</span>  <span class="c1"># filp if asked,</span>
+
+        <span class="n">tlab</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># pop in any case</span>
+        <span class="k">if</span> <span class="n">total</span><span class="p">:</span>
+            <span class="n">dos_arrays</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;tdos&quot;</span><span class="p">][</span><span class="n">spin</span><span class="p">]</span> <span class="o">*</span> <span class="n">multiply</span><span class="p">,</span> <span class="o">*</span><span class="n">dos_arrays</span><span class="p">]</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">tlab</span> <span class="ow">or</span> <span class="s2">&quot;Total&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">labels</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">dos_arrays</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either total should be True or projections given!&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">splot_dos_lines</span><span class="p">(</span><span class="n">energy</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">ezero</span><span class="p">,</span> <span class="n">dos_arrays</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DOS.iplot_dos_lines"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.DOS.iplot_dos_lines">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span>
+        <span class="n">iplot_dos_lines</span><span class="p">,</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;energy :.*fig :&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_proj_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_spin_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_multiply_doc</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_total_doc</span><span class="si">}</span><span class="se">\n</span><span class="s2">fig :&quot;</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">iplot_dos_lines</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;energy&quot;</span><span class="p">,</span> <span class="s2">&quot;dos_arrays&quot;</span><span class="p">,</span> <span class="s2">&quot;labels&quot;</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">iplot_dos_lines</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">projections</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># dos should allow only total dos as well</span>
+        <span class="n">spin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">multiply</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">total</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">ezero</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">,</span> <span class="n">elim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_kwargs</span><span class="p">(</span><span class="n">spin</span><span class="o">=</span><span class="n">spin</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">elim</span><span class="p">,</span> <span class="n">ezero</span><span class="p">,</span> <span class="n">projections</span><span class="p">)</span>
+        <span class="n">energy</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">][</span><span class="n">spin</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span>
+
+        <span class="n">dos_arrays</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">projections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dos_arrays</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">multiply</span><span class="p">)</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pdos&quot;</span><span class="p">]</span>  <span class="c1"># filp if asked</span>
+
+        <span class="n">tname</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># pop in any case</span>
+        <span class="k">if</span> <span class="n">total</span><span class="p">:</span>
+            <span class="n">dos_arrays</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;tdos&quot;</span><span class="p">][</span><span class="n">spin</span><span class="p">]</span> <span class="o">*</span> <span class="n">multiply</span><span class="p">,</span> <span class="o">*</span><span class="n">dos_arrays</span><span class="p">]</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">tname</span> <span class="ow">or</span> <span class="s2">&quot;Total&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">labels</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">dos_arrays</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either total should be True or projections given!&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">iplot_dos_lines</span><span class="p">(</span><span class="n">energy</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">ezero</span><span class="p">,</span> <span class="n">dos_arrays</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Abdul Saboor
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/scripts/furo.js"></script>
+    </body>
+</html>

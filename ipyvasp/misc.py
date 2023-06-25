@@ -10,8 +10,7 @@ from .utils import _sig_kwargs, _sub_doc
 @_sig_kwargs(vp.gen2numpy, skip_params=("gen",))
 @_sub_doc(
     vp.gen2numpy,
-    "gen :",
-    replace={"shape :": "path : Path to file containing data.\nshape :"},
+    {"gen :.*shape :": "path : Path to file containing data.\nshape :"},
 )
 def parse_text(path, shape, slice, **kwargs):
     p = Path(path)

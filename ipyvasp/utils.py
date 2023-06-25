@@ -66,20 +66,30 @@ def _sig_kwargs(from_func, skip_params=()):
     return wrapper
 
 
-def _sub_doc(from_func, skip_matches=None, replace={}):
+def _sub_doc(from_func, replace={}):
     """Assing __doc__ from other function. Replace words in docs where need."""
 
     def wrapper(func):
-        docs = getdoc(from_func).splitlines()
-        if isinstance(skip_matches, (list, tuple)):
-            for param in skip_matches:
-                docs = [line for line in docs if param not in line]
-        elif isinstance(skip_matches, str):
-            docs = [line for line in docs if skip_matches not in line]
-        docs = "\n".join(docs)
+        docs = getdoc(from_func)
+        if not isinstance(replace, dict):
+            raise TypeError("replace must be dict of 'match':'replace'")
+
         for k, v in replace.items():
-            docs = docs.replace(k, v)
+            docs = re.sub(k, v, docs, count=1, flags=re.DOTALL)
         func.__doc__ = docs
+        return func
+
+    return wrapper
+
+
+def _fmt_doc(fmt_dict):
+    "Format docstring with keys from given dict"
+
+    def wrapper(func):
+        docs = func.__doc__  # Not by getdoc here, needs proper formatting
+        if not isinstance(fmt_dict, dict):
+            raise TypeError("fmt_dict must be dict of 'match':'replace'")
+        func.__doc__ = docs.format(**fmt_dict)
         return func
 
     return wrapper

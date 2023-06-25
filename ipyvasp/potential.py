@@ -145,12 +145,10 @@ class LOCPOT:
     .. note::
         To avoid memory issues while loading multiple LOCPOT files, use this class as a context manager which cleans up the memory after use.
 
-    .. code-block:: python
-        :linenos:
 
-        with LOCPOT('path/to/LOCPOT') as tmp:
-            tmp.splot()
-        # The object tmp is destroyed here and memory is freed.
+    >>> with LOCPOT('path/to/LOCPOT') as tmp:
+    >>>     tmp.splot()
+    The object tmp is destroyed here and memory is freed.
     """
 
     def __init__(self, path=None, data_set=0):
@@ -180,7 +178,7 @@ class LOCPOT:
     def data(self):
         return self._data
 
-    @_sub_doc(splot_potential, "- values")
+    @_sub_doc(splot_potential, {"values :.*operation :": "operation :"})
     @_sig_kwargs(splot_potential, ("values",))
     def splot(self, operation="mean_c", **kwargs):
         return splot_potential(

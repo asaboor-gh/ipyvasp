@@ -143,9 +143,18 @@ def _format_input(projections, sys_info):
     return (spins, uspins), (atoms, uatoms), (orbs, uorbs), labels
 
 
-_spin_doc = "spin : int, 0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations. Data for both channel is loaded by default, so when you plot one spin channel, plotting other with same parameters will use the same data."
-_kind_doc = "kpairs : list/tuple of pair of indices to rearrange a computed path. For example, you computed 0:L, 15:G, 25:X, 34:M path and want to plot it as X-G|M-X, use [(25,15), (34,25)] as kpairs."
-_proj_doc = "projections : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals/tdos, occs/idos of from data and should return array of shape[1:] (all but spin dimension)."
+_spin_doc = """spin : int
+    0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations. 
+    Data for both channel is loaded by default, so when you plot one spin channel, 
+    plotting other with same parameters will use the same data."""
+_kind_doc = """kpairs : list/tuple
+    List of pair of indices to rearrange a computed path. For example, if you computed
+    0:L, 15:G, 25:X, 34:M path and want to plot it as X-G|M-X, use [(25,15), (34,25)] as kpairs."""
+_proj_doc = """projections : dict
+    Mapping from str -> [atoms, orbs]. Use dict to select specific projections, 
+    e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict 
+    are callable, they must accept two arguments evals/tdos, occs/idos of from data and 
+    should return array of shape[1:] (all but spin dimension)."""
 
 
 class _BandsDosBase:
@@ -504,8 +513,7 @@ class Bands(_BandsDosBase):
 
     @_sub_doc(
         splot_bands,
-        ["K :", "E :"],
-        replace={"ax :": f"{_spin_doc}\n{_kind_doc}\nax :"},
+        {"K :.*ax :": f"{_spin_doc}\n{_kind_doc}\nax :"},
     )
     @_sig_kwargs(splot_bands, ("K", "E"))
     def splot_bands(self, spin=0, kpairs=None, ezero=None, **kwargs):
@@ -515,8 +523,7 @@ class Bands(_BandsDosBase):
 
     @_sub_doc(
         splot_rgb_lines,
-        ["K :", "E :", "pros :", "labels :"],
-        replace={"ax :": f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\nax :"},
+        {"K :.*ax :": f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\nax :"},
     )
     @_sig_kwargs(splot_rgb_lines, ("K", "E", "pros", "labels"))
     def splot_rgb_lines(self, projections, spin=0, kpairs=None, ezero=None, **kwargs):
@@ -528,8 +535,7 @@ class Bands(_BandsDosBase):
 
     @_sub_doc(
         splot_color_lines,
-        ["K :", "E :", "pros :", "labels :"],
-        replace={"ax :": f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\nax :"},
+        {"K :.*axes :": f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\naxes :"},
     )
     @_sig_kwargs(splot_color_lines, ("K", "E", "pros", "labels"))
     def splot_color_lines(self, projections, spin=0, kpairs=None, ezero=None, **kwargs):
@@ -543,8 +549,7 @@ class Bands(_BandsDosBase):
 
     @_sub_doc(
         iplot_rgb_lines,
-        ["K :", "E :", "pros :", "labels :", "occs :", "kpoints :"],
-        replace={"fig :": f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\nfig :"},
+        {"K :.*fig :": f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\nfig :"},
     )
     @_sig_kwargs(iplot_rgb_lines, ("K", "E", "pros", "labels", "occs", "kpoints"))
     def iplot_rgb_lines(self, projections, spin=0, kpairs=None, ezero=None, **kwargs):
@@ -563,8 +568,7 @@ class Bands(_BandsDosBase):
 
     @_sub_doc(
         iplot_bands,
-        ["K :", "E :"],
-        replace={"fig :": f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\nfig :"},
+        {"K :.*fig :": f"{_spin_doc}\n{_kind_doc}\nfig :"},
     )
     @_sig_kwargs(iplot_bands, ("K", "E"))
     def iplot_bands(self, spin=0, kpairs=None, ezero=None, **kwargs):
@@ -587,8 +591,12 @@ class Bands(_BandsDosBase):
         )
 
 
-_multiply_doc = "multiply : float, multiplied by total dos and sign is multiply by partial dos to flip plot in case of spin down."
-_total_doc = "total : bool, True by default. If False, total dos is not plotted, sign of multiply parameter is still used for partial dos"
+_multiply_doc = """multiply : float
+    A float number to be multiplied by total dos and its sign is multiplied 
+    by partial dos to flip plot in case of spin down."""
+_total_doc = """total : bool
+    True by default. If False, total dos is not plotted, but sign of multiply 
+    parameter is still used for partial dos"""
 
 
 class DOS(_BandsDosBase):
@@ -685,9 +693,8 @@ class DOS(_BandsDosBase):
 
     @_sub_doc(
         splot_dos_lines,
-        ["energy :", "dos_arrays :", "labels :"],
-        replace={
-            "ax :": f"{_proj_doc}\n{_spin_doc}\n{_multiply_doc}\n{_total_doc}\nax :"
+        {
+            "energy :.*ax :": f"{_proj_doc}\n{_spin_doc}\n{_multiply_doc}\n{_total_doc}\nax :"
         },
     )
     @_sig_kwargs(splot_dos_lines, ("energy", "dos_arrays", "labels"))
@@ -719,9 +726,8 @@ class DOS(_BandsDosBase):
 
     @_sub_doc(
         iplot_dos_lines,
-        ["energy :", "dos_arrays :", "labels :"],
-        replace={
-            "fig :": f"{_proj_doc}\n{_spin_doc}\n{_multiply_doc}\n{_total_doc}\nfig :"
+        {
+            "energy :.*fig :": f"{_proj_doc}\n{_spin_doc}\n{_multiply_doc}\n{_total_doc}\nfig :"
         },
     )
     @_sig_kwargs(iplot_dos_lines, ("energy", "dos_arrays", "labels"))

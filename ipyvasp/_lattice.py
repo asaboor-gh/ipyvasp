@@ -468,14 +468,15 @@ def _cif_str_to_poscar_str(cif_str, comment=None):
 
 class InvokeMaterialsProject:
     """Connect to materials project and get data using `api_key` from their site.
-    Usage:
-    ```python
-    from ipyvaspr.sio import InvokeMaterialsProject # or import ipyvasp.InvokeMaterialsProject as InvokeMaterialsProject
-    mp = InvokeMaterialsProject(api_key='your_api_key')
-    outputs = mp.request(formula='NaCl') #returns list of structures from response
-    outupts[0].export_poscar() #returns poscar data
-    outputs[0].cif #returns cif data
-    ```"""
+
+    Usage
+    -----
+    >>> from ipyvaspr.sio import InvokeMaterialsProject # or import ipyvasp.InvokeMaterialsProject as InvokeMaterialsProject
+    >>> mp = InvokeMaterialsProject(api_key='your_api_key')
+    >>> outputs = mp.request(formula='NaCl') #returns list of structures from response
+    >>> outupts[0].export_poscar() #returns poscar data
+    >>> outputs[0].cif #returns cif data
+    """
 
     def __init__(self, api_key=None):
         "Request Materials Project acess. api_key is on their site. Your only need once and it is saved for later."
@@ -569,13 +570,12 @@ def _str2kpoints(kpts_str):
 
 
 def get_kpath(kpoints, n=5, weight=None, ibzkpt=None, outfile=None, rec_basis=None):
-    """
-    Generate list of kpoints along high symmetry path. Options are write to file or return KPOINTS list.
+    """Generate list of kpoints along high symmetry path. Options are write to file or return KPOINTS list.
     It generates uniformly spaced point with input `n` as just a scale factor of number of points per average length of `rec_basis`.
 
     Parameters
     ----------
-    kpoints : list, str
+    kpoints : list or str
         Any number points as [(x,y,z,[label],[N]), ...]. N adds as many points in current interval.
         To disconnect path at a point, provide it as (x,y,z,[label], 0), next point will be start of other patch.
         If `kpoints` is a multiline string, it is converted to list of points. Each line should be in format "x y z [label] [N]".
@@ -583,10 +583,15 @@ def get_kpath(kpoints, n=5, weight=None, ibzkpt=None, outfile=None, rec_basis=No
         Number of point per averge length of `rec_basis`, this makes uniform steps based on distance between points.
         If (x,y,z,[label], N) is provided, this is ignored for that specific interval. If `rec_basis` is not provided, each interval has exactly `n` points.
         Number of points in each interval is at least 2 even if `n` is less than 2 to keep end points anyway.
-    weight : float, None by default to auto generates weights.
-    ibzkpt : PathLike, Path to ibzkpt file, required for HSE calculations.
-    outfile : PathLike, Path/to/file to write kpoints.
-    rec_basis : Reciprocal basis 3x3 array to use for calculating uniform points.
+    weight : float
+        None by default to auto generates weights.
+    ibzkpt : PathLike
+        Path to ibzkpt file, required for HSE calculations.
+    outfile : PathLike
+        Path/to/file to write kpoints.
+    rec_basis : array_like
+        Reciprocal basis 3x3 array to use for calculating uniform points.
+
 
     If `outfile = None`, KPONITS file content is printed.
     """
@@ -2065,13 +2070,11 @@ def transform_poscar(poscar_data, transformation, zoom=2, tol=1e-2):
 
     You may find errors due to missing atoms in the new basis, use `zoom` to increase the size of given cell to include any possible site in new cell.
 
-    Examples:
-    - FCC primitive -> 111 hexagonal cell
-        lambda a,b,c: (a-c,b-c,a+b+c) ~ [[1,0,-1],[0,1,-1],[1,1,1]]
-    - FCC primitive --> FCC unit cell
-        lambda a,b,c: (b+c -a,a+c-b,a+b-c) ~ [[-1,1,1],[1,-1,1],[1,1,-1]]
-    - FCC unit cell --> 110 tetragonal cell
-        lambda a,b,c: (a-b,a+b,c) ~ [[1,-1,0],[1,1,0],[0,0,1]]
+    Examples
+    --------
+    - FCC primitive → 111 hexagonal cell: ``lambda a,b,c: (a-c,b-c,a+b+c) ~ [[1,0,-1],[0,1,-1],[1,1,1]]``
+    - FCC primitive → FCC unit cell: ``lambda a,b,c: (b+c -a,a+c-b,a+b-c) ~ [[-1,1,1],[1,-1,1],[1,1,-1]]``
+    - FCC unit cell → 110 tetragonal cell: ``lambda a,b,c: (a-b,a+b,c) ~ [[1,-1,0],[1,1,0],[0,0,1]]``
     """
     if callable(transformation):
         new_basis = np.array(transformation(*poscar_data.basis))  # mostly a tuple

@@ -49,17 +49,13 @@ def order(points, loop=True):
 
     Example
     -------
-    .. code-block:: python
-        :linenos:
-
-        pts = np.array([[1,0,3],[0,0,0],[0,1,2]])
-        inds = order(pts)
-        pts[inds] # Ordered points
-
-        array([[1, 2, 3],
-               [0, 0, 0],
-               [1, 0, 3]
-               [0, 1, 2]])
+    >>> pts = np.array([[1,0,3],[0,0,0],[0,1,2]])
+    >>> inds = order(pts)
+    >>> pts[inds] # Ordered points
+    array([[1, 2, 3],
+        [0, 0, 0],
+        [1, 0, 3]
+        [0, 1, 2]])
     """
     points = np.array(points)  # Make array.
     # Fix points if start point is zero.
@@ -198,11 +194,11 @@ def get_TM(basis1, basis2):
     Returns a transformation matrix that gives `basis2` when applied on `basis1`.
     basis are 3x3 matrices with basis vectors as rows like [[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]].
 
-    ```python
-    TM = get_TM(basis1, basis2)
-    assert np.allclose(basis2, TM @ basis1)
-    Q = P @ TM.T # Transform points from P in basis1 to Q in basis2
-    # Both P and Q are N x D matrices where N is number of points and D is dimension of space
+    
+    >>> TM = get_TM(basis1, basis2)
+    >>> assert np.allclose(basis2, TM @ basis1)
+    >>> Q = P @ TM.T # Transform points from P in basis1 to Q in basis2
+    >>> # Both P and Q are N x D matrices where N is number of points and D is dimension of space
     ```
     """
     return to_basis(

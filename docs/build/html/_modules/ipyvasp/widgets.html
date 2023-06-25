@@ -1,0 +1,1355 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
+
+    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+        <title>ipyvasp.widgets - ipyvasp 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">ipyvasp 0.1.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  
+  <span class="sidebar-brand-text">ipyvasp 0.1.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../apidoc.html">API</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for ipyvasp.widgets</h1><div class="highlight"><pre>
+<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;load_results&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;summarize&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;FilesWidget&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PropsPicker&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BandsWidget&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;KpathWidget&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="c1"># Widgets Imports</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span>
+<span class="kn">import</span> <span class="nn">ipywidgets</span> <span class="k">as</span> <span class="nn">ipw</span>
+<span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Layout</span><span class="p">,</span>
+    <span class="n">Button</span><span class="p">,</span>
+    <span class="n">Box</span><span class="p">,</span>
+    <span class="n">HBox</span><span class="p">,</span>
+    <span class="n">VBox</span><span class="p">,</span>
+    <span class="n">Dropdown</span><span class="p">,</span>
+    <span class="n">Text</span><span class="p">,</span>
+    <span class="n">Checkbox</span><span class="p">,</span>
+    <span class="n">Stack</span><span class="p">,</span>
+    <span class="n">SelectMultiple</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># More imports</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
+
+<span class="c1"># Internal imports</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">gu</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">lattice</span> <span class="k">as</span> <span class="n">lat</span>
+<span class="kn">from</span> <span class="nn">.core</span> <span class="kn">import</span> <span class="n">serializer</span><span class="p">,</span> <span class="n">parser</span> <span class="k">as</span> <span class="n">vp</span><span class="p">,</span> <span class="n">plot_toolkit</span> <span class="k">as</span> <span class="n">ptk</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">_sig_kwargs</span><span class="p">,</span> <span class="n">_sub_doc</span>
+<span class="kn">from</span> <span class="nn">._enplots</span> <span class="kn">import</span> <span class="n">_fmt_labels</span>
+
+
+<div class="viewcode-block" id="summarize"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.summarize">[docs]</a><span class="k">def</span> <span class="nf">summarize</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply given func to each file in files and return a dataframe of the results.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    files: Iterable, must be an iterable of PathLike objects, a dictionary of {name: PathLike} pairs also works and name appears in the dataframe.</span>
+<span class="sd">    func: callable with a single arguemnt path.  Must return a dictionary.</span>
+
+<span class="sd">    kwargs: passed to func itself.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Argument `func` must be a function.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Argument `files` must be an iterable of PathLike objects.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">):</span> <span class="n">path</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">files</span><span class="p">}</span>  <span class="c1"># make a dictionary of paths</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">files</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Function must return a dictionary.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;FILE&quot;</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="s2">&quot;FILE is a reserved key to store the file name for reference.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span><span class="o">**</span><span class="n">output</span><span class="p">,</span> <span class="s2">&quot;FILE&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+        <span class="p">)</span>  <span class="c1"># add the file name to the output at the end</span>
+
+    <span class="n">unique_keys</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">[]</span>
+    <span class="p">)</span>  <span class="c1"># get all unique keys, there would be missing or extra keys, handle all</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">out</span> <span class="ow">in</span> <span class="n">outputs</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">keys</span><span class="p">()]:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_keys</span><span class="p">:</span>
+            <span class="n">unique_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span><span class="n">ukey</span><span class="p">:</span> <span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ukey</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">out</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span> <span class="k">for</span> <span class="n">ukey</span> <span class="ow">in</span> <span class="n">unique_keys</span><span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<span class="n">_progress_svg</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; height=&quot;5em&quot; viewBox=&quot;0 0 50 50&quot;&gt;</span>
+<span class="s2">    &lt;path fill=&quot;skyblue&quot; d=&quot;M25,5A20.14,20.14,0,0,1,45,22.88a2.51,2.51,0,0,0,2.49,2.26h0A2.52,2.52,0,0,0,50,22.33a25.14,25.14,0,0,0-50,0,2.52,2.52,0,0,0,2.5,2.81h0A2.51,2.51,0,0,0,5,22.88,20.14,20.14,0,0,1,25,5Z&quot;&gt;</span>
+<span class="s2">        &lt;animateTransform attributeName=&quot;transform&quot; type=&quot;rotate&quot; from=&quot;0 25 25&quot; to=&quot;360 25 25&quot; dur=&quot;0.2s&quot; repeatCount=&quot;indefinite&quot;/&gt;</span>
+<span class="s2">    &lt;/path&gt;</span>
+<span class="s2">&lt;/svg&gt;&quot;&quot;&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">fix_signature</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="c1"># VBox ruins signature of subclass, let&#39;s fix it</span>
+    <span class="bp">cls</span><span class="o">.</span><span class="n">__signature__</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">cls</span>
+
+
+<div class="viewcode-block" id="FilesWidget"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.FilesWidget">[docs]</a><span class="nd">@fix_signature</span>
+<span class="k">class</span> <span class="nc">FilesWidget</span><span class="p">(</span><span class="n">VBox</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A widget for selecting files from a directory and its subdirectories.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    path : str, default is &#39;.&#39;. The path to the directory to search.</span>
+<span class="sd">    glob : str, default is &#39;*&#39;. The glob pattern to match files against. See https://docs.python.org/3/library/glob.html</span>
+<span class="sd">    exclude : str, default is None. A regex pattern to exclude files from the selection.</span>
+<span class="sd">    on_file_changed : callable, default is None.</span>
+<span class="sd">        A function that takes path as an argument and is called when the selected file changes. Output is displayed below the widget.</span>
+<span class="sd">        To add extra controls and widgets, use `.interactive`/`.interact` methods instead.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    A FilesWidget object where you can filter files by typing in the text box, and select files from the dropdown.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+        <span class="n">glob</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+        <span class="n">exclude</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_file_changed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">glob</span><span class="p">,</span> <span class="n">exclude</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected string, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">_dom_classes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;FilesWidget&quot;</span><span class="p">])</span>  <span class="c1"># This makes it truely a widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Selections stored as Path objects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">Text</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Path:&quot;</span><span class="p">,</span>
+                <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;The path to the directory to search.&quot;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;glob&quot;</span><span class="p">:</span> <span class="n">Text</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">glob</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Glob:&quot;</span><span class="p">,</span>
+                <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;The glob pattern to match files against. See https://docs.python.org/3/library/glob.html&quot;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;exclude&quot;</span><span class="p">:</span> <span class="n">Text</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">exclude</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Exclude:&quot;</span><span class="p">,</span>
+                <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;A regex pattern to exclude files from the selection.&quot;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;lock&quot;</span><span class="p">:</span> <span class="n">Checkbox</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Lock selection&quot;</span><span class="p">,</span>
+                <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;Lock the current selection and prevent changes.&quot;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;files&quot;</span><span class="p">:</span> <span class="n">Dropdown</span><span class="p">(</span>
+                <span class="n">options</span><span class="o">=</span><span class="p">[],</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;File:&quot;</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;Select a file from the list.&quot;</span>
+            <span class="p">),</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;glob&quot;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;exclude&quot;</span><span class="p">],</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;lock&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lock_selection</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">,</span> <span class="s2">&quot;lock&quot;</span><span class="p">]:</span>
+                <span class="n">value</span><span class="o">.</span><span class="n">on_submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_process</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">on_file_changed</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">on_file_changed</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Argument `on_file_changed` must be a function that takes path as an argument.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">out</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">Output</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">max_height</span> <span class="o">=</span> <span class="s2">&quot;90vh&quot;</span>  <span class="c1"># Only if output is present</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span>
+
+            <span class="nd">@out</span><span class="o">.</span><span class="n">capture</span><span class="p">(</span><span class="n">clear_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">def</span> <span class="nf">on_change</span><span class="p">(</span><span class="n">change</span><span class="p">):</span>
+                <span class="n">on_file_changed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">on_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># Initial processing based on given values</span>
+
+    <span class="k">def</span> <span class="nf">_lock_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">,</span> <span class="s2">&quot;lock&quot;</span><span class="p">]:</span>
+                <span class="n">value</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span>
+                    <span class="s2">&quot;lock&quot;</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">value</span>  <span class="c1"># Don&#39;t allow changes even programatically</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;lock&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;lock&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> files selected&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;lock&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;glob&quot;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;exclude&quot;</span><span class="p">],</span>
+            <span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;output&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]]</span>
+
+    <span class="k">def</span> <span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;lock&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Processing...&quot;</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">glob</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;glob&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">exclude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;exclude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">files</span>
+        <span class="p">]</span>  <span class="c1"># shows only relative path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">path</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>  <span class="c1"># Store as full path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>  <span class="c1">#  show all widgets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span>
+            <span class="s2">&quot;lock&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> files found. Lock selection?&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">paths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Returns all availble paths.&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Returns the dropdown widget to select files.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">selected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="s2">&quot;Returns selected item in the dropdown as Path object.&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>  <span class="c1"># if not empty, otherwise it throws error</span>
+            <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>  <span class="c1"># return full path</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># This is in consistent with other widgets too</span>
+        <span class="s2">&quot;Return currently selected path.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected</span>
+
+<div class="viewcode-block" id="FilesWidget.interactive"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.FilesWidget.interactive">[docs]</a>    <span class="k">def</span> <span class="nf">interactive</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">,</span>
+        <span class="n">other_widgets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">other_controls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;manual&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+        <span class="n">height</span><span class="o">=</span><span class="s2">&quot;90vh&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interact with a function that takes selected Path as first argument. Returns a widget that saves attributes of the function call such as .f, .args, .kwargs.</span>
+<span class="sd">        See docs of self.interact for more details on the parameters. kwargs are passed to ipywidgets.interactive to create controls.</span>
+
+
+<span class="sd">        &gt;&gt;&gt; fw = FilesWidget()</span>
+<span class="sd">        &gt;&gt;&gt; out = fw.interactive(lambda path: print(path.read_text())) # prints contents of selected file on output widget</span>
+<span class="sd">        &gt;&gt;&gt; out.f # function</span>
+<span class="sd">        &gt;&gt;&gt; out.args # arguments</span>
+<span class="sd">        &gt;&gt;&gt; out.kwargs # keyword arguments</span>
+<span class="sd">        &gt;&gt;&gt; out.result # result of function call which is same as out.f(*out.args, **out.kwargs)</span>
+<span class="sd">        &gt;&gt;&gt; out.files_widget # reference to FilesWidget created, not the same as fw because it is a new instance</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            If you don&#39;t need to interpret the result of the function call, you can use the @self.interact decorator instead.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            Each time an underlying new FilesWidget instance is created which picks input from previous one but stays separate. You can access it with `.files_widget` attribute of interactive.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Make new FilesWidget with same parameters, to allow multiple interact calls</span>
+        <span class="n">new_fw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
+            <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">glob</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;glob&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">exclude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;exclude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">HTML</span><span class="p">()</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s2">&quot;FW-Progess&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">interact_func</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>  <span class="c1"># This would be None if no file is selected</span>
+                <span class="n">info</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">_progress_svg</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Running </span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">filename</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">)&quot;</span>
+                    <span class="p">)</span>  <span class="c1"># it also serves as removing the output errors</span>
+                    <span class="n">func</span><span class="p">(</span>
+                        <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span>
+                    <span class="p">)</span>  <span class="c1"># Have Path object absolue if user changes directory</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Finished in </span><span class="si">{</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
+                <span class="k">finally</span><span class="p">:</span>
+                    <span class="n">info</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">interactive</span><span class="p">(</span>
+            <span class="n">interact_func</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">new_fw</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="n">out</span><span class="o">.</span><span class="n">files_widget</span> <span class="o">=</span> <span class="n">new_fw</span>  <span class="c1"># save reference to FilesWidget</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">output_widget</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">children</span><span class="p">[</span>
+            <span class="o">-</span><span class="mi">1</span>
+        <span class="p">]</span>  <span class="c1"># save reference to output widget for other widgets to use</span>
+
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;manual&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">interact_button</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">children</span><span class="p">[</span>
+                <span class="o">-</span><span class="mi">2</span>
+            <span class="p">]</span>  <span class="c1"># save reference to interact button for other widgets to use</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># get output widget</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">clear_output</span><span class="p">(</span>
+            <span class="n">wait</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>  <span class="c1"># clear output by waiting to avoid flickering, this is important</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+            <span class="n">overflow</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">max_height</span><span class="o">=</span><span class="s2">&quot;100%&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="s2">&quot;100%&quot;</span>
+        <span class="p">)</span>  <span class="c1"># make output scrollable and avoid overflow</span>
+
+        <span class="n">others</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># exclude files_dd and Output widget</span>
+        <span class="n">_style</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;&lt;style&gt;</span>
+<span class="s2">        .FilesWidget-Interact {</span>
+<span class="s2">            --jp-widgets-inline-label-width: 4em;</span>
+<span class="s2">            --jp-widgets-inline-width: 18em;</span>
+<span class="s2">            --jp-widgets-inline-width-short: 9em;</span>
+<span class="s2">        }</span>
+<span class="s2">        .FilesWidget-Interact {max-height:90vh;width:100%;}</span>
+<span class="s2">        .FilesWidget-Interact &gt; div {overflow:auto;max-height:100%;padding:8px;}</span>
+<span class="s2">        .FilesWidget-Interact &gt; div:first-child {width:20em}</span>
+<span class="s2">        .FilesWidget-Interact &gt; div:last-child {width:calc(100</span><span class="si">% - 20e</span><span class="s2">m)}</span>
+<span class="s2">        .FilesWidget-Interact .FW-Progess {position:absolute !important; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1}</span>
+<span class="s2">        &lt;/style&gt;&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">others</span><span class="p">:</span>
+            <span class="n">others</span> <span class="o">=</span> <span class="p">[</span><span class="n">ipw</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&lt;hr/&gt;</span><span class="si">{</span><span class="n">_style</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="o">*</span><span class="n">others</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">others</span> <span class="o">=</span> <span class="p">[</span><span class="n">ipw</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="n">_style</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="n">other_controls</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_controls</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;other_controls must be a list or tuple of widgets.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">other_widgets</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_widgets</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;other_widgets must be a list or tuple of widgets.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">other_widgets</span><span class="p">:</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">max_height</span> <span class="o">=</span> <span class="s2">&quot;200px&quot;</span>
+            <span class="n">out_collapser</span> <span class="o">=</span> <span class="n">Checkbox</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Hide output widget&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">toggle_output</span><span class="p">(</span><span class="n">change</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">out_collapser</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="n">output</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="s2">&quot;0px&quot;</span>  <span class="c1"># dont use display = &#39;none&#39; as it will clear widgets and wont show again</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">output</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span>
+
+            <span class="n">out_collapser</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">toggle_output</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+            <span class="n">others</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_collapser</span><span class="p">)</span>
+
+        <span class="c1"># This should be below output collapser</span>
+        <span class="n">others</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="o">*</span><span class="n">others</span><span class="p">,</span>
+            <span class="n">ipw</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&lt;hr/&gt;&quot;</span><span class="p">),</span>
+            <span class="o">*</span><span class="p">(</span><span class="n">other_controls</span> <span class="ow">or</span> <span class="p">[]),</span>
+        <span class="p">]</span>  <span class="c1"># add hr to separate other controls</span>
+
+        <span class="n">out</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">HBox</span><span class="p">(</span>
+                <span class="p">[</span>  <span class="c1"># reset children to include new widgets</span>
+                    <span class="n">VBox</span><span class="p">(</span>
+                        <span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="n">new_fw</span><span class="p">,</span> <span class="n">VBox</span><span class="p">(</span><span class="n">others</span><span class="p">)]</span>
+                    <span class="p">),</span>  <span class="c1"># other widgets in box to make scrollable independent file selection</span>
+                    <span class="n">VBox</span><span class="p">(</span>
+                        <span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="n">Box</span><span class="p">([</span><span class="n">output</span><span class="p">]),</span> <span class="o">*</span><span class="p">(</span><span class="n">other_widgets</span> <span class="ow">or</span> <span class="p">[]),</span> <span class="n">info</span><span class="p">]</span>
+                    <span class="p">),</span>  <span class="c1"># output in box to make scrollable,</span>
+                <span class="p">],</span>
+                <span class="n">layout</span><span class="o">=</span><span class="n">Layout</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">max_height</span><span class="o">=</span><span class="n">height</span><span class="p">),</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s2">&quot;FilesWidget-Interact&quot;</span><span class="p">)</span>
+        <span class="p">]</span>  <span class="c1"># important for every widget separately</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="FilesWidget.interact"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.FilesWidget.interact">[docs]</a>    <span class="k">def</span> <span class="nf">interact</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">other_widgets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">other_controls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;manual&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+        <span class="n">height</span><span class="o">=</span><span class="s2">&quot;90vh&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Interact with a function that takes a selected Path as first argument.</span>
+<span class="sd">        A CSS class &#39;FilesWidget-Interact&#39; is added to the final widget to let you style it.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other_widgets : list/tuple</span>
+<span class="sd">            Any displayable widget can be passed. These are placed below the output widget of interact.</span>
+<span class="sd">            For example you can add plotly&#39;s FigureWidget that updates based on the selection, but is not part of the function, so it is displayed only once.</span>
+<span class="sd">        other_controls : list/tuple</span>
+<span class="sd">            Default is None. If not None, these are assumed to be ipywidgets and are placed below the widgets created by kwargs. These are not passed to the decorated function.</span>
+<span class="sd">        options : dict</span>
+<span class="sd">            Default is {&#39;manua&#39;:False}. If True, the decorated function is not called automatically, and you have to call it manually on button press. You can pass button name as &#39;manual_name&#39; in options.</span>
+<span class="sd">        height : str</span>
+<span class="sd">            Default is &#39;90vh&#39;. height of the final widget. This is important to avoid very long widgets.</span>
+
+
+<span class="sd">        kwargs are passed to ipywidgets.interactive and decorated function. Resulting widgets are placed below the file selection widget.</span>
+
+<span class="sd">        `other_widgets` can be controlled by `other_controls` externally. For example, you can add a button to update a plotly&#39;s FigureWidget.</span>
+
+<span class="sd">        The decorated function can be called later separately as well, and has .args and .kwargs attributes to access the latest arguments</span>
+<span class="sd">        and .result method to access latest. For a function `f`, `f.result` is same as `f(*f.args, **f.kwargs)`.</span>
+
+
+<span class="sd">        &gt;&gt;&gt; fw = FilesWidget()</span>
+<span class="sd">        &gt;&gt;&gt; @fw.interact(x = False)</span>
+<span class="sd">        &gt;&gt;&gt; def f(path,x):</span>
+<span class="sd">        &gt;&gt;&gt;     print(&#39;path:&#39;,path)</span>
+<span class="sd">        &gt;&gt;&gt;     print(&#39;Path Type: &#39;, type(path))</span>
+<span class="sd">        &gt;&gt;&gt;     print(&#39;x: &#39;,x)</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            Use self.interactive to get a widget that stores the argements and can be called later in a notebook cell.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+            <span class="n">display</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">interactive</span><span class="p">(</span>
+                    <span class="n">func</span><span class="p">,</span>
+                    <span class="n">other_widgets</span><span class="o">=</span><span class="n">other_widgets</span><span class="p">,</span>
+                    <span class="n">other_controls</span><span class="o">=</span><span class="n">other_controls</span><span class="p">,</span>
+                    <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span>
+                    <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">func</span>
+
+        <span class="k">return</span> <span class="n">inner</span></div>
+
+<div class="viewcode-block" id="FilesWidget.summarize"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.FilesWidget.summarize">[docs]</a>    <span class="k">def</span> <span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Summarize the results from all selected files using a function that takes a Path object as first arguement.</span>
+<span class="sd">        kwargs are passed to function. Returns a dataframe.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">summarize</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">)</span>
+            <span class="p">},</span>
+            <span class="n">func</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+
+
+<span class="nd">@fix_signature</span>
+<span class="k">class</span> <span class="nc">_PropPicker</span><span class="p">(</span><span class="n">VBox</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_summary</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;atoms&quot;</span><span class="p">:</span> <span class="n">Dropdown</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Atoms&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;orbs&quot;</span><span class="p">:</span> <span class="n">Dropdown</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Orbs&quot;</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_html</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">HTML</span><span class="p">()</span>  <span class="c1"># to observe</span>
+
+        <span class="k">def</span> <span class="nf">observe_change</span><span class="p">(</span><span class="n">change</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_html</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">change</span><span class="o">.</span><span class="n">new</span>  <span class="c1"># is a string</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">observe_change</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;orbs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">observe_change</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_orbs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process</span><span class="p">(</span><span class="n">system_summary</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_summary</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">system_summary</span><span class="p">,</span> <span class="s2">&quot;orbs&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">ipw</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ No projection data found from given summary!&quot;</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;orbs&quot;</span><span class="p">]]</span>
+        <span class="n">sorbs</span> <span class="o">=</span> <span class="n">system_summary</span><span class="o">.</span><span class="n">orbs</span>
+
+        <span class="n">orbs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;All&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sorbs</span><span class="p">)),</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">]}</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;px&quot;</span><span class="p">,</span> <span class="s2">&quot;py&quot;</span><span class="p">,</span> <span class="s2">&quot;pz&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">sorbs</span><span class="p">):</span>
+            <span class="n">orbs</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">orbs</span><span class="p">[</span><span class="s2">&quot;px+py&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sorbs</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;px&quot;</span><span class="p">,</span> <span class="s2">&quot;py&quot;</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">orbs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sorbs</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))})</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;dxy&quot;</span><span class="p">,</span> <span class="s2">&quot;dyz&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">sorbs</span><span class="p">):</span>
+            <span class="n">orbs</span><span class="p">[</span><span class="s2">&quot;d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+            <span class="n">orbs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sorbs</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">))})</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorbs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="n">orbs</span><span class="p">[</span><span class="s2">&quot;f&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+            <span class="n">orbs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sorbs</span><span class="p">[</span><span class="mi">9</span><span class="p">:],</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">16</span><span class="p">))})</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorbs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">16</span><span class="p">:</span>  <span class="c1"># What the hell here</span>
+            <span class="n">orbs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sorbs</span><span class="p">[</span><span class="mi">16</span><span class="p">:],</span> <span class="n">start</span><span class="o">=</span><span class="mi">16</span><span class="p">)})</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_orbs</span> <span class="o">=</span> <span class="n">orbs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;orbs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">orbs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="n">atoms</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;All&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="n">system_summary</span><span class="o">.</span><span class="n">NIONS</span><span class="p">)}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">system_summary</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">atoms</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">tp</span>
+            <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">atoms</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span> <span class="o">=</span> <span class="n">atoms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_summary</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process</span><span class="p">(</span><span class="n">system_summary</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">props</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">w</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">items</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">],</span> <span class="p">[])</span>
+        <span class="n">items</span><span class="p">[</span><span class="s2">&quot;orbs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orbs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="s2">&quot;orbs&quot;</span><span class="p">],</span> <span class="p">[])</span>
+        <span class="n">items</span><span class="p">[</span>
+            <span class="s2">&quot;label&quot;</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s1">&#39;atoms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">[</span><span class="s1">&#39;orbs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">items</span>
+
+
+<div class="viewcode-block" id="PropsPicker"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.PropsPicker">[docs]</a><span class="nd">@fix_signature</span>
+<span class="k">class</span> <span class="nc">PropsPicker</span><span class="p">(</span><span class="n">VBox</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A widget to pick atoms and orbitals for plotting.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    system_summary : (Vasprun,Vaspout).summary</span>
+<span class="sd">    N : int, default is 3, number of projections to pick.</span>
+<span class="sd">    on_button_click : callable, takes button as arguemnet. Default is None, a function to call when button is clicked.</span>
+<span class="sd">    on_selection_changed : callable, takes change as argument. Default is None, a function to call when selection is changed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">system_summary</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">on_button_click</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">on_selection_changed</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_linked</span> <span class="o">=</span> <span class="n">Dropdown</span><span class="p">(</span>
+            <span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">N</span> <span class="o">!=</span> <span class="mi">3</span>
+            <span class="k">else</span> <span class="p">(</span><span class="s2">&quot;Red&quot;</span><span class="p">,</span> <span class="s2">&quot;Green&quot;</span><span class="p">,</span> <span class="s2">&quot;Blue&quot;</span><span class="p">),</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Projection&quot;</span> <span class="k">if</span> <span class="n">N</span> <span class="o">!=</span> <span class="mi">3</span> <span class="k">else</span> <span class="s2">&quot;Color&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stacked</span> <span class="o">=</span> <span class="n">Stack</span><span class="p">(</span>
+            <span class="n">children</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">_PropPicker</span><span class="p">(</span><span class="n">system_summary</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)),</span>
+            <span class="n">selected_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Run Function&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">on_button_click</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_button</span><span class="o">.</span><span class="n">on_click</span><span class="p">(</span><span class="n">on_button_click</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_button</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linked</span><span class="p">]:</span>
+            <span class="n">w</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="s2">&quot;max-content&quot;</span>
+
+        <span class="n">ipw</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_linked</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stacked</span><span class="p">,</span> <span class="s2">&quot;selected_index&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_linked</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_button</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stacked</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">on_selection_changed</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stacked</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">_html</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">on_selection_changed</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PropsPicker.update"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.PropsPicker.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_summary</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stacked</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">system_summary</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">button</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_button</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">projections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stacked</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">props</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">props</span>
+            <span class="k">if</span> <span class="n">props</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">props</span><span class="p">[</span><span class="s2">&quot;orbs&quot;</span><span class="p">]:</span>  <span class="c1"># discard empty</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;atoms&quot;</span><span class="p">],</span> <span class="n">props</span><span class="p">[</span><span class="s2">&quot;orbs&quot;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+<span class="k">def</span> <span class="nf">__store_figclick_data</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">store_dict</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selection</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="s2">&quot;Store clicked data in a dict. callback takes trace as argument and is called after storing data.&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">go</span><span class="o">.</span><span class="n">FigureWidget</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;fig must be a FigureWidget&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">store_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;store_dict must be a dict&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">callback</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">callback</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;callback must be callable if given&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">handle_click</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">store_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">points</span>
+        <span class="k">if</span> <span class="n">callback</span><span class="p">:</span>
+            <span class="n">callback</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">selection</span><span class="p">:</span>
+            <span class="n">trace</span><span class="o">.</span><span class="n">on_selection</span><span class="p">(</span><span class="n">handle_click</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trace</span><span class="o">.</span><span class="n">on_click</span><span class="p">(</span><span class="n">handle_click</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">store_clicked_data</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">store_dict</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="s2">&quot;Store clicked point data to a store_dict. callback takes trace being clicked as argument.&quot;</span>
+    <span class="k">return</span> <span class="n">__store_figclick_data</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">store_dict</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">selection</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">store_selected_data</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">store_dict</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="s2">&quot;Store multipoints selected data to a store_dict. callback takes trace being clicked as argument.&quot;</span>
+    <span class="k">return</span> <span class="n">__store_figclick_data</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">store_dict</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">selection</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="load_results"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.load_results">[docs]</a><span class="k">def</span> <span class="nf">load_results</span><span class="p">(</span><span class="n">paths_list</span><span class="p">):</span>
+    <span class="s2">&quot;Loads result.json from paths_list and returns a dataframe.&quot;</span>
+    <span class="n">paths_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths_list</span><span class="p">]</span>
+    <span class="n">result_paths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">paths_list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">path</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="n">result_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;result.json&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">path</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                <span class="n">result_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;result.json&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">absolute</span><span class="p">()))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>  <span class="c1"># If not found, return empty dictionary</span>
+
+    <span class="k">return</span> <span class="n">summarize</span><span class="p">(</span><span class="n">result_paths</span><span class="p">,</span> <span class="n">load_data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BandsWidget"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.BandsWidget">[docs]</a><span class="nd">@fix_signature</span>
+<span class="k">class</span> <span class="nc">BandsWidget</span><span class="p">(</span><span class="n">VBox</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Visualize band structure from VASP calculation. You can click on the graph to get the data such as VBM, CBM, etc.</span>
+<span class="sd">    Two attributes are important:</span>
+<span class="sd">    self.clicked_data returns the last clicked point, that can also be stored as VBM, CBM etc, using Click dropdown.</span>
+<span class="sd">    self.selected_data returns the last selection of points within a box or lasso. You can plot that output separately as plt.plot(data.xs, data.ys) after a selection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_vaspout</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;90vh&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">file_widget_kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">_dom_classes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;BandsWidget&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bands</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_vaspout</span> <span class="o">=</span> <span class="n">use_vaspout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">FigureWidget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tsd</span> <span class="o">=</span> <span class="n">Dropdown</span><span class="p">(</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Style&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plotly_white&quot;</span><span class="p">,</span> <span class="s2">&quot;plotly_dark&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_click</span> <span class="o">=</span> <span class="n">Dropdown</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Click&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="s2">&quot;VBM&quot;</span><span class="p">,</span> <span class="s2">&quot;CBM&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ktcicks</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;kticks&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_elim</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;elim&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;-10, 10&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ppicks</span> <span class="o">=</span> <span class="n">PropsPicker</span><span class="p">(</span>
+            <span class="n">on_button_click</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_update_graph</span><span class="p">,</span> <span class="n">on_selection_changed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_warn_update</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ppicks</span><span class="o">.</span><span class="n">button</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Update Graph&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># store and save output results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_click_dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># store clicked data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_select_dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># store selection data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">file_widget_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;glob&quot;</span><span class="p">:</span> <span class="s2">&quot;vapout.h5&quot;</span> <span class="k">if</span> <span class="n">use_vaspout</span> <span class="k">else</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">file_widget_kwargs</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span> <span class="o">=</span> <span class="n">FilesWidget</span><span class="p">(</span><span class="o">**</span><span class="n">file_widget_kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">,</span>
+            <span class="n">other_widgets</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">],</span>
+            <span class="n">other_controls</span><span class="o">=</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tsd</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_elim</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ktcicks</span><span class="p">,</span>
+                <span class="n">ipw</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&lt;hr/&gt;&quot;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ppicks</span><span class="p">,</span>
+                <span class="n">ipw</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&lt;hr/&gt;Click on graph to read selected option.&quot;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_click</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files_widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">files_widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">children</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tsd</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_change_theme</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_click</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_click_save_data</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ktcicks</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_warn_update</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_elim</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_warn_update</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Returns currently selected path.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">files_widget</span><span class="o">.</span><span class="n">path</span>
+
+    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>  <span class="c1"># Automatically redirectes to output widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="o">.</span><span class="n">clear_output</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Why need again?</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bands</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">vp</span><span class="o">.</span><span class="n">Vaspout</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_vaspout</span> <span class="k">else</span> <span class="n">vp</span><span class="o">.</span><span class="n">Vasprun</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">bands</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ppicks</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ktcicks</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">get_kticks</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">LSORBIT</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_click</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="s2">&quot;VBM&quot;</span><span class="p">,</span> <span class="s2">&quot;CBM&quot;</span><span class="p">,</span> <span class="s2">&quot;so_max&quot;</span><span class="p">,</span> <span class="s2">&quot;so_min&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_click</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="s2">&quot;VBM&quot;</span><span class="p">,</span> <span class="s2">&quot;CBM&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">file</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">files_widget</span><span class="o">.</span><span class="n">selected</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;result.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="n">serializer</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">absolute</span><span class="p">()))</span>  <span class="c1"># Old data loaded</span>
+
+            <span class="n">pdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">pdata</span><span class="o">.</span><span class="n">volume</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                    <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="n">pdata</span><span class="o">.</span><span class="n">norms</span><span class="p">)},</span>
+                    <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="s2">&quot;αβγ&quot;</span><span class="p">,</span> <span class="n">pdata</span><span class="o">.</span><span class="n">angles</span><span class="p">)},</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_click_save_data</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># Load into view</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_warn_update</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Bands class initialized&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bands</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No data loaded by BandsWidget yet!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bands</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Selected kwargs from GUI&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">clicked_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Clicked data from graph&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_click_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">selected_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Data selected by box or lasso selection from graph&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">btn</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="o">.</span><span class="n">clear_output</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Why need again?</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="p">:</span>
+            <span class="n">hsk</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)]</span>
+                <span class="k">for</span> <span class="n">vs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ktcicks</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">kticks</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">int</span><span class="p">(</span><span class="n">vs</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">vs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">vs</span> <span class="ow">in</span> <span class="n">hsk</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span>
+            <span class="n">elim</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elim</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="ow">or</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;elim&quot;</span><span class="p">:</span> <span class="n">elim</span><span class="p">,</span> <span class="s2">&quot;kticks&quot;</span><span class="p">:</span> <span class="n">kticks</span><span class="p">}</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ppicks</span><span class="o">.</span><span class="n">projections</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;projections&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ppicks</span><span class="o">.</span><span class="n">projections</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">}</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">iplot_rgb_lines</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Up&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">ISPIN</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">iplot_rgb_lines</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Down&quot;</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">iplot</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">iplot_rgb_lines</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">splot</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">splot_rgb_lines</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">iplot_bands</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Up&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">ISPIN</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">iplot_bands</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Down&quot;</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">iplot</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">iplot_bands</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">splot</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">splot_bands</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+
+            <span class="n">ptk</span><span class="o">.</span><span class="n">iplot2widget</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tsd</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_click_dict</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># avoid data from previous figure</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_select_dict</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># avoid data from previous figure</span>
+            <span class="n">store_clicked_data</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_click_dict</span><span class="p">,</span>
+                <span class="n">callback</span><span class="o">=</span><span class="k">lambda</span> <span class="n">trace</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_click_save_data</span><span class="p">(</span><span class="s2">&quot;CLICK&quot;</span><span class="p">),</span>
+            <span class="p">)</span>  <span class="c1"># &#39;CLICK&#39; is needed to inntercept in a function</span>
+            <span class="n">store_selected_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_dict</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ppicks</span><span class="o">.</span><span class="n">button</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Update Graph&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_change_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tsd</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">_click_save_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_show_and_save</span><span class="p">(</span><span class="n">data_dict</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="o">.</span><span class="n">clear_output</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Why need again?</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;so_max&quot;</span><span class="p">,</span> <span class="s2">&quot;so_min&quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">serializer</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span>
+                <span class="n">data_dict</span><span class="p">,</span>
+                <span class="n">dump_to</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
+                <span class="n">outfile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">files_widget</span><span class="o">.</span><span class="n">selected</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;result.json&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">change</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="p">):</span>  <span class="c1"># called from other functions but not from store_clicked_data</span>
+            <span class="k">return</span> <span class="n">_show_and_save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="p">)</span>
+        <span class="c1"># Should be after checking chnage</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_click</span><span class="o">.</span><span class="n">value</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_click</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;None&quot;</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="c1"># No need to act on None</span>
+
+        <span class="n">data_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># Copy old data</span>
+
+        <span class="k">if</span> <span class="n">data</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clicked_data</span><span class="p">:</span>  <span class="c1"># No need to make empty dict</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">6</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">ys</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ezero</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>  <span class="c1"># Add ezero</span>
+
+            <span class="k">if</span> <span class="n">key</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_click</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>  <span class="c1"># Assign value back</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;so&quot;</span><span class="p">):</span>
+                    <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;_k&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
+                        <span class="n">x</span><span class="p">,</span> <span class="mi">6</span>
+                    <span class="p">)</span>  <span class="c1"># Save x to test direct/indirect</span>
+
+            <span class="k">if</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;VBM&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;CBM&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;E_gap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;CBM&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;VBM&quot;</span><span class="p">],</span> <span class="mi">6</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;so_max&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;so_min&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;Δ_SO&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                    <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;so_max&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;so_min&quot;</span><span class="p">],</span> <span class="mi">6</span>
+                <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>  <span class="c1"># store new data</span>
+            <span class="n">_show_and_save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">change</span> <span class="o">==</span> <span class="s2">&quot;CLICK&quot;</span><span class="p">:</span>  <span class="c1"># Called from store_clicked_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_click</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>  <span class="c1"># Reset to None to avoid accidental click</span>
+
+    <span class="k">def</span> <span class="nf">_warn_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ppicks</span><span class="o">.</span><span class="n">button</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;🔴 Update Graph&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Generate a data frame form result.json file in each folder.&quot;</span>
+        <span class="k">return</span> <span class="n">load_results</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files_widget</span><span class="o">.</span><span class="n">paths</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="KpathWidget"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.KpathWidget">[docs]</a><span class="nd">@fix_signature</span>
+<span class="k">class</span> <span class="nc">KpathWidget</span><span class="p">(</span><span class="n">VBox</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interactively bulid a kpath for bandstructure calculation.</span>
+
+<span class="sd">    After initialization and disply:</span>
+
+<span class="sd">    - Select a POSCAR file from &quot;File:&quot; dropdown menu. It will update the figure.</span>
+<span class="sd">    - Add points to select box on left by clicking on plot points. When done with points click on Lock to avoid adding more points.</span>
+<span class="sd">    - To update point(s), select point(s) from the select box and click on a scatter point in figure or use KPOINT input to update it manually, e.g. if a point is not available on plot.</span>
+<span class="sd">    - Add labels to the points by typing in the &quot;Labels&quot; box such as &quot;Γ,X&quot; or &quot;Γ 5,X&quot; that will add 5 points in interval.</span>
+<span class="sd">    - To break the path between two points &quot;Γ&quot; and &quot;X&quot; type &quot;Γ 0,X&quot; in the &quot;Labels&quot; box, zero means no points in interval.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;90vh&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">files_widget_kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">_dom_classes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;KpathWidget&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">FigureWidget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span> <span class="o">=</span> <span class="n">SelectMultiple</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">[],</span> <span class="n">layout</span><span class="o">=</span><span class="n">Layout</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lab</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Labels&quot;</span><span class="p">,</span> <span class="n">continuous_update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kpt</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;KPOINT&quot;</span><span class="p">,</span> <span class="n">continuous_update</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Lock&quot;</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;Lock/Unlock adding more points&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_del</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;❌ Point&quot;</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;Delete Selected Points&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tsb</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Dark Plot&quot;</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;Toggle Plot Theme&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_poscar</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clicktime</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">other_controls</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_add</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_del</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tsb</span><span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">Layout</span><span class="p">(</span><span class="n">min_height</span><span class="o">=</span><span class="s2">&quot;24px&quot;</span><span class="p">)),</span>
+            <span class="n">ipw</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span>
+                <span class="s2">&quot;&lt;style&gt;.KpathWidget .widget-select-multiple { min-height: 180px; }</span><span class="se">\n</span><span class="s2"> .widget-select-multiple &gt; select {height: 100%;}&lt;/style&gt;&quot;</span>
+            <span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lab</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_kpt</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">files_widget_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;glob&quot;</span><span class="p">:</span> <span class="s2">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">files_widget_kwargs</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span> <span class="o">=</span> <span class="n">FilesWidget</span><span class="p">(</span><span class="o">**</span><span class="n">files_widget_kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_fig</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">],</span> <span class="n">other_controls</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files_widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">files_widget</span>  <span class="c1"># sometimes useful</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">children</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tsb</span><span class="o">.</span><span class="n">on_click</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_update_theme</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add</span><span class="o">.</span><span class="n">on_click</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggle_lock</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_del</span><span class="o">.</span><span class="n">on_click</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_del_point</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kpt</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_take_kpt</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lab</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_add_label</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Returns currently selected path.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">files_widget</span><span class="o">.</span><span class="n">path</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;POSCAR class associated to current selection.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_poscar</span>
+
+    <span class="k">def</span> <span class="nf">_update_fig</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">.misc</span> <span class="kn">import</span> <span class="n">POSCAR</span>  <span class="c1"># to avoid circular import</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="p">:</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;plotly_dark&quot;</span> <span class="k">if</span> <span class="s2">&quot;Light&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tsb</span><span class="o">.</span><span class="n">description</span> <span class="k">else</span> <span class="s2">&quot;plotly_white&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_poscar</span> <span class="o">=</span> <span class="n">POSCAR</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">ptk</span><span class="o">.</span><span class="n">iplot2widget</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_poscar</span><span class="o">.</span><span class="n">iplot_bz</span><span class="p">(</span><span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">,</span> <span class="n">template</span>
+            <span class="p">)</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">batch_animate</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+                    <span class="n">go</span><span class="o">.</span><span class="n">Scatter3d</span><span class="p">(</span>
+                        <span class="n">x</span><span class="o">=</span><span class="p">[],</span>
+                        <span class="n">y</span><span class="o">=</span><span class="p">[],</span>
+                        <span class="n">z</span><span class="o">=</span><span class="p">[],</span>
+                        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines+text&quot;</span><span class="p">,</span>
+                        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;path&quot;</span><span class="p">,</span>
+                        <span class="n">text</span><span class="o">=</span><span class="p">[],</span>
+                        <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>  <span class="c1"># dont let it block other points</span>
+                        <span class="n">textfont_size</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>  <span class="c1"># add path that will be updated later</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_click</span><span class="p">()</span>  <span class="c1"># handle events</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Click points on plot to store for kpath.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_click</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">handle_click</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clicktime</span> <span class="ow">and</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clicktime</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">return</span>  <span class="c1"># Avoid double clicks</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_clicktime</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>  <span class="c1"># register this click&#39;s time</span>
+
+            <span class="k">if</span> <span class="n">points</span><span class="o">.</span><span class="n">ys</span> <span class="o">!=</span> <span class="p">[]:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">point_inds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">kp</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">hovertext</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                <span class="n">kp</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_take_kpt</span><span class="p">(</span><span class="n">kp</span><span class="p">)</span>  <span class="c1"># this updates plot back as well</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add</span><span class="o">.</span><span class="n">description</span> <span class="o">==</span> <span class="s2">&quot;Lock&quot;</span><span class="p">:</span>  <span class="c1"># only add when open</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_add_point</span><span class="p">(</span><span class="n">kp</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;HSK&quot;</span> <span class="ow">in</span> <span class="n">trace</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">trace</span><span class="o">.</span><span class="n">on_click</span><span class="p">(</span><span class="n">handle_click</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="p">:</span>
+            <span class="n">coords</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coords_labels</span><span class="p">()</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">batch_animate</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s2">&quot;path&quot;</span> <span class="ow">in</span> <span class="n">trace</span><span class="o">.</span><span class="n">name</span> <span class="ow">and</span> <span class="n">coords</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                        <span class="n">trace</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+                        <span class="n">trace</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+                        <span class="n">trace</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+                        <span class="n">trace</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">_fmt_labels</span><span class="p">(</span>
+                            <span class="n">labels</span>
+                        <span class="p">)</span>  <span class="c1"># convert latex to html equivalent</span>
+
+<div class="viewcode-block" id="KpathWidget.get_coords_labels"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.KpathWidget.get_coords_labels">[docs]</a>    <span class="k">def</span> <span class="nf">get_coords_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Returns tuple of (coordinates, labels) to directly plot.&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kpoints</span><span class="p">()</span>
+
+            <span class="n">coords</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">bz</span><span class="o">.</span><span class="n">to_cartesian</span><span class="p">([</span><span class="n">p</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">points</span>
+                <span class="k">else</span> <span class="p">[]</span>
+            <span class="p">)</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nb">str</span><span class="p">))</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span>
+            <span class="p">]</span>
+            <span class="n">numbers</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">p</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span>
+                <span class="k">else</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nb">int</span><span class="p">))</span>
+                <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span>
+            <span class="p">]</span>
+
+            <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">numbers</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">labels</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">j</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="n">coords</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">j</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">])</span>
+                    <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coords</span><span class="p">),</span> <span class="n">labels</span></div>
+
+<div class="viewcode-block" id="KpathWidget.get_kpoints"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.KpathWidget.get_kpoints">[docs]</a>    <span class="k">def</span> <span class="nf">get_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Returns kpoints list including labels and numbers in intervals if given.&quot;</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">idx</span> <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span> <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints</span>
+        <span class="p">]</span>  <span class="c1"># order and existence is important</span>
+        <span class="n">kpts</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_kpoints</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]</span>
+        <span class="n">LN</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">lab</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;⋮&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">lab</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">keys</span>
+        <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ln</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">LN</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ln</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">kpts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="o">*</span><span class="n">kpts</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">ln</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">ln</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>  <span class="c1"># label, number</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ln</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">kpts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="o">*</span><span class="n">kpts</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">ln</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>  <span class="c1"># number</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">kpts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="o">*</span><span class="n">kpts</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">ln</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>  <span class="c1"># label</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ln</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">kpts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">kpts</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Label and number should be separated by space or only one of them should be present&quot;</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">kpts</span></div>
+
+    <span class="k">def</span> <span class="nf">_update_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">btn</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;Dark&quot;</span> <span class="ow">in</span> <span class="n">btn</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;plotly_dark&quot;</span>
+            <span class="n">btn</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Light Plot&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;plotly_white&quot;</span>
+            <span class="n">btn</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Dark Plot&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_add_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kpt</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;⋮&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span><span class="p">))]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>  <span class="c1"># select to receive point as well</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_take_kpt</span><span class="p">(</span><span class="n">kpt</span><span class="p">)</span>  <span class="c1"># add point, label and plot back</span>
+
+    <span class="k">def</span> <span class="nf">_toggle_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">btn</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add</span><span class="o">.</span><span class="n">description</span> <span class="o">==</span> <span class="s2">&quot;Lock&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Unlock&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Lock&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_del_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">btn</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="p">:</span>
+            <span class="k">for</span> <span class="p">(</span>
+                <span class="n">v</span>
+            <span class="p">)</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">value</span>
+            <span class="p">):</span>  <span class="c1"># for loop here is important to update selection properly</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="n">opt</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span> <span class="k">if</span> <span class="n">opt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">v</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_selection</span><span class="p">()</span>  <span class="c1"># update plot as well</span>
+
+    <span class="k">def</span> <span class="nf">_take_kpt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change_or_kpt</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">change_or_kpt</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">point</span> <span class="o">=</span> <span class="n">change_or_kpt</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">point</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpt</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expects KPOINT of 3 floats&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">v</span><span class="p">:</span> <span class="n">point</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">value</span><span class="p">})</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:&gt;8.4f}</span><span class="s2"> </span><span class="si">{:&gt;8.4f}</span><span class="s2"> </span><span class="si">{:&gt;8.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">point</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">value</span> <span class="k">else</span> <span class="p">(</span><span class="n">lab</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">lab</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span>
+            <span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_label</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># Re-adjust labels and update plot as well</span>
+
+    <span class="k">def</span> <span class="nf">_add_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="p">:</span>
+            <span class="n">labs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot; ⋮ &quot;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span><span class="p">]</span>  <span class="c1"># as much as options</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">lab</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lab</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span>
+            <span class="p">):</span>
+                <span class="n">labs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">labs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">lab</span>  <span class="c1"># don&#39;t leave empty anyhow</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;⋮&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="n">lab</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">idx</span><span class="p">),</span> <span class="n">lab</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="n">labs</span><span class="p">)</span>
+            <span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_selection</span><span class="p">()</span>  <span class="c1"># Update plot in both cases, by click or manual input</span>
+
+<div class="viewcode-block" id="KpathWidget.get_kpath"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.KpathWidget.get_kpath">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">get_kpath</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;kpoints :.*n :&quot;</span><span class="p">:</span> <span class="s2">&quot;n :&quot;</span><span class="p">})</span>
+    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">get_kpath</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;kpoints&quot;</span><span class="p">,))</span>
+    <span class="k">def</span> <span class="nf">get_kpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">get_kpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_kpoints</span><span class="p">(),</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="KpathWidget.splot"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.KpathWidget.splot">[docs]</a>    <span class="k">def</span> <span class="nf">splot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fmt_label</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">plot_kws</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Same as `ipyvasp.lattice.POSCAR.splot_bz` except it also plots path on BZ.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        plane : str of plane like &#39;xy&#39; to plot in 2D or None to plot in 3D</span>
+<span class="sd">        fmt_label : function, should take a string and return a string or (str, dict) of which dict is passed to `plt.text`.</span>
+<span class="sd">        plot_kws : dict of keyword arguments for `plt.plot` for kpath.</span>
+
+<span class="sd">        kwargs are passed to `ipyvasp.lattice.POSCAR.splot_bz`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plot_kws</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;plot_ks should be a dict&quot;</span><span class="p">)</span>
+
+        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">(</span><span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">kpoints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">to_basis</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">reciprocal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">coords</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coords_labels</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">splot_kpath</span><span class="p">(</span>
+            <span class="n">kpoints</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">fmt_label</span><span class="o">=</span><span class="n">fmt_label</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kws</span>
+        <span class="p">)</span>  <span class="c1"># plots on ax automatically</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="KpathWidget.iplot"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.KpathWidget.iplot">[docs]</a>    <span class="k">def</span> <span class="nf">iplot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Returns disconnected current plotly figure&quot;</span>
+        <span class="k">return</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span></div></div>
+
+
+<span class="c1"># Should be at end</span>
+<span class="k">del</span> <span class="n">fix_signature</span>  <span class="c1"># no more need</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Abdul Saboor
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/scripts/furo.js"></script>
+    </body>
+</html>

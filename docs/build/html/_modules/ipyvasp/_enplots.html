@@ -1,0 +1,1325 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
+
+    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+        <title>ipyvasp._enplots - ipyvasp 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">ipyvasp 0.1.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  
+  <span class="sidebar-brand-text">ipyvasp 0.1.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../apidoc.html">API</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for ipyvasp._enplots</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.patheffects</span> <span class="k">as</span> <span class="nn">path_effects</span>
+<span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">LineCollection</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
+
+
+<span class="c1"># Inside packages import</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">gu</span>
+<span class="kn">from</span> <span class="nn">.core.plot_toolkit</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">adjust_axes</span><span class="p">,</span>
+    <span class="n">get_axes</span><span class="p">,</span>
+    <span class="n">add_text</span><span class="p">,</span>
+    <span class="n">add_legend</span><span class="p">,</span>
+    <span class="n">add_colorbar</span><span class="p">,</span>
+    <span class="n">color_cube</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">join_ksegments</span><span class="p">(</span><span class="n">kpath</span><span class="p">,</span> <span class="o">*</span><span class="n">pairs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Joins a broken kpath&#39;s next segment to previous. `pairs` should provide the adjacent indices of the kpoints to be joined.&quot;&quot;&quot;</span>
+    <span class="n">path_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">kpath</span><span class="p">)</span>
+    <span class="n">path_max</span> <span class="o">=</span> <span class="n">path_arr</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">pairs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pair</span><span class="si">}</span><span class="s2"> should have exactly two indices.&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pair</span><span class="si">}</span><span class="s2"> should have integers, got </span><span class="si">{</span><span class="n">idx</span><span class="si">!r}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+            <span class="n">idx_1</span><span class="p">,</span> <span class="n">idx_2</span> <span class="o">=</span> <span class="n">pair</span>
+            <span class="k">if</span> <span class="n">idx_2</span> <span class="o">-</span> <span class="n">idx_1</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Indices in pair (</span><span class="si">{</span><span class="n">idx_1</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">idx_2</span><span class="si">}</span><span class="s2">) are not adjacent.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">path_arr</span><span class="p">[</span><span class="n">idx_2</span><span class="p">:]</span> <span class="o">-=</span> <span class="n">path_arr</span><span class="p">[</span><span class="n">idx_2</span><span class="p">]</span> <span class="o">-</span> <span class="n">path_arr</span><span class="p">[</span><span class="n">idx_1</span><span class="p">]</span>
+        <span class="n">path_arr</span> <span class="o">=</span> <span class="n">path_max</span> <span class="o">*</span> <span class="n">path_arr</span> <span class="o">/</span> <span class="n">path_arr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Normalize to max value back</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">path_arr</span><span class="p">)</span>
+
+
+<span class="c1"># This is to verify things together and make sure they are working as expected.</span>
+<span class="k">def</span> <span class="nf">_validate_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">elim</span><span class="p">,</span> <span class="n">kticks</span><span class="p">,</span> <span class="n">interp</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;E must be a 2D array.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">E</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Length of first dimension of E must be equal to length of K.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">kticks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kticks</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kticks</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">zip</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;kticks must be a list, tuple or zip consisting of (index, label) pairs. index must be an int or tuple of (i, i+1) to join broken path.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kticks</span><span class="p">,</span> <span class="nb">zip</span><span class="p">):</span>
+        <span class="n">kticks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">kticks</span><span class="p">)</span>  <span class="c1"># otherwise it will be empty after first use</span>
+
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kticks</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;First item of pairs in kticks must be int&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Second item of pairs in kticks must be str.&quot;</span><span class="p">)</span>
+
+    <span class="n">pairs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kticks</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;=&quot;</span><span class="p">)</span>
+    <span class="p">]</span>  <span class="c1"># Join broken path at these indices</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">join_ksegments</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="o">*</span><span class="n">pairs</span><span class="p">)</span>
+    <span class="n">inds</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">kticks</span><span class="p">]</span>
+
+    <span class="n">xticks</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">[</span><span class="n">K</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">]</span> <span class="k">if</span> <span class="n">inds</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="p">)</span>  <span class="c1"># Avoid turning off xticks if no kticks given</span>
+    <span class="n">xticklabels</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;=&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kticks</span><span class="p">]</span> <span class="k">if</span> <span class="n">kticks</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="p">)</span>  <span class="c1"># clean up labels</span>
+
+    <span class="k">if</span> <span class="n">elim</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">elim</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;elim must be a list or tuple of length 2.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">interp</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;interp must be an integer or a list/tuple of (n,k).&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">interp</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;interp must be an integer or a list/tuple of (n,k).&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">xticks</span><span class="p">,</span> <span class="n">xticklabels</span>
+
+
+<span class="n">_docs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">params</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Parameters</span>
+<span class="s2">    ----------&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">kticks</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;kticks : list</span>
+<span class="s2">        List of pairs [(int, str),...] for indices of high symmetry k-points. </span>
+<span class="s2">        To join a broken path, use &#39;&lt;=&#39; before symbol, e.g.  [(0, &#39;G&#39;),(40, &#39;&lt;=K|M&#39;), ...] </span>
+<span class="s2">        will join 40 back to 39. You can also use shortcut like zip([0,10,20],&#39;GMK&#39;).&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">interp</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;interp : int or list/tuple</span>
+<span class="s2">        If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">return_ax</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Returns</span>
+<span class="s2">    -------</span>
+<span class="s2">    matplotlib.pyplot.Axes&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">return_fig</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Returns</span>
+<span class="s2">    -------</span>
+<span class="s2">    plotly.graph_objects.Figure&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">K</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;K : array-like</span>
+<span class="s2">        Array of kpoints with shape (nkpts,)&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">E</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;E : array-like</span>
+<span class="s2">        Array of eigenvalues with shape (nkpts, nbands)&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;ax : matplotlib.pyplot.Axes</span>
+<span class="s2">        Matplotlib axes to plot on. If None, a new figure and axes will be created.&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">elim</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;elim : list or tuple</span>
+<span class="s2">        A list or tuple of length 2 for energy limits.&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">pros</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;pros : array-like</span>
+<span class="s2">        Projections of shape (m,nk,nb), m is the number of projections. m &lt;= 3 in rgb case.&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">labels</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;labels : list</span>
+<span class="s2">        As many labels for as projections.&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">colormap</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;colormap : str</span>
+<span class="s2">        A valid matplotlib colormap name.&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="n">maxwidth</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;maxwidth : float</span>
+<span class="s2">        Maximum linewidth to which the projections line width will be scaled. Default is 3.&quot;&quot;&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="splot_bands"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.splot_bands">[docs]</a><span class="nd">@gu</span><span class="o">.</span><span class="n">_fmt_doc</span><span class="p">(</span><span class="n">_docs</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">splot_bands</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot band structure for a single spin channel and return the matplotlib axes which can be used to add other channel if spin polarized.</span>
+<span class="sd">    {params}\n    {K}\n    {E}\n    {ax}\n    {elim}\n    {kticks}\n    {interp}</span>
+
+
+<span class="sd">    kwargs are passed to matplotlib&#39;s command `plt.plot`.</span>
+<span class="sd">    {return_ax}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">xticks</span><span class="p">,</span> <span class="n">xticklabels</span> <span class="o">=</span> <span class="n">_validate_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">elim</span><span class="p">,</span> <span class="n">kticks</span><span class="p">,</span> <span class="n">interp</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">interp</span><span class="p">:</span>
+        <span class="n">nk</span> <span class="o">=</span> <span class="n">interp</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">else</span> <span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">K</span><span class="p">,</span> <span class="n">E</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">interpolate_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="o">*</span><span class="n">nk</span><span class="p">)</span>
+
+    <span class="c1"># handle broken paths</span>
+    <span class="n">breaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">K</span><span class="p">))</span> <span class="k">if</span> <span class="n">K</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">K</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">breaks</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">breaks</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">get_axes</span><span class="p">()</span> <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ax</span>
+    <span class="k">if</span> <span class="s2">&quot;color&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="s2">&quot;c&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;C0&quot;</span>  <span class="c1"># default color from cycler to accommodate themes</span>
+
+    <span class="k">if</span> <span class="s2">&quot;linewidth&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="s2">&quot;lw&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;linewidth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span>  <span class="c1"># default linewidth to make it look good</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+
+    <span class="n">adjust_axes</span><span class="p">(</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Energy (eV)&quot;</span><span class="p">,</span>
+        <span class="n">xticks</span><span class="o">=</span><span class="n">xticks</span><span class="p">,</span>
+        <span class="n">xticklabels</span><span class="o">=</span><span class="n">xticklabels</span><span class="p">,</span>
+        <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">K</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">K</span><span class="p">)],</span>
+        <span class="n">ylim</span><span class="o">=</span><span class="n">elim</span><span class="p">,</span>
+        <span class="n">vlines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">top</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<span class="k">def</span> <span class="nf">_make_line_collection</span><span class="p">(</span>
+    <span class="n">maxwidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">colors_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rgb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">uniwidth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">pros_data</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a tuple of line collections for each given projection data.</span>
+
+<span class="sd">    Parametrs</span>
+<span class="sd">    ---------</span>
+<span class="sd">    maxwidth  : Default is 3. Max linewidth is scaled to maxwidth if an int of float is given.</span>
+<span class="sd">    uniwidth  : Default is False. If True, linewidth is set to maxwidth/2 for all lines. Only works for rgb_lines.</span>
+<span class="sd">    colors_list: List of colors for multiple lines, length equal to 3rd axis length of colors.</span>
+<span class="sd">    rgb        : Default is False. If True and np.shape(colors)[-1] == 3, RGB line collection is returned in a tuple of length 1. Tuple is just to support iteration.</span>
+<span class="sd">    **pros_data: Output dictionary from `_fix_data` containing kpath, evals, colors arrays.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">maxwidth</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;maxwidth must be an int or float.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pros_data</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No pros_data given.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kpath</span> <span class="o">=</span> <span class="n">pros_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kpath&quot;</span><span class="p">)</span>
+        <span class="n">evals</span> <span class="o">=</span> <span class="n">pros_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;evals&quot;</span><span class="p">)</span>
+        <span class="n">pros</span> <span class="o">=</span> <span class="n">pros_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pros&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">kpath</span><span class="p">,</span> <span class="n">evals</span><span class="p">,</span> <span class="n">pros</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;kpath&quot;</span><span class="p">,</span> <span class="s2">&quot;evals&quot;</span><span class="p">,</span> <span class="s2">&quot;pros&quot;</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing </span><span class="si">{!r}</span><span class="s2"> from output of `_fix_data()`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+
+    <span class="c1"># Average pros on two consecutive KPOINTS to get that patch color.</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">pros</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">pros</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">/</span> <span class="mi">2</span>  <span class="c1"># Near kpoints avearge</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+        <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">colors</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="p">)</span>  <span class="c1"># Must before lws</span>
+
+    <span class="k">if</span> <span class="n">rgb</span><span class="p">:</span>  <span class="c1"># Single channel line widths</span>
+        <span class="n">lws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Sum over RGB</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># For separate lines</span>
+        <span class="n">lws</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># .T to access in for loop.</span>
+
+    <span class="n">lws</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="n">maxwidth</span> <span class="o">*</span> <span class="n">lws</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">lws</span><span class="p">))</span> <span class="ow">or</span> <span class="mi">1</span>
+    <span class="p">)</span>  <span class="c1"># Rescale to maxwidth, with a residual with 0.1 as must be visible.</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">colors_list</span><span class="p">):</span>
+        <span class="n">lc_colors</span> <span class="o">=</span> <span class="n">colors_list</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+        <span class="n">lc_colors</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">colors</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">lc_colors</span> <span class="o">=</span> <span class="n">lc_colors</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># Skip Alpha</span>
+
+    <span class="c1"># Reshaping data same as colors reshaped above, nut making line patches too.</span>
+    <span class="n">kgrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">kpath</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">evals</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+        <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">evals</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">narr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">kgrid</span><span class="p">,</span> <span class="n">evals</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">evals</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">marr</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">narr</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">narr</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="p">:]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Make Line collection</span>
+    <span class="n">path_shadow</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">shadow</span><span class="p">:</span>
+        <span class="n">path_shadow</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">path_effects</span><span class="o">.</span><span class="n">SimpleLineShadow</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.8</span><span class="p">),</span> <span class="n">rho</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+            <span class="n">path_effects</span><span class="o">.</span><span class="n">Normal</span><span class="p">(),</span>
+        <span class="p">]</span>
+    <span class="k">if</span> <span class="n">rgb</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">colors</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">LineCollection</span><span class="p">(</span>
+                <span class="n">marr</span><span class="p">,</span>
+                <span class="n">colors</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span>
+                <span class="n">linewidths</span><span class="o">=</span><span class="p">(</span><span class="n">maxwidth</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,)</span> <span class="k">if</span> <span class="n">uniwidth</span> <span class="k">else</span> <span class="n">lws</span><span class="p">,</span>
+                <span class="n">path_effects</span><span class="o">=</span><span class="n">path_shadow</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lcs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">LineCollection</span><span class="p">(</span><span class="n">marr</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">_cl</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="n">lw</span><span class="p">,</span> <span class="n">path_effects</span><span class="o">=</span><span class="n">path_shadow</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_cl</span><span class="p">,</span> <span class="n">lw</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lc_colors</span><span class="p">,</span> <span class="n">lws</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">lcs</span><span class="p">)</span>
+
+
+<span class="c1"># Further fix data for all cases which have projections</span>
+<span class="k">def</span> <span class="nf">_fix_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">pros</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">interp</span><span class="p">,</span> <span class="n">rgb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">others</span><span class="p">):</span>
+    <span class="s2">&quot;Input pros must be [m,nk,nb], output is [nk,nb, m]. `others` must have shape [nk,nb] for occupancies or [nk,3] for kpoints&quot;</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">pros</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">E</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;last two dimensions of `pros` must have same shape as `E`&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">pros</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">pros</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">pros</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># still as [m,nk,nb]</span>
+
+    <span class="k">if</span> <span class="n">others</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">others</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">v</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> must have same length as K&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rgb</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">pros</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;In RGB lines mode, pros.shape[-1] &lt;= 3 should hold&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Should be after exapnding dims but before transposing</span>
+    <span class="k">if</span> <span class="n">labels</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pros</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;labels must be same length as pros&quot;</span><span class="p">)</span>
+
+    <span class="n">pros</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">pros</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>  <span class="c1"># [nk,nb,m] now</span>
+
+    <span class="c1"># Normalize overall data because colors are normalized to 0-1</span>
+    <span class="n">min_max_pros</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">pros</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">pros</span><span class="p">))</span>  <span class="c1"># For data scales to use later</span>
+    <span class="n">c_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">pros</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">c_max</span> <span class="o">&gt;</span> <span class="mf">0.0000001</span><span class="p">:</span>  <span class="c1"># Avoid division error</span>
+        <span class="n">pros</span> <span class="o">=</span> <span class="p">(</span><span class="n">pros</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">pros</span><span class="p">))</span> <span class="o">/</span> <span class="n">c_max</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;kpath&quot;</span><span class="p">:</span> <span class="n">K</span><span class="p">,</span> <span class="s2">&quot;evals&quot;</span><span class="p">:</span> <span class="n">E</span><span class="p">,</span> <span class="s2">&quot;pros&quot;</span><span class="p">:</span> <span class="n">pros</span><span class="p">,</span> <span class="o">**</span><span class="n">others</span><span class="p">,</span> <span class="s2">&quot;ptp&quot;</span><span class="p">:</span> <span class="n">min_max_pros</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">interp</span><span class="p">:</span>
+        <span class="n">nk</span> <span class="o">=</span> <span class="n">interp</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">else</span> <span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">min_d</span><span class="p">,</span> <span class="n">max_d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">pros</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">pros</span><span class="p">)</span>  <span class="c1"># For cliping</span>
+        <span class="n">_K</span><span class="p">,</span> <span class="n">E</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">interpolate_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="o">*</span><span class="n">nk</span><span class="p">)</span>
+        <span class="n">pros</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">interpolate_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">pros</span><span class="p">,</span> <span class="o">*</span><span class="n">nk</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="n">min_d</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">max_d</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;kpath&quot;</span><span class="p">:</span> <span class="n">_K</span><span class="p">,</span> <span class="s2">&quot;evals&quot;</span><span class="p">:</span> <span class="n">E</span><span class="p">,</span> <span class="s2">&quot;pros&quot;</span><span class="p">:</span> <span class="n">pros</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">others</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">interpolate_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="o">*</span><span class="n">nk</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Handle kpath discontinuities</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;kpath&quot;</span><span class="p">]</span>
+    <span class="n">breaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span> <span class="k">if</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="n">breaks</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;kpath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;kpath&quot;</span><span class="p">],</span> <span class="n">breaks</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;evals&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;evals&quot;</span><span class="p">],</span> <span class="n">breaks</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">],</span> <span class="n">breaks</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">][</span><span class="n">breaks</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)</span>  <span class="c1"># Repeat the same data to keep color consistent</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">key</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="n">others</span>
+        <span class="p">):</span>  <span class="c1"># don&#39;t use items here, as interpolation may have changed the shape</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">breaks</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">breaks</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>  <span class="c1"># Repeat here too</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<div class="viewcode-block" id="splot_rgb_lines"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.splot_rgb_lines">[docs]</a><span class="nd">@gu</span><span class="o">.</span><span class="n">_fmt_doc</span><span class="p">(</span><span class="n">_docs</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">splot_rgb_lines</span><span class="p">(</span>
+    <span class="n">K</span><span class="p">,</span>
+    <span class="n">E</span><span class="p">,</span>
+    <span class="n">pros</span><span class="p">,</span>
+    <span class="n">labels</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">kticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">interp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">maxwidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">uniwidth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">colormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">N</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+    <span class="n">shadow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot projected band structure for a given projections.</span>
+<span class="sd">    {params}\n    {K}\n    {E}\n    {pros}\n    {labels}\n    {ax}\n    {elim}\n    {kticks}\n    {interp}\n    {maxwidth}</span>
+<span class="sd">    uniwidth : bool</span>
+<span class="sd">        If True, use same linewidth for all patches to maxwidth/2. Otherwise, use linewidth proportional to projection value.</span>
+<span class="sd">    {colormap}</span>
+<span class="sd">    colorbar : bool</span>
+<span class="sd">        If True, add colorbar, otherwise add attribute to ax to add colorbar or color cube later</span>
+<span class="sd">    N : int</span>
+<span class="sd">        Number of colors in colormap</span>
+<span class="sd">    shadow : bool</span>
+<span class="sd">        If True, add shadow to lines</span>
+
+<span class="sd">    {return_ax}</span>
+<span class="sd">        Returned ax has additional attributes:</span>
+<span class="sd">        .add_colorbar() : Add colorbar that represents most recent plot</span>
+<span class="sd">        .color_cube()   : Add color cube that represents most recent plot if `pros` is 3 components</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">xticks</span><span class="p">,</span> <span class="n">xticklabels</span> <span class="o">=</span> <span class="n">_validate_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">elim</span><span class="p">,</span> <span class="n">kticks</span><span class="p">,</span> <span class="n">interp</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">get_axes</span><span class="p">()</span> <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ax</span>
+
+    <span class="c1"># =====================================================</span>
+    <span class="n">pros_data</span> <span class="o">=</span> <span class="n">_fix_data</span><span class="p">(</span>
+        <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">pros</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">interp</span><span class="p">,</span> <span class="n">rgb</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>  <span class="c1"># (nk,), (nk, nb), (nk, nb, m) at this point</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">pros_data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span>
+    <span class="n">how_many</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">colors</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">how_many</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">percent_colors</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">percent_colors</span> <span class="o">=</span> <span class="n">percent_colors</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">percent_colors</span><span class="p">)</span>
+        <span class="n">pros_data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">colormap</span> <span class="ow">or</span> <span class="s2">&quot;copper&quot;</span><span class="p">,</span> <span class="n">N</span><span class="p">)(</span><span class="n">percent_colors</span><span class="p">)[</span>
+            <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span><span class="mi">3</span>
+        <span class="p">]</span>  <span class="c1"># Get colors in RGB space.</span>
+
+    <span class="k">elif</span> <span class="n">how_many</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_sum</span><span class="p">[</span><span class="n">_sum</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Avoid division error</span>
+        <span class="n">percent_colors</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">_sum</span>  <span class="c1"># second one is on top</span>
+        <span class="n">_colors</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">colormap</span> <span class="ow">or</span> <span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span> <span class="n">N</span><span class="p">)(</span><span class="n">percent_colors</span><span class="p">)[</span>
+            <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span><span class="mi">3</span>
+        <span class="p">]</span>  <span class="c1"># Get colors in RGB space.</span>
+        <span class="n">_colors</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span>
+        <span class="p">]</span>  <span class="c1"># Set color to black if no total projection</span>
+        <span class="n">pros_data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_colors</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Normalize color at each point only for 3 projections.</span>
+        <span class="n">c_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">c_max</span><span class="p">[</span><span class="n">c_max</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Avoid division error:</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span> <span class="o">/</span> <span class="n">c_max</span>  <span class="c1"># Weights to be used for color interpolation.</span>
+
+        <span class="n">nsegs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nsegs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">nsegs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+            <span class="n">colors</span><span class="p">[(</span><span class="n">colors</span> <span class="o">&gt;=</span> <span class="n">low</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">colors</span> <span class="o">&lt;</span> <span class="n">high</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">low</span> <span class="o">+</span> <span class="n">high</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>  <span class="c1"># Center of squre is taken in color_cube</span>
+
+        <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">colormap</span> <span class="ow">or</span> <span class="s2">&quot;brg&quot;</span><span class="p">,</span> <span class="n">N</span><span class="p">)([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">])[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">pros_data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[(</span><span class="n">r</span> <span class="o">*</span> <span class="n">A</span> <span class="o">+</span> <span class="n">g</span> <span class="o">*</span> <span class="n">B</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">C</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">r</span> <span class="o">+</span> <span class="n">g</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">_cols</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">_cols</span> <span class="ow">in</span> <span class="n">colors</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Normalize after picking colors from colormap as well to match the color_cube.</span>
+        <span class="n">c_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">pros_data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">c_max</span><span class="p">[</span><span class="n">c_max</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Avoid division error:</span>
+
+        <span class="n">pros_data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pros_data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">c_max</span>
+
+    <span class="p">(</span><span class="n">line_coll</span><span class="p">,)</span> <span class="o">=</span> <span class="n">_make_line_collection</span><span class="p">(</span>
+        <span class="o">**</span><span class="n">pros_data</span><span class="p">,</span>
+        <span class="n">rgb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">colors_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">maxwidth</span><span class="o">=</span><span class="n">maxwidth</span><span class="p">,</span>
+        <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span>
+        <span class="n">uniwidth</span><span class="o">=</span><span class="n">uniwidth</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">line_coll</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">()</span>
+    <span class="n">adjust_axes</span><span class="p">(</span>
+        <span class="n">ax</span><span class="p">,</span>
+        <span class="n">xticks</span><span class="o">=</span><span class="n">xticks</span><span class="p">,</span>
+        <span class="n">xticklabels</span><span class="o">=</span><span class="n">xticklabels</span><span class="p">,</span>
+        <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">K</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">K</span><span class="p">)],</span>
+        <span class="n">ylim</span><span class="o">=</span><span class="n">elim</span><span class="p">,</span>
+        <span class="n">vlines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">top</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># ====================================================</span>
+
+    <span class="c1"># Add colorbar/legend etc.</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">colormap</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="s2">&quot;copper&quot;</span> <span class="k">if</span> <span class="n">how_many</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;brg&quot;</span> <span class="k">if</span> <span class="n">how_many</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="s2">&quot;coolwarm&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ticks</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">pros_data</span><span class="p">[</span><span class="s2">&quot;ptp&quot;</span><span class="p">],</span> <span class="mi">5</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">how_many</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">how_many</span> <span class="o">==</span> <span class="mi">3</span>
+        <span class="k">else</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">ticklabels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s2">4.2f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">]</span> <span class="k">if</span> <span class="n">how_many</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">labels</span>
+
+    <span class="k">if</span> <span class="n">colorbar</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">how_many</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">cax</span> <span class="o">=</span> <span class="n">add_colorbar</span><span class="p">(</span>
+                <span class="n">ax</span><span class="p">,</span>
+                <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span>
+                <span class="n">vertical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">ticklabels</span><span class="o">=</span><span class="n">ticklabels</span><span class="p">,</span>
+                <span class="n">ticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span>
+                <span class="n">cmap_or_clist</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">how_many</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">cax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">color_cube</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="n">colormap</span> <span class="ow">or</span> <span class="s2">&quot;brg&quot;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># MAKE PARTIAL COLOR CUBE AND COLORBAR HERE FOR LATER USE.</span>
+        <span class="k">def</span> <span class="nf">recent_colorbar</span><span class="p">(</span>
+            <span class="n">cax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tickloc</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">vertical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">digits</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="n">add_colorbar</span><span class="p">(</span>
+                <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">,</span>
+                <span class="n">cmap_or_clist</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+                <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span>
+                <span class="n">ticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span>
+                <span class="n">ticklabels</span><span class="o">=</span><span class="n">ticklabels</span><span class="p">,</span>
+                <span class="n">tickloc</span><span class="o">=</span><span class="n">tickloc</span><span class="p">,</span>
+                <span class="n">vertical</span><span class="o">=</span><span class="n">vertical</span><span class="p">,</span>
+                <span class="n">digits</span><span class="o">=</span><span class="n">digits</span><span class="p">,</span>
+                <span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">add_colorbar</span> <span class="o">=</span> <span class="n">recent_colorbar</span>
+
+        <span class="k">def</span> <span class="nf">recent_color_cube</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mf">0.67</span><span class="p">,</span> <span class="mf">0.67</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">color_cube</span><span class="p">(</span>
+                <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                <span class="n">colormap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+                <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+                <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span>
+                <span class="n">loc</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span>
+                <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                <span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">color_cube</span> <span class="o">=</span> <span class="n">recent_color_cube</span>
+
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="splot_color_lines"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.splot_color_lines">[docs]</a><span class="nd">@gu</span><span class="o">.</span><span class="n">_fmt_doc</span><span class="p">(</span><span class="n">_docs</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">splot_color_lines</span><span class="p">(</span>
+    <span class="n">K</span><span class="p">,</span>
+    <span class="n">E</span><span class="p">,</span>
+    <span class="n">pros</span><span class="p">,</span>
+    <span class="n">labels</span><span class="p">,</span>
+    <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">kticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">interp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">maxwidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">colormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">shadow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">showlegend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">xyc_label</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">,</span> <span class="s2">&quot;black&quot;</span><span class="p">],</span>  <span class="c1"># x, y, color only if showlegend = False</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot projected band structure for a given projections.</span>
+<span class="sd">    {params}\n    {K}\n    {E}\n    {pros}\n    {labels}</span>
+<span class="sd">    axes : matplotlib.axes.Axes or list of Axes</span>
+<span class="sd">        Number of axes should be 1 or equal to the number of projections to plot separately. If None, creates new axes.</span>
+<span class="sd">    {elim}\n    {kticks}\n    {interp}\n    {maxwidth}\n    {colormap}</span>
+<span class="sd">    shadow : bool</span>
+<span class="sd">        If True, add shadow to lines</span>
+<span class="sd">    showlegend : bool</span>
+<span class="sd">        If True, add legend, otherwise adds a label to the plot.</span>
+<span class="sd">    xyc_label : list or tuple</span>
+<span class="sd">        List of (x, y, color) for the label. Used only if showlegend = False</span>
+
+
+<span class="sd">    kwargs are passed to matplotlib&#39;s command `ax.legend`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    One or as many matplotlib.axes.Axes as given by `axes` parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">xticks</span><span class="p">,</span> <span class="n">xticklabels</span> <span class="o">=</span> <span class="n">_validate_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">elim</span><span class="p">,</span> <span class="n">kticks</span><span class="p">,</span> <span class="n">interp</span><span class="p">)</span>
+    <span class="n">pros_data</span> <span class="o">=</span> <span class="n">_fix_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">pros</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">interp</span><span class="p">,</span> <span class="n">rgb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">colormap</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plt</span><span class="o">.</span><span class="n">colormaps</span><span class="p">():</span>
+        <span class="n">c_map</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;colormap = </span><span class="si">{!r}</span><span class="s2"> not exists, falling back to default color map.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">colormap</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">c_map</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">colormap</span><span class="p">)</span>
+    <span class="n">c_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+        <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pros_data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="p">)</span>  <span class="c1"># Output pros data has shape (nk, nb, projections)</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">c_map</span><span class="p">(</span><span class="n">c_vals</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="n">axes</span><span class="p">]):</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">get_axes</span><span class="p">()</span>
+    <span class="n">axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">axes</span><span class="p">])</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>  <span class="c1"># Safe list any axes size</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pros_data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">]</span>  <span class="c1"># Make a list of axes for each projection</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span> <span class="o">!=</span> <span class="n">pros_data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of axes should be 1 or same as number of projections&quot;</span><span class="p">)</span>
+
+    <span class="n">lcs</span> <span class="o">=</span> <span class="n">_make_line_collection</span><span class="p">(</span>
+        <span class="n">maxwidth</span><span class="o">=</span><span class="n">maxwidth</span><span class="p">,</span> <span class="n">colors_list</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span> <span class="n">rgb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="o">**</span><span class="n">pros_data</span>
+    <span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="p">[</span><span class="n">ax</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">lc</span><span class="p">)</span> <span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">lc</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">lcs</span><span class="p">)]</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="p">[</span><span class="n">ax</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">()</span> <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">showlegend</span><span class="p">:</span>
+        <span class="c1"># Default values for legend_kwargs are overwritten by **kwargs</span>
+        <span class="n">legend_kws</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;ncol&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s2">&quot;anchor&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">),</span>
+            <span class="s2">&quot;handletextpad&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;handlelength&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;fontsize&quot;</span><span class="p">:</span> <span class="s2">&quot;small&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;frameon&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">add_legend</span><span class="p">(</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">colors</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="n">maxwidth</span><span class="p">,</span> <span class="o">**</span><span class="n">legend_kws</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">colors</span> <span class="o">=</span> <span class="n">xyc_label</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">add_text</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">xs</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="o">=</span><span class="n">ys</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span> <span class="n">txts</span><span class="o">=</span><span class="n">lab</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">lab</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="p">]</span>
+
+    <span class="n">_</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">adjust_axes</span><span class="p">(</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+            <span class="n">xticks</span><span class="o">=</span><span class="n">xticks</span><span class="p">,</span>
+            <span class="n">xticklabels</span><span class="o">=</span><span class="n">xticklabels</span><span class="p">,</span>
+            <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">K</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">K</span><span class="p">)],</span>
+            <span class="n">ylim</span><span class="o">=</span><span class="n">elim</span><span class="p">,</span>
+            <span class="n">vlines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">top</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">axes</span></div>
+
+
+<span class="k">def</span> <span class="nf">_fix_dos_data</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">dos_arrays</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">interp</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If colors is given,they must have same length as labels.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dos_arrays</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dos_arrays and labels must have same length.&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dos_arrays</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;array </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> in dos_arrays must have same length as energy.&quot;</span>
+            <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dos_arrays</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dos_arrays must have at least one array.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">interp</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;interp must be an integer or a list/tuple of (n,k).&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">interp</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;interp must be an integer or a list/tuple of (n,k).&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">interp</span><span class="p">:</span>
+        <span class="n">nk</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">interp</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">else</span> <span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># default spline order is 3.</span>
+        <span class="n">en</span><span class="p">,</span> <span class="n">arr1</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">interpolate_data</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">dos_arrays</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nk</span><span class="p">)</span>
+        <span class="n">arrays</span> <span class="o">=</span> <span class="p">[</span><span class="n">arr1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">dos_arrays</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gu</span><span class="o">.</span><span class="n">interpolate_data</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">nk</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">en</span><span class="p">,</span> <span class="n">arrays</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">colors</span>
+
+    <span class="k">return</span> <span class="n">energy</span><span class="p">,</span> <span class="n">dos_arrays</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">colors</span>
+
+
+<div class="viewcode-block" id="splot_dos_lines"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.splot_dos_lines">[docs]</a><span class="nd">@gu</span><span class="o">.</span><span class="n">_fmt_doc</span><span class="p">(</span><span class="n">_docs</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">splot_dos_lines</span><span class="p">(</span>
+    <span class="n">energy</span><span class="p">,</span>
+    <span class="n">dos_arrays</span><span class="p">,</span>
+    <span class="n">labels</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">colormap</span><span class="o">=</span><span class="s2">&quot;tab10&quot;</span><span class="p">,</span>
+    <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">vertical</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">stack</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">interp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">showlegend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">legend_kws</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;ncol&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s2">&quot;anchor&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot density of states (DOS) lines.</span>
+<span class="sd">    {params}</span>
+<span class="sd">    energy : array-like, shape (n,)</span>
+<span class="sd">    dos_arrays : list of array_like, each of shape (n,) or array-like (m,n)</span>
+<span class="sd">    labels : list of str, length = len(dos_arrays) should hold.</span>
+<span class="sd">    {ax}\n    {elim}\n    {colormap}</span>
+<span class="sd">    colors : list of str, length = len(dos_arrays) should hold if given, and will override colormap.</span>
+<span class="sd">    fill : bool, default True, if True, fill the area under the DOS lines.</span>
+<span class="sd">    vertical : bool, default False, if True, plot DOS lines vertically.</span>
+<span class="sd">    stack : bool, default False, if True, stack the DOS lines. Only works for horizontal plots.</span>
+<span class="sd">    {interp}</span>
+<span class="sd">    showlegend : bool, default True, if True, show legend.</span>
+<span class="sd">    legend_kws : dict, default is just hint, anything that `ipyvasp.add_legend` accepts can be passed, only used if showlegend is True.</span>
+
+<span class="sd">    keyword arguments are passed to matplotlib.axes.Axes.plot or matplotlib.axes.Axes.fill_between or matplotlib.axes.Axes.fill_betweenx.</span>
+
+<span class="sd">    {return_ax}&quot;&quot;&quot;</span>
+    <span class="n">energy</span><span class="p">,</span> <span class="n">dos_arrays</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">colors</span> <span class="o">=</span> <span class="n">_fix_dos_data</span><span class="p">(</span>
+        <span class="n">energy</span><span class="p">,</span> <span class="n">dos_arrays</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">interp</span>
+    <span class="p">)</span>  <span class="c1"># validate data brfore plotting.</span>
+
+    <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">colormap</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">get_axes</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="s2">&quot;c&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;color&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">vertical</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;stack is not supported for vertical plots.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">stackplot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="o">*</span><span class="n">dos_arrays</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">arr</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dos_arrays</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">colors</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">fill</span><span class="p">:</span>
+                <span class="n">fill_func</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">fill_betweenx</span> <span class="k">if</span> <span class="n">vertical</span> <span class="k">else</span> <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span>
+                <span class="n">fill_func</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">vertical</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">showlegend</span><span class="p">:</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;ncol&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s2">&quot;anchor&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="s2">&quot;handletextpad&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;handlelength&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;fontsize&quot;</span><span class="p">:</span> <span class="s2">&quot;small&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;frameon&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">legend_kws</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">add_legend</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># Labels are picked from plot</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="n">elim</span> <span class="ow">or</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">vertical</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">elim</span> <span class="ow">or</span> <span class="p">[])</span>
+    <span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="s2">&quot;Energy (eV)&quot;</span><span class="p">,</span> <span class="s2">&quot;DOS&quot;</span>
+    <span class="k">if</span> <span class="n">vertical</span><span class="p">:</span>
+        <span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="n">ylabel</span><span class="p">,</span> <span class="n">xlabel</span>
+    <span class="n">adjust_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="n">ylabel</span><span class="p">,</span> <span class="n">zeroline</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<span class="c1"># PLOTLY PLOTS</span>
+
+
+<span class="k">def</span> <span class="nf">_format_rgb_data</span><span class="p">(</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">pros</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">interp</span><span class="p">,</span> <span class="n">occs</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">maxwidth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+    <span class="s2">&quot;Transform data to 1D for rgb lines to plot effectently. Output is a dictionary.&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">_fix_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">pros</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">interp</span><span class="p">,</span> <span class="n">rgb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">occs</span><span class="o">=</span><span class="n">occs</span><span class="p">,</span> <span class="n">kpoints</span><span class="o">=</span><span class="n">kpoints</span><span class="p">)</span>
+    <span class="c1"># Note that data[&#39;pros&#39;] is normalized to 0-1</span>
+    <span class="n">rgb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+        <span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;evals&quot;</span><span class="p">]),</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="p">)</span>  <span class="c1"># Initialize rgb array, because there could be less than three channels</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">rgb</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">rgb</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span>  <span class="c1"># Normalized overall color data</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">labels</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">rgb</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span>  <span class="c1"># Normalized overall color data</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">labels</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Since normalized data is Y = (X - X_min)/(X_max - X_min), so X = Y*(X_max - X_min) + X_min is the actual data.</span>
+    <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ptp&quot;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;norms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+        <span class="n">rgb</span> <span class="o">*</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">+</span> <span class="n">low</span><span class="p">,</span> <span class="mi">3</span>
+    <span class="p">)</span>  <span class="c1"># Read actual data back from normalized data.</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;norms&quot;</span><span class="p">][:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># Avoid wrong info here</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">][:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="n">lws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rgb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># Sum of all colors</span>
+    <span class="n">lws</span> <span class="o">=</span> <span class="n">maxwidth</span> <span class="o">*</span> <span class="n">lws</span> <span class="o">/</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">lws</span><span class="p">))</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Normalize to maxwidth</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;widths&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.0001</span> <span class="o">+</span> <span class="n">lws</span>
+    <span class="p">)</span>  <span class="c1"># should be before scale colors, almost zero size of a data point with no contribution.</span>
+
+    <span class="c1"># Now scale colors to 1 at each point.</span>
+    <span class="n">cl_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">cl_max</span><span class="p">[</span><span class="n">cl_max</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># avoid divide by zero. Contributions are 4 digits only.</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">rgb</span> <span class="o">/</span> <span class="n">cl_max</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+        <span class="nb">int</span>
+    <span class="p">)</span>  <span class="c1"># Normalized per point and set rgb data back to data.</span>
+
+    <span class="k">if</span> <span class="n">indices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># make sure indices are in range</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;evals&quot;</span><span class="p">])[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Now process data to make single data for faster plotting.</span>
+    <span class="n">txt</span> <span class="o">=</span> <span class="s2">&quot;Projection: [</span><span class="si">{}</span><span class="s2">]&lt;/br&gt;Value:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">PT</span><span class="p">,</span> <span class="n">OT</span><span class="p">,</span> <span class="n">KT</span><span class="p">,</span> <span class="n">ET</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">indices</span><span class="p">):</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">K</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;kpath&quot;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">E</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;evals&quot;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="o">*</span><span class="n">C</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;rgb(</span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">g</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]],</span>
+            <span class="s2">&quot;rgb(0,0,0)&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">S</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;widths&quot;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;widths&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]]</span>
+        <span class="n">PT</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">PT</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">txt</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">]&quot;</span> <span class="k">for</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;norms&quot;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">]],</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="n">OT</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">OT</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Occ: </span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;occs&quot;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">]],</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="n">KT</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="o">*</span><span class="n">KT</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;K&lt;sub&gt;</span><span class="si">{</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&lt;/sub&gt;: </span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}{</span><span class="n">y</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}{</span><span class="n">z</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;kpoints&quot;</span><span class="p">])</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">ET</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="o">*</span><span class="n">ET</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;kpath&quot;</span><span class="p">]],</span>
+            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="p">]</span>  <span class="c1"># Add bands subscripts to labels.</span>
+
+    <span class="n">T</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;&lt;/br&gt;</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2"> &lt;/br&gt;&lt;/br&gt;Band: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">o</span><span class="si">}</span><span class="s2">&lt;/br&gt;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">PT</span><span class="p">,</span> <span class="n">ET</span><span class="p">,</span> <span class="n">OT</span><span class="p">,</span> <span class="n">KT</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;K&quot;</span><span class="p">:</span> <span class="n">K</span><span class="p">,</span>
+        <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="n">E</span><span class="p">,</span>
+        <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="n">C</span><span class="p">,</span>
+        <span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="n">S</span><span class="p">,</span>
+        <span class="s2">&quot;T&quot;</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span>
+        <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="n">labels</span><span class="p">,</span>
+    <span class="p">}</span>  <span class="c1"># K, energy, marker color, marker size, text, labels that get changed</span>
+
+
+<span class="k">def</span> <span class="nf">_fmt_labels</span><span class="p">(</span><span class="n">ticklabels</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ticklabels</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                <span class="sa">r</span><span class="s2">&quot;\$\_\{(.*)\}\$|\$\_(.*)\$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;&lt;sub&gt;\1\2&lt;/sub&gt;&quot;</span><span class="p">,</span> <span class="n">lab</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="n">ticklabels</span>
+        <span class="p">]</span>  <span class="c1"># will match _{x} or _x not both at the same time.</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                <span class="sa">r</span><span class="s2">&quot;\$\^\{(.*)\}\$|\$\^(.*)\$&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;&lt;sup&gt;\1\2&lt;/sup&gt;&quot;</span><span class="p">,</span> <span class="n">lab</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="n">labels</span>
+        <span class="p">]</span>
+    <span class="k">return</span> <span class="n">ticklabels</span>
+
+
+<div class="viewcode-block" id="iplot_bands"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.iplot_bands">[docs]</a><span class="nd">@gu</span><span class="o">.</span><span class="n">_fmt_doc</span><span class="p">(</span><span class="n">_docs</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">iplot_bands</span><span class="p">(</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot band structure using plotly.</span>
+<span class="sd">    {params}\n    {K}\n    {E}</span>
+<span class="sd">    fig : plotly.graph_objects.Figure</span>
+<span class="sd">        If not given, create a new figure.</span>
+<span class="sd">    {elim}\n    {kticks}\n    {interp}</span>
+<span class="sd">    title : str, title of plot</span>
+
+
+<span class="sd">    kwargs are passed to plotly.graph_objects.Scatter</span>
+<span class="sd">    {return_fig}&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>  <span class="c1"># Provided by Bands class, don&#39;t do is yourself</span>
+        <span class="n">K</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">K</span><span class="p">[</span><span class="s2">&quot;K&quot;</span><span class="p">],</span> <span class="n">K</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">K</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">K</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">E</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># Assume K is provided by user</span>
+
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">xticks</span><span class="p">,</span> <span class="n">xticklabels</span> <span class="o">=</span> <span class="n">_validate_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">elim</span><span class="p">,</span> <span class="n">kticks</span><span class="p">,</span> <span class="n">interp</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">_format_rgb_data</span><span class="p">(</span>
+        <span class="n">K</span><span class="p">,</span>
+        <span class="n">E</span><span class="p">,</span>
+        <span class="p">[</span><span class="n">E</span><span class="p">],</span>
+        <span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">],</span>
+        <span class="n">interp</span><span class="p">,</span>
+        <span class="n">E</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">K</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">K</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+        <span class="n">maxwidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">indices</span><span class="o">=</span><span class="n">indices</span><span class="p">,</span>
+    <span class="p">)</span>  <span class="c1"># moking other arrays, we need only</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;K&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">]</span>  <span class="c1"># Fixed K and E as single line data</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;Band&quot;</span> <span class="o">+</span> <span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;Band&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;Occ&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">T</span>
+    <span class="p">]</span>  <span class="c1"># Just Band number here</span>
+
+    <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;markers + lines&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">}</span>  <span class="c1"># marker so that it is selectable by box, otherwise it does not</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">K</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">E</span><span class="p">,</span> <span class="n">hovertext</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;plotly_white&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="p">(</span>
+            <span class="n">title</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">),</span>  <span class="c1"># Do not set autosize = False, need to be responsive in widgets boxes</span>
+        <span class="n">margin</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">Margin</span><span class="p">(</span><span class="n">l</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+        <span class="n">yaxis</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">YAxis</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;Energy (eV)&quot;</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">elim</span> <span class="ow">or</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">E</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">E</span><span class="p">)]),</span>
+        <span class="n">xaxis</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">XAxis</span><span class="p">(</span>
+            <span class="n">ticktext</span><span class="o">=</span><span class="n">_fmt_labels</span><span class="p">(</span><span class="n">xticklabels</span><span class="p">),</span>
+            <span class="n">tickvals</span><span class="o">=</span><span class="n">xticks</span><span class="p">,</span>
+            <span class="n">tickmode</span><span class="o">=</span><span class="s2">&quot;array&quot;</span><span class="p">,</span>
+            <span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">K</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">K</span><span class="p">)],</span>
+        <span class="p">),</span>
+        <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="s2">&quot;stix, serif&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="iplot_rgb_lines"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.iplot_rgb_lines">[docs]</a><span class="k">def</span> <span class="nf">iplot_rgb_lines</span><span class="p">(</span>
+    <span class="n">K</span><span class="p">,</span>
+    <span class="n">E</span><span class="p">,</span>
+    <span class="n">pros</span><span class="p">,</span>
+    <span class="n">labels</span><span class="p">,</span>
+    <span class="n">occs</span><span class="p">,</span>
+    <span class="n">kpoints</span><span class="p">,</span>
+    <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">kticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">interp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">maxwidth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers + lines&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interactive plot of band structure with rgb data points using plotly.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    K : array-like, shape (nk,)</span>
+<span class="sd">    E : array-like, shape (nk,nb)</span>
+<span class="sd">    pros : array-like, shape (m,nk,nb), m is the number of projections</span>
+<span class="sd">    labels : list of str, length m</span>
+<span class="sd">    occs : array-like, shape (nk,nb)</span>
+<span class="sd">    kpoints : array-like, shape (nk,3)</span>
+<span class="sd">    fig : plotly.graph_objects.Figure, if not provided, a new figure will be created</span>
+<span class="sd">    elim : tuple, (emin,emax), energy range to plot</span>
+<span class="sd">    kticks : [(int, str),...] for indices of high symmetry k-points. To join a broken path, use &#39;&lt;=&#39; before symbol, e.g.  [(0, &#39;G&#39;),(40, &#39;&lt;=K|M&#39;), ...] will join 40 back to 39. You can also use shortcut like zip([0,10,20],&#39;GMK&#39;).</span>
+<span class="sd">    interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.</span>
+<span class="sd">    maxwidth : float, maximum linewidth, 10 by default</span>
+<span class="sd">    mode : str, plotly mode, &#39;markers + lines&#39; by default, see modes in `plotly.graph_objects.Scatter`.</span>
+<span class="sd">    title : str, title of the figure, labels are added to the end of the title.</span>
+
+<span class="sd">    kwargs are passed to `plotly.graph_objects.Scatter`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fig : plotly.graph_objects.Figure that can be displayed in Jupyter notebook or saved as html using `ipyvasp.iplot2html`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>  <span class="c1"># Provided by Bands class, don&#39;t do is yourself</span>
+        <span class="n">K</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">K</span><span class="p">[</span><span class="s2">&quot;K&quot;</span><span class="p">],</span> <span class="n">K</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">K</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">K</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">E</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># Assume K is provided by user</span>
+
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">xticks</span><span class="p">,</span> <span class="n">xticklabels</span> <span class="o">=</span> <span class="n">_validate_data</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">elim</span><span class="p">,</span> <span class="n">kticks</span><span class="p">,</span> <span class="n">interp</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">_format_rgb_data</span><span class="p">(</span>
+        <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">pros</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">interp</span><span class="p">,</span> <span class="n">occs</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">maxwidth</span><span class="o">=</span><span class="n">maxwidth</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="n">indices</span>
+    <span class="p">)</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;K&quot;</span><span class="p">],</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">],</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">],</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">],</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">],</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;marker_color&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># Provided by C</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;marker_size&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># Provided by S</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;hovertext&quot;</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span>
+            <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;line_color&quot;</span><span class="p">:</span> <span class="s2">&quot;rgba(0,0,0,0)&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;marker&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+                <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">C</span><span class="p">,</span>
+                <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">S</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">)</span>  <span class="c1"># marker edge should be free</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">K</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">E</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;plotly_white&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="p">(</span><span class="n">title</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="o">+</span> <span class="s2">&quot;[&quot;</span>
+        <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="o">+</span> <span class="s2">&quot;]&quot;</span><span class="p">,</span>  <span class="c1"># Do not set autosize = False, need to be responsive in widgets boxes</span>
+        <span class="n">margin</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">Margin</span><span class="p">(</span><span class="n">l</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+        <span class="n">yaxis</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">YAxis</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;Energy (eV)&quot;</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">elim</span> <span class="ow">or</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">E</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">E</span><span class="p">)]),</span>
+        <span class="n">xaxis</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">XAxis</span><span class="p">(</span>
+            <span class="n">ticktext</span><span class="o">=</span><span class="n">_fmt_labels</span><span class="p">(</span><span class="n">xticklabels</span><span class="p">),</span>
+            <span class="n">tickvals</span><span class="o">=</span><span class="n">xticks</span><span class="p">,</span>
+            <span class="n">tickmode</span><span class="o">=</span><span class="s2">&quot;array&quot;</span><span class="p">,</span>
+            <span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">K</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">K</span><span class="p">)],</span>
+        <span class="p">),</span>
+        <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="s2">&quot;stix, serif&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="iplot_dos_lines"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.iplot_dos_lines">[docs]</a><span class="k">def</span> <span class="nf">iplot_dos_lines</span><span class="p">(</span>
+    <span class="n">energy</span><span class="p">,</span>
+    <span class="n">dos_arrays</span><span class="p">,</span>
+    <span class="n">labels</span><span class="p">,</span>
+    <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">colormap</span><span class="o">=</span><span class="s2">&quot;tab10&quot;</span><span class="p">,</span>
+    <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">vertical</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">stack</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+    <span class="n">interp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot density of states (DOS) lines.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    energy : array-like, shape (n,)</span>
+<span class="sd">    dos_arrays : list of array_like, each of shape (n,) or array-like (m,n)</span>
+<span class="sd">    labels : list of str, length = len(dos_arrays) should hold.</span>
+<span class="sd">    fig : plotly.graph_objects.Figure, if not provided, a new figure will be created</span>
+<span class="sd">    elim : list of length 2, (emin, emax), if None, (min(energy), max(energy)) is used.</span>
+<span class="sd">    colormap : str, default &#39;tab10&#39;, any valid matplotlib colormap name. Note that colormap is take from matplotlib, not plotly.</span>
+<span class="sd">    colors : list of str, length = len(dos_arrays) should hold if given, and will override colormap. Should be valid CSS colors.</span>
+<span class="sd">    fill : bool, default True, if True, fill the area under the DOS lines.</span>
+<span class="sd">    vertical : bool, default False, if True, plot DOS lines vertically.</span>
+<span class="sd">    mode : str, default &#39;lines&#39;, plotly mode, see modes in `plotly.graph_objects.Scatter`.</span>
+<span class="sd">    stack : bool, default False, if True, stack the DOS lines. Only works for horizontal plots.</span>
+<span class="sd">    interp : int or list/tuple of (n,k), default None, if given, interpolate the DOS lines using spline.</span>
+
+<span class="sd">    keyword arguments are passed to `plotly.graph_objects.Scatter`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fig : plotly.graph_objects.Figure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">energy</span><span class="p">,</span> <span class="n">dos_arrays</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">colors</span> <span class="o">=</span> <span class="n">_fix_dos_data</span><span class="p">(</span>
+        <span class="n">energy</span><span class="p">,</span> <span class="n">dos_arrays</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">interp</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+            <span class="n">margin</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">Margin</span><span class="p">(</span><span class="n">l</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+            <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="s2">&quot;stix, serif&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">),</span>
+        <span class="p">)</span>  <span class="c1"># Do not set autosize = False, need to be responsive in widgets boxes</span>
+    <span class="k">if</span> <span class="n">elim</span><span class="p">:</span>
+        <span class="n">ylim</span> <span class="o">=</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">elim</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">elim</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ylim</span> <span class="o">=</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">energy</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">energy</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">import</span> <span class="n">cm</span>
+
+        <span class="n">_colors</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">colormap</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)))</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;rgb(</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="mi">255</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">c</span><span class="p">[:</span><span class="mi">3</span><span class="p">]])</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">_colors</span>
+        <span class="p">]</span>
+    <span class="k">if</span> <span class="n">vertical</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;stack is not supported for vertical plots&quot;</span><span class="p">)</span>
+
+        <span class="n">_fill</span> <span class="o">=</span> <span class="s2">&quot;tozerox&quot;</span> <span class="k">if</span> <span class="n">fill</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Energy (eV)&quot;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;DOS&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">arr</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dos_arrays</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">colors</span><span class="p">):</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+                <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">arr</span><span class="p">,</span>
+                    <span class="n">line_color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                    <span class="n">fill</span><span class="o">=</span><span class="n">_fill</span><span class="p">,</span>
+                    <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">extra_args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;stackgroup&quot;</span><span class="p">:</span> <span class="s2">&quot;one&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">stack</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="n">_fill</span> <span class="o">=</span> <span class="s2">&quot;tozeroy&quot;</span> <span class="k">if</span> <span class="n">fill</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Energy (eV)&quot;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;DOS&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">arr</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dos_arrays</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">colors</span><span class="p">):</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+                <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">arr</span><span class="p">,</span>
+                    <span class="n">line_color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                    <span class="n">fill</span><span class="o">=</span><span class="n">_fill</span><span class="p">,</span>
+                    <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">extra_args</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span></div>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Abdul Saboor
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/scripts/furo.js"></script>
+    </body>
+</html>

@@ -27,28 +27,25 @@ def dict2tuple(name: str, d: dict):
 
 
 class Dict2Data:
-    """
-    Creates a ``Data`` object with dictionary keys as attributes of Data accessible by dot notation or by key.
+    """Creates a ``Data`` object with dictionary keys as attributes of Data accessible by dot notation or by key.
     Once an attribute is created, it can not be changed from outside.
 
     Parameters
     ----------
-    d : dict, Python dictionary (nested as well) containing any python data types.
+    d : dict
+        Python dictionary (nested as well) containing any python data types.
 
-    .. code-block:: python
-        :caption: **Usage Example**
-        :linenos:
 
-        x = Dict2Data({'A':1,'B':{'C':2}})
-        x
-        Data(
-            A = 1
-            B = Data(
-                C = 2
-                )
+    >>> x = Dict2Data({'A':1,'B':{'C':2}})
+    >>> x
+    Data(
+        A = 1
+        B = Data(
+            C = 2
             )
-        x.B.to_dict()
-         {'C': 2}
+        )
+    >>> x.B.to_dict()
+    {'C': 2}
     """
 
     _req_keys = ()
@@ -345,13 +342,10 @@ class PoscarData(Dict2Data):
 
         You can visualize selective dynamics sites by their labels as follows:
 
-        .. code-block:: python
-            :caption: **Usage Example**
-            :linenos:
-
-            poscar = POSCAR.from_file('POSCAR')
-            sd = poscar.data.get_selective_dynamics(lambda i,x,y,z: (True, False, True) if i % 2 == 0 else (False, True, False)) # Just an example
-            poscar.splot_lattice(..., fmt_label = lambda lab: sd[lab]) # This will label sites as T T T, F F F, ... and so so on
+        
+        >>> poscar = POSCAR.from_file('POSCAR')
+        >>> sd = poscar.data.get_selective_dynamics(lambda i,x,y,z: (True, False, True) if i % 2 == 0 else (False, True, False)) # Just an example
+        >>> poscar.splot_lattice(..., fmt_label = lambda lab: sd[lab]) # This will label sites as T T T, F F F, ... and so so on
         """
         if not callable(func):
             raise TypeError(
@@ -605,12 +599,9 @@ class EncodeFromNumpy(json.JSONEncoder):
     """
     Serializes python/Numpy objects via customizing json encoder.
 
-    .. code-block:: python
-        :caption: **Usage Example**
-        :linenos:
-
-        json.dumps(python_dict, cls=EncodeFromNumpy) # to get json string.
-        json.dump(*args, cls=EncodeFromNumpy) # to create a file.json.
+    
+    >>> json.dumps(python_dict, cls=EncodeFromNumpy) # to get json string.
+    >>> json.dump(*args, cls=EncodeFromNumpy) # to create a file.json.
     """
 
     def default(self, obj):
@@ -630,12 +621,9 @@ class DecodeToNumpy(json.JSONDecoder):
     """
     Deserilizes JSON object to Python/Numpy's objects.
 
-    .. code-block:: python
-        :caption: **Usage Example**
-        :linenos:
-
-        json.loads(json_string,cls=DecodeToNumpy) #  from string
-        json.load(path) # from file.
+    
+    >>> json.loads(json_string,cls=DecodeToNumpy) #  from string
+    >>> json.load(path) # from file.
     """
 
     def __init__(self, *args, **kwargs):

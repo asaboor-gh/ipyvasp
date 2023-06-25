@@ -112,13 +112,11 @@ class POSCAR:
 
         Example
         -------
-        ```python
-        from ase.visualize import view
-        structure = poscar.to_ase()
-        view(structure) # POSCAR.view() also uses this method if viewer is given.
-        reciprocal_lattice = structure.cell.get_bravais_lattice()
-        reciprocal_lattice.plt_bz() # Plot BZ usinn ase, it also plots suggested band path.
-        ```
+        >>> from ase.visualize import view
+        >>> structure = poscar.to_ase()
+        >>> view(structure) # POSCAR.view() also uses this method if viewer is given.
+        >>> reciprocal_lattice = structure.cell.get_bravais_lattice()
+        >>> reciprocal_lattice.plt_bz() # Plot BZ usinn ase, it also plots suggested band path.
         """
         from ase import Atoms
 
@@ -309,7 +307,7 @@ class POSCAR:
     def cell(self):
         return self._cell
 
-    @_sub_doc(stk.get_bz, "basis :")
+    @_sub_doc(stk.get_bz, {"basis :.*loop :": "loop :"})
     @_sig_kwargs(stk.get_bz, ("basis",))
     def get_bz(self, **kwargs):
         self._bz = stk.get_bz(self._data.rec_basis, **kwargs)
@@ -324,7 +322,7 @@ class POSCAR:
         )  # cell must be primitive
         return self._cell
 
-    @_sub_doc(plat.splot_bz, "bz_data :")
+    @_sub_doc(plat.splot_bz, {"bz_data :.*plane :": "plane :"})
     @_sig_kwargs(plat.splot_bz, ("bz_data",))
     def splot_bz(self, plane=None, **kwargs):
         self._plane = plane  # Set plane for splot_kpath
@@ -336,21 +334,25 @@ class POSCAR:
     def splot_kpath(
         self, kpoints, labels=None, fmt_label=lambda x: (x, {"color": "blue"}), **kwargs
     ):
-        """
-        Plot k-path over existing BZ.
+        """Plot k-path over existing BZ.
 
         Parameters
         ----------
-        kpoints : list of k-points in fractional coordinates. e.g. [(0,0,0),(0.5,0.5,0.5),(1,1,1)] in order of path.
-        labels : list of labels for each k-point in same order as `knn_inds`.
-        fmt_label : function, takes a label from labels and should return a string or (str, dict) of which dict is passed to `plt.text`.
+        kpoints : array_like
+            List of k-points in fractional coordinates. e.g. [(0,0,0),(0.5,0.5,0.5),(1,1,1)] in order of path.
+        labels : list
+            List of labels for each k-point in same order as kpoints.
+        fmt_label : callable
+            Function that takes a label from labels and should return a string or (str, dict) of which dict is passed to ``plt.text``.
 
-        kwargs are passed to `plt.plot` with some defaults.
 
-        You can get `kpoints = POSCAR.get_bz().specials.masked(lambda x,y,z : (-0.1 < z 0.1) & (x >= 0) & (y >= 0))` to get k-points in positive xy plane.
-        Then you can reorder them by an indexer like `kpoints = kpoints[[0,1,2,0,7,6]]`, note double brackets, and also that point at zero index is taken twice.
+        kwargs are passed to ``plt.plot`` with some defaults.
 
-        > Tip: You can use this function multiple times to plot multiple/broken paths over same BZ.
+        You can get ``kpoints = POSCAR.get_bz().specials.masked(lambda x,y,z : (-0.1 < z 0.1) & (x >= 0) & (y >= 0))`` to get k-points in positive xy plane.
+        Then you can reorder them by an indexer like ``kpoints = kpoints[[0,1,2,0,7,6]]``, note double brackets, and also that point at zero index is taken twice.
+
+        .. tip::
+            You can use this function multiple times to plot multiple/broken paths over same BZ.
         """
         if not self._bz or not self._ax:
             raise ValueError("BZ not found, use `splot_bz` first")
@@ -421,7 +423,7 @@ class POSCAR:
         "See docs of `splot_bz`, everything is same except space is inverted."
         return plat.splot_bz(bz_data=self._cell, plane=plane, **kwargs)
 
-    @_sub_doc(plat.iplot_bz, "bz_data :")
+    @_sub_doc(plat.iplot_bz, {"bz_data :.*fill :": "fill :"})
     @_sig_kwargs(plat.iplot_bz, ("bz_data",))
     def iplot_bz(self, **kwargs):
         return plat.iplot_bz(bz_data=self._bz, **kwargs)
@@ -431,22 +433,22 @@ class POSCAR:
         "See docs of `iplot_bz`, everything is same except space is iverted."
         return plat.iplot_bz(bz_data=self._cell, special_kpoints=False, **kwargs)
 
-    @_sub_doc(plat.splot_lattice, "poscar_data :")
+    @_sub_doc(plat.splot_lattice, {"poscar_data :": ""})
     @_sig_kwargs(plat.splot_lattice, ("poscar_data", "plane"))
     def splot_lattice(self, plane=None, **kwargs):
         return plat.splot_lattice(self._data, plane=plane, **kwargs)
 
-    @_sub_doc(plat.iplot_lattice, "poscar_data :")
+    @_sub_doc(plat.iplot_lattice, {"poscar_data :": ""})
     @_sig_kwargs(plat.iplot_lattice, ("poscar_data",))
     def iplot_lattice(self, **kwargs):
         return plat.iplot_lattice(self._data, **kwargs)
 
-    @_sub_doc(plat.write_poscar, "poscar_data :")
+    @_sub_doc(plat.write_poscar, {"poscar_data :": ""})
     @_sig_kwargs(plat.write_poscar, ("poscar_data",))
     def write(self, outfile=None, **kwargs):
         return plat.write_poscar(self._data, outfile=outfile, **kwargs)
 
-    @_sub_doc(plat.join_poscars, "poscar_data :")
+    @_sub_doc(plat.join_poscars, {"poscar_data :": ""})
     @_sig_kwargs(plat.join_poscars, ("poscar_data", "other"))
     def join(self, other, direction="c", **kwargs):
         return self.__class__(
@@ -455,32 +457,32 @@ class POSCAR:
             )
         )
 
-    @_sub_doc(plat.scale_poscar, "poscar_data :")
+    @_sub_doc(plat.scale_poscar, {"poscar_data :": ""})
     @_sig_kwargs(plat.scale_poscar, ("poscar_data",))
     def scale(self, scale=(1, 1, 1), **kwargs):
         return self.__class__(data=plat.scale_poscar(self._data, scale, **kwargs))
 
-    @_sub_doc(plat.rotate_poscar, "poscar_data :")
+    @_sub_doc(plat.rotate_poscar, {"poscar_data :": ""})
     def rotate(self, angle_deg, axis_vec):
         return self.__class__(
             data=plat.rotate_poscar(self._data, angle_deg=angle_deg, axis_vec=axis_vec)
         )
 
-    @_sub_doc(plat.set_zdir, "poscar_data :")
+    @_sub_doc(plat.set_zdir, {"poscar_data :": ""})
     def set_zdir(self, hkl, phi=0):
         return self.__class__(data=plat.set_zdir(self._data, hkl, phi=phi))
 
-    @_sub_doc(plat.translate_poscar, "poscar_data :")
+    @_sub_doc(plat.translate_poscar, {"poscar_data :": ""})
     def translate(self, offset):
         return self.__class__(data=plat.translate_poscar(self._data, offset=offset))
 
-    @_sub_doc(plat.repeat_poscar, "poscar_data :")
+    @_sub_doc(plat.repeat_poscar, {"poscar_data :": ""})
     def repeat(self, n, direction):
         return self.__class__(
             data=plat.repeat_poscar(self._data, n=n, direction=direction)
         )
 
-    @_sub_doc(plat.mirror_poscar, "poscar_data :")
+    @_sub_doc(plat.mirror_poscar, {"poscar_data :": ""})
     def mirror(self, direction):
         return self.__class__(data=plat.mirror_poscar(self._data, direction=direction))
 
@@ -494,11 +496,11 @@ class POSCAR:
             data=plat.transform_poscar(self._data, transformation, zoom=zoom, tol=tol)
         )
 
-    @_sub_doc(plat.transpose_poscar, "poscar_data :")
+    @_sub_doc(plat.transpose_poscar, {"poscar_data :": ""})
     def transpose(self, axes=[1, 0, 2]):
         return self.__class__(data=plat.transpose_poscar(self._data, axes=axes))
 
-    @_sub_doc(plat.add_vaccum, "poscar_data :")
+    @_sub_doc(plat.add_vaccum, {"poscar_data :": ""})
     def add_vaccum(self, thickness, direction, left=False):
         return self.__class__(
             data=plat.add_vaccum(
@@ -506,13 +508,13 @@ class POSCAR:
             )
         )
 
-    @_sub_doc(plat.add_atoms, "poscar_data :")
+    @_sub_doc(plat.add_atoms, {"poscar_data :": ""})
     def add_atoms(self, name, positions):
         return self.__class__(
             data=plat.add_atoms(self._data, name=name, positions=positions)
         )
 
-    @_sub_doc(plat.convert_poscar, "poscar_data :")
+    @_sub_doc(plat.convert_poscar, {"poscar_data :": ""})
     def convert(self, atoms_mapping, basis_factor):
         return self.__class__(
             data=plat.convert_poscar(
@@ -520,18 +522,18 @@ class POSCAR:
             )
         )
 
-    @_sub_doc(plat.strain_poscar, "poscar_data :")
+    @_sub_doc(plat.strain_poscar, {"poscar_data :": ""})
     def strain(self, strain_matrix):
         return self.__class__(
             data=plat.strain_poscar(self._data, strain_matrix=strain_matrix)
         )
 
-    @_sub_doc(get_kmesh, "poscar_data :")
+    @_sub_doc(get_kmesh, {"poscar_data :": ""})
     @_sig_kwargs(get_kmesh, ("poscar_data",))
     def get_kmesh(self, *args, **kwargs):
         return get_kmesh(self.data, *args, **kwargs)
 
-    @_sub_doc(get_kpath, "- rec_basis")
+    @_sub_doc(get_kpath, {"rec_basis :.*\n\n": "\n\n"})
     @_sig_kwargs(get_kpath, ("rec_basis",))
     def get_kpath(self, kpoints, n=5, **kwargs):
         return get_kpath(kpoints, n=n, **kwargs, rec_basis=self.data.rec_basis)
