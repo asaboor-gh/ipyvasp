@@ -41,6 +41,7 @@ def download_structure(
     ------
     list : List of Structure data containing attribute/method `cif`/`export_poscar, write_cif` etc.
 
+
     .. note::
         max_sites and min_sites are used to filter the number of sites in structure, or use mp_id to download a specific structure.
     """
@@ -75,7 +76,6 @@ class POSCAR:
         """
         self._path = Path(path or "POSCAR")  # Path to file
         self._content = content
-        self._sd = None  # Selective dynamics Array will be stored here if applied.
 
         if data:
             self._data = serializer.PoscarData.validated(data)
@@ -300,10 +300,6 @@ class POSCAR:
         return self._bz
 
     @property
-    def sd(self):
-        return self._sd
-
-    @property
     def cell(self):
         return self._cell
 
@@ -433,22 +429,22 @@ class POSCAR:
         "See docs of `iplot_bz`, everything is same except space is iverted."
         return plat.iplot_bz(bz_data=self._cell, special_kpoints=False, **kwargs)
 
-    @_sub_doc(plat.splot_lattice, {"poscar_data :": ""})
+    @_sub_doc(plat.splot_lattice)
     @_sig_kwargs(plat.splot_lattice, ("poscar_data", "plane"))
     def splot_lattice(self, plane=None, **kwargs):
         return plat.splot_lattice(self._data, plane=plane, **kwargs)
 
-    @_sub_doc(plat.iplot_lattice, {"poscar_data :": ""})
+    @_sub_doc(plat.iplot_lattice)
     @_sig_kwargs(plat.iplot_lattice, ("poscar_data",))
     def iplot_lattice(self, **kwargs):
         return plat.iplot_lattice(self._data, **kwargs)
 
-    @_sub_doc(plat.write_poscar, {"poscar_data :": ""})
+    @_sub_doc(plat.write_poscar)
     @_sig_kwargs(plat.write_poscar, ("poscar_data",))
     def write(self, outfile=None, **kwargs):
         return plat.write_poscar(self._data, outfile=outfile, **kwargs)
 
-    @_sub_doc(plat.join_poscars, {"poscar_data :": ""})
+    @_sub_doc(plat.join_poscars)
     @_sig_kwargs(plat.join_poscars, ("poscar_data", "other"))
     def join(self, other, direction="c", **kwargs):
         return self.__class__(
@@ -457,32 +453,32 @@ class POSCAR:
             )
         )
 
-    @_sub_doc(plat.scale_poscar, {"poscar_data :": ""})
+    @_sub_doc(plat.scale_poscar)
     @_sig_kwargs(plat.scale_poscar, ("poscar_data",))
     def scale(self, scale=(1, 1, 1), **kwargs):
         return self.__class__(data=plat.scale_poscar(self._data, scale, **kwargs))
 
-    @_sub_doc(plat.rotate_poscar, {"poscar_data :": ""})
+    @_sub_doc(plat.rotate_poscar)
     def rotate(self, angle_deg, axis_vec):
         return self.__class__(
             data=plat.rotate_poscar(self._data, angle_deg=angle_deg, axis_vec=axis_vec)
         )
 
-    @_sub_doc(plat.set_zdir, {"poscar_data :": ""})
+    @_sub_doc(plat.set_zdir)
     def set_zdir(self, hkl, phi=0):
         return self.__class__(data=plat.set_zdir(self._data, hkl, phi=phi))
 
-    @_sub_doc(plat.translate_poscar, {"poscar_data :": ""})
+    @_sub_doc(plat.translate_poscar)
     def translate(self, offset):
         return self.__class__(data=plat.translate_poscar(self._data, offset=offset))
 
-    @_sub_doc(plat.repeat_poscar, {"poscar_data :": ""})
+    @_sub_doc(plat.repeat_poscar)
     def repeat(self, n, direction):
         return self.__class__(
             data=plat.repeat_poscar(self._data, n=n, direction=direction)
         )
 
-    @_sub_doc(plat.mirror_poscar, {"poscar_data :": ""})
+    @_sub_doc(plat.mirror_poscar)
     def mirror(self, direction):
         return self.__class__(data=plat.mirror_poscar(self._data, direction=direction))
 
@@ -496,11 +492,11 @@ class POSCAR:
             data=plat.transform_poscar(self._data, transformation, zoom=zoom, tol=tol)
         )
 
-    @_sub_doc(plat.transpose_poscar, {"poscar_data :": ""})
+    @_sub_doc(plat.transpose_poscar)
     def transpose(self, axes=[1, 0, 2]):
         return self.__class__(data=plat.transpose_poscar(self._data, axes=axes))
 
-    @_sub_doc(plat.add_vaccum, {"poscar_data :": ""})
+    @_sub_doc(plat.add_vaccum)
     def add_vaccum(self, thickness, direction, left=False):
         return self.__class__(
             data=plat.add_vaccum(
@@ -508,13 +504,13 @@ class POSCAR:
             )
         )
 
-    @_sub_doc(plat.add_atoms, {"poscar_data :": ""})
+    @_sub_doc(plat.add_atoms)
     def add_atoms(self, name, positions):
         return self.__class__(
             data=plat.add_atoms(self._data, name=name, positions=positions)
         )
 
-    @_sub_doc(plat.convert_poscar, {"poscar_data :": ""})
+    @_sub_doc(plat.convert_poscar)
     def convert(self, atoms_mapping, basis_factor):
         return self.__class__(
             data=plat.convert_poscar(
@@ -522,13 +518,13 @@ class POSCAR:
             )
         )
 
-    @_sub_doc(plat.strain_poscar, {"poscar_data :": ""})
+    @_sub_doc(plat.strain_poscar)
     def strain(self, strain_matrix):
         return self.__class__(
             data=plat.strain_poscar(self._data, strain_matrix=strain_matrix)
         )
 
-    @_sub_doc(get_kmesh, {"poscar_data :": ""})
+    @_sub_doc(get_kmesh, {"poscar_data :.*\*args :": "*args :"})
     @_sig_kwargs(get_kmesh, ("poscar_data",))
     def get_kmesh(self, *args, **kwargs):
         return get_kmesh(self.data, *args, **kwargs)

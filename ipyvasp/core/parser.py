@@ -13,7 +13,8 @@ from . import serializer
 
 
 class DataSource:
-    "Base class for all data sources. It provides a common interface to access data from different sources. Subclass it to get data from a source."
+    """Base class for all data sources. It provides a common interface to access data from different sources.
+    Subclass it to get data from a source and implement the abstract methods."""
 
     def __init__(self, path):
         self._path = Path(path).absolute()
@@ -34,7 +35,6 @@ class DataSource:
 
     @property
     def bands(self):
-        "Returns a Bands object to access band structure data and plotting methods."
         if not hasattr(self, "_bands"):
             from ..bsdos import Bands
 
@@ -44,7 +44,6 @@ class DataSource:
 
     @property
     def dos(self):
-        "Returns a Dos object to access density of states data and plotting methods."
         if not hasattr(self, "_dos"):
             from ..bsdos import DOS
 
@@ -54,7 +53,6 @@ class DataSource:
 
     @property
     def poscar(self):
-        "Returns a POSCAR class instance based on data from source."
         if not hasattr(self, "_poscar"):
             from ..lattice import POSCAR
 
@@ -105,6 +103,20 @@ class Vaspout(DataSource):
     def __init__(self, path):
         raise NotImplementedError("Vaspout is not implemented yet.")
 
+    @property
+    def bands(self):
+        "Access ipyvasp.bsdos.Bands class singleton instance for current Vaspout class."
+        return super().bands
+
+    @property
+    def dos(self):
+        "Access ipyvasp.bsdos.DOS class singleton instance for current Vaspout class."
+        return super().dos
+
+    @property
+    def poscar(self):
+        "Access ipyvasp.lattice.POSCAR class instance."
+        return super().poscar
 
 class Vasprun(DataSource):
     "Reads vasprun.xml file lazily. It reads only the required data from the file when a plot or data access is requested."
@@ -114,6 +126,21 @@ class Vasprun(DataSource):
         self._skipk = (
             skipk if isinstance(skipk, (int, np.integer)) else self.get_skipk()
         )
+
+    @property
+    def bands(self):
+        "Access ipyvasp.bsdos.Bands class singleton instance for current Vasprun class."
+        return super().bands
+
+    @property
+    def dos(self):
+        "Access ipyvasp.bsdos.DOS class singleton instance for current Vasprun class."
+        return super().dos
+
+    @property
+    def poscar(self):
+        "Access ipyvasp.lattice.POSCAR class instance."
+        return super().poscar
 
     def read(self, start_match, stop_match, nth_match=1, skip_last=False):
         """Reads a part of the file between start_match and stop_match and returns a generator. It is lazy and fast.
@@ -627,30 +654,37 @@ def gen2numpy(
     exclude: str = "#",
     fix_format: bool = True,
 ):
-    """
-    Convert a generator of text lines to numpy array while excluding comments, given matches and empty lines.
+    """Convert a generator of text lines to numpy array while excluding comments, given matches and empty lines.
     Data is sliced and reshaped as per given shape and slices. It is very efficient for large data files to fetch only required data.
 
     Parameters
     ----------
-    gen : generator object. Typical example is `with open('file.txt') as f: gen = itertools.islice(f,0,None)`
-    shape : tuple or list of integers. Given shape of data to be read. Last item is considered to be columns. User should keep track of empty lines and excluded lines.
-    slices : tuple or list of integers or range or -1. Given slices of data to be read along each dimension. Last item is considered to be columns.
-    raw : bool, returns raw data for quick visualizing and determining shape such as columns, if True.
-    dtype : data type of numpy array to be returned.
-    delimiter : delimiter of data in text file.
-    include : string to include in each line to be read. If None, all lines are included.
-    exclude : string to exclude in each line to be read. If None, no lines are excluded.
-    fix_format : bool, if True, it will fix the format of data in each line. It is useful when data is not properly formatted. like 0.500-0.700 -> 0.500 -0.700
+    gen : generator
+        Typical example is `with open('file.txt') as f: gen = itertools.islice(f,0,None)`
+    shape : tuple
+        Tuple or list of integers. Given shape of data to be read. Last item is considered to be columns.
+        User should keep track of empty lines and excluded lines.
+    slices : tuple
+        Tuple or list of integers or range or -1. Given slices of data to be read along each dimension.
+        Last item is considered to be columns.
+    raw : bool
+        Returns raw data for quick visualizing and determining shape such as columns, if True.
+    dtype : object
+        Data type of numpy array to be returned. Default is float.
+    delimiter : str
+        Delimiter of data in text file.
+    include : str
+        Match to include in each line to be read. If None, all lines are included.
+    exclude : str
+        Match to exclude in each line to be read. If None, no lines are excluded.
+    fix_format : bool
+        If True, it will fix the format of data in each line. It is useful when data is not properly formatted. like 0.500-0.700 -> 0.500 -0.700
 
     Returns
     -------
-    numpy array of given shape and dtype.
+    ndarray
+        numpy array of given shape and dtype.
 
-    Raises
-    ------
-    Multiple errors are raised if given arguments are not of correct type or shape.
-    If number of lines in generators are less than given shape, it will raise ValueError for short iterator from numpy.
     """
     if not isinstance(shape, (list, tuple)):
         raise TypeError(f"shape must be a list/tuple of size of dimensions.")

@@ -132,10 +132,12 @@ def to_plane(normal, points):
 
 def rotation(angle_deg, axis_vec):
     """Get a scipy Rotation object at given `angle_deg` around `axis_vec`.
-    Usage:
-        rot = rotation(60,[0,0,1])
-        rot.apply([1,1,1])
-        [-0.3660254  1.3660254  1.] #give this
+
+    Usage
+    -----
+    >>> rot = rotation(60,[0,0,1])
+    >>> rot.apply([1,1,1])
+    [-0.3660254  1.3660254  1.]
     """
     axis_vec = np.array(axis_vec) / np.linalg.norm(axis_vec)  # Normalization
     angle_rad = np.deg2rad(angle_deg)
@@ -163,25 +165,31 @@ def to_R3(basis, points):
 
     Parameters
     ----------
-    basis : 3x3 matrix with basis vectors as rows like [[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]].
-    points : Nx3 points relative to basis, such as KPOINTS and Lattice Points.
+    basis : array_like
+        3x3 matrix with basis vectors as rows like [[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]].
+    points : array_like
+        Nx3 points relative to basis, such as KPOINTS and Lattice Points.
+
 
     Conversion formula:
     [x,y,z] = n1*b1 + n2*b2 +n3*b3 = [n1, n2, n3] @ [[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]]
 
-    **Note**: Do not use this function if points are Cartesian or provide identity basis.
+    .. note::
+        Do not use this function if points are Cartesian or provide identity basis.
     """
     return np.array(points) @ basis
 
 
 def to_basis(basis, coords):
-    """
-    Transforms coordinates of points (relative to othogonal basis) into basis space.
+    """Transforms coordinates of points (relative to othogonal basis) into basis space.
 
     Parameters
     ---------
-    basis : 3x3 matrix with basis vectors as rows like [[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]].
-    coords : Nx3 points relative to cartesian axes.
+    basis : array_like
+        3x3 matrix with basis vectors as rows like [[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]].
+    coords : array_like
+        Nx3 points relative to cartesian axes.
+
 
     Conversion formula:
     [n1, n2, n3] = [x,y,z] @ inv([[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]])
@@ -190,12 +198,12 @@ def to_basis(basis, coords):
 
 
 def get_TM(basis1, basis2):
-    """
-    Returns a transformation matrix that gives `basis2` when applied on `basis1`.
+    """Returns a transformation matrix that gives `basis2` when applied on `basis1`.
     basis are 3x3 matrices with basis vectors as rows like [[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]].
 
-    
-    >>> TM = get_TM(basis1, basis2)
+
+    >>> from ipyvasp.core.spatial_toolkit import get_TM
+    >>> TM = get_TM(basis1, basis2) # Can be ipyvasp.POSCAR.get_TM(basis2) while basis1 is POSCAR.data.basis
     >>> assert np.allclose(basis2, TM @ basis1)
     >>> Q = P @ TM.T # Transform points from P in basis1 to Q in basis2
     >>> # Both P and Q are N x D matrices where N is number of points and D is dimension of space
@@ -211,9 +219,10 @@ def get_bz(basis, loop=True, primitive=False):
     Return required data to construct first Brillouin zone.
 
     Parameters
+    ----------
     basis : array_like, shape (3, 3) in reciprocal space.
     loop : If True, joins the last vertex of a BZ plane to starting vertex in order to complete loop.
-    primitive : Defualt is False and returns Wigner-Seitz cell, If True returns parallelipiped in rec_basis.
+    primitive : Defualt is False and returns Wigner-Seitz cell, If True returns parallelipiped of basis in reciprocal space.
 
     Returns
     -------
@@ -282,7 +291,7 @@ def get_bz(basis, loop=True, primitive=False):
         "basis": basis,
         "vertices": verts,
         "faces": idx_faces,
-        "metadata": {"primitive": primitive},
+        "primitive": primitive,
     }
     from .serializer import BrZoneData  # to avoid circular import
 
@@ -295,13 +304,12 @@ def kpoints2bz(bz_data, kpoints, shift=0):
 
     Parameters
     ----------
-    bz_data : Output of get_bz(), make sure use same value of `primitive` there and here.
+    bz_data : Output of get_bz().
     kpoints : List or array of KPOINTS to transorm into BZ or R3.
-    primitive : Default is False and brings kpoints into regular BZ. If True, returns `to_R3()`.
     shift : This value is added to kpoints before any other operation, single number of list of 3 numbers for each direction.
     """
     kpoints = np.array(kpoints) + shift
-    if bz_data.metadata.primitive:
+    if bz_data.primitive:
         return to_R3(bz_data.basis, kpoints)
 
     cent_planes = [

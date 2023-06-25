@@ -1,14 +1,23 @@
 """ipyvasp is a processing tool for VASP DFT input/output processing.
-Author: Abdul Saboor
-Licence: Apache License Version 2.0, January 2004 #See file
-    
-Links
------
-    [github](https://github.com/massgh/ipyvasp)            
-    [docs](https://massgh.github.io/ipyvasp/)     
+
+It is designed to primarily be used in Jupyter Notebook because it offers
+widgets for interactive visualization and bulk analysis.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
+
+__all__ = [  # For documentation purpose
+    "get_axes",
+    "plt2text",
+    "plt2html",
+    "iplot2html",
+    "iplot2widget",
+    "webshow",
+    "list_files",
+    "parse_text",
+    "summarize",
+    "OUTCAR",
+]
 
 from .core.parser import *
 from .core.serializer import *

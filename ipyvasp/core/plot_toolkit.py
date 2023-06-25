@@ -1,4 +1,3 @@
-
 from uuid import uuid1
 from io import BytesIO
 
@@ -43,7 +42,7 @@ def global_matplotlib_settings(rcParams={}, display_format="svg"):
     mpl.rcParams.update(rcParams)  # Update rcParams
 
 
-class Arrow3D(FancyArrowPatch):
+class _Arrow3D(FancyArrowPatch):
     """Draw 3D fancy arrow."""
 
     def __init__(self, x, y, z, u, v, w, *args, **kwargs):
@@ -69,19 +68,28 @@ class Arrow3D(FancyArrowPatch):
 
 
 def quiver3d(X, Y, Z, U, V, W, ax=None, C="r", L=0.7, mutation_scale=10, **kwargs):
-    """
-    Plots 3D arrows on a given ax. See [FancyArrowPatch](https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.patches.FancyArrowPatch.html).
+    """Plots 3D arrows on a given ax.
+    See `FancyArrowPatch <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.patches.FancyArrowPatch.html>`_ for more details.
+
+    ``X, Y, Z`` should be 1D arrays of coordinates of arrows tail point.
+
+    ``U, V, W`` should be 1D arrays of dx,dy,dz of arrows.
 
     Parameters
     ----------
-    X, Y, Z : 1D arrays of coordinates of arrows' tail point.
-    U, V, W : 1D arrays of dx,dy,dz of arrows.
-    ax : 3D axes, if not given, auto created.
-    C : 1D colors array mapping for arrows. Could be one color.
-    L : 1D linwidths array mapping for arrows. Could be one linewidth.
-    mutation_scale: Arrow head width/size scale. Default is 10.
-    kwargs : FancyArrowPatch's keyword arguments excluding positions,color, lw and mutation_scale, shrinkA, shrinkB which are already used.
-        An important keyword argument is `arrowstyle` which could be '->','-|>', their inverted forms and many more. See on matplotlib.
+    ax : matplotlib.pyplot.Axes
+        3D axes, if not given, auto created.
+    C : array_like
+        1D colors array mapping for arrows. Could be one color.
+    L : array_like
+        1D linwidths array mapping for arrows. Could be one linewidth.
+    mutation_scale: float
+        Arrow head width/size scale. Default is 10.
+
+
+    kwargs are passed to ``FancyArrowPatch`` excluding `positions`, `color`, `lw`, `mutation_scale`,
+    `shrinkA`, `shrinkB` which are already used. An important keyword argument is `arrowstyle`
+    which could be any style valid in matplotlib.
     """
     if not ax:
         ax = get_axes(figsize=(3.4, 3.4), axes_3d=True)  # Same aspect ratio.
@@ -93,7 +101,7 @@ def quiver3d(X, Y, Z, U, V, W, ax=None, C="r", L=0.7, mutation_scale=10, **kwarg
         L = [L for x in X]
     args_dict = dict(mutation_scale=mutation_scale, shrinkA=0, shrinkB=0)
     for x, y, z, u, v, w, c, l in zip(X, Y, Z, U, V, W, C, L):
-        Arrow3D(x, y, z, u, v, w, color=c, lw=l, **args_dict, **kwargs).on(ax)
+        _Arrow3D(x, y, z, u, v, w, color=c, lw=l, **args_dict, **kwargs).on(ax)
 
     return ax
 
@@ -113,26 +121,45 @@ def get_axes(
     ortho3d=True,
     **subplots_adjust_kwargs,
 ):
-    """
-    Returns axes of initialized figure, based on plt.subplots(). If you want to access parent figure, use ax.get_figure() or current figure as plt.gcf().
+    """Returns axes of initialized figure, based on plt.subplots().
+    If you want to access parent figure, use ax.get_figure() or current figure as plt.gcf().
 
     Parameters
     ----------
-    figsize : Tuple (width, height). Default is (3.4,2.6).
-    nrows : Default 1.
-    ncols : Default 1.
-    widths : List with len(widths)==nrows, to set width ratios of subplots.
-    heights : List with len(heights)==ncols, to set height ratios of subplots.
-    share(x,y) : Share axes between plots, this removes shared ticks automatically.
-    axes_off : Turn off axes visibility, If `nrows = ncols = 1, set True/False`, If anyone of `nrows or ncols > 1`, provide list of axes indices to turn off. If both `nrows and ncols > 1`, provide list of tuples (x_index,y_index) of axes.
-    axes_3d : Change axes to 3D. If `nrows = ncols = 1, set True/False`, If anyone of `nrows or ncols > 1`, provide list of axes indices to turn off. If both `nrows and ncols > 1`, provide list of tuples (x_index,y_index) of axes.
-    azim,elev : Matplotlib's 3D angles, defualt are 45,15.
-    ortho3d : Only works for 3D axes. If True, x,y,z are orthogonal, otherwise perspective.
-    **subplots_adjust_kwargs : These are same as `plt.subplots_adjust()`'s arguements.
-    
+    figsize : tuple
+        Tuple (width, height). Default is (3.4,2.6).
+    nrows : int
+        Default 1.
+    ncols : int
+        Default 1.
+    widths : list
+        List with len(widths)==nrows, to set width ratios of subplots.
+    heights : list
+        List with len(heights)==ncols, to set height ratios of subplots.
+    sharex : bool
+        Share x-axis between plots, this removes shared ticks automatically.
+    sharey : bool
+        Share y-axis between plots, this removes shared ticks automatically.
+    axes_off : bool or list
+        Turn off axes visibility, If `nrows = ncols = 1, set True/False`.
+        If anyone of `nrows or ncols > 1`, provide list of axes indices to turn off.
+        If both `nrows and ncols > 1`, provide list of tuples (x_index,y_index) of axes.
+    axes_3d : bool or list
+        Change axes to 3D. If `nrows = ncols = 1, set True/False`.
+        If anyone of `nrows or ncols > 1`, provide list of axes indices to turn off.
+        If both `nrows and ncols > 1`, provide list of tuples (x_index,y_index) of axes.
+    ortho3d : bool
+        Only works for 3D axes. If True, x,y,z are orthogonal, otherwise perspective.
+
+
+    `azim, elev` are passed to `ax.view_init`. Defualt values are 45,15 respectively.
+
+    `subplots_adjust_kwargs` are passed to `plt.subplots_adjust`.
+
     .. note::
         There are extra methods added to each axes (only 2D) object.
-        ``add_text``, ``add_legend``, ``add_colorbar``, ``color_wheel``, ``break_spines``, ``adjust_axes``, ``append_axes``, ``join_axes``.
+        ``add_text``, ``add_legend``, ``add_colorbar``, ``color_wheel``,
+        ``break_spines``, ``adjust_axes``, ``append_axes``, ``join_axes``.
     """
     global_matplotlib_settings()  # Set global matplotlib settings.
 
@@ -208,13 +235,15 @@ def adjust_axes(
 
     Parameters
     ----------
-    ax : Matplotlib axes object.
-    (x,y)ticks : List of positions on (x,y axes).
-    (x,y)ticklabels : List of labels on (x,y) ticks points.
-    (x,y)lim : [min, max] of (x,y) axes.
-    (x,y)label : axes labels.
-    vlines : If True, draw vertical lines at points of xticks.
-    zeroline : If True, drawn when `xlim` is not empty.
+    ax : matplotlib.pyplot.Axes
+        Matplotlib axes object on which settings are applied.
+    vlines : bool
+        If True, draw vertical lines at points of xticks.
+    zeroline : bool
+        If True, drawn when `xlim` is not empty.
+
+
+    Other parameters are well known matplotlib parameters.
 
     kwargs are passed to `ax.tick_params`
     """
@@ -267,9 +296,9 @@ def adjust_axes(
 def append_axes(
     ax, position="right", size=0.2, pad=0.1, sharex=False, sharey=False, **kwargs
 ):
-    """
-    Append an axes to the given `ax` at given `position` |top|right|left|bottom|. Useful for adding custom colorbar.
+    """Append an axes to the given `ax` at given `position` top,right,left,bottom. Useful for adding custom colorbar.
     kwargs are passed to `mpl_toolkits.axes_grid1.make_axes_locatable.append_axes`.
+
     Returns appended axes.
     """
     extra_args = {}
@@ -317,14 +346,18 @@ def join_axes(ax1, ax2, **kwargs):
 
 
 def break_spines(ax, spines, symbol="\u2571", **kwargs):
-    """
-    Simulates broken axes using subplots. Need to fix heights according to given data for real aspect. Also plot the same data on each axes and set axes limits.
+    """Simulates broken axes using subplots. Need to fix heights according
+    to given data for real aspect. Also plot the same data on each axes and set axes limits.
 
     Parameters
     ----------
-    ax : Axes who's spine(s) to edit.
-    spines : str,list, str/list of any of ['top','bottom','left','right'].
-    symbol: Defult is u'\u2571'. Its at 60 degrees. so you can apply rotation to make it any angle.
+    ax : matplotlib.pyplot.Axes
+        Axes who's spine(s) to edit.
+    spines : str or list
+        str/list of any of ['top','bottom','left','right'].
+    symbol: str
+        Defult is u'\u2571'. Its at 60 degrees. so you can apply rotation to make it any angle.
+
 
     kwargs are passed to plt.text.
     """
@@ -351,16 +384,21 @@ def break_spines(ax, spines, symbol="\u2571", **kwargs):
 def add_text(
     ax=None, xs=0.25, ys=0.9, txts="[List]", colors="r", transform=True, **kwargs
 ):
-    """
-    Adds text entries on axes, given single string or list.
+    """Adds text entries on axes, given single string or list.
 
     Parameters
     ----------
-    xs : List of x coordinates relative to axes or single coordinate.
-    ys : List of y coordinates relative to axes or single coordinate.
-    txts : List of strings or one string.
-    colors : List of x colors of txts or one color.
-    transform : Dafault is True and positions are relative to axes, If False, positions are in data coordinates.
+    xs : float or array_like
+        List of x coordinates relative to axes or single coordinate.
+    ys : float or array_like
+        List of y coordinates relative to axes or single coordinate.
+    txts : str or array_like
+        List of strings or one string.
+    colors : array_like or Any
+        List of colors of txts or one color.
+    transform : bool
+        Dafault is True and positions are relative to axes, If False, positions are in data coordinates.
+
 
     kwargs are passed to plt.text.
     """
@@ -822,13 +860,6 @@ def webshow(transparent=False):
         del svg, html_str
 
 
-def savefig(filename, dpi=600, **kwargs):
-    """Save matplotlib's figure while handling existing files. `kwargs` are passed to `plt.savefig`"""
-    from ..utils import prevent_overwrite
-
-    plt.savefig(prevent_overwrite(filename), dpi=dpi, **kwargs)
-
-
 def plt2text(
     plt_fig=None,
     width=144,
@@ -943,15 +974,12 @@ def iplot2html(fig, filename=None, out_string=False, modebar=True):
     fig : A plotly's figure object.
     filename : Name of file to save fig. Defualt is None and show plot in Colab/Online or return hrml string.
     out_string : If True, returns HTML string, if False displays graph if possible.
-    modebar : If True, shows modebar in graph. Default is True.
+    modebar : If True, shows modebar in graph. Default is True. Not used if saving to file.
     """
     div_id = "graph-{}".format(uuid1())
     fig_json = fig.to_json()
     # a simple HTML template
     if filename:
-        from ..utils import prevent_overwrite
-
-        _filename = prevent_overwrite(filename)
         template = """<html>
         <head>
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -966,7 +994,7 @@ def iplot2html(fig, filename=None, out_string=False, modebar=True):
         </html>"""
 
         # write the JSON to the HTML template
-        with open(_filename, "w") as f:
+        with open(filename, "w") as f:
             f.write(template.format(div_id, fig_json, div_id))
 
     else:

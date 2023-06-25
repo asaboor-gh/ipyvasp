@@ -232,8 +232,7 @@ def _read_kticks(kpoints_path):
 
 
 class Bands(_BandsDosBase):
-    """
-    Class to handle and plot bandstructure data.
+    """Class to handle and plot bandstructure data.
 
     Parameters
     ----------
@@ -245,20 +244,14 @@ class Bands(_BandsDosBase):
         self._data_args = ()  # will be updated on demand
 
     def get_kticks(self, rel_path="KPOINTS"):
-        """
-        Reads associated KPOINTS file form a relative path of calculations and returns kticks. If KPOINTS file does not exist or was not created by this module, returns empty dict.
-
-        .. note::
-            kticks become useless when you interploate data in plotting, in that case write kticks manually.
-        """
+        "Reads associated KPOINTS file form a relative path of calculations and returns kticks. If KPOINTS file does not exist or was not created by this module, returns empty dict."
         path = Path(self.source.path).parent / rel_path
         if path.is_file():
             return _read_kticks(path)
         return []
 
     def get_plot_coords(self, kindices, eindices):
-        """
-        Returns coordinates of shape (len(zip(kindices, eindices)), 2) from most recent bandstructure plot.
+        """Returns coordinates of shape (len(zip(kindices, eindices)), 2) from most recent bandstructure plot.
         Use in a plot command as `plt.plot(*get_plot_coords(kindices, eindices).T)`.
         Enegy values are shifted by `ezero` from a plot command or data. Use coords + [0, ezero] to get data values.
         """
@@ -600,8 +593,7 @@ _total_doc = """total : bool
 
 
 class DOS(_BandsDosBase):
-    """
-    Class to handle and plot density of states data.
+    """Class to handle and plot density of states data.
 
     Parameters
     ----------

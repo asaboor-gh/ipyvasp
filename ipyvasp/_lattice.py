@@ -212,16 +212,21 @@ def periodic_table():
 
 
 def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=False):
-    """Writes poscar data object to a file or returns string
+    """Writes POSCAR data to a file or returns string
+
     Parameters
     ----------
-    poscar_data : Output of `export_poscar`,`join_poscars` etc.
-    outfile : str,file path to write on.
-    selective_dynamics : callable, if given, should be a function like `f(index,x,y,z) -> (bool, bool, bool)`
-        which turns on/off selective dynamics for each atom based in each dimension. See `ipyvasp.POSCAR.data.get_selective_dynamics` for more info.
-    overwrite: bool, if file already exists, overwrite=True changes it.
+    outfile : PathLike
+    selective_dynamics : callable
+        If given, should be a function like `f(index,x,y,z) -> (bool, bool, bool)`
+        which turns on/off selective dynamics for each atom based in each dimension.
+        See `ipyvasp.POSCAR.data.get_selective_dynamics` for more info.
+    overwrite: bool
+        If file already exists, overwrite=True changes it.
 
-    **Note**: POSCAR is only written in direct format even if it was loaded from cartesian format.
+
+    .. note::
+        POSCAR is only written in direct format even if it was loaded from cartesian format.
     """
     _comment = poscar_data.metadata.comment
     out_str = f"{poscar_data.SYSTEM}  # " + (_comment or "Created by Pivopty")
@@ -264,13 +269,14 @@ def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=F
 
 
 def export_poscar(path=None, content=None):
-    """
-    Export POSCAR file to python objects. Only Direct POSCAR supported.
+    """Export POSCAR file to python objects.
 
     Parameters
     ----------
-    path : Path/to/POSCAR file. Auto picks in CWD.
-    content : POSCAR content as string, This takes precedence to path.
+    path : PathLike
+        Path/to/POSCAR file. Auto picks in CWD.
+    content : str
+        POSCAR content as string, This takes precedence to path.
     """
     if content and isinstance(content, str):
         file_lines = [f"{line}\n" for line in content.splitlines()]
@@ -338,9 +344,7 @@ def export_poscar(path=None, content=None):
 
 # Cell
 def _save_mp_API(api_key):
-    """
-    - Save materials project api key for autoload in functions. This works only for legacy API.
-    """
+    "Save materials project api key for autoload in functions. This works only for legacy API."
     path = Path.home() / ".ipyvasprc"
     lines = []
     if path.is_file():
@@ -731,24 +735,29 @@ def get_kmesh(
     outfile=None,
     endpoint=True,
 ):
-    """
-    Generates uniform mesh of kpoints. Options are write to file, or return KPOINTS list.
+    """Generates uniform mesh of kpoints. Options are write to file, or return KPOINTS list.
 
     Parameters
     ----------
-    poscar_data : export_poscar() or export_vasprun().poscar().
-    *args : 1 or 3 integers which decide shape of mesh. If 1, mesh points equally spaced based on data from POSCAR.
-    shift : Only works if cartesian = False. Defualt is 0. Could be a number or list of three numbers to add to interval [0,1].
-    weight : Float, if None, auto generates weights.
-    cartesian : If True, generates cartesian mesh.
-    ibzkpt : Path to ibzkpt file, required for HSE calculations.
-    outfile : Path/to/file to write kpoints.
-    endpoint : Default True, include endpoints in mesh at edges away from origin.
+    poscar_data : ipyvasp.POSCAR.data
+    *args : tuple
+        1 or 3 integers which decide shape of mesh. If 1, mesh points equally spaced based on data from POSCAR.
+    shift : float
+        Only works if cartesian = False. Defualt is 0. Could be a number or list of three numbers to add to interval [0,1].
+    weight : float
+        If None, auto generates weights.
+    cartesian : bool
+        If True, generates cartesian mesh.
+    ibzkpt : PathLike
+        Path to ibzkpt file, required for HSE calculations.
+    outfile : PathLike
+        Path/to/file to write kpoints.
+    endpoint : bool
+        Default True, include endpoints in mesh at edges away from origin.
+
 
     If `outfile = None`, KPOINTS file content is printed.
 
-    .. note::
-        Use `ipyvasp.POSCAR.get_kmesh` to get k-mesh based on current POSCAR.
     """
     if len(args) not in [1, 3]:
         raise ValueError("get_kmesh() takes 1 or 3 args!")
@@ -842,27 +851,38 @@ def splot_bz(
     zoffset=0,
     **kwargs,
 ):
-    """
-    Plots matplotlib's static figure of Brillouin zone. You can also plot in 2D on a 3D axes.
+    """Plots matplotlib's static figure of Brillouin zone. You can also plot in 2D on a 3D axes.
 
     Parameters
     ----------
     bz_data : Output of `get_bz`.
-    plane : Default is None and plots 3D surface. Can take 'xy','yz','zx' to plot in 2D.
-    fill : True by defult, determines whether to fill surface of BZ or not.
-    color : color to fill surface and stroke color.
-    vectors : Tuple of indices of basis vectors to plot. Default is (0,1,2). All three are plotted in 3D (you can turn of by None or empty tuple), whhile you can specify any two/three in 2D.
-    ax : Auto generated by default, 2D/3D axes, auto converts in 3D on demand as well.
-    colormap : If None, single color is applied, only works in 3D and `fill=True`. Colormap is applied along z.
-    shade : Shade polygons or not. Only works in 3D and `fill=True`.
-    alpha : Opacity of filling in range [0,1]. Increase for clear viewpoint.
-    zoffset : Only used if plotting in 2D over a 3D axis. Default is 0. Any plane 'xy','yz' etc. can be plotted but it will be in xy plane of 3D axes.
+    plane : str
+        Default is None and plots 3D surface. Can take 'xy','yz','zx' to plot in 2D.
+    fill : bool
+        True by defult, determines whether to fill surface of BZ or not.
+    color : Any
+        Color to fill surface and stroke color. Default is 'blue'. Can be any valid matplotlib color.
+    vectors : tuple
+        Tuple of indices of basis vectors to plot. Default is (0,1,2). All three are plotted in 3D
+        (you can turn of by None or empty tuple), whhile you can specify any two/three in 2D.
+    ax : matplotlib.pyplot.Axes
+        Auto generated by default, 2D/3D axes, auto converts in 3D on demand as well.
+    colormap : str
+        If None, single color is applied, only works in 3D and `fill=True`. Colormap is applied along z.
+    shade : bool
+        Shade polygons or not. Only works in 3D and `fill=True`.
+    alpha : float
+        Opacity of filling in range [0,1]. Increase for clear viewpoint.
+    zoffset : float
+        Only used if plotting in 2D over a 3D axis. Default is 0. Any plane 'xy','yz' etc.
+
 
     kwargs are passed to `plt.plot` or `Poly3DCollection` if `fill=True`.
 
     Returns
     -------
-    ax : Matplotlib's 2D axes if `plane=None` otherswise 3D axes.
+    matplotlib.pyplot.Axes
+        Matplotlib's 2D axes if `plane=None` otherswise 3D axes.
     """
     vname = "a" if bz_data.__class__.__name__ == "CellData" else "b"
     label = r"$k_{}/2π$" if vname == "b" else "{}"
@@ -1055,25 +1075,31 @@ def iplot_bz(
     fig=None,
     **kwargs,
 ):
-    """
-    Plots interactive figure showing axes,BZ surface, special points and basis, each of which could be hidden or shown.
+    """Plots interactive figure showing axes,BZ surface, special points and basis, each of which could be hidden or shown.
 
     Parameters
     ----------
     bz_data : Output of `get_bz`.
-    fill : False by defult, determines whether to fill surface of BZ or not.
-    color : color to fill surface 'rgba(168,204,216,0.4)` by default.
-    background : Plot background color, default is 'rgb(255,255,255)'.
-    special_kpoints : True by default, determines whether to plot special points or not.
+    fill : bool
+        False by defult, determines whether to fill surface of BZ or not.
+    color : str
+        Color to fill surface 'rgba(168,204,216,0.4)` by default. This sholud be a valid Plotly color.
+    special_kpoints : bool or callable
+        True by default, determines whether to plot special points or not.
         You can also proivide a mask function f(x,y,z) -> bool which will be used to filter special points based on their fractional coordinates.
-    alpha : Opacity of BZ planes.
-    ortho3d : Default is True, decides whether x,y,z are orthogonal or perspective.
-    fig : (Optional) Plotly's `go.Figure`. If you want to plot on another plotly's figure, provide that.
+    alpha : float
+        Opacity of BZ planes.
+    ortho3d : bool
+        Default is True, decides whether x,y,z are orthogonal or perspective.
+    fig : plotly.graph_objects.Figure
+        Plotly's `go.Figure`. If you want to plot on another plotly's figure, provide that.
+
 
     kwargs are passed to `plotly.graph_objects.Scatter3d` for BZ lines.
+
     Returns
     -------
-    fig : plotly.graph_object's Figure instance.
+    plotly.graph_objects.Figure
     """
     if not fig:
         fig = go.Figure()
@@ -1251,16 +1277,9 @@ def iplot_bz(
 
 
 # Cell
-def _fix_sites(
-    poscar_data, tol=1e-2, eqv_sites=False, translate=None
-):  # should not be exposed mostly be used in visualizations
+def _fix_sites(poscar_data, tol=1e-2, eqv_sites=False, translate=None):
     """Add equivalent sites to make a full data shape of lattice. Returns same data after fixing.
-
-    Parameters
-    ----------
-    eqv_sites : If True, add sites on edges and faces. If False, just fix coordinates, i.e. `pos > 1 - tol -> pos - 1`, useful for merging poscars to make slabs.
-    translate : A number(+/-) or list of three numbers to translate in a,b,c directions.
-    """
+    It should not be exposed mostly be used in visualizations"""
     pos = (
         poscar_data.positions.copy()
     )  # We can also do poscar_data.copy().positions that copies all contents.
@@ -1343,29 +1362,26 @@ def _fix_sites(
 
 
 def translate_poscar(poscar_data, offset):
-    """
-    Translate sites of a PPSCAR. Usully a farction of integarers like 1/2,1/4 etc.
-
-    Parameters
-    ----------
-    poscar_data : Output of `export_poscar` or `export_vasprun().poscar`.
-    offset : A number(+/-) or list of three numbers to translate in a,b,c directions.
-    """
+    """Translate sites of a POSCAR with a given offset as a number or list of three number.
+    Usully a farction of integarers like 1/2,1/4 etc."""
     return _fix_sites(poscar_data, translate=offset, eqv_sites=False)
 
 
-def get_pairs(poscar_data, positions, r, tol=1e-3):
-    """
-    Returns a tuple of Lattice (coords,pairs), so coords[pairs] given nearest site bonds.
+def get_pairs(basis, positions, r, tol=1e-3):
+    """Returns a tuple of Lattice (coords,pairs), so coords[pairs] given nearest site bonds.
 
     Parameters
     ----------
-    poscar_data : Output of `export_poscar` or `export_vasprun().poscar`.
-    positions : Array(N,3) of fractional positions of lattice sites. If coordinates positions, provide unity basis.
-    r : Cartesian distance between the pairs in units of Angstrom e.g. 1.2 -> 1.2E-10.
-    tol : Tolerance value. Default is 10^-3.
+    basis : array_like
+        3x3 array of lattice basis vectors in rows.
+    positions : array_like
+        Array(N,3) of fractional positions of lattice sites. If coordinates positions, provide unity basis.
+    r : float
+        Cartesian distance between the pairs in units of Angstrom e.g. 1.2 -> 1.2E-10.
+    tol : float
+        Tolerance value. Default is 10^-3.
     """
-    coords = to_R3(poscar_data.basis, positions)
+    coords = to_R3(basis, positions)
     tree = KDTree(coords)
     inds = np.array([[*p] for p in tree.query_pairs(r, eps=tol)])
     return serializer.dict2tuple("Lattice", {"coords": coords, "pairs": inds})
@@ -1429,18 +1445,29 @@ def iplot_lattice(
     plot_cell=True,
     **kwargs,
 ):
-    """
-    Plotly's interactive plot of lattice.
+    """Plotly's interactive plot of lattice.
+
     Parameters
     ----------
-    poscar_data : Output of export_poscar or export_vasprun().poscar.
-    sizes : Size of sites. Either one int/float or list equal to type of ions.
-    colors : Sequence of colors for each type. Automatically generated if not provided.
-    bond_length : Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.
-    mask_sites : Provide a mask function `f(index, x,y,z) -> bool` to show only selected sites. For example, to show only sites with z > 0.5, use `mask_sites = lambda i, x,y,z: x > 0.5`.
-    bond_kws : Keyword arguments passed to `plotly.graph_objects.Scatter3d` for bonds. Default is jus hint, you can use any keyword argument that is accepted by `plotly.graph_objects.Scatter3d`.
-    site_kws : Keyword arguments passed to `plotly.graph_objects.Scatter3d` for sites. Default is jus hint, you can use any keyword argument that is accepted by `plotly.graph_objects.Scatter3d`.
-    plot_cell : bool, defult is True. Plot unit cell with default settings. If you want to customize, use `POSCAR.iplot_cell(fig = <return of iplot_lattice>)` function.
+    sizes : float or tuple
+        Size of sites. Either one int/float or list equal to type of ions.
+    colors : tuple
+        Sequence of colors for each type. Automatically generated if not provided.
+    bond_length : float
+        Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.
+    mask_sites : callable
+        Provide a mask function `f(index, x,y,z) -> bool` to show only selected sites.
+        For example, to show only sites with z > 0.5, use `mask_sites = lambda i, x,y,z: x > 0.5`.
+    bond_kws : dict
+        Keyword arguments passed to `plotly.graph_objects.Scatter3d` for bonds.
+        Default is jus hint, you can use any keyword argument that is accepted by `plotly.graph_objects.Scatter3d`.
+    site_kws : dict
+        Keyword arguments passed to `plotly.graph_objects.Scatter3d` for sites.
+        Default is jus hint, you can use any keyword argument that is accepted by `plotly.graph_objects.Scatter3d`.
+    plot_cell : bool
+        Defult is True. Plot unit cell with default settings.
+        If you want to customize, use `POSCAR.iplot_cell(fig = <return of iplot_lattice>)` function.
+
 
     kwargs are passed to `iplot_bz`.
     """
@@ -1460,7 +1487,7 @@ def iplot_lattice(
             raise ValueError("No sites found with given mask_sites function.")
 
     coords, pairs = get_pairs(
-        poscar_data, pos, r=bond_length, tol=bond_tol
+        poscar_data.basis, pos, r=bond_length, tol=bond_tol
     )  # bond tolernce should be smaller than cell tolernce.
 
     if not fig:
@@ -1618,27 +1645,43 @@ def splot_lattice(
     plot_cell=True,
     **kwargs,
 ):
-    """
-    Matplotlib Static plot of lattice.
+    """Matplotlib Static plot of lattice.
 
     Parameters
     ----------
-    poscar_data : Output of export_poscar or export_vasprun().poscar.
-    plane : Plane to plot. Either 'xy','xz','yz' or None for 3D plot.
-    sizes : Size of sites. Either one int/float or list equal to type of ions.
-    colors : Sequence of colors for each ion type. If None, automatically generated.
-    bond_length : Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.
-    alpha : Opacity of points and bonds.
-    mask_sites : Provide a mask function `f(index, x,y,z) -> bool` to show only selected sites. For example, to show only sites with z > 0.5, use `mask_sites = lambda i,x,y,z: x > 0.5`.
-    showlegend : bool, default is True, show legend for each ion type.
-    site_kws : Keyword arguments to pass to `plt.scatter` for plotting sites. Default is just hint, you can pass any keyword argument that `plt.scatter` accepts.
-    bond_kws : Keyword arguments to pass to `plt.plot` for plotting bonds. Default is just hint, you can pass any keyword argument that `plt.plot` accepts.
-    fmt_label : If given, each site label is passed to it like fmt_label('Ga 1'). It must return a string or a list/tuple of length 2. First item is the label and second item is a dictionary of keywords to pass to `plt.text`.
-    plot_cell : bool, default is True, plot unit cell with default settings. To customize options, use `plot_cell = False` and do `POSCAR.splot_cell(ax = <return of splot_lattice>)`.
+    plane : str
+        Plane to plot. Either 'xy','xz','yz' or None for 3D plot.
+    sizes : float or tuple
+        Size of sites. Either one int/float or list equal to type of ions.
+    colors : tuple
+        Sequence of colors for each ion type. If None, automatically generated.
+    bond_length : float
+        Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.
+    alpha : float
+        Opacity of points and bonds.
+    mask_sites : callable
+        Provide a mask function `f(index, x,y,z) -> bool` to show only selected sites.
+        For example, to show only sites with z > 0.5, use `mask_sites = lambda i,x,y,z: x > 0.5`.
+    showlegend : bool
+        Default is True, show legend for each ion type.
+    site_kws : dict
+        Keyword arguments to pass to `plt.scatter` for plotting sites.
+        Default is just hint, you can pass any keyword argument that `plt.scatter` accepts.
+    bond_kws : dict
+        Keyword arguments to pass to `plt.plot` for plotting bonds.
+        Default is just hint, you can pass any keyword argument that `plt.plot` accepts.
+    fmt_label : callable
+        If given, each site label is passed to it like fmt_label('Ga 1').
+        It must return a string or a list/tuple of length 2 with first item as label and second item as dictionary of keywords to pass to `plt.text`.
+    plot_cell : bool
+        Default is True, plot unit cell with default settings.
+        To customize options, use `plot_cell = False` and do `POSCAR.splot_cell(ax = <return of splot_lattice>)`.
+
 
     kwargs are passed to `splot_bz`.
 
-    > Tip: Use `plt.style.use('ggplot')` for better 3D perception.
+    .. tip::
+        Use `plt.style.use('ggplot')` for better 3D perception.
     """
     # Plane fix
     if plane and plane not in "xyzxzyx":
@@ -1662,7 +1705,7 @@ def splot_lattice(
             raise ValueError("No sites found with given mask_sites function.")
 
     coords, pairs = get_pairs(
-        poscar_data, positions=pos, r=bond_length, tol=bond_tol
+        poscar_data.basis, positions=pos, r=bond_length, tol=bond_tol
     )  # bond tolernce should be smaller than cell tolernce.
 
     labels = [poscar_data.labels[i] for i in sites] if sites else poscar_data.labels
@@ -1780,15 +1823,20 @@ def splot_lattice(
 
 # Cell
 def join_poscars(poscar_data, other, direction="c", tol=1e-2, system=None):
-    """Joins two POSCARs in a given direction. In-plane lattice parameters are kept from first poscar and out of plane basis vector of other is modified while volume is kept same.
+    """Joins two POSCARs in a given direction. In-plane lattice parameters are kept from
+    first poscar and out of plane basis vector of other is modified while volume is kept same.
 
     Parameters
     ----------
-    poscar_data :  Base POSCAR. Output of `export_poscar` or similar object from other functions.
-    other : Other POSCAR to be joined with this POSCAR.
-    direction : The joining direction. It is general and can join in any direction along basis. Expect one of ['a','b','c'].
-    tol : Default is 0.01. It is used to bring sites near 1 to near zero in order to complete sites in plane. Vasp relaxation could move a point, say at 0.00100 to 0.99800 which is not useful while merging sites.
-    system : If system is given, it is written on top of file. Otherwise, it is infered from atomic species.
+    other : type(self)
+        Other POSCAR to be joined with this POSCAR.
+    direction : str
+        The joining direction. It is general and can join in any direction along basis. Expect one of ['a','b','c'].
+    tol : float
+        Default is 0.01. It is used to bring sites near 1 to near zero in order to complete sites in plane.
+        Vasp relaxation could move a point, say at 0.00100 to 0.99800 which is not useful while merging sites.
+    system : str
+        If system is given, it is written on top of file. Otherwise, it is infered from atomic species.
     """
     _poscar1 = _fix_sites(poscar_data, tol=tol, eqv_sites=False)
     _poscar2 = _fix_sites(other, tol=tol, eqv_sites=False)
@@ -1872,14 +1920,14 @@ def join_poscars(poscar_data, other, direction="c", tol=1e-2, system=None):
 
 # Cell
 def repeat_poscar(poscar_data, n, direction):
-    """
-    Repeat a given POSCAR.
+    """Repeat a given POSCAR.
 
     Parameters
     ----------
-    poscar_data : Path/to/POSCAR or `poscar` data object.
-    n : Number of repetitions.
-    direction : Direction of repetition. Can be 'a', 'b' or 'c'.
+    n : int
+        Number of repetitions.
+    direction : str
+        Direction of repetition. Can be 'a', 'b' or 'c'.
     """
     if not isinstance(n, (int, np.integer)) and n < 2:
         raise ValueError("n must be an integer greater than 1.")
@@ -1890,19 +1938,22 @@ def repeat_poscar(poscar_data, n, direction):
 
 
 def scale_poscar(poscar_data, scale=(1, 1, 1), tol=1e-2):
-    """
-    Create larger/smaller cell from a given POSCAR. Can be used to repeat a POSCAR with integer scale values.
+    """Create larger/smaller cell from a given POSCAR. Can be used to repeat a POSCAR with integer scale values.
 
     Parameters
     ----------
-    poscar_data : `poscar` data object.
-    scale : Tuple of three values along (a,b,c) vectors. int or float values. If number of sites are not as expected in output,
+    scale : tuple
+        Tuple of three values along (a,b,c) vectors. int or float values. If number of sites are not as expected in output,
         tweak `tol` instead of `scale`. You can put a minus sign with `tol` to get more sites and plus sign to reduce sites.
-    tol : It is used such that site positions are blow `1 - tol`, as 1 belongs to next cell, not previous one.
+    tol : float
+        It is used such that site positions are blow `1 - tol`, as 1 belongs to next cell, not previous one.
 
-    **Tip:** scale = (2,2,2) enlarges a cell and next operation of (1/2,1/2,1/2) should bring original cell back.
 
-    **Caveat:** A POSCAR scaled with Non-integer values should only be used for visualization purposes, Not for any other opration such as making supercells, joining POSCARs.
+    .. note::
+        ``scale = (2,2,2)`` enlarges a cell and next operation of ``(1/2,1/2,1/2)`` should bring original cell back.
+
+    .. warning::
+        A POSCAR scaled with Non-integer values should only be used for visualization purposes, Not for any other opration such as making supercells, joining POSCARs.
     """
     ii, jj, kk = np.ceil(scale).astype(int)  # Need int for joining.
 
@@ -1958,14 +2009,14 @@ def scale_poscar(poscar_data, scale=(1, 1, 1), tol=1e-2):
 
 
 def rotate_poscar(poscar_data, angle_deg, axis_vec):
-    """
-    Rotate a given POSCAR.
+    """Rotate a given POSCAR.
 
     Parameters
     ----------
-    path_poscar : Path/to/POSCAR or `poscar` data object.
-    angle_deg : Rotation angle in degrees.
-    axis_vec : (x,y,z) of axis about which rotation takes place. Axis passes through origin.
+    angle_deg : float
+        Rotation angle in degrees.
+    axis_vec : array_like
+        Vector (x,y,z) of axis about which rotation takes place. Axis passes through origin.
     """
     rot = rotation(angle_deg=angle_deg, axis_vec=axis_vec)
     p_dict = poscar_data.to_dict()
@@ -1977,14 +2028,15 @@ def rotate_poscar(poscar_data, angle_deg, axis_vec):
 
 
 def set_zdir(poscar_data, hkl, phi=0):
-    """
-    Set z-direction of POSCAR along a given hkl direction and returns new data.
+    """Set z-direction of POSCAR along a given hkl direction and returns new data.
 
     Parameters
     ----------
-    path_poscar : Path/to/POSCAR or `poscar` data object.
-    hkl : (h,k,l) of the direction along which z-direction is to be set. Vector is constructed as h*a + k*b + l*c in cartesian coordinates.
-    phi: Rotation angle in degrees about z-axis to set a desired rotated view.
+    hkl : tuple
+        (h,k,l) of the direction along which z-direction is to be set.
+        Vector is constructed as h*a + k*b + l*c in cartesian coordinates.
+    phi: float
+        Rotation angle in degrees about z-axis to set a desired rotated view.
 
     Returns
     -------
@@ -2025,9 +2077,18 @@ def mirror_poscar(poscar_data, direction):
 
 def convert_poscar(poscar_data, atoms_mapping, basis_factor):
     """Convert a POSCAR to a similar structure of other atomic types or same type with strained basis.
-    `atoms_mapping` is a dictionary of {old_atom: new_atom} like {'Ga':'Al'} will convert GaAs to AlAs structure.
-    `basis_factor` is a scaling factor multiplied with basis vectors, single value (useful for conversion to another type)
-    or list of three values to scale along (a,b,c) vectors (useful for strained structures).
+
+    Parameters
+    ----------
+    atoms_mapping : dict
+        A dictionary of {old_atom: new_atom} like {'Ga':'Al'} will convert GaAs to AlAs structure.
+    basis_factor : float
+        A scaling factor multiplied with basis vectors, single value (useful for conversion to another type)
+        or list of three values to scale along (a,b,c) vectors (useful for strained structures).
+
+
+    .. note::
+        This can be used to strain basis vectors uniformly only. For non-uniform strain, use :func:`ipyvasp.POSCAR.strain`.
     """
     poscar_data = poscar_data.to_dict()  # Avoid modifying original
     poscar_data["types"] = {
@@ -2156,15 +2217,16 @@ def transform_poscar(poscar_data, transformation, zoom=2, tol=1e-2):
 
 
 def add_vaccum(poscar_data, thickness, direction, left=False):
-    """
-    Add vacuum to a POSCAR.
+    """Add vacuum to a POSCAR.
 
     Parameters
     ----------
-    poscar_data : `poscar` data object.
-    thickness : Thickness of vacuum in Angstrom.
-    direction : Direction of vacuum. Can be 'a', 'b' or 'c'.
-    left : If True, vacuum is added to left of sites. By default, vacuum is added to right of sites.
+    thickness : float
+        Thickness of vacuum in Angstrom.
+    direction : str
+        Direction of vacuum. Can be 'a', 'b' or 'c'.
+    left : bool
+        If True, vacuum is added to left of sites. By default, vacuum is added to right of sites.
     """
     if direction not in "abc":
         raise Exception("Direction must be a, b or c.")
@@ -2188,7 +2250,6 @@ def add_vaccum(poscar_data, thickness, direction, left=False):
     return serializer.PoscarData(poscar_dict)  # Return new POSCAR
 
 
-# Cell
 def transpose_poscar(poscar_data, axes=[1, 0, 2]):
     "Transpose a POSCAR by switching basis from [0,1,2] -> `axes`. By Default, x and y are transposed."
     if isinstance(axes, (list, tuple, np.ndarray)) and len(axes) == 3:

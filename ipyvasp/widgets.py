@@ -268,6 +268,7 @@ class FilesWidget(VBox):
         >>> out.result # result of function call which is same as out.f(*out.args, **out.kwargs)
         >>> out.files_widget # reference to FilesWidget created, not the same as fw because it is a new instance
 
+
         .. note::
             If you don't need to interpret the result of the function call, you can use the @self.interact decorator instead.
 
@@ -416,6 +417,7 @@ class FilesWidget(VBox):
         >>>     print('path:',path)
         >>>     print('Path Type: ', type(path))
         >>>     print('x: ',x)
+
 
         .. note::
             Use self.interactive to get a widget that stores the argements and can be called later in a notebook cell.
@@ -1088,8 +1090,8 @@ class KpathWidget(VBox):
 
             self._update_selection()  # Update plot in both cases, by click or manual input
 
-    @_sub_doc(lat.get_kpath, {"kpoints :.*n :": "n :"})
-    @_sig_kwargs(lat.get_kpath, ("kpoints",))
+    @_sub_doc(lat.get_kpath, {"kpoints :.*n :": "n :", "rec_basis :.*\n\n": "\n\n"})
+    @_sig_kwargs(lat.get_kpath, ("kpoints", "rec_basis"))
     def get_kpath(self, n=5, **kwargs):
         return self.poscar.get_kpath(self.get_kpoints(), n=n, **kwargs)
 

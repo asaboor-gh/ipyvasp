@@ -342,7 +342,7 @@ class PoscarData(Dict2Data):
 
         You can visualize selective dynamics sites by their labels as follows:
 
-        
+
         >>> poscar = POSCAR.from_file('POSCAR')
         >>> sd = poscar.data.get_selective_dynamics(lambda i,x,y,z: (True, False, True) if i % 2 == 0 else (False, True, False)) # Just an example
         >>> poscar.splot_lattice(..., fmt_label = lambda lab: sd[lab]) # This will label sites as T T T, F F F, ... and so so on
@@ -411,15 +411,27 @@ class SpecialPoints(Dict2Data):
         )
 
 
+class SubZoneData(Dict2Data):
+    _req_keys = ("vertices", "faces", "specials")
+
+    def __init__(self, d):
+        super().__init__(d)
+
+    def splot(plane=None):
+        raise NotImplementedError("Not implemented yet")
+
+    def iplot():
+        raise NotImplementedError("Not implemented yet")
+
+
 class BrZoneData(Dict2Data):
-    _req_keys = ("basis", "faces", "vertices", "metadata")
+    _req_keys = ("basis", "faces", "vertices", "primitive")
 
     def __init__(self, d):
         super().__init__(d)
 
     def get_special_points(self, orderby=(1, 1, 1)):
         "Returns the special points in the brillouin zone in the order relative to a given point in cartesian coordinates. Gamma is always first."
-        # High symmerty KPOINTS in primitive BZ
         mid_faces = np.array(
             [np.mean(np.unique(face, axis=0), axis=0) for face in self.faces_coords]
         )
@@ -511,10 +523,12 @@ class BrZoneData(Dict2Data):
         """
         return kpoints2bz(self, kpoints, shift=shift)
 
-    def get_region(self, func):
+    def get_subzone(self, func):
         # Disclaimer: Reuduction totally depends on given function, we only test for volume to satify the condition V_old = N * V_new
         # This should add an attrivute to not recalculate special points, just return old points including in this zone
         # How to plot the reduced zone, as it will be nowhere? or make this a plotting function? or add new namespace to POSACR? like splot_bzr(func), thing?
+        # return SubZoneData({"vertices","faces", "specials"})
+        # specials here should not be recalculated, old ones with in this zone
         raise NotImplementedError("Not implemented yet")
 
 
@@ -522,7 +536,7 @@ class CellData(Dict2Data):
     _req_keys = ("basis", "faces", "vertices")
 
     def __init__(self, d):
-        super().__init__(d)
+        super().__init__({k: v for k, v in d.items() if k != "primitive"})
 
     @property
     def faces_coords(self):
@@ -599,7 +613,7 @@ class EncodeFromNumpy(json.JSONEncoder):
     """
     Serializes python/Numpy objects via customizing json encoder.
 
-    
+
     >>> json.dumps(python_dict, cls=EncodeFromNumpy) # to get json string.
     >>> json.dump(*args, cls=EncodeFromNumpy) # to create a file.json.
     """
@@ -621,7 +635,7 @@ class DecodeToNumpy(json.JSONDecoder):
     """
     Deserilizes JSON object to Python/Numpy's objects.
 
-    
+
     >>> json.loads(json_string,cls=DecodeToNumpy) #  from string
     >>> json.load(path) # from file.
     """

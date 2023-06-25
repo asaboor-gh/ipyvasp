@@ -115,6 +115,7 @@ class SpinDataFrame(pd.DataFrame):
         data=None,
         **kwargs,
     ):
+        raise NotImplementedError("This class is not ready yet.")
         if not (
             path or args
         ):  # It works fine without path given, but it is not recommended.
@@ -208,7 +209,7 @@ class SpinDataFrame(pd.DataFrame):
     def get_data(self, shift=0):
         """Access Data with transformed KPOINTS based on current Brillouin Zone.
         shift is used to shift kpoints before any other operation.
-        If You need to have kpoints in primitive/regular BZ, first use .poscar.set_bz() to set that kind of BZ.
+        If You need to have kpoints in primitive/regular BZ, first use .poscar.get_bz() that set that kind of BZ.
         """
         bands = np.unique(self["band"].to_numpy()).astype(int)
         out_dict = {"SYSTEM": self.sys_info.SYSTEM}

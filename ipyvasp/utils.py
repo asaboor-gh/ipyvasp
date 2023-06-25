@@ -126,6 +126,7 @@ def interpolate_data(x: np.ndarray, y: np.ndarray, n: int = 10, k: int = 3) -> t
     -------
     tuple: (xnew, ynew) after interpolation.
 
+
     .. note::
         Only axis 0 will be interpolated. If you want general interploation, use ``from scipy.interpolate import make_interp_spline, BSpline``.
     """
@@ -281,18 +282,24 @@ def list_files(path=".", glob="*", exclude=None, files_only=False, dirs_only=Fal
     return tuple(files)
 
 
-def prevent_overwrite(path: str) -> str:
-    """Prevents overwiting as file/directory by adding numbers in given file/directory path."""
-    if (p := Path(path)).exists():
+@contextmanager
+def prevent_overwrite(path) -> Path:
+    """Contextmanager to prevents overwiting as file by adding numbers in given path.
+
+    >>> with prevent_overwrite("file.txt") as path:
+    >>>     print(path) # file.txt if it doesn't exist, file-1.txt if it exists, file-2.txt if file-1.txt exists and so on.
+    """
+    out_path = Path(path)
+    if out_path.exists():
         # Check existing files
         i = 0
-        name = p.stem + "-{}" + p.suffix
+        name = out_path.stem + "-{}" + out_path.suffix
         while Path(name.format(i)).is_file():
             i += 1
-        out_path = name.format(i)
+        out_path = Path(name.format(i))
         print(f"Found existing path: {path!r}\nConverting to: {out_path!r}")
-        return out_path
-    return path
+
+    yield out_path
 
 
 class color:

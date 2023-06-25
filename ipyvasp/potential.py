@@ -142,6 +142,7 @@ class LOCPOT:
     path : path/to/LOCPOT. LOCPOT is auto picked in CWD.
     data_set : 0 for electrostatic data, 1 for magnetization data if ISPIN = 2. If non-colinear calculations, 1,2,3 will pick Mx,My,Mz data sets respectively. Only one data set is loaded, so you should know what you are loading.
 
+
     .. note::
         To avoid memory issues while loading multiple LOCPOT files, use this class as a context manager which cleans up the memory after use.
 
@@ -209,6 +210,7 @@ class LOCPOT:
         figsize : Tuple of (width,height) of figure. Since each time a figure is created, we can't reuse it, so we need to specify the size.
 
         kwargs are passed to the plt.Axes.set(kwargs) method to handle the plot styling.
+
 
         .. note::
             You can use return value to retrieve information, like output.f(*output.args, **output.kwargs) in a cell to plot the current state and save it.
