@@ -534,7 +534,7 @@
 
 <span class="sd">        You can visualize selective dynamics sites by their labels as follows:</span>
 
-<span class="sd">        </span>
+
 <span class="sd">        &gt;&gt;&gt; poscar = POSCAR.from_file(&#39;POSCAR&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; sd = poscar.data.get_selective_dynamics(lambda i,x,y,z: (True, False, True) if i % 2 == 0 else (False, True, False)) # Just an example</span>
 <span class="sd">        &gt;&gt;&gt; poscar.splot_lattice(..., fmt_label = lambda lab: sd[lab]) # This will label sites as T T T, F F F, ... and so so on</span>
@@ -603,15 +603,27 @@
         <span class="p">)</span>
 
 
+<span class="k">class</span> <span class="nc">SubZoneData</span><span class="p">(</span><span class="n">Dict2Data</span><span class="p">):</span>
+    <span class="n">_req_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;vertices&quot;</span><span class="p">,</span> <span class="s2">&quot;faces&quot;</span><span class="p">,</span> <span class="s2">&quot;specials&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">splot</span><span class="p">(</span><span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Not implemented yet&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">iplot</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Not implemented yet&quot;</span><span class="p">)</span>
+
+
 <span class="k">class</span> <span class="nc">BrZoneData</span><span class="p">(</span><span class="n">Dict2Data</span><span class="p">):</span>
-    <span class="n">_req_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;basis&quot;</span><span class="p">,</span> <span class="s2">&quot;faces&quot;</span><span class="p">,</span> <span class="s2">&quot;vertices&quot;</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">)</span>
+    <span class="n">_req_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;basis&quot;</span><span class="p">,</span> <span class="s2">&quot;faces&quot;</span><span class="p">,</span> <span class="s2">&quot;vertices&quot;</span><span class="p">,</span> <span class="s2">&quot;primitive&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_special_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orderby</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span>
         <span class="s2">&quot;Returns the special points in the brillouin zone in the order relative to a given point in cartesian coordinates. Gamma is always first.&quot;</span>
-        <span class="c1"># High symmerty KPOINTS in primitive BZ</span>
         <span class="n">mid_faces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
             <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">faces_coords</span><span class="p">]</span>
         <span class="p">)</span>
@@ -703,10 +715,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">kpoints2bz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">get_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_subzone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
         <span class="c1"># Disclaimer: Reuduction totally depends on given function, we only test for volume to satify the condition V_old = N * V_new</span>
         <span class="c1"># This should add an attrivute to not recalculate special points, just return old points including in this zone</span>
         <span class="c1"># How to plot the reduced zone, as it will be nowhere? or make this a plotting function? or add new namespace to POSACR? like splot_bzr(func), thing?</span>
+        <span class="c1"># return SubZoneData({&quot;vertices&quot;,&quot;faces&quot;, &quot;specials&quot;})</span>
+        <span class="c1"># specials here should not be recalculated, old ones with in this zone</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Not implemented yet&quot;</span><span class="p">)</span>
 
 
@@ -714,7 +728,7 @@
     <span class="n">_req_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;basis&quot;</span><span class="p">,</span> <span class="s2">&quot;faces&quot;</span><span class="p">,</span> <span class="s2">&quot;vertices&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;primitive&quot;</span><span class="p">})</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">faces_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -791,7 +805,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Serializes python/Numpy objects via customizing json encoder.</span>
 
-<span class="sd">    </span>
+
 <span class="sd">    &gt;&gt;&gt; json.dumps(python_dict, cls=EncodeFromNumpy) # to get json string.</span>
 <span class="sd">    &gt;&gt;&gt; json.dump(*args, cls=EncodeFromNumpy) # to create a file.json.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -813,7 +827,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Deserilizes JSON object to Python/Numpy&#39;s objects.</span>
 
-<span class="sd">    </span>
+
 <span class="sd">    &gt;&gt;&gt; json.loads(json_string,cls=DecodeToNumpy) #  from string</span>
 <span class="sd">    &gt;&gt;&gt; json.load(path) # from file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>

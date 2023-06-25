@@ -404,16 +404,21 @@
 
 
 <span class="k">def</span> <span class="nf">write_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selective_dynamics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Writes poscar data object to a file or returns string</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Writes POSCAR data to a file or returns string</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    poscar_data : Output of `export_poscar`,`join_poscars` etc.</span>
-<span class="sd">    outfile : str,file path to write on.</span>
-<span class="sd">    selective_dynamics : callable, if given, should be a function like `f(index,x,y,z) -&gt; (bool, bool, bool)`</span>
-<span class="sd">        which turns on/off selective dynamics for each atom based in each dimension. See `ipyvasp.POSCAR.data.get_selective_dynamics` for more info.</span>
-<span class="sd">    overwrite: bool, if file already exists, overwrite=True changes it.</span>
+<span class="sd">    outfile : PathLike</span>
+<span class="sd">    selective_dynamics : callable</span>
+<span class="sd">        If given, should be a function like `f(index,x,y,z) -&gt; (bool, bool, bool)`</span>
+<span class="sd">        which turns on/off selective dynamics for each atom based in each dimension.</span>
+<span class="sd">        See `ipyvasp.POSCAR.data.get_selective_dynamics` for more info.</span>
+<span class="sd">    overwrite: bool</span>
+<span class="sd">        If file already exists, overwrite=True changes it.</span>
 
-<span class="sd">    **Note**: POSCAR is only written in direct format even if it was loaded from cartesian format.</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        POSCAR is only written in direct format even if it was loaded from cartesian format.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_comment</span> <span class="o">=</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">comment</span>
     <span class="n">out_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">poscar_data</span><span class="o">.</span><span class="n">SYSTEM</span><span class="si">}</span><span class="s2">  # &quot;</span> <span class="o">+</span> <span class="p">(</span><span class="n">_comment</span> <span class="ow">or</span> <span class="s2">&quot;Created by Pivopty&quot;</span><span class="p">)</span>
@@ -456,13 +461,14 @@
 
 
 <span class="k">def</span> <span class="nf">export_poscar</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Export POSCAR file to python objects. Only Direct POSCAR supported.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Export POSCAR file to python objects.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    path : Path/to/POSCAR file. Auto picks in CWD.</span>
-<span class="sd">    content : POSCAR content as string, This takes precedence to path.</span>
+<span class="sd">    path : PathLike</span>
+<span class="sd">        Path/to/POSCAR file. Auto picks in CWD.</span>
+<span class="sd">    content : str</span>
+<span class="sd">        POSCAR content as string, This takes precedence to path.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">content</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">file_lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()]</span>
@@ -530,9 +536,7 @@
 
 <span class="c1"># Cell</span>
 <span class="k">def</span> <span class="nf">_save_mp_API</span><span class="p">(</span><span class="n">api_key</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    - Save materials project api key for autoload in functions. This works only for legacy API.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="s2">&quot;Save materials project api key for autoload in functions. This works only for legacy API.&quot;</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.ipyvasprc&quot;</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
@@ -923,24 +927,29 @@
     <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generates uniform mesh of kpoints. Options are write to file, or return KPOINTS list.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates uniform mesh of kpoints. Options are write to file, or return KPOINTS list.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    poscar_data : export_poscar() or export_vasprun().poscar().</span>
-<span class="sd">    *args : 1 or 3 integers which decide shape of mesh. If 1, mesh points equally spaced based on data from POSCAR.</span>
-<span class="sd">    shift : Only works if cartesian = False. Defualt is 0. Could be a number or list of three numbers to add to interval [0,1].</span>
-<span class="sd">    weight : Float, if None, auto generates weights.</span>
-<span class="sd">    cartesian : If True, generates cartesian mesh.</span>
-<span class="sd">    ibzkpt : Path to ibzkpt file, required for HSE calculations.</span>
-<span class="sd">    outfile : Path/to/file to write kpoints.</span>
-<span class="sd">    endpoint : Default True, include endpoints in mesh at edges away from origin.</span>
+<span class="sd">    poscar_data : ipyvasp.POSCAR.data</span>
+<span class="sd">    *args : tuple</span>
+<span class="sd">        1 or 3 integers which decide shape of mesh. If 1, mesh points equally spaced based on data from POSCAR.</span>
+<span class="sd">    shift : float</span>
+<span class="sd">        Only works if cartesian = False. Defualt is 0. Could be a number or list of three numbers to add to interval [0,1].</span>
+<span class="sd">    weight : float</span>
+<span class="sd">        If None, auto generates weights.</span>
+<span class="sd">    cartesian : bool</span>
+<span class="sd">        If True, generates cartesian mesh.</span>
+<span class="sd">    ibzkpt : PathLike</span>
+<span class="sd">        Path to ibzkpt file, required for HSE calculations.</span>
+<span class="sd">    outfile : PathLike</span>
+<span class="sd">        Path/to/file to write kpoints.</span>
+<span class="sd">    endpoint : bool</span>
+<span class="sd">        Default True, include endpoints in mesh at edges away from origin.</span>
+
 
 <span class="sd">    If `outfile = None`, KPOINTS file content is printed.</span>
 
-<span class="sd">    .. note::</span>
-<span class="sd">        Use `ipyvasp.POSCAR.get_kmesh` to get k-mesh based on current POSCAR.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;get_kmesh() takes 1 or 3 args!&quot;</span><span class="p">)</span>
@@ -1034,27 +1043,38 @@
     <span class="n">zoffset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plots matplotlib&#39;s static figure of Brillouin zone. You can also plot in 2D on a 3D axes.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots matplotlib&#39;s static figure of Brillouin zone. You can also plot in 2D on a 3D axes.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    bz_data : Output of `get_bz`.</span>
-<span class="sd">    plane : Default is None and plots 3D surface. Can take &#39;xy&#39;,&#39;yz&#39;,&#39;zx&#39; to plot in 2D.</span>
-<span class="sd">    fill : True by defult, determines whether to fill surface of BZ or not.</span>
-<span class="sd">    color : color to fill surface and stroke color.</span>
-<span class="sd">    vectors : Tuple of indices of basis vectors to plot. Default is (0,1,2). All three are plotted in 3D (you can turn of by None or empty tuple), whhile you can specify any two/three in 2D.</span>
-<span class="sd">    ax : Auto generated by default, 2D/3D axes, auto converts in 3D on demand as well.</span>
-<span class="sd">    colormap : If None, single color is applied, only works in 3D and `fill=True`. Colormap is applied along z.</span>
-<span class="sd">    shade : Shade polygons or not. Only works in 3D and `fill=True`.</span>
-<span class="sd">    alpha : Opacity of filling in range [0,1]. Increase for clear viewpoint.</span>
-<span class="sd">    zoffset : Only used if plotting in 2D over a 3D axis. Default is 0. Any plane &#39;xy&#39;,&#39;yz&#39; etc. can be plotted but it will be in xy plane of 3D axes.</span>
+<span class="sd">    plane : str</span>
+<span class="sd">        Default is None and plots 3D surface. Can take &#39;xy&#39;,&#39;yz&#39;,&#39;zx&#39; to plot in 2D.</span>
+<span class="sd">    fill : bool</span>
+<span class="sd">        True by defult, determines whether to fill surface of BZ or not.</span>
+<span class="sd">    color : Any</span>
+<span class="sd">        Color to fill surface and stroke color. Default is &#39;blue&#39;. Can be any valid matplotlib color.</span>
+<span class="sd">    vectors : tuple</span>
+<span class="sd">        Tuple of indices of basis vectors to plot. Default is (0,1,2). All three are plotted in 3D</span>
+<span class="sd">        (you can turn of by None or empty tuple), whhile you can specify any two/three in 2D.</span>
+<span class="sd">    ax : matplotlib.pyplot.Axes</span>
+<span class="sd">        Auto generated by default, 2D/3D axes, auto converts in 3D on demand as well.</span>
+<span class="sd">    colormap : str</span>
+<span class="sd">        If None, single color is applied, only works in 3D and `fill=True`. Colormap is applied along z.</span>
+<span class="sd">    shade : bool</span>
+<span class="sd">        Shade polygons or not. Only works in 3D and `fill=True`.</span>
+<span class="sd">    alpha : float</span>
+<span class="sd">        Opacity of filling in range [0,1]. Increase for clear viewpoint.</span>
+<span class="sd">    zoffset : float</span>
+<span class="sd">        Only used if plotting in 2D over a 3D axis. Default is 0. Any plane &#39;xy&#39;,&#39;yz&#39; etc.</span>
+
 
 <span class="sd">    kwargs are passed to `plt.plot` or `Poly3DCollection` if `fill=True`.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    ax : Matplotlib&#39;s 2D axes if `plane=None` otherswise 3D axes.</span>
+<span class="sd">    matplotlib.pyplot.Axes</span>
+<span class="sd">        Matplotlib&#39;s 2D axes if `plane=None` otherswise 3D axes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">vname</span> <span class="o">=</span> <span class="s2">&quot;a&quot;</span> <span class="k">if</span> <span class="n">bz_data</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;CellData&quot;</span> <span class="k">else</span> <span class="s2">&quot;b&quot;</span>
     <span class="n">label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$k_</span><span class="si">{}</span><span class="s2">/2π$&quot;</span> <span class="k">if</span> <span class="n">vname</span> <span class="o">==</span> <span class="s2">&quot;b&quot;</span> <span class="k">else</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span>
@@ -1247,25 +1267,31 @@
     <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plots interactive figure showing axes,BZ surface, special points and basis, each of which could be hidden or shown.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots interactive figure showing axes,BZ surface, special points and basis, each of which could be hidden or shown.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    bz_data : Output of `get_bz`.</span>
-<span class="sd">    fill : False by defult, determines whether to fill surface of BZ or not.</span>
-<span class="sd">    color : color to fill surface &#39;rgba(168,204,216,0.4)` by default.</span>
-<span class="sd">    background : Plot background color, default is &#39;rgb(255,255,255)&#39;.</span>
-<span class="sd">    special_kpoints : True by default, determines whether to plot special points or not.</span>
+<span class="sd">    fill : bool</span>
+<span class="sd">        False by defult, determines whether to fill surface of BZ or not.</span>
+<span class="sd">    color : str</span>
+<span class="sd">        Color to fill surface &#39;rgba(168,204,216,0.4)` by default. This sholud be a valid Plotly color.</span>
+<span class="sd">    special_kpoints : bool or callable</span>
+<span class="sd">        True by default, determines whether to plot special points or not.</span>
 <span class="sd">        You can also proivide a mask function f(x,y,z) -&gt; bool which will be used to filter special points based on their fractional coordinates.</span>
-<span class="sd">    alpha : Opacity of BZ planes.</span>
-<span class="sd">    ortho3d : Default is True, decides whether x,y,z are orthogonal or perspective.</span>
-<span class="sd">    fig : (Optional) Plotly&#39;s `go.Figure`. If you want to plot on another plotly&#39;s figure, provide that.</span>
+<span class="sd">    alpha : float</span>
+<span class="sd">        Opacity of BZ planes.</span>
+<span class="sd">    ortho3d : bool</span>
+<span class="sd">        Default is True, decides whether x,y,z are orthogonal or perspective.</span>
+<span class="sd">    fig : plotly.graph_objects.Figure</span>
+<span class="sd">        Plotly&#39;s `go.Figure`. If you want to plot on another plotly&#39;s figure, provide that.</span>
+
 
 <span class="sd">    kwargs are passed to `plotly.graph_objects.Scatter3d` for BZ lines.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    fig : plotly.graph_object&#39;s Figure instance.</span>
+<span class="sd">    plotly.graph_objects.Figure</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">fig</span><span class="p">:</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
@@ -1443,16 +1469,9 @@
 
 
 <span class="c1"># Cell</span>
-<span class="k">def</span> <span class="nf">_fix_sites</span><span class="p">(</span>
-    <span class="n">poscar_data</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">eqv_sites</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">translate</span><span class="o">=</span><span class="kc">None</span>
-<span class="p">):</span>  <span class="c1"># should not be exposed mostly be used in visualizations</span>
+<span class="k">def</span> <span class="nf">_fix_sites</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">eqv_sites</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">translate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add equivalent sites to make a full data shape of lattice. Returns same data after fixing.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    eqv_sites : If True, add sites on edges and faces. If False, just fix coordinates, i.e. `pos &gt; 1 - tol -&gt; pos - 1`, useful for merging poscars to make slabs.</span>
-<span class="sd">    translate : A number(+/-) or list of three numbers to translate in a,b,c directions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    It should not be exposed mostly be used in visualizations&quot;&quot;&quot;</span>
     <span class="n">pos</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">poscar_data</span><span class="o">.</span><span class="n">positions</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="p">)</span>  <span class="c1"># We can also do poscar_data.copy().positions that copies all contents.</span>
@@ -1535,29 +1554,26 @@
 
 
 <span class="k">def</span> <span class="nf">translate_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Translate sites of a PPSCAR. Usully a farction of integarers like 1/2,1/4 etc.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    poscar_data : Output of `export_poscar` or `export_vasprun().poscar`.</span>
-<span class="sd">    offset : A number(+/-) or list of three numbers to translate in a,b,c directions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Translate sites of a POSCAR with a given offset as a number or list of three number.</span>
+<span class="sd">    Usully a farction of integarers like 1/2,1/4 etc.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_fix_sites</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">translate</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">eqv_sites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">get_pairs</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a tuple of Lattice (coords,pairs), so coords[pairs] given nearest site bonds.</span>
+<span class="k">def</span> <span class="nf">get_pairs</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a tuple of Lattice (coords,pairs), so coords[pairs] given nearest site bonds.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    poscar_data : Output of `export_poscar` or `export_vasprun().poscar`.</span>
-<span class="sd">    positions : Array(N,3) of fractional positions of lattice sites. If coordinates positions, provide unity basis.</span>
-<span class="sd">    r : Cartesian distance between the pairs in units of Angstrom e.g. 1.2 -&gt; 1.2E-10.</span>
-<span class="sd">    tol : Tolerance value. Default is 10^-3.</span>
+<span class="sd">    basis : array_like</span>
+<span class="sd">        3x3 array of lattice basis vectors in rows.</span>
+<span class="sd">    positions : array_like</span>
+<span class="sd">        Array(N,3) of fractional positions of lattice sites. If coordinates positions, provide unity basis.</span>
+<span class="sd">    r : float</span>
+<span class="sd">        Cartesian distance between the pairs in units of Angstrom e.g. 1.2 -&gt; 1.2E-10.</span>
+<span class="sd">    tol : float</span>
+<span class="sd">        Tolerance value. Default is 10^-3.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">coords</span> <span class="o">=</span> <span class="n">to_R3</span><span class="p">(</span><span class="n">poscar_data</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">to_R3</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span>
     <span class="n">tree</span> <span class="o">=</span> <span class="n">KDTree</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
     <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">*</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">query_pairs</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">tol</span><span class="p">)])</span>
     <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">dict2tuple</span><span class="p">(</span><span class="s2">&quot;Lattice&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;coords&quot;</span><span class="p">:</span> <span class="n">coords</span><span class="p">,</span> <span class="s2">&quot;pairs&quot;</span><span class="p">:</span> <span class="n">inds</span><span class="p">})</span>
@@ -1621,18 +1637,29 @@
     <span class="n">plot_cell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plotly&#39;s interactive plot of lattice.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plotly&#39;s interactive plot of lattice.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    poscar_data : Output of export_poscar or export_vasprun().poscar.</span>
-<span class="sd">    sizes : Size of sites. Either one int/float or list equal to type of ions.</span>
-<span class="sd">    colors : Sequence of colors for each type. Automatically generated if not provided.</span>
-<span class="sd">    bond_length : Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.</span>
-<span class="sd">    mask_sites : Provide a mask function `f(index, x,y,z) -&gt; bool` to show only selected sites. For example, to show only sites with z &gt; 0.5, use `mask_sites = lambda i, x,y,z: x &gt; 0.5`.</span>
-<span class="sd">    bond_kws : Keyword arguments passed to `plotly.graph_objects.Scatter3d` for bonds. Default is jus hint, you can use any keyword argument that is accepted by `plotly.graph_objects.Scatter3d`.</span>
-<span class="sd">    site_kws : Keyword arguments passed to `plotly.graph_objects.Scatter3d` for sites. Default is jus hint, you can use any keyword argument that is accepted by `plotly.graph_objects.Scatter3d`.</span>
-<span class="sd">    plot_cell : bool, defult is True. Plot unit cell with default settings. If you want to customize, use `POSCAR.iplot_cell(fig = &lt;return of iplot_lattice&gt;)` function.</span>
+<span class="sd">    sizes : float or tuple</span>
+<span class="sd">        Size of sites. Either one int/float or list equal to type of ions.</span>
+<span class="sd">    colors : tuple</span>
+<span class="sd">        Sequence of colors for each type. Automatically generated if not provided.</span>
+<span class="sd">    bond_length : float</span>
+<span class="sd">        Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.</span>
+<span class="sd">    mask_sites : callable</span>
+<span class="sd">        Provide a mask function `f(index, x,y,z) -&gt; bool` to show only selected sites.</span>
+<span class="sd">        For example, to show only sites with z &gt; 0.5, use `mask_sites = lambda i, x,y,z: x &gt; 0.5`.</span>
+<span class="sd">    bond_kws : dict</span>
+<span class="sd">        Keyword arguments passed to `plotly.graph_objects.Scatter3d` for bonds.</span>
+<span class="sd">        Default is jus hint, you can use any keyword argument that is accepted by `plotly.graph_objects.Scatter3d`.</span>
+<span class="sd">    site_kws : dict</span>
+<span class="sd">        Keyword arguments passed to `plotly.graph_objects.Scatter3d` for sites.</span>
+<span class="sd">        Default is jus hint, you can use any keyword argument that is accepted by `plotly.graph_objects.Scatter3d`.</span>
+<span class="sd">    plot_cell : bool</span>
+<span class="sd">        Defult is True. Plot unit cell with default settings.</span>
+<span class="sd">        If you want to customize, use `POSCAR.iplot_cell(fig = &lt;return of iplot_lattice&gt;)` function.</span>
+
 
 <span class="sd">    kwargs are passed to `iplot_bz`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1652,7 +1679,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No sites found with given mask_sites function.&quot;</span><span class="p">)</span>
 
     <span class="n">coords</span><span class="p">,</span> <span class="n">pairs</span> <span class="o">=</span> <span class="n">get_pairs</span><span class="p">(</span>
-        <span class="n">poscar_data</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">bond_length</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">bond_tol</span>
+        <span class="n">poscar_data</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">bond_length</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">bond_tol</span>
     <span class="p">)</span>  <span class="c1"># bond tolernce should be smaller than cell tolernce.</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">fig</span><span class="p">:</span>
@@ -1810,27 +1837,43 @@
     <span class="n">plot_cell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Matplotlib Static plot of lattice.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Matplotlib Static plot of lattice.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    poscar_data : Output of export_poscar or export_vasprun().poscar.</span>
-<span class="sd">    plane : Plane to plot. Either &#39;xy&#39;,&#39;xz&#39;,&#39;yz&#39; or None for 3D plot.</span>
-<span class="sd">    sizes : Size of sites. Either one int/float or list equal to type of ions.</span>
-<span class="sd">    colors : Sequence of colors for each ion type. If None, automatically generated.</span>
-<span class="sd">    bond_length : Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.</span>
-<span class="sd">    alpha : Opacity of points and bonds.</span>
-<span class="sd">    mask_sites : Provide a mask function `f(index, x,y,z) -&gt; bool` to show only selected sites. For example, to show only sites with z &gt; 0.5, use `mask_sites = lambda i,x,y,z: x &gt; 0.5`.</span>
-<span class="sd">    showlegend : bool, default is True, show legend for each ion type.</span>
-<span class="sd">    site_kws : Keyword arguments to pass to `plt.scatter` for plotting sites. Default is just hint, you can pass any keyword argument that `plt.scatter` accepts.</span>
-<span class="sd">    bond_kws : Keyword arguments to pass to `plt.plot` for plotting bonds. Default is just hint, you can pass any keyword argument that `plt.plot` accepts.</span>
-<span class="sd">    fmt_label : If given, each site label is passed to it like fmt_label(&#39;Ga 1&#39;). It must return a string or a list/tuple of length 2. First item is the label and second item is a dictionary of keywords to pass to `plt.text`.</span>
-<span class="sd">    plot_cell : bool, default is True, plot unit cell with default settings. To customize options, use `plot_cell = False` and do `POSCAR.splot_cell(ax = &lt;return of splot_lattice&gt;)`.</span>
+<span class="sd">    plane : str</span>
+<span class="sd">        Plane to plot. Either &#39;xy&#39;,&#39;xz&#39;,&#39;yz&#39; or None for 3D plot.</span>
+<span class="sd">    sizes : float or tuple</span>
+<span class="sd">        Size of sites. Either one int/float or list equal to type of ions.</span>
+<span class="sd">    colors : tuple</span>
+<span class="sd">        Sequence of colors for each ion type. If None, automatically generated.</span>
+<span class="sd">    bond_length : float</span>
+<span class="sd">        Length of bond in fractional unit [0,1]. It is scaled to V^1/3 and auto calculated if not provides.</span>
+<span class="sd">    alpha : float</span>
+<span class="sd">        Opacity of points and bonds.</span>
+<span class="sd">    mask_sites : callable</span>
+<span class="sd">        Provide a mask function `f(index, x,y,z) -&gt; bool` to show only selected sites.</span>
+<span class="sd">        For example, to show only sites with z &gt; 0.5, use `mask_sites = lambda i,x,y,z: x &gt; 0.5`.</span>
+<span class="sd">    showlegend : bool</span>
+<span class="sd">        Default is True, show legend for each ion type.</span>
+<span class="sd">    site_kws : dict</span>
+<span class="sd">        Keyword arguments to pass to `plt.scatter` for plotting sites.</span>
+<span class="sd">        Default is just hint, you can pass any keyword argument that `plt.scatter` accepts.</span>
+<span class="sd">    bond_kws : dict</span>
+<span class="sd">        Keyword arguments to pass to `plt.plot` for plotting bonds.</span>
+<span class="sd">        Default is just hint, you can pass any keyword argument that `plt.plot` accepts.</span>
+<span class="sd">    fmt_label : callable</span>
+<span class="sd">        If given, each site label is passed to it like fmt_label(&#39;Ga 1&#39;).</span>
+<span class="sd">        It must return a string or a list/tuple of length 2 with first item as label and second item as dictionary of keywords to pass to `plt.text`.</span>
+<span class="sd">    plot_cell : bool</span>
+<span class="sd">        Default is True, plot unit cell with default settings.</span>
+<span class="sd">        To customize options, use `plot_cell = False` and do `POSCAR.splot_cell(ax = &lt;return of splot_lattice&gt;)`.</span>
+
 
 <span class="sd">    kwargs are passed to `splot_bz`.</span>
 
-<span class="sd">    &gt; Tip: Use `plt.style.use(&#39;ggplot&#39;)` for better 3D perception.</span>
+<span class="sd">    .. tip::</span>
+<span class="sd">        Use `plt.style.use(&#39;ggplot&#39;)` for better 3D perception.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Plane fix</span>
     <span class="k">if</span> <span class="n">plane</span> <span class="ow">and</span> <span class="n">plane</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">&quot;xyzxzyx&quot;</span><span class="p">:</span>
@@ -1854,7 +1897,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No sites found with given mask_sites function.&quot;</span><span class="p">)</span>
 
     <span class="n">coords</span><span class="p">,</span> <span class="n">pairs</span> <span class="o">=</span> <span class="n">get_pairs</span><span class="p">(</span>
-        <span class="n">poscar_data</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">bond_length</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">bond_tol</span>
+        <span class="n">poscar_data</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">bond_length</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">bond_tol</span>
     <span class="p">)</span>  <span class="c1"># bond tolernce should be smaller than cell tolernce.</span>
 
     <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">poscar_data</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">]</span> <span class="k">if</span> <span class="n">sites</span> <span class="k">else</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">labels</span>
@@ -1972,15 +2015,20 @@
 
 <span class="c1"># Cell</span>
 <span class="k">def</span> <span class="nf">join_poscars</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Joins two POSCARs in a given direction. In-plane lattice parameters are kept from first poscar and out of plane basis vector of other is modified while volume is kept same.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Joins two POSCARs in a given direction. In-plane lattice parameters are kept from</span>
+<span class="sd">    first poscar and out of plane basis vector of other is modified while volume is kept same.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    poscar_data :  Base POSCAR. Output of `export_poscar` or similar object from other functions.</span>
-<span class="sd">    other : Other POSCAR to be joined with this POSCAR.</span>
-<span class="sd">    direction : The joining direction. It is general and can join in any direction along basis. Expect one of [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;].</span>
-<span class="sd">    tol : Default is 0.01. It is used to bring sites near 1 to near zero in order to complete sites in plane. Vasp relaxation could move a point, say at 0.00100 to 0.99800 which is not useful while merging sites.</span>
-<span class="sd">    system : If system is given, it is written on top of file. Otherwise, it is infered from atomic species.</span>
+<span class="sd">    other : type(self)</span>
+<span class="sd">        Other POSCAR to be joined with this POSCAR.</span>
+<span class="sd">    direction : str</span>
+<span class="sd">        The joining direction. It is general and can join in any direction along basis. Expect one of [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;].</span>
+<span class="sd">    tol : float</span>
+<span class="sd">        Default is 0.01. It is used to bring sites near 1 to near zero in order to complete sites in plane.</span>
+<span class="sd">        Vasp relaxation could move a point, say at 0.00100 to 0.99800 which is not useful while merging sites.</span>
+<span class="sd">    system : str</span>
+<span class="sd">        If system is given, it is written on top of file. Otherwise, it is infered from atomic species.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_poscar1</span> <span class="o">=</span> <span class="n">_fix_sites</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span> <span class="n">eqv_sites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">_poscar2</span> <span class="o">=</span> <span class="n">_fix_sites</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span> <span class="n">eqv_sites</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -2064,14 +2112,14 @@
 
 <span class="c1"># Cell</span>
 <span class="k">def</span> <span class="nf">repeat_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">direction</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Repeat a given POSCAR.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Repeat a given POSCAR.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    poscar_data : Path/to/POSCAR or `poscar` data object.</span>
-<span class="sd">    n : Number of repetitions.</span>
-<span class="sd">    direction : Direction of repetition. Can be &#39;a&#39;, &#39;b&#39; or &#39;c&#39;.</span>
+<span class="sd">    n : int</span>
+<span class="sd">        Number of repetitions.</span>
+<span class="sd">    direction : str</span>
+<span class="sd">        Direction of repetition. Can be &#39;a&#39;, &#39;b&#39; or &#39;c&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n must be an integer greater than 1.&quot;</span><span class="p">)</span>
@@ -2082,19 +2130,22 @@
 
 
 <span class="k">def</span> <span class="nf">scale_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create larger/smaller cell from a given POSCAR. Can be used to repeat a POSCAR with integer scale values.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create larger/smaller cell from a given POSCAR. Can be used to repeat a POSCAR with integer scale values.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    poscar_data : `poscar` data object.</span>
-<span class="sd">    scale : Tuple of three values along (a,b,c) vectors. int or float values. If number of sites are not as expected in output,</span>
+<span class="sd">    scale : tuple</span>
+<span class="sd">        Tuple of three values along (a,b,c) vectors. int or float values. If number of sites are not as expected in output,</span>
 <span class="sd">        tweak `tol` instead of `scale`. You can put a minus sign with `tol` to get more sites and plus sign to reduce sites.</span>
-<span class="sd">    tol : It is used such that site positions are blow `1 - tol`, as 1 belongs to next cell, not previous one.</span>
+<span class="sd">    tol : float</span>
+<span class="sd">        It is used such that site positions are blow `1 - tol`, as 1 belongs to next cell, not previous one.</span>
 
-<span class="sd">    **Tip:** scale = (2,2,2) enlarges a cell and next operation of (1/2,1/2,1/2) should bring original cell back.</span>
 
-<span class="sd">    **Caveat:** A POSCAR scaled with Non-integer values should only be used for visualization purposes, Not for any other opration such as making supercells, joining POSCARs.</span>
+<span class="sd">    .. note::</span>
+<span class="sd">        ``scale = (2,2,2)`` enlarges a cell and next operation of ``(1/2,1/2,1/2)`` should bring original cell back.</span>
+
+<span class="sd">    .. warning::</span>
+<span class="sd">        A POSCAR scaled with Non-integer values should only be used for visualization purposes, Not for any other opration such as making supercells, joining POSCARs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ii</span><span class="p">,</span> <span class="n">jj</span><span class="p">,</span> <span class="n">kk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># Need int for joining.</span>
 
@@ -2150,14 +2201,14 @@
 
 
 <span class="k">def</span> <span class="nf">rotate_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">angle_deg</span><span class="p">,</span> <span class="n">axis_vec</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Rotate a given POSCAR.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rotate a given POSCAR.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    path_poscar : Path/to/POSCAR or `poscar` data object.</span>
-<span class="sd">    angle_deg : Rotation angle in degrees.</span>
-<span class="sd">    axis_vec : (x,y,z) of axis about which rotation takes place. Axis passes through origin.</span>
+<span class="sd">    angle_deg : float</span>
+<span class="sd">        Rotation angle in degrees.</span>
+<span class="sd">    axis_vec : array_like</span>
+<span class="sd">        Vector (x,y,z) of axis about which rotation takes place. Axis passes through origin.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rot</span> <span class="o">=</span> <span class="n">rotation</span><span class="p">(</span><span class="n">angle_deg</span><span class="o">=</span><span class="n">angle_deg</span><span class="p">,</span> <span class="n">axis_vec</span><span class="o">=</span><span class="n">axis_vec</span><span class="p">)</span>
     <span class="n">p_dict</span> <span class="o">=</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
@@ -2169,14 +2220,15 @@
 
 
 <span class="k">def</span> <span class="nf">set_zdir</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">hkl</span><span class="p">,</span> <span class="n">phi</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Set z-direction of POSCAR along a given hkl direction and returns new data.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set z-direction of POSCAR along a given hkl direction and returns new data.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    path_poscar : Path/to/POSCAR or `poscar` data object.</span>
-<span class="sd">    hkl : (h,k,l) of the direction along which z-direction is to be set. Vector is constructed as h*a + k*b + l*c in cartesian coordinates.</span>
-<span class="sd">    phi: Rotation angle in degrees about z-axis to set a desired rotated view.</span>
+<span class="sd">    hkl : tuple</span>
+<span class="sd">        (h,k,l) of the direction along which z-direction is to be set.</span>
+<span class="sd">        Vector is constructed as h*a + k*b + l*c in cartesian coordinates.</span>
+<span class="sd">    phi: float</span>
+<span class="sd">        Rotation angle in degrees about z-axis to set a desired rotated view.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -2217,9 +2269,18 @@
 
 <span class="k">def</span> <span class="nf">convert_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">atoms_mapping</span><span class="p">,</span> <span class="n">basis_factor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a POSCAR to a similar structure of other atomic types or same type with strained basis.</span>
-<span class="sd">    `atoms_mapping` is a dictionary of {old_atom: new_atom} like {&#39;Ga&#39;:&#39;Al&#39;} will convert GaAs to AlAs structure.</span>
-<span class="sd">    `basis_factor` is a scaling factor multiplied with basis vectors, single value (useful for conversion to another type)</span>
-<span class="sd">    or list of three values to scale along (a,b,c) vectors (useful for strained structures).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    atoms_mapping : dict</span>
+<span class="sd">        A dictionary of {old_atom: new_atom} like {&#39;Ga&#39;:&#39;Al&#39;} will convert GaAs to AlAs structure.</span>
+<span class="sd">    basis_factor : float</span>
+<span class="sd">        A scaling factor multiplied with basis vectors, single value (useful for conversion to another type)</span>
+<span class="sd">        or list of three values to scale along (a,b,c) vectors (useful for strained structures).</span>
+
+
+<span class="sd">    .. note::</span>
+<span class="sd">        This can be used to strain basis vectors uniformly only. For non-uniform strain, use :func:`ipyvasp.POSCAR.strain`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">poscar_data</span> <span class="o">=</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>  <span class="c1"># Avoid modifying original</span>
     <span class="n">poscar_data</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
@@ -2348,15 +2409,16 @@
 
 
 <span class="k">def</span> <span class="nf">add_vaccum</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Add vacuum to a POSCAR.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add vacuum to a POSCAR.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    poscar_data : `poscar` data object.</span>
-<span class="sd">    thickness : Thickness of vacuum in Angstrom.</span>
-<span class="sd">    direction : Direction of vacuum. Can be &#39;a&#39;, &#39;b&#39; or &#39;c&#39;.</span>
-<span class="sd">    left : If True, vacuum is added to left of sites. By default, vacuum is added to right of sites.</span>
+<span class="sd">    thickness : float</span>
+<span class="sd">        Thickness of vacuum in Angstrom.</span>
+<span class="sd">    direction : str</span>
+<span class="sd">        Direction of vacuum. Can be &#39;a&#39;, &#39;b&#39; or &#39;c&#39;.</span>
+<span class="sd">    left : bool</span>
+<span class="sd">        If True, vacuum is added to left of sites. By default, vacuum is added to right of sites.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">direction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">&quot;abc&quot;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Direction must be a, b or c.&quot;</span><span class="p">)</span>
@@ -2380,7 +2442,6 @@
     <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">PoscarData</span><span class="p">(</span><span class="n">poscar_dict</span><span class="p">)</span>  <span class="c1"># Return new POSCAR</span>
 
 
-<span class="c1"># Cell</span>
 <span class="k">def</span> <span class="nf">transpose_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]):</span>
     <span class="s2">&quot;Transpose a POSCAR by switching basis from [0,1,2] -&gt; `axes`. By Default, x and y are transposed.&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>

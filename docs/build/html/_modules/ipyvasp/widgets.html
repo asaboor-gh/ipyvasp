@@ -235,7 +235,7 @@
 <span class="kn">from</span> <span class="nn">._enplots</span> <span class="kn">import</span> <span class="n">_fmt_labels</span>
 
 
-<div class="viewcode-block" id="summarize"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.summarize">[docs]</a><span class="k">def</span> <span class="nf">summarize</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="summarize"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.summarize">[docs]</a><span class="k">def</span> <span class="nf">summarize</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply given func to each file in files and return a dataframe of the results.</span>
 
@@ -295,7 +295,7 @@
     <span class="k">return</span> <span class="bp">cls</span>
 
 
-<div class="viewcode-block" id="FilesWidget"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.FilesWidget">[docs]</a><span class="nd">@fix_signature</span>
+<div class="viewcode-block" id="FilesWidget"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.FilesWidget">[docs]</a><span class="nd">@fix_signature</span>
 <span class="k">class</span> <span class="nc">FilesWidget</span><span class="p">(</span><span class="n">VBox</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A widget for selecting files from a directory and its subdirectories.</span>
 
@@ -438,7 +438,7 @@
         <span class="s2">&quot;Return currently selected path.&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected</span>
 
-<div class="viewcode-block" id="FilesWidget.interactive"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.FilesWidget.interactive">[docs]</a>    <span class="k">def</span> <span class="nf">interactive</span><span class="p">(</span>
+<div class="viewcode-block" id="FilesWidget.interactive"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.FilesWidget.interactive">[docs]</a>    <span class="k">def</span> <span class="nf">interactive</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">func</span><span class="p">,</span>
         <span class="n">other_widgets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -459,6 +459,7 @@
 <span class="sd">        &gt;&gt;&gt; out.kwargs # keyword arguments</span>
 <span class="sd">        &gt;&gt;&gt; out.result # result of function call which is same as out.f(*out.args, **out.kwargs)</span>
 <span class="sd">        &gt;&gt;&gt; out.files_widget # reference to FilesWidget created, not the same as fw because it is a new instance</span>
+
 
 <span class="sd">        .. note::</span>
 <span class="sd">            If you don&#39;t need to interpret the result of the function call, you can use the @self.interact decorator instead.</span>
@@ -570,7 +571,7 @@
         <span class="p">]</span>  <span class="c1"># important for every widget separately</span>
         <span class="k">return</span> <span class="n">out</span></div>
 
-<div class="viewcode-block" id="FilesWidget.interact"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.FilesWidget.interact">[docs]</a>    <span class="k">def</span> <span class="nf">interact</span><span class="p">(</span>
+<div class="viewcode-block" id="FilesWidget.interact"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.FilesWidget.interact">[docs]</a>    <span class="k">def</span> <span class="nf">interact</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">other_widgets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">other_controls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -609,6 +610,7 @@
 <span class="sd">        &gt;&gt;&gt;     print(&#39;Path Type: &#39;, type(path))</span>
 <span class="sd">        &gt;&gt;&gt;     print(&#39;x: &#39;,x)</span>
 
+
 <span class="sd">        .. note::</span>
 <span class="sd">            Use self.interactive to get a widget that stores the argements and can be called later in a notebook cell.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -628,7 +630,7 @@
 
         <span class="k">return</span> <span class="n">inner</span></div>
 
-<div class="viewcode-block" id="FilesWidget.summarize"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.FilesWidget.summarize">[docs]</a>    <span class="k">def</span> <span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="FilesWidget.summarize"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.FilesWidget.summarize">[docs]</a>    <span class="k">def</span> <span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Summarize the results from all selected files using a function that takes a Path object as first arguement.</span>
 <span class="sd">        kwargs are passed to function. Returns a dataframe.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">summarize</span><span class="p">(</span>
@@ -713,7 +715,7 @@
         <span class="k">return</span> <span class="n">items</span>
 
 
-<div class="viewcode-block" id="PropsPicker"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.PropsPicker">[docs]</a><span class="nd">@fix_signature</span>
+<div class="viewcode-block" id="PropsPicker"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.PropsPicker">[docs]</a><span class="nd">@fix_signature</span>
 <span class="k">class</span> <span class="nc">PropsPicker</span><span class="p">(</span><span class="n">VBox</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A widget to pick atoms and orbitals for plotting.</span>
@@ -755,7 +757,7 @@
             <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stacked</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
                 <span class="n">child</span><span class="o">.</span><span class="n">_html</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">on_selection_changed</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PropsPicker.update"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.PropsPicker.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_summary</span><span class="p">):</span>
+<div class="viewcode-block" id="PropsPicker.update"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.PropsPicker.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_summary</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stacked</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
             <span class="n">child</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">system_summary</span><span class="p">)</span></div>
 
@@ -805,7 +807,7 @@
     <span class="k">return</span> <span class="n">__store_figclick_data</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">store_dict</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">selection</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="load_results"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.load_results">[docs]</a><span class="k">def</span> <span class="nf">load_results</span><span class="p">(</span><span class="n">paths_list</span><span class="p">):</span>
+<div class="viewcode-block" id="load_results"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.load_results">[docs]</a><span class="k">def</span> <span class="nf">load_results</span><span class="p">(</span><span class="n">paths_list</span><span class="p">):</span>
     <span class="s2">&quot;Loads result.json from paths_list and returns a dataframe.&quot;</span>
     <span class="n">paths_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths_list</span><span class="p">]</span>
     <span class="n">result_paths</span> <span class="o">=</span> <span class="p">[]</span>
@@ -825,7 +827,7 @@
     <span class="k">return</span> <span class="n">summarize</span><span class="p">(</span><span class="n">result_paths</span><span class="p">,</span> <span class="n">load_data</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="BandsWidget"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.BandsWidget">[docs]</a><span class="nd">@fix_signature</span>
+<div class="viewcode-block" id="BandsWidget"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.BandsWidget">[docs]</a><span class="nd">@fix_signature</span>
 <span class="k">class</span> <span class="nc">BandsWidget</span><span class="p">(</span><span class="n">VBox</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Visualize band structure from VASP calculation. You can click on the graph to get the data such as VBM, CBM, etc.</span>
 <span class="sd">    Two attributes are important:</span>
@@ -1036,7 +1038,7 @@
         <span class="k">return</span> <span class="n">load_results</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files_widget</span><span class="o">.</span><span class="n">paths</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="KpathWidget"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.KpathWidget">[docs]</a><span class="nd">@fix_signature</span>
+<div class="viewcode-block" id="KpathWidget"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.KpathWidget">[docs]</a><span class="nd">@fix_signature</span>
 <span class="k">class</span> <span class="nc">KpathWidget</span><span class="p">(</span><span class="n">VBox</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interactively bulid a kpath for bandstructure calculation.</span>
@@ -1156,7 +1158,7 @@
                             <span class="n">labels</span>
                         <span class="p">)</span>  <span class="c1"># convert latex to html equivalent</span>
 
-<div class="viewcode-block" id="KpathWidget.get_coords_labels"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.KpathWidget.get_coords_labels">[docs]</a>    <span class="k">def</span> <span class="nf">get_coords_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="KpathWidget.get_coords_labels"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.KpathWidget.get_coords_labels">[docs]</a>    <span class="k">def</span> <span class="nf">get_coords_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Returns tuple of (coordinates, labels) to directly plot.&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interact</span><span class="o">.</span><span class="n">output_widget</span><span class="p">:</span>
             <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kpoints</span><span class="p">()</span>
@@ -1187,7 +1189,7 @@
 
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coords</span><span class="p">),</span> <span class="n">labels</span></div>
 
-<div class="viewcode-block" id="KpathWidget.get_kpoints"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.KpathWidget.get_kpoints">[docs]</a>    <span class="k">def</span> <span class="nf">get_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="KpathWidget.get_kpoints"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.KpathWidget.get_kpoints">[docs]</a>    <span class="k">def</span> <span class="nf">get_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Returns kpoints list including labels and numbers in intervals if given.&quot;</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">idx</span> <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sm</span><span class="o">.</span><span class="n">options</span> <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints</span>
@@ -1280,12 +1282,12 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_update_selection</span><span class="p">()</span>  <span class="c1"># Update plot in both cases, by click or manual input</span>
 
-<div class="viewcode-block" id="KpathWidget.get_kpath"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.KpathWidget.get_kpath">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">get_kpath</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;kpoints :.*n :&quot;</span><span class="p">:</span> <span class="s2">&quot;n :&quot;</span><span class="p">})</span>
-    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">get_kpath</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;kpoints&quot;</span><span class="p">,))</span>
+<div class="viewcode-block" id="KpathWidget.get_kpath"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.KpathWidget.get_kpath">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">get_kpath</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;kpoints :.*n :&quot;</span><span class="p">:</span> <span class="s2">&quot;n :&quot;</span><span class="p">,</span> <span class="s2">&quot;rec_basis :.*</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">})</span>
+    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">get_kpath</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;kpoints&quot;</span><span class="p">,</span> <span class="s2">&quot;rec_basis&quot;</span><span class="p">))</span>
     <span class="k">def</span> <span class="nf">get_kpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">get_kpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_kpoints</span><span class="p">(),</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="KpathWidget.splot"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.KpathWidget.splot">[docs]</a>    <span class="k">def</span> <span class="nf">splot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fmt_label</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">plot_kws</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="KpathWidget.splot"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.KpathWidget.splot">[docs]</a>    <span class="k">def</span> <span class="nf">splot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fmt_label</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">plot_kws</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Same as `ipyvasp.lattice.POSCAR.splot_bz` except it also plots path on BZ.</span>
 
@@ -1308,7 +1310,7 @@
         <span class="p">)</span>  <span class="c1"># plots on ax automatically</span>
         <span class="k">return</span> <span class="n">ax</span></div>
 
-<div class="viewcode-block" id="KpathWidget.iplot"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.widgets.KpathWidget.iplot">[docs]</a>    <span class="k">def</span> <span class="nf">iplot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="KpathWidget.iplot"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.KpathWidget.iplot">[docs]</a>    <span class="k">def</span> <span class="nf">iplot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Returns disconnected current plotly figure&quot;</span>
         <span class="k">return</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span></div></div>
 

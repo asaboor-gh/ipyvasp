@@ -153,9 +153,25 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+  <ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+</ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../apidoc.html">API</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../apidoc.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules.html">IPyVASP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.core.parser">Data Parsers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.core.serializer">Data Serializer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.core.spatial_toolkit">Spatial Toolkit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.core.plot_toolkit">Plot Toolkit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.utils">Additional Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.bsdos">Bandstructure and Density of States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.lattice">Lattice Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.widgets">Widgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.misc">Miscellaneous</a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -205,7 +221,8 @@
 
 
 <span class="k">class</span> <span class="nc">DataSource</span><span class="p">:</span>
-    <span class="s2">&quot;Base class for all data sources. It provides a common interface to access data from different sources. Subclass it to get data from a source.&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for all data sources. It provides a common interface to access data from different sources.</span>
+<span class="sd">    Subclass it to get data from a source and implement the abstract methods.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
@@ -226,7 +243,6 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Returns a Bands object to access band structure data and plotting methods.&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_bands&quot;</span><span class="p">):</span>
             <span class="kn">from</span> <span class="nn">..bsdos</span> <span class="kn">import</span> <span class="n">Bands</span>
 
@@ -236,7 +252,6 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Returns a Dos object to access density of states data and plotting methods.&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_dos&quot;</span><span class="p">):</span>
             <span class="kn">from</span> <span class="nn">..bsdos</span> <span class="kn">import</span> <span class="n">DOS</span>
 
@@ -246,7 +261,6 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Returns a POSCAR class instance based on data from source.&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_poscar&quot;</span><span class="p">):</span>
             <span class="kn">from</span> <span class="nn">..lattice</span> <span class="kn">import</span> <span class="n">POSCAR</span>
 
@@ -291,14 +305,28 @@
         <span class="p">)</span>
 
 
-<div class="viewcode-block" id="Vaspout"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.Vaspout">[docs]</a><span class="k">class</span> <span class="nc">Vaspout</span><span class="p">(</span><span class="n">DataSource</span><span class="p">):</span>
+<div class="viewcode-block" id="Vaspout"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vaspout">[docs]</a><span class="k">class</span> <span class="nc">Vaspout</span><span class="p">(</span><span class="n">DataSource</span><span class="p">):</span>
     <span class="s2">&quot;Read data from vaspout.h5 file on demand.&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Vaspout is not implemented yet.&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Vaspout is not implemented yet.&quot;</span><span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Access ipyvasp.bsdos.Bands class singleton instance for current Vaspout class.&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">bands</span>
 
-<div class="viewcode-block" id="Vasprun"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.Vasprun">[docs]</a><span class="k">class</span> <span class="nc">Vasprun</span><span class="p">(</span><span class="n">DataSource</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Access ipyvasp.bsdos.DOS class singleton instance for current Vaspout class.&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dos</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Access ipyvasp.lattice.POSCAR class instance.&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">poscar</span></div>
+
+<div class="viewcode-block" id="Vasprun"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun">[docs]</a><span class="k">class</span> <span class="nc">Vasprun</span><span class="p">(</span><span class="n">DataSource</span><span class="p">):</span>
     <span class="s2">&quot;Reads vasprun.xml file lazily. It reads only the required data from the file when a plot or data access is requested.&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;./vasprun.xml&quot;</span><span class="p">,</span> <span class="n">skipk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -307,7 +335,22 @@
             <span class="n">skipk</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">skipk</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_skipk</span><span class="p">()</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="Vasprun.read"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.Vasprun.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_match</span><span class="p">,</span> <span class="n">stop_match</span><span class="p">,</span> <span class="n">nth_match</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skip_last</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Access ipyvasp.bsdos.Bands class singleton instance for current Vasprun class.&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">bands</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Access ipyvasp.bsdos.DOS class singleton instance for current Vasprun class.&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dos</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Access ipyvasp.lattice.POSCAR class instance.&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">poscar</span>
+
+<div class="viewcode-block" id="Vasprun.read"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_match</span><span class="p">,</span> <span class="n">stop_match</span><span class="p">,</span> <span class="n">nth_match</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skip_last</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads a part of the file between start_match and stop_match and returns a generator. It is lazy and fast.</span>
 <span class="sd">        `start_match` and `stop_match` are regular expressions. `nth_match` is the number of occurence of start_match to start reading.</span>
 <span class="sd">        `skip_last` is used to determine whether to keep or skip last line.</span>
@@ -338,7 +381,7 @@
                 <span class="k">if</span> <span class="n">matched</span><span class="p">:</span>  <span class="c1"># should be after break to handle last line above</span>
                     <span class="k">yield</span> <span class="n">line</span></div>
 
-<div class="viewcode-block" id="Vasprun.get_skipk"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.Vasprun.get_skipk">[docs]</a>    <span class="k">def</span> <span class="nf">get_skipk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Vasprun.get_skipk"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun.get_skipk">[docs]</a>    <span class="k">def</span> <span class="nf">get_skipk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Returns the number of k-points to skip in band structure plot in case of HSE calculation.&quot;</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
             <span class="p">(</span>
@@ -351,7 +394,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">([</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">weights</span> <span class="k">if</span> <span class="n">w</span> <span class="o">!=</span> <span class="n">weights</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span></div>
 
-<div class="viewcode-block" id="Vasprun.get_summary"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.Vasprun.get_summary">[docs]</a>    <span class="k">def</span> <span class="nf">get_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Vasprun.get_summary"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun.get_summary">[docs]</a>    <span class="k">def</span> <span class="nf">get_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Returns summary data of calculation.&quot;</span>
         <span class="n">incar</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">v</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]:</span> <span class="n">v</span><span class="o">.</span><span class="n">text</span>
@@ -418,7 +461,7 @@
         <span class="n">info_dict</span><span class="p">[</span><span class="s2">&quot;incar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">incar</span>  <span class="c1"># Just at end</span>
         <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">Dict2Data</span><span class="p">(</span><span class="n">info_dict</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Vasprun.get_structure"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.Vasprun.get_structure">[docs]</a>    <span class="k">def</span> <span class="nf">get_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Vasprun.get_structure"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun.get_structure">[docs]</a>    <span class="k">def</span> <span class="nf">get_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Returns a structure object including types, basis, rec_basis and positions.&quot;</span>
         <span class="n">arrays</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
             <span class="p">[</span>
@@ -443,7 +486,7 @@
             <span class="p">}</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Vasprun.get_kpoints"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.Vasprun.get_kpoints">[docs]</a>    <span class="k">def</span> <span class="nf">get_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Vasprun.get_kpoints"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun.get_kpoints">[docs]</a>    <span class="k">def</span> <span class="nf">get_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Returns k-points data including kpoints, coords, weights and rec_basis in which coords are calculated.&quot;</span>
         <span class="n">kpoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
             <span class="p">[</span>
@@ -487,7 +530,7 @@
             <span class="p">}</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Vasprun.get_dos"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.Vasprun.get_dos">[docs]</a>    <span class="k">def</span> <span class="nf">get_dos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ezero</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">orbs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Vasprun.get_dos"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun.get_dos">[docs]</a>    <span class="k">def</span> <span class="nf">get_dos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ezero</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">orbs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns energy, total and integrated dos of the calculation. If atoms and orbs are specified, then partial dos are included too.</span>
 
@@ -623,7 +666,7 @@
             <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="p">)</span>  <span class="c1"># (atoms, orbs, kpts, bands)</span>
 
-<div class="viewcode-block" id="Vasprun.get_evals"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.Vasprun.get_evals">[docs]</a>    <span class="k">def</span> <span class="nf">get_evals</span><span class="p">(</span>
+<div class="viewcode-block" id="Vasprun.get_evals"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun.get_evals">[docs]</a>    <span class="k">def</span> <span class="nf">get_evals</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ezero</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">orbs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -747,12 +790,12 @@
         <span class="n">out</span><span class="p">[</span><span class="s2">&quot;shape&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;(spins, [atoms, orbitals], kpoints, bands)&quot;</span>
         <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">Dict2Data</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Vasprun.get_forces"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.Vasprun.get_forces">[docs]</a>    <span class="k">def</span> <span class="nf">get_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Vasprun.get_forces"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun.get_forces">[docs]</a>    <span class="k">def</span> <span class="nf">get_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Reads force on each ion from vasprun.xml&quot;</span>
         <span class="n">node</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">fromstringlist</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;&lt;varray.*forces&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;/varray&gt;&quot;</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">iter</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">)])</span></div>
 
-<div class="viewcode-block" id="Vasprun.get_scsteps"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.Vasprun.get_scsteps">[docs]</a>    <span class="k">def</span> <span class="nf">get_scsteps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Vasprun.get_scsteps"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun.get_scsteps">[docs]</a>    <span class="k">def</span> <span class="nf">get_scsteps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Reads all self-consistent steps from vasprun.xml&quot;</span>
         <span class="n">node</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">fromstringlist</span><span class="p">(</span>
             <span class="p">[</span>
@@ -777,7 +820,7 @@
 
             <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">Dict2Data</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">arrays</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span></div>
 
-<div class="viewcode-block" id="Vasprun.minify"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.Vasprun.minify">[docs]</a>    <span class="k">def</span> <span class="nf">minify</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Vasprun.minify"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun.minify">[docs]</a>    <span class="k">def</span> <span class="nf">minify</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Removes partial dos and projected eigenvalues data from large vasprun.xml to make it smaller in size to save on disk.&quot;</span>
         <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;mini-vasprun.xml&quot;</span>
         <span class="n">lines_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;xml&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;partial&quot;</span><span class="p">,</span> <span class="n">skip_last</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -791,7 +834,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Minified vasprun.xml saved at </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)))</span></div></div>
 
 
-<div class="viewcode-block" id="xml2dict"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.xml2dict">[docs]</a><span class="k">def</span> <span class="nf">xml2dict</span><span class="p">(</span><span class="n">xmlnode_or_filepath</span><span class="p">):</span>
+<div class="viewcode-block" id="xml2dict"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.xml2dict">[docs]</a><span class="k">def</span> <span class="nf">xml2dict</span><span class="p">(</span><span class="n">xmlnode_or_filepath</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert xml node or xml file content to dictionary.</span>
 <span class="sd">    All output text is in string format, so further processing is required to convert into data types/split etc.</span>
 
@@ -819,30 +862,37 @@
     <span class="n">exclude</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;#&quot;</span><span class="p">,</span>
     <span class="n">fix_format</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert a generator of text lines to numpy array while excluding comments, given matches and empty lines.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a generator of text lines to numpy array while excluding comments, given matches and empty lines.</span>
 <span class="sd">    Data is sliced and reshaped as per given shape and slices. It is very efficient for large data files to fetch only required data.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    gen : generator object. Typical example is `with open(&#39;file.txt&#39;) as f: gen = itertools.islice(f,0,None)`</span>
-<span class="sd">    shape : tuple or list of integers. Given shape of data to be read. Last item is considered to be columns. User should keep track of empty lines and excluded lines.</span>
-<span class="sd">    slices : tuple or list of integers or range or -1. Given slices of data to be read along each dimension. Last item is considered to be columns.</span>
-<span class="sd">    raw : bool, returns raw data for quick visualizing and determining shape such as columns, if True.</span>
-<span class="sd">    dtype : data type of numpy array to be returned.</span>
-<span class="sd">    delimiter : delimiter of data in text file.</span>
-<span class="sd">    include : string to include in each line to be read. If None, all lines are included.</span>
-<span class="sd">    exclude : string to exclude in each line to be read. If None, no lines are excluded.</span>
-<span class="sd">    fix_format : bool, if True, it will fix the format of data in each line. It is useful when data is not properly formatted. like 0.500-0.700 -&gt; 0.500 -0.700</span>
+<span class="sd">    gen : generator</span>
+<span class="sd">        Typical example is `with open(&#39;file.txt&#39;) as f: gen = itertools.islice(f,0,None)`</span>
+<span class="sd">    shape : tuple</span>
+<span class="sd">        Tuple or list of integers. Given shape of data to be read. Last item is considered to be columns.</span>
+<span class="sd">        User should keep track of empty lines and excluded lines.</span>
+<span class="sd">    slices : tuple</span>
+<span class="sd">        Tuple or list of integers or range or -1. Given slices of data to be read along each dimension.</span>
+<span class="sd">        Last item is considered to be columns.</span>
+<span class="sd">    raw : bool</span>
+<span class="sd">        Returns raw data for quick visualizing and determining shape such as columns, if True.</span>
+<span class="sd">    dtype : object</span>
+<span class="sd">        Data type of numpy array to be returned. Default is float.</span>
+<span class="sd">    delimiter : str</span>
+<span class="sd">        Delimiter of data in text file.</span>
+<span class="sd">    include : str</span>
+<span class="sd">        Match to include in each line to be read. If None, all lines are included.</span>
+<span class="sd">    exclude : str</span>
+<span class="sd">        Match to exclude in each line to be read. If None, no lines are excluded.</span>
+<span class="sd">    fix_format : bool</span>
+<span class="sd">        If True, it will fix the format of data in each line. It is useful when data is not properly formatted. like 0.500-0.700 -&gt; 0.500 -0.700</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    numpy array of given shape and dtype.</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        numpy array of given shape and dtype.</span>
 
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    Multiple errors are raised if given arguments are not of correct type or shape.</span>
-<span class="sd">    If number of lines in generators are less than given shape, it will raise ValueError for short iterator from numpy.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;shape must be a list/tuple of size of dimensions.&quot;</span><span class="p">)</span>
@@ -950,7 +1000,7 @@
     <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">new_shape</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="minify_vasprun"><a class="viewcode-back" href="../../../apidoc.html#ipyvasp.core.parser.minify_vasprun">[docs]</a><span class="k">def</span> <span class="nf">minify_vasprun</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="minify_vasprun"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.minify_vasprun">[docs]</a><span class="k">def</span> <span class="nf">minify_vasprun</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="s2">&quot;Minify vasprun.xml file by removing projected data.&quot;</span>
     <span class="k">return</span> <span class="n">Vasprun</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">minify</span><span class="p">()</span></div>
 

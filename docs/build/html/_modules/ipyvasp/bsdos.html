@@ -424,8 +424,7 @@
 
 
 <div class="viewcode-block" id="Bands"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands">[docs]</a><span class="k">class</span> <span class="nc">Bands</span><span class="p">(</span><span class="n">_BandsDosBase</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class to handle and plot bandstructure data.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to handle and plot bandstructure data.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -437,20 +436,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_args</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># will be updated on demand</span>
 
 <div class="viewcode-block" id="Bands.get_kticks"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands.get_kticks">[docs]</a>    <span class="k">def</span> <span class="nf">get_kticks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rel_path</span><span class="o">=</span><span class="s2">&quot;KPOINTS&quot;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Reads associated KPOINTS file form a relative path of calculations and returns kticks. If KPOINTS file does not exist or was not created by this module, returns empty dict.</span>
-
-<span class="sd">        .. note::</span>
-<span class="sd">            kticks become useless when you interploate data in plotting, in that case write kticks manually.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="s2">&quot;Reads associated KPOINTS file form a relative path of calculations and returns kticks. If KPOINTS file does not exist or was not created by this module, returns empty dict.&quot;</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">rel_path</span>
         <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
             <span class="k">return</span> <span class="n">_read_kticks</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[]</span></div>
 
 <div class="viewcode-block" id="Bands.get_plot_coords"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.Bands.get_plot_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_plot_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kindices</span><span class="p">,</span> <span class="n">eindices</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns coordinates of shape (len(zip(kindices, eindices)), 2) from most recent bandstructure plot.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns coordinates of shape (len(zip(kindices, eindices)), 2) from most recent bandstructure plot.</span>
 <span class="sd">        Use in a plot command as `plt.plot(*get_plot_coords(kindices, eindices).T)`.</span>
 <span class="sd">        Enegy values are shifted by `ezero` from a plot command or data. Use coords + [0, ezero] to get data values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -792,8 +785,7 @@
 
 
 <div class="viewcode-block" id="DOS"><a class="viewcode-back" href="../../apidoc.html#ipyvasp.bsdos.DOS">[docs]</a><span class="k">class</span> <span class="nc">DOS</span><span class="p">(</span><span class="n">_BandsDosBase</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class to handle and plot density of states data.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to handle and plot density of states data.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

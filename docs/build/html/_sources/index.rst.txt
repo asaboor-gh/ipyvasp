@@ -1,17 +1,39 @@
 
 `Edit on Github <https://github.com/massgh/ipyvasp>`_
 
-Welcome to ipyvasp's Documentation!
+Documentation for ipyvasp
 ===================================
+``ipyvasp`` is a processing tool for VASP DFT input/output processing.
+
+It is designed to primarily be used in Jupyter Notebook as it offers
+widgets for interactive visualization and bulk analysis.
+  
+
+Installation
+============
+.. code-block:: bash
+
+   pip install ipyvasp
+
+Development Installation
+========================
+.. code-block:: bash
+
+   git clone https://github.com/massgh/ipyvasp.git
+   cd ipyvasp
+   pip install -e .
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
+   examples
+
+.. toctree::
+   :maxdepth: 2
+   
    apidoc
 
 
-Complete Module and documentation will be available soon!
 
 Indices and tables
 ==================
