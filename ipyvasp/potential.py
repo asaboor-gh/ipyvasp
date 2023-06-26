@@ -285,7 +285,7 @@ class LOCPOT:
             ),
         )
 
-    def view_slice(self, *argse, **kwargs):
+    def view_slice(self, *args, **kwargs):
         # Use interactive here to select the slice, digonal slices and so on..., tell user to get output results back
         raise NotImplementedError("Coming soon...")
 

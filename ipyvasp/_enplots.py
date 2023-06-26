@@ -719,11 +719,11 @@ def splot_dos_lines(
         }
         add_legend(ax, **kwargs)  # Labels are picked from plot
 
-    args = dict(ylim=elim or []) if vertical else dict(xlim=elim or [])
+    kws = dict(ylim=elim or []) if vertical else dict(xlim=elim or [])
     xlabel, ylabel = "Energy (eV)", "DOS"
     if vertical:
         xlabel, ylabel = ylabel, xlabel
-    adjust_axes(ax, xlabel=xlabel, ylabel=ylabel, zeroline=False, **args)
+    adjust_axes(ax, xlabel=xlabel, ylabel=ylabel, zeroline=False, **kws)
     return ax
 
 

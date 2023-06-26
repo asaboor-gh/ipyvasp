@@ -2175,7 +2175,11 @@ def transform_poscar(poscar_data, transformation, zoom=2, tol=1e-2):
     points = to_basis(
         new_basis, poscar_data.coords
     )  # Transform coordinates to new basis around origin
-    points = points - np.mean(points, axis=0)  # Center around origin, to include all
+
+    # Let's bring the most central point to origin
+    close_to_origin = np.linalg.norm(points - np.mean(points, axis=0), axis=1)
+    nearest_idx = np.argsort(close_to_origin)[0]
+    points = points - points[nearest_idx]  # one point is at origin now
 
     new_poscar = poscar_data.to_dict()  # Update in it
     new_poscar["basis"] = new_basis

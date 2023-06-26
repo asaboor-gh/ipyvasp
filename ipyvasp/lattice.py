@@ -1,4 +1,12 @@
-__all__ = ["POSCAR", "download_structure", "periodic_table", "get_kpath", "get_kmesh"]
+__all__ = [
+    "POSCAR",
+    "download_structure",
+    "periodic_table",
+    "get_kpath",
+    "get_kmesh",
+    "splot_bz",
+    "iplot_bz",
+]
 
 from pathlib import Path
 from contextlib import redirect_stdout
@@ -16,6 +24,8 @@ from ._lattice import (
     periodic_table,
     get_kpath,
     get_kmesh,
+    splot_bz,
+    iplot_bz,
 )  # need these as direct access
 
 
@@ -123,8 +133,8 @@ class POSCAR:
         symbols = [
             lab.split()[0] for lab in self.data.labels
         ]  # Remove numbers from labels
-        return Atoms(
-            symbols=symbols, positions=self.data.positions, cell=self.data.basis
+        return Atoms(  # ASE positions are cartesian, not fractional
+            symbols=symbols, positions=self.data.coords, cell=self.data.basis
         )
 
     def view(self, viewer=None, **kwargs):
