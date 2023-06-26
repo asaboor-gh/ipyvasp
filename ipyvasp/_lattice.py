@@ -12,6 +12,7 @@ import plotly.graph_objects as go
 
 import matplotlib.pyplot as plt  # For viewpoint
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+import matplotlib.colors as mplc
 
 from ipywidgets import interactive
 

@@ -388,7 +388,7 @@ class POSCAR:
 
         plat._validate_label_func(fmt_label, labels[0])
 
-        coords = self.to_R3(kpoints, reciprocal=True)
+        coords = self.bz.to_cartesian(kpoints)
         if _zoffset and self._plane:
             normal = (
                 [0, 0, 1]

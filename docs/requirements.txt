@@ -1,5 +1,6 @@
 ipyvasp
 furo
+nbsphinx
 ipywidgets==8.0.2
 matplotlib==3.5.3
 numpy==1.23.2
