@@ -207,14 +207,24 @@
         </div>
         <article role="main">
           <h1>Source code for ipyvasp.lattice</h1><div class="highlight"><pre>
-<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="s2">&quot;download_structure&quot;</span><span class="p">,</span> <span class="s2">&quot;periodic_table&quot;</span><span class="p">,</span> <span class="s2">&quot;get_kpath&quot;</span><span class="p">,</span> <span class="s2">&quot;get_kmesh&quot;</span><span class="p">]</span>
+<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;POSCAR&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;download_structure&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;periodic_table&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_kpath&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_kmesh&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;splot_bz&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;iplot_bz&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">redirect_stdout</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">pandas.io.clipboard</span> <span class="kn">import</span> <span class="n">clipboard_get</span><span class="p">,</span> <span class="n">clipboard_set</span>
+<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">mcolors</span>
 
 
 <span class="kn">from</span> <span class="nn">.core</span> <span class="kn">import</span> <span class="n">serializer</span>
@@ -225,6 +235,8 @@
     <span class="n">periodic_table</span><span class="p">,</span>
     <span class="n">get_kpath</span><span class="p">,</span>
     <span class="n">get_kmesh</span><span class="p">,</span>
+    <span class="n">splot_bz</span><span class="p">,</span>
+    <span class="n">iplot_bz</span><span class="p">,</span>
 <span class="p">)</span>  <span class="c1"># need these as direct access</span>
 
 
@@ -264,6 +276,118 @@
         <span class="k">return</span> <span class="n">output</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;Connection was not sccessful. Try again!&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">ngl_viewer</span><span class="p">(</span>
+    <span class="n">poscar</span><span class="p">,</span>
+    <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">sizes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">plot_cell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+    <span class="n">bond_color</span><span class="o">=</span><span class="s2">&quot;whitesmoke&quot;</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="s2">&quot;400px&quot;</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="s2">&quot;400px&quot;</span><span class="p">,</span>
+    <span class="n">plot_vectors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Display structure in Jupyter notebook using nglview.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    poscar : ipyvasp.POSCAR</span>
+<span class="sd">    colors : list or str</span>
+<span class="sd">        List of colors for each atom type. If str, use sames colors for all.</span>
+<span class="sd">        If `colors = &#39;element&#39;`, then element colors from `nglview` will be used.</span>
+<span class="sd">        You can use `nglview.color.COLOR_SCHEME` to see available color schemes to use.</span>
+<span class="sd">        If colors is None, then default colors from ipyvasp will be used that are same in `[i,s]plot_lattice`.</span>
+<span class="sd">    sizes : list</span>
+<span class="sd">        List of sizes for each atom type.</span>
+<span class="sd">    plot_cell : bool</span>
+<span class="sd">        Plot unit cell. Default True.</span>
+<span class="sd">    linewidth : float</span>
+<span class="sd">        Linewidth of cell edges.</span>
+<span class="sd">    color : list or str</span>
+<span class="sd">        Color of cell edges. Must be a valid color to support conversion to RGB via matplotlib.</span>
+<span class="sd">    bond_color : str</span>
+<span class="sd">        Color of bonds. Default &quot;whitesmoke&quot;. Can be &quot;element&quot; or any other scheme from `nglview`.</span>
+<span class="sd">    width : str</span>
+<span class="sd">        Width of viewer. Default &quot;400px&quot;.</span>
+<span class="sd">    height : str</span>
+<span class="sd">        Height of viewer. Default &quot;400px&quot;.</span>
+<span class="sd">    plot_vectors : bool</span>
+<span class="sd">        Plot vectors. Default True. Only works if `plot_cell = True`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    NGLWidget</span>
+<span class="sd">        An instance of nglview.NGLWidget object. You can use `.render_image()`, `.download_image()` etc. on it or can add more representations.</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        `nglview` sometimes does not work in Jupyter lab. You can switch to classic notebook in that case.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">poscar</span><span class="p">,</span> <span class="n">POSCAR</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;poscar must be an instance of POSCAR class.&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">nglview</span> <span class="k">as</span> <span class="nn">nv</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Please install nglview to use this function.&quot;</span><span class="p">)</span>
+
+    <span class="n">fix_pos</span> <span class="o">=</span> <span class="n">POSCAR</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">_fix_sites</span><span class="p">(</span><span class="n">poscar</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">eqv_sites</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="n">_types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fix_pos</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="n">_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">_types</span><span class="p">]</span>
+    <span class="n">_colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">mcolors</span><span class="o">.</span><span class="n">to_hex</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">_atom_colors</span><span class="p">[</span><span class="n">e</span><span class="p">])</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_types</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">sizes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_types</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;sizes must have the same length as the number of atom types.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">_sizes</span> <span class="o">=</span> <span class="n">sizes</span>
+    <span class="k">if</span> <span class="n">colors</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">_colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">colors</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">_types</span><span class="p">]</span>  <span class="c1"># All same color, may be &#39;element&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_types</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;colors must have the same length as the number of atom types.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">_colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">mcolors</span><span class="o">.</span><span class="n">to_hex</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">colors</span><span class="p">]</span>
+
+    <span class="n">view</span> <span class="o">=</span> <span class="n">nv</span><span class="o">.</span><span class="n">NGLWidget</span><span class="p">(</span>
+        <span class="n">nv</span><span class="o">.</span><span class="n">ASEStructure</span><span class="p">(</span><span class="n">fix_pos</span><span class="o">.</span><span class="n">to_ase</span><span class="p">()),</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">default_representation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">view</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">nv</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">Shape</span><span class="p">(</span><span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">_types</span><span class="p">,</span> <span class="n">_sizes</span><span class="p">,</span> <span class="n">_colors</span><span class="p">):</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">add_spacefill</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">selection</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;#</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="n">view</span><span class="o">.</span><span class="n">add_ball_and_stick</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">bond_color</span><span class="p">)</span>
+    <span class="n">view</span><span class="o">.</span><span class="n">camera</span> <span class="o">=</span> <span class="s2">&quot;orthographic&quot;</span>
+    <span class="n">view</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">plot_cell</span><span class="p">:</span>
+        <span class="n">_color</span> <span class="o">=</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">to_rgb</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>  <span class="c1"># convert to rgb for nglview</span>
+        <span class="n">cell</span> <span class="o">=</span> <span class="n">fix_pos</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">faces_coords</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">face</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">shape</span><span class="o">.</span><span class="n">add_cylinder</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">_color</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">vertices</span><span class="p">:</span>
+            <span class="n">shape</span><span class="o">.</span><span class="n">add_sphere</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">_color</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">plot_vectors</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">tail</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">b</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+                <span class="n">shape</span><span class="o">.</span><span class="n">add_cone</span><span class="p">(</span><span class="n">tail</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">_color</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">shape</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="n">b</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">view</span>
 
 
 <div class="viewcode-block" id="POSCAR"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR">[docs]</a><span class="k">class</span> <span class="nc">POSCAR</span><span class="p">:</span>
@@ -332,8 +456,8 @@
         <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">lab</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">labels</span>
         <span class="p">]</span>  <span class="c1"># Remove numbers from labels</span>
-        <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span>
-            <span class="n">symbols</span><span class="o">=</span><span class="n">symbols</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">basis</span>
+        <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span>  <span class="c1"># ASE positions are cartesian, not fractional</span>
+            <span class="n">symbols</span><span class="o">=</span><span class="n">symbols</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">basis</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="POSCAR.view"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view">[docs]</a>    <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">viewer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -341,6 +465,9 @@
 
 <span class="sd">        kwargs are passed to self.splot_lattice if viewer is None, otherwise a  single keyword argument `data` is passed to ase viewer.</span>
 <span class="sd">        data should be volumetric data for ase.visualize.view, such as charge density, spin density, etc.</span>
+
+<span class="sd">        .. tip::</span>
+<span class="sd">            Use ``self.view_ngl()`` if you don&#39;t want to pass ``viewer = &#39;nglview&#39;`` to ASE viewer or not showing volumetric data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">viewer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">plat</span><span class="o">.</span><span class="n">view_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -348,6 +475,11 @@
             <span class="kn">from</span> <span class="nn">ase.visualize</span> <span class="kn">import</span> <span class="n">view</span>
 
             <span class="k">return</span> <span class="n">view</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_ase</span><span class="p">(),</span> <span class="n">viewer</span><span class="o">=</span><span class="n">viewer</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="POSCAR.view_ngl"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view_ngl">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">ngl_viewer</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;poscar :.*colors :&quot;</span><span class="p">:</span> <span class="s2">&quot;colors :&quot;</span><span class="p">})</span>
+    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">ngl_viewer</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;poscar&quot;</span><span class="p">,))</span>
+    <span class="k">def</span> <span class="nf">view_ngl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ngl_viewer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="POSCAR.view_kpath"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view_kpath">[docs]</a>    <span class="k">def</span> <span class="nf">view_kpath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Initialize a KpathWidget instance to view kpath for current POSCAR, and you can select others too.&quot;</span>

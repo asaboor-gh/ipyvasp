@@ -1048,7 +1048,7 @@
 
 
 <span class="c1"># Cell</span>
-<span class="k">def</span> <span class="nf">splot_bz</span><span class="p">(</span>
+<div class="viewcode-block" id="splot_bz"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.splot_bz">[docs]</a><span class="k">def</span> <span class="nf">splot_bz</span><span class="p">(</span>
     <span class="n">bz_data</span><span class="p">,</span>
     <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1271,11 +1271,11 @@
         <span class="n">ax3d</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">))</span>
         <span class="n">ax3d</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">))</span>
         <span class="n">ax3d</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">ax3d</span>
+        <span class="k">return</span> <span class="n">ax3d</span></div>
 
 
 <span class="c1"># Cell</span>
-<span class="k">def</span> <span class="nf">iplot_bz</span><span class="p">(</span>
+<div class="viewcode-block" id="iplot_bz"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.iplot_bz">[docs]</a><span class="k">def</span> <span class="nf">iplot_bz</span><span class="p">(</span>
     <span class="n">bz_data</span><span class="p">,</span>
     <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;rgba(168,204,216,0.8)&quot;</span><span class="p">,</span>
@@ -1483,7 +1483,7 @@
         <span class="p">),</span>
         <span class="n">margin</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">r</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span>
     <span class="p">)</span>
-    <span class="k">return</span> <span class="n">fig</span>
+    <span class="k">return</span> <span class="n">fig</span></div>
 
 
 <span class="c1"># Cell</span>
@@ -2384,7 +2384,11 @@
     <span class="n">points</span> <span class="o">=</span> <span class="n">to_basis</span><span class="p">(</span>
         <span class="n">new_basis</span><span class="p">,</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">coords</span>
     <span class="p">)</span>  <span class="c1"># Transform coordinates to new basis around origin</span>
-    <span class="n">points</span> <span class="o">=</span> <span class="n">points</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Center around origin, to include all</span>
+
+    <span class="c1"># Let&#39;s bring the most central point to origin</span>
+    <span class="n">close_to_origin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">points</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">nearest_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">close_to_origin</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">points</span> <span class="o">-</span> <span class="n">points</span><span class="p">[</span><span class="n">nearest_idx</span><span class="p">]</span>  <span class="c1"># one point is at origin now</span>
 
     <span class="n">new_poscar</span> <span class="o">=</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>  <span class="c1"># Update in it</span>
     <span class="n">new_poscar</span><span class="p">[</span><span class="s2">&quot;basis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_basis</span>

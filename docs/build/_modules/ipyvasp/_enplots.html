@@ -154,7 +154,8 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notebooks/quickstart.html">Quickstart</a></li>
 </ul>
 </li>
 </ul>
@@ -927,11 +928,11 @@
         <span class="p">}</span>
         <span class="n">add_legend</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># Labels are picked from plot</span>
 
-    <span class="n">args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="n">elim</span> <span class="ow">or</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">vertical</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">elim</span> <span class="ow">or</span> <span class="p">[])</span>
+    <span class="n">kws</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="n">elim</span> <span class="ow">or</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">vertical</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">elim</span> <span class="ow">or</span> <span class="p">[])</span>
     <span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="s2">&quot;Energy (eV)&quot;</span><span class="p">,</span> <span class="s2">&quot;DOS&quot;</span>
     <span class="k">if</span> <span class="n">vertical</span><span class="p">:</span>
         <span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="n">ylabel</span><span class="p">,</span> <span class="n">xlabel</span>
-    <span class="n">adjust_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="n">ylabel</span><span class="p">,</span> <span class="n">zeroline</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">adjust_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="n">ylabel</span><span class="p">,</span> <span class="n">zeroline</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ax</span></div>
 
 
