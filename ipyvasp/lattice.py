@@ -11,9 +11,11 @@ __all__ = [
 from pathlib import Path
 from contextlib import redirect_stdout
 from io import StringIO
+from functools import partial
 
 import numpy as np
 from pandas.io.clipboard import clipboard_get, clipboard_set
+import matplotlib.colors as mcolors
 
 
 from .core import serializer
@@ -65,6 +67,118 @@ def download_structure(
         return output
     else:
         raise ConnectionError("Connection was not sccessful. Try again!")
+
+
+def ngl_viewer(
+    poscar,
+    colors=None,
+    sizes=None,
+    plot_cell=True,
+    linewidth=0.05,
+    color=[0, 0, 0.2],
+    bond_color="whitesmoke",
+    width="400px",
+    height="400px",
+    plot_vectors=True,
+):
+    """Display structure in Jupyter notebook using nglview.
+
+    Parameters
+    ----------
+    poscar : ipyvasp.POSCAR
+    colors : list or str
+        List of colors for each atom type. If str, use sames colors for all.
+        If `colors = 'element'`, then element colors from `nglview` will be used.
+        You can use `nglview.color.COLOR_SCHEME` to see available color schemes to use.
+        If colors is None, then default colors from ipyvasp will be used that are same in `[i,s]plot_lattice`.
+    sizes : list
+        List of sizes for each atom type.
+    plot_cell : bool
+        Plot unit cell. Default True.
+    linewidth : float
+        Linewidth of cell edges.
+    color : list or str
+        Color of cell edges. Must be a valid color to support conversion to RGB via matplotlib.
+    bond_color : str
+        Color of bonds. Default "whitesmoke". Can be "element" or any other scheme from `nglview`.
+    width : str
+        Width of viewer. Default "400px".
+    height : str
+        Height of viewer. Default "400px".
+    plot_vectors : bool
+        Plot vectors. Default True. Only works if `plot_cell = True`.
+
+    Returns
+    -------
+    NGLWidget
+        An instance of nglview.NGLWidget object. You can use `.render_image()`, `.download_image()` etc. on it or can add more representations.
+
+    .. note::
+        `nglview` sometimes does not work in Jupyter lab. You can switch to classic notebook in that case.
+    """
+    if not isinstance(poscar, POSCAR):
+        raise TypeError("poscar must be an instance of POSCAR class.")
+
+    try:
+        import nglview as nv
+    except ImportError:
+        raise ImportError("Please install nglview to use this function.")
+
+    fix_pos = POSCAR(data=plat._fix_sites(poscar.data, eqv_sites=True))
+    _types = list(fix_pos.data.types.keys())
+
+    _sizes = [0.5 for _ in _types]
+    _colors = [mcolors.to_hex(plat._atom_colors[e]) for e in _types]
+    if sizes:
+        if len(sizes) != len(_types):
+            raise ValueError(
+                "sizes must have the same length as the number of atom types."
+            )
+        _sizes = sizes
+    if colors:
+        if isinstance(colors, str):
+            _colors = [colors for _ in _types]  # All same color, may be 'element'
+        else:
+            if len(colors) != len(_types):
+                raise ValueError(
+                    "colors must have the same length as the number of atom types."
+                )
+            _colors = [mcolors.to_hex(c) for c in colors]
+
+    view = nv.NGLWidget(
+        nv.ASEStructure(fix_pos.to_ase()),
+        width=width,
+        height=height,
+        default_representation=False,
+    )
+    view.clear()
+
+    shape = nv.shape.Shape(view=view)
+
+    for e, r, c in zip(_types, _sizes, _colors):
+        view.add_spacefill(radius=r, selection=f"#{e}", color=c)
+
+    view.add_ball_and_stick(color=bond_color)
+    view.camera = "orthographic"
+    view.center()
+
+    if plot_cell:
+        _color = mcolors.to_rgb(color)  # convert to rgb for nglview
+        cell = fix_pos.get_cell()
+        for face in cell.faces_coords:
+            for p1, p2 in zip(face[1:], face[:-1]):
+                shape.add_cylinder(p1, p2, _color, linewidth)
+
+        for v in cell.vertices:
+            shape.add_sphere(v, _color, linewidth)
+
+        if plot_vectors:
+            for i, b in enumerate(cell.basis, start=1):
+                tail = b - b / np.linalg.norm(b)
+                shape.add_cone(tail, b, _color, linewidth * 3, f"a{i}")
+                shape.add_text(b / 2, [0.2, 0.15, 0.2], 2, f"a{i}")
+
+    return view
 
 
 class POSCAR:
@@ -142,6 +256,9 @@ class POSCAR:
 
         kwargs are passed to self.splot_lattice if viewer is None, otherwise a  single keyword argument `data` is passed to ase viewer.
         data should be volumetric data for ase.visualize.view, such as charge density, spin density, etc.
+
+        .. tip::
+            Use ``self.view_ngl()`` if you don't want to pass ``viewer = 'nglview'`` to ASE viewer or not showing volumetric data.
         """
         if viewer is None:
             return plat.view_poscar(self.data, **kwargs)
@@ -149,6 +266,11 @@ class POSCAR:
             from ase.visualize import view
 
             return view(self.to_ase(), viewer=viewer, data=kwargs.get("data", None))
+
+    @_sub_doc(ngl_viewer, {"poscar :.*colors :": "colors :"})
+    @_sig_kwargs(ngl_viewer, ("poscar",))
+    def view_ngl(self, **kwargs):
+        return ngl_viewer(self, **kwargs)
 
     def view_kpath(self):
         "Initialize a KpathWidget instance to view kpath for current POSCAR, and you can select others too."
