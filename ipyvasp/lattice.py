@@ -124,17 +124,20 @@ def ngl_viewer(
     except ImportError:
         raise ImportError("Please install nglview to use this function.")
 
-    fix_pos = POSCAR(data=plat._fix_sites(poscar.data, eqv_sites=True))
-    _types = list(fix_pos.data.types.keys())
+    if plot_cell:  # Only show equivalent sites if plotting cell
+        poscar = POSCAR(data=plat._fix_sites(poscar.data, eqv_sites=True))
 
+    _types = list(poscar.data.types.keys())
     _sizes = [0.5 for _ in _types]
     _colors = [mcolors.to_hex(plat._atom_colors[e]) for e in _types]
+
     if sizes:
         if len(sizes) != len(_types):
             raise ValueError(
                 "sizes must have the same length as the number of atom types."
             )
         _sizes = sizes
+
     if colors:
         if isinstance(colors, str):
             _colors = [colors for _ in _types]  # All same color, may be 'element'
@@ -146,14 +149,12 @@ def ngl_viewer(
             _colors = [mcolors.to_hex(c) for c in colors]
 
     view = nv.NGLWidget(
-        nv.ASEStructure(fix_pos.to_ase()),
+        nv.ASEStructure(poscar.to_ase()),
         width=width,
         height=height,
         default_representation=False,
     )
     view.clear()
-
-    shape = nv.shape.Shape(view=view)
 
     for e, r, c in zip(_types, _sizes, _colors):
         view.add_spacefill(radius=r, selection=f"#{e}", color=c)
@@ -163,8 +164,9 @@ def ngl_viewer(
     view.center()
 
     if plot_cell:
+        shape = nv.shape.Shape(view=view)
         _color = mcolors.to_rgb(color)  # convert to rgb for nglview
-        cell = fix_pos.get_cell()
+        cell = poscar.get_cell()
         for face in cell.faces_coords:
             for p1, p2 in zip(face[1:], face[:-1]):
                 shape.add_cylinder(p1, p2, _color, linewidth)

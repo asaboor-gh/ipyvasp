@@ -333,17 +333,20 @@
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Please install nglview to use this function.&quot;</span><span class="p">)</span>
 
-    <span class="n">fix_pos</span> <span class="o">=</span> <span class="n">POSCAR</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">_fix_sites</span><span class="p">(</span><span class="n">poscar</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">eqv_sites</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-    <span class="n">_types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fix_pos</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">plot_cell</span><span class="p">:</span>  <span class="c1"># Only show equivalent sites if plotting cell</span>
+        <span class="n">poscar</span> <span class="o">=</span> <span class="n">POSCAR</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">_fix_sites</span><span class="p">(</span><span class="n">poscar</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">eqv_sites</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 
+    <span class="n">_types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">poscar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
     <span class="n">_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">_types</span><span class="p">]</span>
     <span class="n">_colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">mcolors</span><span class="o">.</span><span class="n">to_hex</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">_atom_colors</span><span class="p">[</span><span class="n">e</span><span class="p">])</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_types</span><span class="p">]</span>
+
     <span class="k">if</span> <span class="n">sizes</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_types</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;sizes must have the same length as the number of atom types.&quot;</span>
             <span class="p">)</span>
         <span class="n">_sizes</span> <span class="o">=</span> <span class="n">sizes</span>
+
     <span class="k">if</span> <span class="n">colors</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">_colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">colors</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">_types</span><span class="p">]</span>  <span class="c1"># All same color, may be &#39;element&#39;</span>
@@ -355,14 +358,12 @@
             <span class="n">_colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">mcolors</span><span class="o">.</span><span class="n">to_hex</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">colors</span><span class="p">]</span>
 
     <span class="n">view</span> <span class="o">=</span> <span class="n">nv</span><span class="o">.</span><span class="n">NGLWidget</span><span class="p">(</span>
-        <span class="n">nv</span><span class="o">.</span><span class="n">ASEStructure</span><span class="p">(</span><span class="n">fix_pos</span><span class="o">.</span><span class="n">to_ase</span><span class="p">()),</span>
+        <span class="n">nv</span><span class="o">.</span><span class="n">ASEStructure</span><span class="p">(</span><span class="n">poscar</span><span class="o">.</span><span class="n">to_ase</span><span class="p">()),</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
         <span class="n">default_representation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">view</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-
-    <span class="n">shape</span> <span class="o">=</span> <span class="n">nv</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">Shape</span><span class="p">(</span><span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">_types</span><span class="p">,</span> <span class="n">_sizes</span><span class="p">,</span> <span class="n">_colors</span><span class="p">):</span>
         <span class="n">view</span><span class="o">.</span><span class="n">add_spacefill</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">selection</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;#</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">)</span>
@@ -372,8 +373,9 @@
     <span class="n">view</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">plot_cell</span><span class="p">:</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">nv</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">Shape</span><span class="p">(</span><span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
         <span class="n">_color</span> <span class="o">=</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">to_rgb</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>  <span class="c1"># convert to rgb for nglview</span>
-        <span class="n">cell</span> <span class="o">=</span> <span class="n">fix_pos</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
+        <span class="n">cell</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">faces_coords</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">face</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
                 <span class="n">shape</span><span class="o">.</span><span class="n">add_cylinder</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">_color</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">)</span>
