@@ -852,7 +852,7 @@ def splot_bz(
     zoffset=0,
     **kwargs,
 ):
-    """Plots matplotlib's static figure of Brillouin zone. You can also plot in 2D on a 3D axes.
+    """Plots matplotlib's static figure of BZ/Cell. You can also plot in 2D on a 3D axes.
 
     Parameters
     ----------
@@ -886,14 +886,13 @@ def splot_bz(
         Matplotlib's 2D axes if `plane=None` otherswise 3D axes.
     """
     vname = "a" if bz_data.__class__.__name__ == "CellData" else "b"
-    if vname == "b":  # These needed for splot_kpath internally
-        type(bz_data)._splot_kws = dict(plane=plane, zoffset=zoffset)
-
     label = r"$k_{}/2π$" if vname == "b" else "{}"
     if not ax:  # For both 3D and 2D, initialize 2D axis.
         ax = ptk.get_axes(figsize=(3.4, 3.4))  # For better display
 
-    type(bz_data)._splot_kws["ax"] = ax  # For splot_kpath
+    if vname == "b":  # These needed for splot_kpath internally
+        type(bz_data)._splot_kws = dict(plane=plane, zoffset=zoffset, ax=ax)
+
     _label = r"\vec{" + vname + "}"  # For both
 
     if vectors and not isinstance(vectors, (tuple, list)):
@@ -1006,7 +1005,8 @@ def splot_bz(
             ax3d = fig.add_axes(
                 pos, projection="3d", azim=45, elev=30, proj_type="ortho"
             )
-            type(bz_data)._splot_kws["ax"] = ax3d
+            if vname == "b":  # it wont be ther for a
+                type(bz_data)._splot_kws["ax"] = ax3d
 
         if fill:
             if colormap:

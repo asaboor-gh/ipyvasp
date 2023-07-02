@@ -217,17 +217,14 @@ class POSCAR:
             self._data = serializer.PoscarData.validated(data)
         else:
             self._data = plat.export_poscar(path=str(self.path), content=content)
-        # These after data to work with data
-        self._bz = self.get_bz(primitive=False)  # Get defualt regular BZ from sio
-        self._cell = self.get_cell()  # Get defualt cell
 
     def __repr__(self):
-        atoms = ", ".join([f"{k}={len(v)}" for k, v in self._data.types.items()])
+        atoms = ", ".join([f"{k}={len(v)}" for k, v in self.data.types.items()])
         lat = ", ".join(
             [
                 f"{k}={v}"
                 for k, v in zip(
-                    "abcαβγ", (*self._data.norms.round(3), *self._data.angles.round(3))
+                    "abcαβγ", (*self.data.norms.round(3), *self.data.angles.round(3))
                 )
             ]
         )
@@ -432,7 +429,7 @@ class POSCAR:
 
     def copy(self):
         "Copy POSCAR object. It avoids accidental changes to numpy arrays in original object."
-        return self.__class__(data=self._data.copy())
+        return self.__class__(data=self.data.copy())
 
     @property
     def content(self):
@@ -443,35 +440,34 @@ class POSCAR:
 
     @property
     def bz(self):
+        "Regular BZ data. To get primitive BZ use `get_bz(primitive = True)`."
+        if not hasattr(self, "_bz"):
+            self._bz = self.get_bz(primitive=False)
         return self._bz
 
     @property
     def cell(self):
+        if not hasattr(self, "_cell"):
+            self._cell = self.get_cell()
         return self._cell
 
     @_sub_doc(stk.get_bz, {"basis :.*loop :": "loop :"})
     @_sig_kwargs(stk.get_bz, ("basis",))
     def get_bz(self, **kwargs):
-        self.set_bz(**kwargs)  # set bz to current data
-        return self._bz
-
-    def set_bz(self, primitive=False, loop=True):
-        """Set BZ to primitve/regular on demand. All successive operations follow the current set BZ."""
-        self._bz = stk.get_bz(self._data.rec_basis, primitive=primitive, loop=loop)
+        return stk.get_bz(self.data.rec_basis, **kwargs)
 
     def get_cell(self, loop=True):
         "See docs of `get_bz`, same except space is inverted and no factor of 2pi."
-        self._cell = serializer.CellData(
+        return serializer.CellData(
             stk.get_bz(  # data.basis makes prmitive cell in direct space
                 basis=self.data.basis, loop=loop, primitive=True
             ).to_dict()
         )  # cell must be primitive
-        return self._cell
 
     @_sub_doc(plat.splot_bz, {"bz_data :.*plane :": "plane :"})
     @_sig_kwargs(plat.splot_bz, ("bz_data",))
     def splot_bz(self, plane=None, **kwargs):
-        return plat.splot_bz(bz_data=self._bz, plane=plane, **kwargs)
+        return plat.splot_bz(bz_data=self.bz, plane=plane, **kwargs)
 
     def splot_kpath(
         self, kpoints, labels=None, fmt_label=lambda x: (x, {"color": "blue"}), **kwargs
@@ -496,7 +492,7 @@ class POSCAR:
         .. tip::
             You can use this function multiple times to plot multiple/broken paths over same BZ.
         """
-        if not self._bz or not hasattr(self._bz, "_splot_kws"):
+        if not self.bz or not hasattr(self.bz, "_splot_kws"):
             raise ValueError(
                 "BZ data or plot not found, use `self.splot_bz` or `self.bz.splot` first"
             )
@@ -505,7 +501,7 @@ class POSCAR:
             raise ValueError("kpoints must be 2D array of shape (N,3)")
 
         plane, ax, zoffset = [
-            self._bz._splot_kws.get(attr, default)  # class level attributes
+            self.bz._splot_kws.get(attr, default)  # class level attributes
             for attr, default in zip(["plane", "ax", "zoffset"], [None, None, 0])
         ]
 
@@ -570,111 +566,111 @@ class POSCAR:
     @_sig_kwargs(plat.splot_bz, ("bz_data",))
     def splot_cell(self, plane=None, **kwargs):
         "See docs of `splot_bz`, everything is same except space is inverted."
-        return plat.splot_bz(bz_data=self._cell, plane=plane, **kwargs)
+        return plat.splot_bz(bz_data=self.cell, plane=plane, **kwargs)
 
     @_sub_doc(plat.iplot_bz, {"bz_data :.*fill :": "fill :"})
     @_sig_kwargs(plat.iplot_bz, ("bz_data",))
     def iplot_bz(self, **kwargs):
-        return plat.iplot_bz(bz_data=self._bz, **kwargs)
+        return plat.iplot_bz(bz_data=self.bz, **kwargs)
 
     @_sig_kwargs(plat.iplot_bz, ("bz_data", "special_kpoints"))
     def iplot_cell(self, **kwargs):
         "See docs of `iplot_bz`, everything is same except space is iverted."
-        return plat.iplot_bz(bz_data=self._cell, special_kpoints=False, **kwargs)
+        return plat.iplot_bz(bz_data=self.cell, special_kpoints=False, **kwargs)
 
     @_sub_doc(plat.splot_lattice)
     @_sig_kwargs(plat.splot_lattice, ("poscar_data", "plane"))
     def splot_lattice(self, plane=None, **kwargs):
-        return plat.splot_lattice(self._data, plane=plane, **kwargs)
+        return plat.splot_lattice(self.data, plane=plane, **kwargs)
 
     @_sub_doc(plat.iplot_lattice)
     @_sig_kwargs(plat.iplot_lattice, ("poscar_data",))
     def iplot_lattice(self, **kwargs):
-        return plat.iplot_lattice(self._data, **kwargs)
+        return plat.iplot_lattice(self.data, **kwargs)
 
     @_sub_doc(plat.write_poscar)
     @_sig_kwargs(plat.write_poscar, ("poscar_data",))
     def write(self, outfile=None, **kwargs):
-        return plat.write_poscar(self._data, outfile=outfile, **kwargs)
+        return plat.write_poscar(self.data, outfile=outfile, **kwargs)
 
     @_sub_doc(plat.join_poscars)
     @_sig_kwargs(plat.join_poscars, ("poscar_data", "other"))
     def join(self, other, direction="c", **kwargs):
         return self.__class__(
             data=plat.join_poscars(
-                poscar_data=self._data, other=other.data, direction=direction, **kwargs
+                poscar_data=self.data, other=other.data, direction=direction, **kwargs
             )
         )
 
     @_sub_doc(plat.scale_poscar)
     @_sig_kwargs(plat.scale_poscar, ("poscar_data",))
     def scale(self, scale=(1, 1, 1), **kwargs):
-        return self.__class__(data=plat.scale_poscar(self._data, scale, **kwargs))
+        return self.__class__(data=plat.scale_poscar(self.data, scale, **kwargs))
 
     @_sub_doc(plat.rotate_poscar)
     def rotate(self, angle_deg, axis_vec):
         return self.__class__(
-            data=plat.rotate_poscar(self._data, angle_deg=angle_deg, axis_vec=axis_vec)
+            data=plat.rotate_poscar(self.data, angle_deg=angle_deg, axis_vec=axis_vec)
         )
 
     @_sub_doc(plat.set_zdir)
     def set_zdir(self, hkl, phi=0):
-        return self.__class__(data=plat.set_zdir(self._data, hkl, phi=phi))
+        return self.__class__(data=plat.set_zdir(self.data, hkl, phi=phi))
 
     @_sub_doc(plat.translate_poscar)
     def translate(self, offset):
-        return self.__class__(data=plat.translate_poscar(self._data, offset=offset))
+        return self.__class__(data=plat.translate_poscar(self.data, offset=offset))
 
     @_sub_doc(plat.repeat_poscar)
     def repeat(self, n, direction):
         return self.__class__(
-            data=plat.repeat_poscar(self._data, n=n, direction=direction)
+            data=plat.repeat_poscar(self.data, n=n, direction=direction)
         )
 
     @_sub_doc(plat.mirror_poscar)
     def mirror(self, direction):
-        return self.__class__(data=plat.mirror_poscar(self._data, direction=direction))
+        return self.__class__(data=plat.mirror_poscar(self.data, direction=direction))
 
     @_sub_doc(stk.get_TM, replace={"basis1": "self.basis"})
     def get_TM(self, target_basis):
-        return stk.get_TM(self._data.basis, target_basis)
+        return stk.get_TM(self.data.basis, target_basis)
 
     @_sub_doc(plat.transform_poscar)
     def transform(self, transformation, zoom=2, tol=1e-2):
         return self.__class__(
-            data=plat.transform_poscar(self._data, transformation, zoom=zoom, tol=tol)
+            data=plat.transform_poscar(self.data, transformation, zoom=zoom, tol=tol)
         )
 
     @_sub_doc(plat.transpose_poscar)
     def transpose(self, axes=[1, 0, 2]):
-        return self.__class__(data=plat.transpose_poscar(self._data, axes=axes))
+        return self.__class__(data=plat.transpose_poscar(self.data, axes=axes))
 
     @_sub_doc(plat.add_vaccum)
     def add_vaccum(self, thickness, direction, left=False):
         return self.__class__(
             data=plat.add_vaccum(
-                self._data, thickness=thickness, direction=direction, left=left
+                self.data, thickness=thickness, direction=direction, left=left
             )
         )
 
     @_sub_doc(plat.add_atoms)
     def add_atoms(self, name, positions):
         return self.__class__(
-            data=plat.add_atoms(self._data, name=name, positions=positions)
+            data=plat.add_atoms(self.data, name=name, positions=positions)
         )
 
     @_sub_doc(plat.convert_poscar)
     def convert(self, atoms_mapping, basis_factor):
         return self.__class__(
             data=plat.convert_poscar(
-                self._data, atoms_mapping=atoms_mapping, basis_factor=basis_factor
+                self.data, atoms_mapping=atoms_mapping, basis_factor=basis_factor
             )
         )
 
     @_sub_doc(plat.strain_poscar)
     def strain(self, strain_matrix):
         return self.__class__(
-            data=plat.strain_poscar(self._data, strain_matrix=strain_matrix)
+            data=plat.strain_poscar(self.data, strain_matrix=strain_matrix)
         )
 
     @_sub_doc(get_kmesh, {"poscar_data :.*\*args :": "*args :"})
