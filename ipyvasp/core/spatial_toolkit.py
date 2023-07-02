@@ -298,20 +298,22 @@ def get_bz(basis, loop=True, primitive=False):
     return BrZoneData(out_dict)
 
 
-def kpoints2bz(bz_data, kpoints, shift=0):
-    """Brings KPOINTS inside BZ. Applies `to_R3` only if bz_data is for primitive BZ.
+def kpoints2bz(bz_data, kpoints, shift=0, keep_geomerty=False):
+    """Brings KPOINTS inside BZ. Applies `to_R3` only if BZ is primitive.
 
     Parameters
     ----------
     bz_data : Output of get_bz().
-    kpoints : List or array of KPOINTS to transorm into BZ or R3.
-    shift : This value is added to kpoints before any other operation, single number of list of 3 numbers for each direction.
-
-    .. warning::
-        Do not use this function to translate kpoints created as cartesian, just shift by adding a vector.
+    kpoints : array_like
+        List or array of KPOINTS to transorm into BZ or R3.
+    shift : float
+        This value is added to kpoints before any other operation, single number of list of 3 numbers for each direction.
+    keep_geomerty : bool
+        If True, returns kpoints in R3 with `shift` applied, keeping the neighbors in order, else kpoints adopt the shape of BZ.
+        This is useful when you already created cartesian kpoints mesh and want to collect their fractional coordinates back to cartesian.
     """
     kpoints = np.array(kpoints) + shift
-    if bz_data.primitive:
+    if bz_data.primitive or keep_geomerty:
         return to_R3(bz_data.basis, kpoints)
 
     cent_planes = [

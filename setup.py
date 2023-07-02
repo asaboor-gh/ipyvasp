@@ -125,4 +125,10 @@ setup(
     cmdclass={
         "upload": UploadCommand,
     },
+    # for command line interface
+    entry_points={
+        "console_scripts": [
+            "ipyvasp=ipyvasp.cli:main",
+        ]
+    },
 )

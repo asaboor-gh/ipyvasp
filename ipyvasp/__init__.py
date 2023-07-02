@@ -64,9 +64,3 @@ global_matplotlib_settings(
         ),
     }
 )
-
-
-def docs():
-    from IPython.display import Markdown
-
-    return Markdown("[ipyvasp-docs](https://massgh.github.io/ipyvasp/)")

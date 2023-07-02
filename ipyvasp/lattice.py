@@ -306,7 +306,7 @@ class POSCAR:
             raise ValueError(f"Invalid POSCAR string!!!!!\n{content}")
 
     @classmethod
-    def from_materials_project(cls, formula, mp_id, api_key=None, save_key=False):
+    def download(cls, formula, mp_id, api_key=None, save_key=False):
         """Downloads POSCAR from materials project. `mp_id` should be string associated with a material on their website. `api_key` is optional if not saved.
         Get your API key from https://legacy.materialsproject.org/open and save it using `save_key` to avoid entering it everytime.
         """

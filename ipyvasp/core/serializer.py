@@ -17,7 +17,8 @@ from pathlib import Path
 
 import numpy as np
 
-from .spatial_toolkit import angle_deg, to_basis, to_R3, kpoints2bz, get_bz
+from .spatial_toolkit import angle_deg, to_basis, to_R3, kpoints2bz
+from ..utils import _sub_doc
 
 
 def dict2tuple(name: str, d: dict):
@@ -547,15 +548,9 @@ class BrZoneData(Dict2Data):
             )
         return other.to_fractional(self.to_cartesian(kpoints))
 
-    def translate_inside(self, kpoints, shift=0):
-        """Brings kpoints inside BZ. Mostly useful for regular kmesh to bring all kpoints inside BZ.
-        `shift` is a number or a list of three numbers that will be added to kpoints before any other operation,
-        in case points are not symmetric around origin.
-
-        .. warning::
-            If you made cartesian kpoints, you should not translate them with this function, just shift them by adding a vector.
-        """
-        return kpoints2bz(self, kpoints, shift=shift)
+    @_sub_doc(kpoints2bz, {"bz_data :.*kpoints :": "kpoints :"})
+    def translate_inside(self, kpoints, shift=0, keep_geometry=False):
+        return kpoints2bz(self, kpoints, shift=shift, keep_geomerty=keep_geometry)
 
     def get_subzone(self, func):
         # Disclaimer: Reuduction totally depends on given function, we only test for volume to satify the condition V_old = N * V_new

@@ -897,6 +897,7 @@ def iplot_bands(
     return fig
 
 
+@gu._fmt_doc(_docs)
 def iplot_rgb_lines(
     K,
     E,
@@ -913,31 +914,17 @@ def iplot_rgb_lines(
     title=None,
     **kwargs,
 ):
-    """
-    Interactive plot of band structure with rgb data points using plotly.
-
-    Parameters
-    ----------
-    K : array-like, shape (nk,)
-    E : array-like, shape (nk,nb)
-    pros : array-like, shape (m,nk,nb), m is the number of projections
-    labels : list of str, length m
+    """Interactive plot of band structure with rgb data points using plotly.
+    {params}\n    {K}\n    {E}\n    {pros}\n    {labels}\n    {elim}\n    {kticks}\n    {interp}
     occs : array-like, shape (nk,nb)
     kpoints : array-like, shape (nk,3)
     fig : plotly.graph_objects.Figure, if not provided, a new figure will be created
-    elim : tuple, (emin,emax), energy range to plot
-    kticks : [(int, str),...] for indices of high symmetry k-points. To join a broken path, use '<=' before symbol, e.g.  [(0, 'G'),(40, '<=K|M'), ...] will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').
-    interp : int or list/tuple of (n,k) for interpolation. If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.
     maxwidth : float, maximum linewidth, 10 by default
     mode : str, plotly mode, 'markers + lines' by default, see modes in `plotly.graph_objects.Scatter`.
     title : str, title of the figure, labels are added to the end of the title.
 
     kwargs are passed to `plotly.graph_objects.Scatter`.
-
-    Returns
-    -------
-    fig : plotly.graph_objects.Figure that can be displayed in Jupyter notebook or saved as html using `ipyvasp.iplot2html`.
-    """
+    {return_fig}"""
     if isinstance(K, dict):  # Provided by Bands class, don't do is yourself
         K, indices = K["K"], K["indices"]
     else:
@@ -1018,21 +1005,18 @@ def iplot_dos_lines(
     dos_arrays : list of array_like, each of shape (n,) or array-like (m,n)
     labels : list of str, length = len(dos_arrays) should hold.
     fig : plotly.graph_objects.Figure, if not provided, a new figure will be created
-    elim : list of length 2, (emin, emax), if None, (min(energy), max(energy)) is used.
-    colormap : str, default 'tab10', any valid matplotlib colormap name. Note that colormap is take from matplotlib, not plotly.
+    {elim}
+    {colormap}
     colors : list of str, length = len(dos_arrays) should hold if given, and will override colormap. Should be valid CSS colors.
     fill : bool, default True, if True, fill the area under the DOS lines.
     vertical : bool, default False, if True, plot DOS lines vertically.
     mode : str, default 'lines', plotly mode, see modes in `plotly.graph_objects.Scatter`.
     stack : bool, default False, if True, stack the DOS lines. Only works for horizontal plots.
-    interp : int or list/tuple of (n,k), default None, if given, interpolate the DOS lines using spline.
+    {interp}
+
 
     keyword arguments are passed to `plotly.graph_objects.Scatter`.
-
-    Returns
-    -------
-    fig : plotly.graph_objects.Figure
-    """
+    {return_fig}"""
     energy, dos_arrays, labels, colors = _fix_dos_data(
         energy, dos_arrays, labels, colors, interp
     )
