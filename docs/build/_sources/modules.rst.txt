@@ -76,6 +76,15 @@ Widgets
    :undoc-members:
    :show-inheritance:
 
+Potential and Charge Density
+============================
+
+.. automodule:: ipyvasp.potential
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 Miscellaneous
 =============
 

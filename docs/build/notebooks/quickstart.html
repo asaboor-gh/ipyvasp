@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="API" href="../apidoc.html" /><link rel="prev" title="Examples" href="../examples.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="API Summary" href="../summary.html" /><link rel="prev" title="Examples" href="../examples.html" />
 
     <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
-        <title>Quickstart - ipyvasp 0.2.0 documentation</title>
+        <title>Quickstart - ipyvasp 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">ipyvasp 0.2.0 documentation</div></a>
+      <a href="../index.html"><div class="brand">ipyvasp 0.3.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -147,7 +147,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   
-  <span class="sidebar-brand-text">ipyvasp 0.2.0 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 0.3.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -162,6 +162,9 @@
 </li>
 </ul>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../summary.html">API Summary</a></li>
+</ul>
+<ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../apidoc.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../modules.html">IPyVASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../modules.html#module-ipyvasp.core.parser">Data Parsers</a></li>
@@ -172,6 +175,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../modules.html#module-ipyvasp.bsdos">Bandstructure and Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../modules.html#module-ipyvasp.lattice">Lattice Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../modules.html#module-ipyvasp.widgets">Widgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules.html#module-ipyvasp.potential">Potential and Charge Density</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../modules.html#module-ipyvasp.misc">Miscellaneous</a></li>
 </ul>
 </li>
@@ -212,7 +216,7 @@
           <section id="Quickstart">
 <h1>Quickstart<a class="headerlink" href="#Quickstart" title="Permalink to this heading">#</a></h1>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -224,7 +228,7 @@
 </div>
 <p>Let’s create some dummy POSCAR.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">poscar</span> <span class="o">=</span> <span class="n">ipv</span><span class="o">.</span><span class="n">POSCAR</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
@@ -361,29 +365,41 @@ Reciprocal
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">view</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">view_ngl</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">view</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">view_ngl</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">dashboard</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">view</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6d763300c1894aae943284e09a178710", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a081752860b84615bc2d008241cf99a0", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "4c811c4c435447498b931938f88569bc", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">view</span><span class="o">.</span><span class="n">download_image</span><span class="p">(</span><span class="s1">&#39;nglview.png&#39;</span><span class="p">,</span><span class="n">factor</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6aafc16f86664415ba584c5c0616131f", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <p>If you are not seeing interactive widget above, don’t worry! We’ve got you covered with a screenshot below:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[111]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">view</span><span class="o">.</span><span class="n">download_image</span><span class="p">(</span><span class="s1">&#39;nglview.png&#39;</span><span class="p">,</span><span class="n">factor</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="kc">True</span><span class="p">,)</span>
+</pre></div>
+</div>
+</div>
 <p><img alt="GaAs" class="no-scaled-link" src="../_images/nglview.png" style="width: 200px;" /></p>
 </section>
 
@@ -392,12 +408,12 @@ Reciprocal
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../apidoc.html">
+          <a class="next-page" href="../summary.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">API</div>
+                <div class="title">API Summary</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

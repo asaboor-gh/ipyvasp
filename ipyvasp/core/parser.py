@@ -60,6 +60,12 @@ class DataSource:
 
         return self._poscar  # keep same instance to avoid data loss
 
+    def get_evals_dataframe(self, spins=[0], bands=[0], atoms=None, orbs=None):
+        """Initialize and return an EvalsDataFrame instance, with the given parameters."""
+        from ..evals_dataframe import EvalsDataFrame
+
+        return EvalsDataFrame(self, spins=spins, bands=bands, atoms=atoms, orbs=orbs)
+
     # Following methods should be implemented in a subclass
     def get_summary(self):
         raise NotImplementedError(
@@ -99,48 +105,29 @@ class DataSource:
 
 class Vaspout(DataSource):
     "Read data from vaspout.h5 file on demand."
+    # These methods are accessible from parent class, but need here for including in sphinx documentation
+    get_evals_dataframe = DataSource.get_evals_dataframe
+    poscar = DataSource.poscar
+    dos = DataSource.dos
+    bands = DataSource.bands
 
     def __init__(self, path):
         raise NotImplementedError("Vaspout is not implemented yet.")
 
-    @property
-    def bands(self):
-        "Access ipyvasp.bsdos.Bands class singleton instance for current Vaspout class."
-        return super().bands
-
-    @property
-    def dos(self):
-        "Access ipyvasp.bsdos.DOS class singleton instance for current Vaspout class."
-        return super().dos
-
-    @property
-    def poscar(self):
-        "Access ipyvasp.lattice.POSCAR class instance."
-        return super().poscar
 
 class Vasprun(DataSource):
     "Reads vasprun.xml file lazily. It reads only the required data from the file when a plot or data access is requested."
+    # These methods are accessible from parent class, but need here for including in sphinx documentation
+    get_evals_dataframe = DataSource.get_evals_dataframe
+    poscar = DataSource.poscar
+    dos = DataSource.dos
+    bands = DataSource.bands
 
     def __init__(self, path="./vasprun.xml", skipk=None):
         super().__init__(path)
         self._skipk = (
             skipk if isinstance(skipk, (int, np.integer)) else self.get_skipk()
         )
-
-    @property
-    def bands(self):
-        "Access ipyvasp.bsdos.Bands class singleton instance for current Vasprun class."
-        return super().bands
-
-    @property
-    def dos(self):
-        "Access ipyvasp.bsdos.DOS class singleton instance for current Vasprun class."
-        return super().dos
-
-    @property
-    def poscar(self):
-        "Access ipyvasp.lattice.POSCAR class instance."
-        return super().poscar
 
     def read(self, start_match, stop_match, nth_match=1, skip_last=False):
         """Reads a part of the file between start_match and stop_match and returns a generator. It is lazy and fast.
@@ -520,9 +507,10 @@ class Vasprun(DataSource):
                     raise TypeError(
                         "bands should be a tuple/list/range of of positive integers"
                     )
-            evals = evals[:, :, (bands,)]
-            occs = occs[:, :, (bands,)]
-            bands_range = bands
+            _bands = list(bands)
+            evals = evals[:, :, _bands]
+            occs = occs[:, :, _bands]
+            bands_range = _bands
         elif elim:
             if (not isinstance(elim, (list, tuple))) and (len(elim) != 2):
                 raise TypeError("elim should be a tuple of length 2")

@@ -23,10 +23,16 @@ Development Installation
    cd ipyvasp
    pip install -e .
 
+
 .. toctree::
    :maxdepth: 2
 
    examples
+
+.. toctree::
+   :maxdepth: 2
+
+   summary
 
 .. toctree::
    :maxdepth: 2

@@ -1,6 +1,14 @@
-__all__ = ["dump", "load", "dict2tuple", "Dict2Data"]
+__all__ = [
+    "dump",
+    "load",
+    "dict2tuple",
+    "Dict2Data",
+    "PoscarData",
+    "BrZoneData",
+    "CellData",
+]
 
-import json
+import json, re
 import pickle
 import inspect
 from collections import namedtuple
@@ -9,7 +17,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .spatial_toolkit import angle_deg, to_basis, to_R3, kpoints2bz
+from .spatial_toolkit import angle_deg, to_basis, to_R3, kpoints2bz, get_bz
 
 
 def dict2tuple(name: str, d: dict):
@@ -125,7 +133,7 @@ class Dict2Data:
         outfile : str, Default is None and returns string. If given, writes to file.
         indent : int, JSON indent. Default is 1.
         """
-        return dump(self, dump_to="json", outfile=outfile, indent=indent)
+        return dump(self, format="json", outfile=outfile, indent=indent)
 
     def to_pickle(self, outfile: str = None):
         """
@@ -135,7 +143,7 @@ class Dict2Data:
         ---------
         outfile : str, Default is None and returns string. If given, writes to file.
         """
-        return dump(self, dump_to="pickle", outfile=outfile)
+        return dump(self, format="pickle", outfile=outfile)
 
     def to_tuple(self):
         """Creates a namedtuple."""
@@ -418,27 +426,49 @@ class SubZoneData(Dict2Data):
         super().__init__(d)
 
     def splot(plane=None):
+        # Implemenet using splot under BrZoneData
         raise NotImplementedError("Not implemented yet")
 
     def iplot():
+        # Implemenet using iplot under BrZoneData
         raise NotImplementedError("Not implemented yet")
 
 
+def _methods_imported():
+    # These imports work as methods of the class
+    from .._lattice import splot_bz as splot, iplot_bz as iplot  # Avoid circular import
+
+    splot.__doc__ = re.sub(  # This replaces orginal docstring too. That is strange
+        "bz_data :.*plane :", "plane :", splot.__doc__, flags=re.DOTALL
+    )
+    iplot.__doc__ = re.sub(
+        "bz_data :.*fill :", "fill :", iplot.__doc__, flags=re.DOTALL
+    )
+    return splot, iplot
+
+
 class BrZoneData(Dict2Data):
+    splot, iplot = _methods_imported()
     _req_keys = ("basis", "faces", "vertices", "primitive")
 
     def __init__(self, d):
         super().__init__(d)
 
     def get_special_points(self, orderby=(1, 1, 1)):
-        "Returns the special points in the brillouin zone in the order relative to a given point in cartesian coordinates. Gamma is always first."
+        """Returns the special points in the brillouin zone in the order relative
+        to a given point in cartesian coordinates. Gamma is always first."""
+        if self.primitive:
+            return SpecialPoints(
+                {"coords": np.empty((0, 3)), "kpoints": np.empty((0, 3))}
+            )  # Primitive Zone has no meaning for special points
+
         mid_faces = np.array(
             [np.mean(np.unique(face, axis=0), axis=0) for face in self.faces_coords]
         )
         mid_edges = []
         for f in self.faces_coords:
             for i in range(len(f) - 1):
-                # Do not insert point between unique vertices
+                # NOTE: Do not insert point between unique vertices, is it necessary?
                 if np.isclose(np.linalg.norm(f[i]), np.linalg.norm(f[i + 1])):
                     mid_edges.append(np.mean([f[i], f[i + 1]], axis=0))
 
@@ -519,7 +549,11 @@ class BrZoneData(Dict2Data):
 
     def translate_inside(self, kpoints, shift=0):
         """Brings kpoints inside BZ. Mostly useful for regular kmesh to bring all kpoints inside BZ.
-        `shift` is a number or a list of three numbers that will be added to kpoints before any other operation, in case points are not symmetric around origin.
+        `shift` is a number or a list of three numbers that will be added to kpoints before any other operation,
+        in case points are not symmetric around origin.
+
+        .. warning::
+            If you made cartesian kpoints, you should not translate them with this function, just shift them by adding a vector.
         """
         return kpoints2bz(self, kpoints, shift=shift)
 
@@ -533,6 +567,7 @@ class BrZoneData(Dict2Data):
 
 
 class CellData(Dict2Data):
+    splot, iplot = _methods_imported()
     _req_keys = ("basis", "faces", "vertices")
 
     def __init__(self, d):
@@ -655,38 +690,37 @@ class DecodeToNumpy(json.JSONDecoder):
         return obj
 
 
-def dump(
-    dict_data, dump_to: str = "pickle", outfile: str = None, indent: int = 1
-) -> None:
-    """
-    Dump ``Dict2Data`` or subclass object or any dictionary to json or pickle string/file.
+def dump(data, format: str = "pickle", outfile: str = None, indent: int = 1) -> None:
+    """Dump ``Dict2Data`` or subclass object or any dictionary to json or pickle string/file.
 
     Parameters
     ----------
-    dict_data : dict or instance of Dict2Data, Any dictionary/Dict2Data(or subclass Data) object containg numpy arrays.
-    dump_to : str, Defualt is ``pickle`` or ``json``.
-    outfile : str, Defualt is None and return string. File name does not require extension.
-    indent : int, Defualt is 1. Only works for json.
+    data : dict or instance of Dict2Data
+        Any dictionary/Dict2Data(or subclass Data) object can be saved.
+    format : str,
+        Defualt is ``pickle``. Should be ``pickle`` or ``json``.
+    outfile : str
+        Defualt is None and return string. File name does not require extension as it is added from ``format``.
+    indent : int
+        Defualt is 1. Only works for json.
     """
-    if dump_to not in ["pickle", "json"]:
-        raise ValueError(
-            "`dump_to` expects 'pickle' or 'json', got '{}'".format(dump_to)
-        )
+    if format not in ["pickle", "json"]:
+        raise ValueError("`format` expects 'pickle' or 'json', got '{}'".format(format))
     try:
-        dict_obj = dict_data.to_dict()  # Change Data object to dictionary
+        dict_obj = data.to_dict()  # Change Data object to dictionary
         dict_obj = {
-            "_loader_": dict_data.__class__.__name__,
+            "_loader_": data.__class__.__name__,
             "_data_": dict_obj,
         }  # Add class name to dictionary for reconstruction
     except:
-        dict_obj = dict_data
-    if dump_to == "pickle":
+        dict_obj = data
+    if format == "pickle":
         if outfile == None:
             return pickle.dumps(dict_obj)
         outfile = Path(outfile).stem + ".pickle"
         with open(outfile, "wb") as f:
             pickle.dump(dict_obj, f)
-    if dump_to == "json":
+    if format == "json":
         if outfile == None:
             return json.dumps(dict_obj, cls=EncodeFromNumpy, indent=indent)
         outfile = Path(outfile).stem + ".json"

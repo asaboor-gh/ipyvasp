@@ -299,14 +299,16 @@ def get_bz(basis, loop=True, primitive=False):
 
 
 def kpoints2bz(bz_data, kpoints, shift=0):
-    """
-    Brings KPOINTS inside BZ. Applies `to_R3` only if bz_data is for primitive BZ.
+    """Brings KPOINTS inside BZ. Applies `to_R3` only if bz_data is for primitive BZ.
 
     Parameters
     ----------
     bz_data : Output of get_bz().
     kpoints : List or array of KPOINTS to transorm into BZ or R3.
     shift : This value is added to kpoints before any other operation, single number of list of 3 numbers for each direction.
+
+    .. warning::
+        Do not use this function to translate kpoints created as cartesian, just shift by adding a vector.
     """
     kpoints = np.array(kpoints) + shift
     if bz_data.primitive:

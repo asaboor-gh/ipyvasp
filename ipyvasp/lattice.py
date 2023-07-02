@@ -6,12 +6,12 @@ __all__ = [
     "get_kmesh",
     "splot_bz",
     "iplot_bz",
+    "ngl_viewer",
 ]
 
 from pathlib import Path
 from contextlib import redirect_stdout
 from io import StringIO
-from functools import partial
 
 import numpy as np
 from pandas.io.clipboard import clipboard_get, clipboard_set
@@ -80,6 +80,7 @@ def ngl_viewer(
     width="400px",
     height="400px",
     plot_vectors=True,
+    dashboard=False,
 ):
     """Display structure in Jupyter notebook using nglview.
 
@@ -107,6 +108,8 @@ def ngl_viewer(
         Height of viewer. Default "400px".
     plot_vectors : bool
         Plot vectors. Default True. Only works if `plot_cell = True`.
+    dashboard : bool
+        Show dashboard. Default False. It just sets `view.gui_style = 'NGL'`.
 
     Returns
     -------
@@ -115,6 +118,9 @@ def ngl_viewer(
 
     .. note::
         `nglview` sometimes does not work in Jupyter lab. You can switch to classic notebook in that case.
+
+    .. tip::
+        See `Advanced NGLView usage <https://projects.volkamerlab.org/teachopencadd/talktorials/T017_advanced_nglview_usage.html>`_.
     """
     if not isinstance(poscar, POSCAR):
         raise TypeError("poscar must be an instance of POSCAR class.")
@@ -164,22 +170,26 @@ def ngl_viewer(
     view.center()
 
     if plot_cell:
+        # arrays.tolist() is important for nglview to write json
         shape = nv.shape.Shape(view=view)
         _color = mcolors.to_rgb(color)  # convert to rgb for nglview
         cell = poscar.get_cell()
         for face in cell.faces_coords:
             for p1, p2 in zip(face[1:], face[:-1]):
-                shape.add_cylinder(p1, p2, _color, linewidth)
+                shape.add_cylinder(p1.tolist(), p2.tolist(), _color, linewidth)
 
         for v in cell.vertices:
-            shape.add_sphere(v, _color, linewidth)
+            shape.add_sphere(v.tolist(), _color, linewidth)
 
         if plot_vectors:
             for i, b in enumerate(cell.basis, start=1):
                 tail = b - b / np.linalg.norm(b)
-                shape.add_cone(tail, b, _color, linewidth * 3, f"a{i}")
-                shape.add_text(b / 2, [0.2, 0.15, 0.2], 2, f"a{i}")
-
+                shape.add_cone(
+                    tail.tolist(), b.tolist(), _color, linewidth * 3, f"a{i}"
+                )
+                shape.add_text((b / 2).tolist(), [0.2, 0.15, 0.2], 2, f"a{i}")
+    if dashboard:
+        view.gui_style = "NGL"
     return view
 
 
@@ -210,8 +220,6 @@ class POSCAR:
         # These after data to work with data
         self._bz = self.get_bz(primitive=False)  # Get defualt regular BZ from sio
         self._cell = self.get_cell()  # Get defualt cell
-        self._plane = None  # Get defualt plane, changed with splot_bz
-        self._ax = None  # Get defualt axis, changed with splot_bz
 
     def __repr__(self):
         atoms = ", ".join([f"{k}={len(v)}" for k, v in self._data.types.items()])
@@ -264,6 +272,10 @@ class POSCAR:
         """
         if viewer is None:
             return plat.view_poscar(self.data, **kwargs)
+        elif viewer in "nglview":
+            return print(
+                f"Use `self.view_ngl()` for better customization in case of viewer={viewer!r}"
+            )
         else:
             from ase.visualize import view
 
@@ -440,8 +452,12 @@ class POSCAR:
     @_sub_doc(stk.get_bz, {"basis :.*loop :": "loop :"})
     @_sig_kwargs(stk.get_bz, ("basis",))
     def get_bz(self, **kwargs):
-        self._bz = stk.get_bz(self._data.rec_basis, **kwargs)
+        self.set_bz(**kwargs)  # set bz to current data
         return self._bz
+
+    def set_bz(self, primitive=False, loop=True):
+        """Set BZ to primitve/regular on demand. All successive operations follow the current set BZ."""
+        self._bz = stk.get_bz(self._data.rec_basis, primitive=primitive, loop=loop)
 
     def get_cell(self, loop=True):
         "See docs of `get_bz`, same except space is inverted and no factor of 2pi."
@@ -455,16 +471,12 @@ class POSCAR:
     @_sub_doc(plat.splot_bz, {"bz_data :.*plane :": "plane :"})
     @_sig_kwargs(plat.splot_bz, ("bz_data",))
     def splot_bz(self, plane=None, **kwargs):
-        self._plane = plane  # Set plane for splot_kpath
-        new_ax = plat.splot_bz(bz_data=self._bz, plane=plane, **kwargs)
-        self._ax = new_ax  # Set ax for splot_kpath
-        self._zoffset = kwargs.get("zoffset", 0)  # Set zoffset for splot_kpath
-        return new_ax
+        return plat.splot_bz(bz_data=self._bz, plane=plane, **kwargs)
 
     def splot_kpath(
         self, kpoints, labels=None, fmt_label=lambda x: (x, {"color": "blue"}), **kwargs
     ):
-        """Plot k-path over existing BZ.
+        """Plot k-path over existing BZ. It will take ``ax``, ``plane`` and ``zoffset`` internally from most recent call to ``self.splot_bz``/``self.bz.splot``.
 
         Parameters
         ----------
@@ -484,11 +496,18 @@ class POSCAR:
         .. tip::
             You can use this function multiple times to plot multiple/broken paths over same BZ.
         """
-        if not self._bz or not self._ax:
-            raise ValueError("BZ not found, use `splot_bz` first")
+        if not self._bz or not hasattr(self._bz, "_splot_kws"):
+            raise ValueError(
+                "BZ data or plot not found, use `self.splot_bz` or `self.bz.splot` first"
+            )
 
         if not np.ndim(kpoints) == 2 and np.shape(kpoints)[-1] == 3:
             raise ValueError("kpoints must be 2D array of shape (N,3)")
+
+        plane, ax, zoffset = [
+            self._bz._splot_kws.get(attr, default)  # class level attributes
+            for attr, default in zip(["plane", "ax", "zoffset"], [None, None, 0])
+        ]
 
         ijk = [0, 1, 2]
         _mapping = {
@@ -500,19 +519,19 @@ class POSCAR:
             "yx": [1, 0],
         }
         _zoffset = [0, 0, 0]
-        if self._plane:
+        if plane:
             _zoffset = (
-                [0, 0, self._zoffset]
-                if self._plane in "xyx"
-                else [0, self._zoffset, 0]
-                if self._plane in "xzx"
-                else [self._zoffset, 0, 0]
+                [0, 0, zoffset]
+                if plane in "xyx"
+                else [0, zoffset, 0]
+                if plane in "xzx"
+                else [zoffset, 0, 0]
             )
 
-        if isinstance(self._plane, str) and self._plane in _mapping:
-            if getattr(self._ax, "name", None) != "3d":
+        if isinstance(plane, str) and plane in _mapping:
+            if getattr(ax, "name", None) != "3d":
                 ijk = _mapping[
-                    self._plane
+                    plane
                 ]  # only change indices if axes is not 3d, even if plane is given
 
         if not labels:
@@ -523,12 +542,12 @@ class POSCAR:
         plat._validate_label_func(fmt_label, labels[0])
 
         coords = self.bz.to_cartesian(kpoints)
-        if _zoffset and self._plane:
+        if _zoffset and plane:
             normal = (
                 [0, 0, 1]
-                if self._plane in "xyx"
+                if plane in "xyx"
                 else [0, 1, 0]
-                if self._plane in "xzx"
+                if plane in "xzx"
                 else [1, 0, 0]
             )
             coords = plat.to_plane(normal, coords) + _zoffset
@@ -538,15 +557,15 @@ class POSCAR:
             **dict(color="blue", linewidth=0.8, marker=".", markersize=10),
             **kwargs,
         }  # need some defaults
-        self._ax.plot(*coords.T, **kwargs)
+        ax.plot(*coords.T, **kwargs)
 
         for c, text in zip(coords, labels):
             lab, textkws = fmt_label(text), {}
             if isinstance(lab, (list, tuple)):
                 lab, textkws = lab
-            self._ax.text(*c, lab, **textkws)
+            ax.text(*c, lab, **textkws)
 
-        return self._ax
+        return ax
 
     @_sig_kwargs(plat.splot_bz, ("bz_data",))
     def splot_cell(self, plane=None, **kwargs):

@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
-        <title>ipyvasp.core.parser - ipyvasp 0.2.0 documentation</title>
+        <title>ipyvasp.core.parser - ipyvasp 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -122,7 +122,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">ipyvasp 0.2.0 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">ipyvasp 0.3.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -145,7 +145,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
   
-  <span class="sidebar-brand-text">ipyvasp 0.2.0 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 0.3.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -154,9 +154,13 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/quickstart.html">Quickstart</a></li>
 </ul>
 </li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../summary.html">API Summary</a></li>
 </ul>
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../apidoc.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -169,6 +173,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.bsdos">Bandstructure and Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.lattice">Lattice Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.widgets">Widgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.potential">Potential and Charge Density</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.misc">Miscellaneous</a></li>
 </ul>
 </li>
@@ -268,6 +273,12 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_poscar</span>  <span class="c1"># keep same instance to avoid data loss</span>
 
+    <span class="k">def</span> <span class="nf">get_evals_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bands</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">orbs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize and return an EvalsDataFrame instance, with the given parameters.&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">..evals_dataframe</span> <span class="kn">import</span> <span class="n">EvalsDataFrame</span>
+
+        <span class="k">return</span> <span class="n">EvalsDataFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spins</span><span class="o">=</span><span class="n">spins</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="n">bands</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">orbs</span><span class="o">=</span><span class="n">orbs</span><span class="p">)</span>
+
     <span class="c1"># Following methods should be implemented in a subclass</span>
     <span class="k">def</span> <span class="nf">get_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
@@ -307,48 +318,29 @@
 
 <div class="viewcode-block" id="Vaspout"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vaspout">[docs]</a><span class="k">class</span> <span class="nc">Vaspout</span><span class="p">(</span><span class="n">DataSource</span><span class="p">):</span>
     <span class="s2">&quot;Read data from vaspout.h5 file on demand.&quot;</span>
+    <span class="c1"># These methods are accessible from parent class, but need here for including in sphinx documentation</span>
+    <span class="n">get_evals_dataframe</span> <span class="o">=</span> <span class="n">DataSource</span><span class="o">.</span><span class="n">get_evals_dataframe</span>
+    <span class="n">poscar</span> <span class="o">=</span> <span class="n">DataSource</span><span class="o">.</span><span class="n">poscar</span>
+    <span class="n">dos</span> <span class="o">=</span> <span class="n">DataSource</span><span class="o">.</span><span class="n">dos</span>
+    <span class="n">bands</span> <span class="o">=</span> <span class="n">DataSource</span><span class="o">.</span><span class="n">bands</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Vaspout is not implemented yet.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Vaspout is not implemented yet.&quot;</span><span class="p">)</span></div>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Access ipyvasp.bsdos.Bands class singleton instance for current Vaspout class.&quot;</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">bands</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Access ipyvasp.bsdos.DOS class singleton instance for current Vaspout class.&quot;</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dos</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Access ipyvasp.lattice.POSCAR class instance.&quot;</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">poscar</span></div>
 
 <div class="viewcode-block" id="Vasprun"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun">[docs]</a><span class="k">class</span> <span class="nc">Vasprun</span><span class="p">(</span><span class="n">DataSource</span><span class="p">):</span>
     <span class="s2">&quot;Reads vasprun.xml file lazily. It reads only the required data from the file when a plot or data access is requested.&quot;</span>
+    <span class="c1"># These methods are accessible from parent class, but need here for including in sphinx documentation</span>
+    <span class="n">get_evals_dataframe</span> <span class="o">=</span> <span class="n">DataSource</span><span class="o">.</span><span class="n">get_evals_dataframe</span>
+    <span class="n">poscar</span> <span class="o">=</span> <span class="n">DataSource</span><span class="o">.</span><span class="n">poscar</span>
+    <span class="n">dos</span> <span class="o">=</span> <span class="n">DataSource</span><span class="o">.</span><span class="n">dos</span>
+    <span class="n">bands</span> <span class="o">=</span> <span class="n">DataSource</span><span class="o">.</span><span class="n">bands</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;./vasprun.xml&quot;</span><span class="p">,</span> <span class="n">skipk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_skipk</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">skipk</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">skipk</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_skipk</span><span class="p">()</span>
         <span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bands</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Access ipyvasp.bsdos.Bands class singleton instance for current Vasprun class.&quot;</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">bands</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Access ipyvasp.bsdos.DOS class singleton instance for current Vasprun class.&quot;</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dos</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Access ipyvasp.lattice.POSCAR class instance.&quot;</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">poscar</span>
 
 <div class="viewcode-block" id="Vasprun.read"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.parser.Vasprun.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_match</span><span class="p">,</span> <span class="n">stop_match</span><span class="p">,</span> <span class="n">nth_match</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skip_last</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads a part of the file between start_match and stop_match and returns a generator. It is lazy and fast.</span>
@@ -728,9 +720,10 @@
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                         <span class="s2">&quot;bands should be a tuple/list/range of of positive integers&quot;</span>
                     <span class="p">)</span>
-            <span class="n">evals</span> <span class="o">=</span> <span class="n">evals</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">(</span><span class="n">bands</span><span class="p">,)]</span>
-            <span class="n">occs</span> <span class="o">=</span> <span class="n">occs</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">(</span><span class="n">bands</span><span class="p">,)]</span>
-            <span class="n">bands_range</span> <span class="o">=</span> <span class="n">bands</span>
+            <span class="n">_bands</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bands</span><span class="p">)</span>
+            <span class="n">evals</span> <span class="o">=</span> <span class="n">evals</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">_bands</span><span class="p">]</span>
+            <span class="n">occs</span> <span class="o">=</span> <span class="n">occs</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">_bands</span><span class="p">]</span>
+            <span class="n">bands_range</span> <span class="o">=</span> <span class="n">_bands</span>
         <span class="k">elif</span> <span class="n">elim</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elim</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)))</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">elim</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;elim should be a tuple of length 2&quot;</span><span class="p">)</span>

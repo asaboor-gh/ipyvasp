@@ -198,8 +198,7 @@ class LOCPOT:
         figsize=(5, 3),
         **kwargs,
     ):
-        """
-        Check periodicity using ipywidgets interactive plot.
+        """Check periodicity using ipywidgets interactive plot.
 
         Parameters
         ----------

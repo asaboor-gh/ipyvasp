@@ -886,10 +886,14 @@ def splot_bz(
         Matplotlib's 2D axes if `plane=None` otherswise 3D axes.
     """
     vname = "a" if bz_data.__class__.__name__ == "CellData" else "b"
+    if vname == "b":  # These needed for splot_kpath internally
+        type(bz_data)._splot_kws = dict(plane=plane, zoffset=zoffset)
+
     label = r"$k_{}/2π$" if vname == "b" else "{}"
     if not ax:  # For both 3D and 2D, initialize 2D axis.
         ax = ptk.get_axes(figsize=(3.4, 3.4))  # For better display
 
+    type(bz_data)._splot_kws["ax"] = ax  # For splot_kpath
     _label = r"\vec{" + vname + "}"  # For both
 
     if vectors and not isinstance(vectors, (tuple, list)):
@@ -977,11 +981,11 @@ def splot_bz(
                     scale=1,
                 )
 
-        ax.set_xlabel(label.format(idxs[plane][0]))
-        ax.set_ylabel(label.format(idxs[plane][1]))
+        ax.set_xlabel(label.format(plane[0]))
+        ax.set_ylabel(label.format(plane[1]))
         if is3d:
-            ind = [i for i in range(3) if i not in idxs[plane]][0]
-            ax.set_zlabel(label.format(ind))
+            lab = [v for v in "xyz" if v not in plane][0]
+            ax.set_zlabel(label.format(lab))
             ax.set_aspect("equal")
             zmin, zmax = ax.get_zlim()
             if zoffset > zmax:
@@ -1002,6 +1006,7 @@ def splot_bz(
             ax3d = fig.add_axes(
                 pos, projection="3d", azim=45, elev=30, proj_type="ortho"
             )
+            type(bz_data)._splot_kws["ax"] = ax3d
 
         if fill:
             if colormap:
@@ -1019,9 +1024,7 @@ def splot_bz(
 
             poly = Poly3DCollection(
                 bz_data.faces_coords,
-                edgecolors=[
-                    color,
-                ],
+                edgecolors=[color],
                 facecolors=colors,
                 alpha=alpha,
                 shade=shade,
@@ -1087,7 +1090,8 @@ def iplot_bz(
         Color to fill surface 'rgba(168,204,216,0.4)` by default. This sholud be a valid Plotly color.
     special_kpoints : bool or callable
         True by default, determines whether to plot special points or not.
-        You can also proivide a mask function f(x,y,z) -> bool which will be used to filter special points based on their fractional coordinates.
+        You can also proivide a mask function f(x,y,z) -> bool which will be used to filter special points
+        based on their fractional coordinates. This is ignored if BZ is primitive.
     alpha : float
         Opacity of BZ planes.
     ortho3d : bool
@@ -1218,8 +1222,8 @@ def iplot_bz(
             )
         )
 
-    # Special Points only if in reciprocal space.
-    if vname == "b" and special_kpoints:
+    # Special Points only if in reciprocal space and regular BZ
+    if vname == "b" and (not getattr(bz_data, "primitive", False)) and special_kpoints:
         if callable(special_kpoints):
             skpts = bz_data.specials.masked(special_kpoints)
         else:

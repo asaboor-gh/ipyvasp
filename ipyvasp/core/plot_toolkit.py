@@ -844,7 +844,7 @@ def color_cube(
 def webshow(transparent=False):
     """Displays all available figures in browser without blocking terminal"""
     for i in plt.get_fignums():
-        svg = plt2html(plt.figure(i), transparent=transparent, dash_html=False)
+        svg = plt2html(plt.figure(i), transparent=transparent)
         html_str = """\
 <!DOCTYPE html>
 <head></head>
@@ -933,53 +933,38 @@ def plt2text(
             print(line)
 
 
-def plt2html(plt_fig=None, transparent=True, out_string=False):
-    """
-    Display svg image in notebook, or return <svg> or show image from terminal.
+def plt2html(plt_fig=None, transparent=True):
+    """Returns ``ipython.display.HTML(<svg of figure>)``. It clears figure after use. So ``plt.show()`` will not work after this.
 
     Parameters
     ----------
     plt_fig : Matplotlib's figure instance, auto picks as well.
     transparent : True of False for fig background.
-    out_string : If True, returns <svg> string.
     """
     if plt_fig is None:
         plt_fig = plt.gcf()
     plot_bytes = BytesIO()
     plt.savefig(plot_bytes, format="svg", transparent=transparent)
 
-    if out_string:
-        _ = plt.clf()  # Clear image
-        return "<svg" + plot_bytes.getvalue().decode("utf-8").split("<svg")[1]
-    else:
-        try:
-            shell = get_ipython().__class__.__name__
-            if (
-                shell == "ZMQInteractiveShell" or shell == "Shell"
-            ):  # Shell for Colab. Don't know why Google ...
-                _ = plt.clf()  # Clear other display
-                return HTML(
-                    "<svg" + plot_bytes.getvalue().decode("utf-8").split("<svg")[1]
-                )
-        except:
-            return plt.show()
+    _ = plt.clf()  # Clear other display
+    return HTML("<svg" + plot_bytes.getvalue().decode("utf-8").split("<svg")[1])
 
 
-def iplot2html(fig, filename=None, out_string=False, modebar=True):
-    """
-    Writes plotly's figure as HTML file or display in IPython which is accessible when online. It is different than plotly's `fig.to_html` as it is minimal in memory. If you need to have offline working file, just use `fig.write_html('file.html')` which will be larger in size.
+def iplot2html(fig, outfile=None, modebar=True):
+    """Writes plotly's figure as HTML file or display in IPython which is accessible when online.
+    It is different than plotly's `fig.to_html` as it is minimal in memory. If you need to have
+    offline working file, just use `fig.write_html('file.html')` which will be larger in size.
 
     Parameters
     ----------
     fig : A plotly's figure object.
-    filename : Name of file to save fig. Defualt is None and show plot in Colab/Online or return hrml string.
-    out_string : If True, returns HTML string, if False displays graph if possible.
+    outfile : Name of file to save fig. Defualt is None and show plot in Notebook.
     modebar : If True, shows modebar in graph. Default is True. Not used if saving to file.
     """
     div_id = "graph-{}".format(uuid1())
     fig_json = fig.to_json()
     # a simple HTML template
-    if filename:
+    if outfile:
         template = """<html>
         <head>
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -994,7 +979,7 @@ def iplot2html(fig, filename=None, out_string=False, modebar=True):
         </html>"""
 
         # write the JSON to the HTML template
-        with open(filename, "w") as f:
+        with open(outfile, "w") as f:
             f.write(template.format(div_id, fig_json, div_id))
 
     else:
@@ -1013,10 +998,7 @@ def iplot2html(fig, filename=None, out_string=False, modebar=True):
         </div>""".format(
             div_id, fig_json, config, div_id
         )
-        if out_string is True:
-            return template
-        else:
-            return HTML(template)
+        return HTML(template)
 
 
 def iplot2widget(fig, fig_widget=None, template=None):

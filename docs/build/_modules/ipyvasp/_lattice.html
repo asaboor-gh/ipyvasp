@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
-        <title>ipyvasp._lattice - ipyvasp 0.2.0 documentation</title>
+        <title>ipyvasp._lattice - ipyvasp 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -122,7 +122,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">ipyvasp 0.2.0 documentation</div></a>
+      <a href="../../index.html"><div class="brand">ipyvasp 0.3.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -145,7 +145,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">ipyvasp 0.2.0 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 0.3.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -160,7 +160,22 @@
 </li>
 </ul>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../apidoc.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../summary.html">API Summary</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of API Summary</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.lattice.html">ipyvasp.lattice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.bsdos.html">ipyvasp.bsdos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.potential.html">ipyvasp.potential</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.widgets.html">ipyvasp.widgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.misc.html">ipyvasp.misc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.utils.html">ipyvasp.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.core.parser.html">ipyvasp.core.parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.core.serializer.html">ipyvasp.core.serializer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.core.plot_toolkit.html">ipyvasp.core.plot_toolkit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.core.spatial_toolkit.html">ipyvasp.core.spatial_toolkit</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../apidoc.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html">IPyVASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.core.parser">Data Parsers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.core.serializer">Data Serializer</a></li>
@@ -170,6 +185,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.bsdos">Bandstructure and Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.lattice">Lattice Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.widgets">Widgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.potential">Potential and Charge Density</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.misc">Miscellaneous</a></li>
 </ul>
 </li>
@@ -377,7 +393,7 @@
     <span class="p">)</span>
 
 
-<div class="viewcode-block" id="periodic_table"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.periodic_table">[docs]</a><span class="k">def</span> <span class="nf">periodic_table</span><span class="p">():</span>
+<div class="viewcode-block" id="periodic_table"><a class="viewcode-back" href="../../modules.html#ipyvasp.core.serializer.periodic_table">[docs]</a><span class="k">def</span> <span class="nf">periodic_table</span><span class="p">():</span>
     <span class="s2">&quot;Display colorerd elements in periodic table.&quot;</span>
     <span class="n">_copy_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
         <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;$^</span><span class="se">{{</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="se">}}</span><span class="s2">$</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">_atom_colors</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
@@ -783,7 +799,7 @@
     <span class="k">return</span> <span class="n">hsk_list</span>
 
 
-<div class="viewcode-block" id="get_kpath"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.get_kpath">[docs]</a><span class="k">def</span> <span class="nf">get_kpath</span><span class="p">(</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ibzkpt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rec_basis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="get_kpath"><a class="viewcode-back" href="../../modules.html#ipyvasp.core.serializer.get_kpath">[docs]</a><span class="k">def</span> <span class="nf">get_kpath</span><span class="p">(</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ibzkpt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rec_basis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate list of kpoints along high symmetry path. Options are write to file or return KPOINTS list.</span>
 <span class="sd">    It generates uniformly spaced point with input `n` as just a scale factor of number of points per average length of `rec_basis`.</span>
 
@@ -935,7 +951,7 @@
 
 
 <span class="c1"># Cell</span>
-<div class="viewcode-block" id="get_kmesh"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.get_kmesh">[docs]</a><span class="k">def</span> <span class="nf">get_kmesh</span><span class="p">(</span>
+<div class="viewcode-block" id="get_kmesh"><a class="viewcode-back" href="../../modules.html#ipyvasp.core.serializer.get_kmesh">[docs]</a><span class="k">def</span> <span class="nf">get_kmesh</span><span class="p">(</span>
     <span class="n">poscar_data</span><span class="p">,</span>
     <span class="o">*</span><span class="n">args</span><span class="p">,</span>
     <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -1048,7 +1064,7 @@
 
 
 <span class="c1"># Cell</span>
-<div class="viewcode-block" id="splot_bz"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.splot_bz">[docs]</a><span class="k">def</span> <span class="nf">splot_bz</span><span class="p">(</span>
+<div class="viewcode-block" id="splot_bz"><a class="viewcode-back" href="../../modules.html#ipyvasp.core.serializer.splot_bz">[docs]</a><span class="k">def</span> <span class="nf">splot_bz</span><span class="p">(</span>
     <span class="n">bz_data</span><span class="p">,</span>
     <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1095,10 +1111,14 @@
 <span class="sd">        Matplotlib&#39;s 2D axes if `plane=None` otherswise 3D axes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">vname</span> <span class="o">=</span> <span class="s2">&quot;a&quot;</span> <span class="k">if</span> <span class="n">bz_data</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;CellData&quot;</span> <span class="k">else</span> <span class="s2">&quot;b&quot;</span>
+    <span class="k">if</span> <span class="n">vname</span> <span class="o">==</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span>  <span class="c1"># These needed for splot_kpath internally</span>
+        <span class="nb">type</span><span class="p">(</span><span class="n">bz_data</span><span class="p">)</span><span class="o">.</span><span class="n">_splot_kws</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span> <span class="n">zoffset</span><span class="o">=</span><span class="n">zoffset</span><span class="p">)</span>
+
     <span class="n">label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$k_</span><span class="si">{}</span><span class="s2">/2π$&quot;</span> <span class="k">if</span> <span class="n">vname</span> <span class="o">==</span> <span class="s2">&quot;b&quot;</span> <span class="k">else</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ax</span><span class="p">:</span>  <span class="c1"># For both 3D and 2D, initialize 2D axis.</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">ptk</span><span class="o">.</span><span class="n">get_axes</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.4</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">))</span>  <span class="c1"># For better display</span>
 
+    <span class="nb">type</span><span class="p">(</span><span class="n">bz_data</span><span class="p">)</span><span class="o">.</span><span class="n">_splot_kws</span><span class="p">[</span><span class="s2">&quot;ax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>  <span class="c1"># For splot_kpath</span>
     <span class="n">_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\vec{&quot;</span> <span class="o">+</span> <span class="n">vname</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>  <span class="c1"># For both</span>
 
     <span class="k">if</span> <span class="n">vectors</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
@@ -1186,11 +1206,11 @@
                     <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                 <span class="p">)</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">plane</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idxs</span><span class="p">[</span><span class="n">plane</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plane</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plane</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
         <span class="k">if</span> <span class="n">is3d</span><span class="p">:</span>
-            <span class="n">ind</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">idxs</span><span class="p">[</span><span class="n">plane</span><span class="p">]][</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">))</span>
+            <span class="n">lab</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="s2">&quot;xyz&quot;</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plane</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lab</span><span class="p">))</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
             <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_zlim</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">zoffset</span> <span class="o">&gt;</span> <span class="n">zmax</span><span class="p">:</span>
@@ -1211,6 +1231,7 @@
             <span class="n">ax3d</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span>
                 <span class="n">pos</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">,</span> <span class="n">azim</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span> <span class="n">elev</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">proj_type</span><span class="o">=</span><span class="s2">&quot;ortho&quot;</span>
             <span class="p">)</span>
+            <span class="nb">type</span><span class="p">(</span><span class="n">bz_data</span><span class="p">)</span><span class="o">.</span><span class="n">_splot_kws</span><span class="p">[</span><span class="s2">&quot;ax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax3d</span>
 
         <span class="k">if</span> <span class="n">fill</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">colormap</span><span class="p">:</span>
@@ -1228,9 +1249,7 @@
 
             <span class="n">poly</span> <span class="o">=</span> <span class="n">Poly3DCollection</span><span class="p">(</span>
                 <span class="n">bz_data</span><span class="o">.</span><span class="n">faces_coords</span><span class="p">,</span>
-                <span class="n">edgecolors</span><span class="o">=</span><span class="p">[</span>
-                    <span class="n">color</span><span class="p">,</span>
-                <span class="p">],</span>
+                <span class="n">edgecolors</span><span class="o">=</span><span class="p">[</span><span class="n">color</span><span class="p">],</span>
                 <span class="n">facecolors</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span>
                 <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
                 <span class="n">shade</span><span class="o">=</span><span class="n">shade</span><span class="p">,</span>
@@ -1275,7 +1294,7 @@
 
 
 <span class="c1"># Cell</span>
-<div class="viewcode-block" id="iplot_bz"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.iplot_bz">[docs]</a><span class="k">def</span> <span class="nf">iplot_bz</span><span class="p">(</span>
+<div class="viewcode-block" id="iplot_bz"><a class="viewcode-back" href="../../modules.html#ipyvasp.core.serializer.iplot_bz">[docs]</a><span class="k">def</span> <span class="nf">iplot_bz</span><span class="p">(</span>
     <span class="n">bz_data</span><span class="p">,</span>
     <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;rgba(168,204,216,0.8)&quot;</span><span class="p">,</span>
@@ -1296,7 +1315,8 @@
 <span class="sd">        Color to fill surface &#39;rgba(168,204,216,0.4)` by default. This sholud be a valid Plotly color.</span>
 <span class="sd">    special_kpoints : bool or callable</span>
 <span class="sd">        True by default, determines whether to plot special points or not.</span>
-<span class="sd">        You can also proivide a mask function f(x,y,z) -&gt; bool which will be used to filter special points based on their fractional coordinates.</span>
+<span class="sd">        You can also proivide a mask function f(x,y,z) -&gt; bool which will be used to filter special points</span>
+<span class="sd">        based on their fractional coordinates. This is ignored if BZ is primitive.</span>
 <span class="sd">    alpha : float</span>
 <span class="sd">        Opacity of BZ planes.</span>
 <span class="sd">    ortho3d : bool</span>
@@ -1427,8 +1447,8 @@
             <span class="p">)</span>
         <span class="p">)</span>
 
-    <span class="c1"># Special Points only if in reciprocal space.</span>
-    <span class="k">if</span> <span class="n">vname</span> <span class="o">==</span> <span class="s2">&quot;b&quot;</span> <span class="ow">and</span> <span class="n">special_kpoints</span><span class="p">:</span>
+    <span class="c1"># Special Points only if in reciprocal space and regular BZ</span>
+    <span class="k">if</span> <span class="n">vname</span> <span class="o">==</span> <span class="s2">&quot;b&quot;</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">bz_data</span><span class="p">,</span> <span class="s2">&quot;primitive&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span> <span class="ow">and</span> <span class="n">special_kpoints</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">special_kpoints</span><span class="p">):</span>
             <span class="n">skpts</span> <span class="o">=</span> <span class="n">bz_data</span><span class="o">.</span><span class="n">specials</span><span class="o">.</span><span class="n">masked</span><span class="p">(</span><span class="n">special_kpoints</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

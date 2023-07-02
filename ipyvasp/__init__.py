@@ -4,7 +4,6 @@ It is designed to primarily be used in Jupyter Notebook because it offers
 widgets for interactive visualization and bulk analysis.
 """
 
-__version__ = "0.3.0"
 
 __all__ = [  # For documentation purpose
     "get_axes",
@@ -19,13 +18,14 @@ __all__ = [  # For documentation purpose
     "OUTCAR",
 ]
 
+from ._version import __version__
 from .core.parser import *
 from .core.serializer import *
 from .misc import *
 from .lattice import *
 from .bsdos import *
 from .potential import *
-from .surface import *
+from .evals_dataframe import *
 from .utils import *
 from .widgets import summarize, BandsWidget, KpathWidget, FilesWidget
 from .core import plot_toolkit, spatial_toolkit
@@ -40,7 +40,7 @@ from .core.plot_toolkit import (
     webshow,
 )
 
-
+version = __version__
 # Set global matplotlib settings for notebook.
 from cycler import cycler as __cycler
 

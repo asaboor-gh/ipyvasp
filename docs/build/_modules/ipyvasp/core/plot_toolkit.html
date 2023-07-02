@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
-        <title>ipyvasp.core.plot_toolkit - ipyvasp 0.2.0 documentation</title>
+        <title>ipyvasp.core.plot_toolkit - ipyvasp 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -122,7 +122,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">ipyvasp 0.2.0 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">ipyvasp 0.3.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -145,7 +145,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
   
-  <span class="sidebar-brand-text">ipyvasp 0.2.0 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 0.3.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -154,9 +154,13 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/quickstart.html">Quickstart</a></li>
 </ul>
 </li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../summary.html">API Summary</a></li>
 </ul>
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../apidoc.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -169,6 +173,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.bsdos">Bandstructure and Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.lattice">Lattice Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.widgets">Widgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.potential">Potential and Charge Density</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../modules.html#module-ipyvasp.misc">Miscellaneous</a></li>
 </ul>
 </li>
@@ -1052,7 +1057,7 @@
 <div class="viewcode-block" id="webshow"><a class="viewcode-back" href="../../../modules.html#ipyvasp.webshow">[docs]</a><span class="k">def</span> <span class="nf">webshow</span><span class="p">(</span><span class="n">transparent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Displays all available figures in browser without blocking terminal&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_fignums</span><span class="p">():</span>
-        <span class="n">svg</span> <span class="o">=</span> <span class="n">plt2html</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">transparent</span><span class="o">=</span><span class="n">transparent</span><span class="p">,</span> <span class="n">dash_html</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">svg</span> <span class="o">=</span> <span class="n">plt2html</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">transparent</span><span class="o">=</span><span class="n">transparent</span><span class="p">)</span>
         <span class="n">html_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
 <span class="s2">&lt;!DOCTYPE html&gt;</span>
 <span class="s2">&lt;head&gt;&lt;/head&gt;</span>
@@ -1141,53 +1146,38 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="plt2html"><a class="viewcode-back" href="../../../modules.html#ipyvasp.plt2html">[docs]</a><span class="k">def</span> <span class="nf">plt2html</span><span class="p">(</span><span class="n">plt_fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">out_string</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Display svg image in notebook, or return &lt;svg&gt; or show image from terminal.</span>
+<div class="viewcode-block" id="plt2html"><a class="viewcode-back" href="../../../modules.html#ipyvasp.plt2html">[docs]</a><span class="k">def</span> <span class="nf">plt2html</span><span class="p">(</span><span class="n">plt_fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns ``ipython.display.HTML(&lt;svg of figure&gt;)``. It clears figure after use. So ``plt.show()`` will not work after this.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    plt_fig : Matplotlib&#39;s figure instance, auto picks as well.</span>
 <span class="sd">    transparent : True of False for fig background.</span>
-<span class="sd">    out_string : If True, returns &lt;svg&gt; string.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">plt_fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plt_fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
     <span class="n">plot_bytes</span> <span class="o">=</span> <span class="n">BytesIO</span><span class="p">()</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_bytes</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;svg&quot;</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="n">transparent</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">out_string</span><span class="p">:</span>
-        <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>  <span class="c1"># Clear image</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;svg&quot;</span> <span class="o">+</span> <span class="n">plot_bytes</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&lt;svg&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">shell</span> <span class="o">=</span> <span class="n">get_ipython</span><span class="p">()</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="n">shell</span> <span class="o">==</span> <span class="s2">&quot;ZMQInteractiveShell&quot;</span> <span class="ow">or</span> <span class="n">shell</span> <span class="o">==</span> <span class="s2">&quot;Shell&quot;</span>
-            <span class="p">):</span>  <span class="c1"># Shell for Colab. Don&#39;t know why Google ...</span>
-                <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>  <span class="c1"># Clear other display</span>
-                <span class="k">return</span> <span class="n">HTML</span><span class="p">(</span>
-                    <span class="s2">&quot;&lt;svg&quot;</span> <span class="o">+</span> <span class="n">plot_bytes</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&lt;svg&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>  <span class="c1"># Clear other display</span>
+    <span class="k">return</span> <span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&lt;svg&quot;</span> <span class="o">+</span> <span class="n">plot_bytes</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&lt;svg&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="iplot2html"><a class="viewcode-back" href="../../../modules.html#ipyvasp.iplot2html">[docs]</a><span class="k">def</span> <span class="nf">iplot2html</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_string</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">modebar</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Writes plotly&#39;s figure as HTML file or display in IPython which is accessible when online. It is different than plotly&#39;s `fig.to_html` as it is minimal in memory. If you need to have offline working file, just use `fig.write_html(&#39;file.html&#39;)` which will be larger in size.</span>
+<div class="viewcode-block" id="iplot2html"><a class="viewcode-back" href="../../../modules.html#ipyvasp.iplot2html">[docs]</a><span class="k">def</span> <span class="nf">iplot2html</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">modebar</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Writes plotly&#39;s figure as HTML file or display in IPython which is accessible when online.</span>
+<span class="sd">    It is different than plotly&#39;s `fig.to_html` as it is minimal in memory. If you need to have</span>
+<span class="sd">    offline working file, just use `fig.write_html(&#39;file.html&#39;)` which will be larger in size.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    fig : A plotly&#39;s figure object.</span>
-<span class="sd">    filename : Name of file to save fig. Defualt is None and show plot in Colab/Online or return hrml string.</span>
-<span class="sd">    out_string : If True, returns HTML string, if False displays graph if possible.</span>
+<span class="sd">    outfile : Name of file to save fig. Defualt is None and show plot in Notebook.</span>
 <span class="sd">    modebar : If True, shows modebar in graph. Default is True. Not used if saving to file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">div_id</span> <span class="o">=</span> <span class="s2">&quot;graph-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">uuid1</span><span class="p">())</span>
     <span class="n">fig_json</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
     <span class="c1"># a simple HTML template</span>
-    <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">outfile</span><span class="p">:</span>
         <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;&lt;html&gt;</span>
 <span class="s2">        &lt;head&gt;</span>
 <span class="s2">        &lt;script src=&quot;https://cdn.plot.ly/plotly-latest.min.js&quot;&gt;&lt;/script&gt;</span>
@@ -1202,7 +1192,7 @@
 <span class="s2">        &lt;/html&gt;&quot;&quot;&quot;</span>
 
         <span class="c1"># write the JSON to the HTML template</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">div_id</span><span class="p">,</span> <span class="n">fig_json</span><span class="p">,</span> <span class="n">div_id</span><span class="p">))</span>
 
     <span class="k">else</span><span class="p">:</span>
@@ -1221,10 +1211,7 @@
 <span class="s2">        &lt;/div&gt;&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">div_id</span><span class="p">,</span> <span class="n">fig_json</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">div_id</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">out_string</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">template</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">HTML</span><span class="p">(</span><span class="n">template</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">HTML</span><span class="p">(</span><span class="n">template</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="iplot2widget"><a class="viewcode-back" href="../../../modules.html#ipyvasp.iplot2widget">[docs]</a><span class="k">def</span> <span class="nf">iplot2widget</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">fig_widget</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

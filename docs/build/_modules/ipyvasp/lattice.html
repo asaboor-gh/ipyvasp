@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
-        <title>ipyvasp.lattice - ipyvasp 0.2.0 documentation</title>
+        <title>ipyvasp.lattice - ipyvasp 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -122,7 +122,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">ipyvasp 0.2.0 documentation</div></a>
+      <a href="../../index.html"><div class="brand">ipyvasp 0.3.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -145,7 +145,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">ipyvasp 0.2.0 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 0.3.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -160,7 +160,22 @@
 </li>
 </ul>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../apidoc.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../summary.html">API Summary</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of API Summary</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.lattice.html">ipyvasp.lattice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.bsdos.html">ipyvasp.bsdos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.potential.html">ipyvasp.potential</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.widgets.html">ipyvasp.widgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.misc.html">ipyvasp.misc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.utils.html">ipyvasp.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.core.parser.html">ipyvasp.core.parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.core.serializer.html">ipyvasp.core.serializer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.core.plot_toolkit.html">ipyvasp.core.plot_toolkit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/ipyvasp.core.spatial_toolkit.html">ipyvasp.core.spatial_toolkit</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../apidoc.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html">IPyVASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.core.parser">Data Parsers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.core.serializer">Data Serializer</a></li>
@@ -170,6 +185,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.bsdos">Bandstructure and Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.lattice">Lattice Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.widgets">Widgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.potential">Potential and Charge Density</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules.html#module-ipyvasp.misc">Miscellaneous</a></li>
 </ul>
 </li>
@@ -215,12 +231,12 @@
     <span class="s2">&quot;get_kmesh&quot;</span><span class="p">,</span>
     <span class="s2">&quot;splot_bz&quot;</span><span class="p">,</span>
     <span class="s2">&quot;iplot_bz&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ngl_viewer&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">redirect_stdout</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">pandas.io.clipboard</span> <span class="kn">import</span> <span class="n">clipboard_get</span><span class="p">,</span> <span class="n">clipboard_set</span>
@@ -278,7 +294,7 @@
         <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;Connection was not sccessful. Try again!&quot;</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">ngl_viewer</span><span class="p">(</span>
+<div class="viewcode-block" id="ngl_viewer"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.ngl_viewer">[docs]</a><span class="k">def</span> <span class="nf">ngl_viewer</span><span class="p">(</span>
     <span class="n">poscar</span><span class="p">,</span>
     <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">sizes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -289,6 +305,7 @@
     <span class="n">width</span><span class="o">=</span><span class="s2">&quot;400px&quot;</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="s2">&quot;400px&quot;</span><span class="p">,</span>
     <span class="n">plot_vectors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">dashboard</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Display structure in Jupyter notebook using nglview.</span>
 
@@ -316,6 +333,8 @@
 <span class="sd">        Height of viewer. Default &quot;400px&quot;.</span>
 <span class="sd">    plot_vectors : bool</span>
 <span class="sd">        Plot vectors. Default True. Only works if `plot_cell = True`.</span>
+<span class="sd">    dashboard : bool</span>
+<span class="sd">        Show dashboard. Default False. It just sets `view.gui_style = &#39;NGL&#39;`.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -324,6 +343,9 @@
 
 <span class="sd">    .. note::</span>
 <span class="sd">        `nglview` sometimes does not work in Jupyter lab. You can switch to classic notebook in that case.</span>
+
+<span class="sd">    .. tip::</span>
+<span class="sd">        See `Advanced NGLView usage &lt;https://projects.volkamerlab.org/teachopencadd/talktorials/T017_advanced_nglview_usage.html&gt;`_.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">poscar</span><span class="p">,</span> <span class="n">POSCAR</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;poscar must be an instance of POSCAR class.&quot;</span><span class="p">)</span>
@@ -373,23 +395,27 @@
     <span class="n">view</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">plot_cell</span><span class="p">:</span>
+        <span class="c1"># arrays.tolist() is important for nglview to write json</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">nv</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">Shape</span><span class="p">(</span><span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
         <span class="n">_color</span> <span class="o">=</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">to_rgb</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>  <span class="c1"># convert to rgb for nglview</span>
         <span class="n">cell</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">faces_coords</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">face</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
-                <span class="n">shape</span><span class="o">.</span><span class="n">add_cylinder</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">_color</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">)</span>
+                <span class="n">shape</span><span class="o">.</span><span class="n">add_cylinder</span><span class="p">(</span><span class="n">p1</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">p2</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">_color</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">vertices</span><span class="p">:</span>
-            <span class="n">shape</span><span class="o">.</span><span class="n">add_sphere</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">_color</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">)</span>
+            <span class="n">shape</span><span class="o">.</span><span class="n">add_sphere</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">_color</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">plot_vectors</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
                 <span class="n">tail</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">b</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-                <span class="n">shape</span><span class="o">.</span><span class="n">add_cone</span><span class="p">(</span><span class="n">tail</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">_color</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">shape</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="n">b</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">view</span>
+                <span class="n">shape</span><span class="o">.</span><span class="n">add_cone</span><span class="p">(</span>
+                    <span class="n">tail</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">b</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">_color</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="n">shape</span><span class="o">.</span><span class="n">add_text</span><span class="p">((</span><span class="n">b</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dashboard</span><span class="p">:</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">gui_style</span> <span class="o">=</span> <span class="s2">&quot;NGL&quot;</span>
+    <span class="k">return</span> <span class="n">view</span></div>
 
 
 <div class="viewcode-block" id="POSCAR"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR">[docs]</a><span class="k">class</span> <span class="nc">POSCAR</span><span class="p">:</span>
@@ -419,8 +445,6 @@
         <span class="c1"># These after data to work with data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bz</span><span class="p">(</span><span class="n">primitive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Get defualt regular BZ from sio</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>  <span class="c1"># Get defualt cell</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Get defualt plane, changed with splot_bz</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Get defualt axis, changed with splot_bz</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">atoms</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
@@ -473,6 +497,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">viewer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">plat</span><span class="o">.</span><span class="n">view_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">viewer</span> <span class="ow">in</span> <span class="s2">&quot;nglview&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Use `self.view_ngl()` for better customization in case of viewer=</span><span class="si">{</span><span class="n">viewer</span><span class="si">!r}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">ase.visualize</span> <span class="kn">import</span> <span class="n">view</span>
 
@@ -649,8 +677,12 @@
 <div class="viewcode-block" id="POSCAR.get_bz"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_bz">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">stk</span><span class="o">.</span><span class="n">get_bz</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;basis :.*loop :&quot;</span><span class="p">:</span> <span class="s2">&quot;loop :&quot;</span><span class="p">})</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">stk</span><span class="o">.</span><span class="n">get_bz</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;basis&quot;</span><span class="p">,))</span>
     <span class="k">def</span> <span class="nf">get_bz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bz</span> <span class="o">=</span> <span class="n">stk</span><span class="o">.</span><span class="n">get_bz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">rec_basis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_bz</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># set bz to current data</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bz</span></div>
+
+<div class="viewcode-block" id="POSCAR.set_bz"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.set_bz">[docs]</a>    <span class="k">def</span> <span class="nf">set_bz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primitive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set BZ to primitve/regular on demand. All successive operations follow the current set BZ.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bz</span> <span class="o">=</span> <span class="n">stk</span><span class="o">.</span><span class="n">get_bz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">rec_basis</span><span class="p">,</span> <span class="n">primitive</span><span class="o">=</span><span class="n">primitive</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="POSCAR.get_cell"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_cell">[docs]</a>    <span class="k">def</span> <span class="nf">get_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="s2">&quot;See docs of `get_bz`, same except space is inverted and no factor of 2pi.&quot;</span>
@@ -664,16 +696,12 @@
 <div class="viewcode-block" id="POSCAR.splot_bz"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_bz">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;bz_data :.*plane :&quot;</span><span class="p">:</span> <span class="s2">&quot;plane :&quot;</span><span class="p">})</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;bz_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span> <span class="nf">splot_bz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span> <span class="o">=</span> <span class="n">plane</span>  <span class="c1"># Set plane for splot_kpath</span>
-        <span class="n">new_ax</span> <span class="o">=</span> <span class="n">plat</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">(</span><span class="n">bz_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bz</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="n">new_ax</span>  <span class="c1"># Set ax for splot_kpath</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_zoffset</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;zoffset&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># Set zoffset for splot_kpath</span>
-        <span class="k">return</span> <span class="n">new_ax</span></div>
+        <span class="k">return</span> <span class="n">plat</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">(</span><span class="n">bz_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bz</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="POSCAR.splot_kpath"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_kpath">[docs]</a>    <span class="k">def</span> <span class="nf">splot_kpath</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fmt_label</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">}),</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot k-path over existing BZ.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot k-path over existing BZ. It will take ``ax``, ``plane`` and ``zoffset`` internally from most recent call to ``self.splot_bz``/``self.bz.splot``.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -693,11 +721,18 @@
 <span class="sd">        .. tip::</span>
 <span class="sd">            You can use this function multiple times to plot multiple/broken paths over same BZ.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bz</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;BZ not found, use `splot_bz` first&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bz</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bz</span><span class="p">,</span> <span class="s2">&quot;_splot_kws&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;BZ data or plot not found, use `self.splot_bz` or `self.bz.splot` first&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">kpoints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">kpoints</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;kpoints must be 2D array of shape (N,3)&quot;</span><span class="p">)</span>
+
+        <span class="n">plane</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">zoffset</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bz</span><span class="o">.</span><span class="n">_splot_kws</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>  <span class="c1"># class level attributes</span>
+            <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">default</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="s2">&quot;plane&quot;</span><span class="p">,</span> <span class="s2">&quot;ax&quot;</span><span class="p">,</span> <span class="s2">&quot;zoffset&quot;</span><span class="p">],</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="p">]</span>
 
         <span class="n">ijk</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
         <span class="n">_mapping</span> <span class="o">=</span> <span class="p">{</span>
@@ -709,19 +744,19 @@
             <span class="s2">&quot;yx&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
         <span class="p">}</span>
         <span class="n">_zoffset</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">plane</span><span class="p">:</span>
             <span class="n">_zoffset</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_zoffset</span><span class="p">]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span> <span class="ow">in</span> <span class="s2">&quot;xyx&quot;</span>
-                <span class="k">else</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_zoffset</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span> <span class="ow">in</span> <span class="s2">&quot;xzx&quot;</span>
-                <span class="k">else</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_zoffset</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">zoffset</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">plane</span> <span class="ow">in</span> <span class="s2">&quot;xyx&quot;</span>
+                <span class="k">else</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">zoffset</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">plane</span> <span class="ow">in</span> <span class="s2">&quot;xzx&quot;</span>
+                <span class="k">else</span> <span class="p">[</span><span class="n">zoffset</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span> <span class="ow">in</span> <span class="n">_mapping</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;3d&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plane</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">plane</span> <span class="ow">in</span> <span class="n">_mapping</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;3d&quot;</span><span class="p">:</span>
                 <span class="n">ijk</span> <span class="o">=</span> <span class="n">_mapping</span><span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span>
+                    <span class="n">plane</span>
                 <span class="p">]</span>  <span class="c1"># only change indices if axes is not 3d, even if plane is given</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">labels</span><span class="p">:</span>
@@ -732,12 +767,12 @@
         <span class="n">plat</span><span class="o">.</span><span class="n">_validate_label_func</span><span class="p">(</span><span class="n">fmt_label</span><span class="p">,</span> <span class="n">labels</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bz</span><span class="o">.</span><span class="n">to_cartesian</span><span class="p">(</span><span class="n">kpoints</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">_zoffset</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_zoffset</span> <span class="ow">and</span> <span class="n">plane</span><span class="p">:</span>
             <span class="n">normal</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span> <span class="ow">in</span> <span class="s2">&quot;xyx&quot;</span>
+                <span class="k">if</span> <span class="n">plane</span> <span class="ow">in</span> <span class="s2">&quot;xyx&quot;</span>
                 <span class="k">else</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plane</span> <span class="ow">in</span> <span class="s2">&quot;xzx&quot;</span>
+                <span class="k">if</span> <span class="n">plane</span> <span class="ow">in</span> <span class="s2">&quot;xzx&quot;</span>
                 <span class="k">else</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
             <span class="p">)</span>
             <span class="n">coords</span> <span class="o">=</span> <span class="n">plat</span><span class="o">.</span><span class="n">to_plane</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">_zoffset</span>
@@ -747,15 +782,15 @@
             <span class="o">**</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">}</span>  <span class="c1"># need some defaults</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
             <span class="n">lab</span><span class="p">,</span> <span class="n">textkws</span> <span class="o">=</span> <span class="n">fmt_label</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="p">{}</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lab</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
                 <span class="n">lab</span><span class="p">,</span> <span class="n">textkws</span> <span class="o">=</span> <span class="n">lab</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">lab</span><span class="p">,</span> <span class="o">**</span><span class="n">textkws</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">,</span> <span class="n">lab</span><span class="p">,</span> <span class="o">**</span><span class="n">textkws</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span></div>
+        <span class="k">return</span> <span class="n">ax</span></div>
 
 <div class="viewcode-block" id="POSCAR.splot_cell"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_cell">[docs]</a>    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;bz_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span> <span class="nf">splot_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>

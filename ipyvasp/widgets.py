@@ -283,23 +283,23 @@ class FilesWidget(VBox):
         )
         info = ipw.HTML().add_class("FW-Progess")
 
-        def interact_func(filename, **kwargs):
-            if filename:  # This would be None if no file is selected
+        def interact_func(fname, **kwargs):
+            if fname:  # This would be None if no file is selected
                 info.value = _progress_svg
                 try:
                     start = time()
                     print(
-                        f"Running {func.__name__}({filename!r}, {kwargs})"
+                        f"Running {func.__name__}({fname!r}, {kwargs})"
                     )  # it also serves as removing the output errors
                     func(
-                        Path(filename).absolute(), **kwargs
+                        Path(fname).absolute(), **kwargs
                     )  # Have Path object absolue if user changes directory
                     print(f"Finished in {time() - start:.3f} seconds.")
                 finally:
                     info.value = ""
 
         out = ipw.interactive(
-            interact_func, options, filename=new_fw._widgets["files"], **kwargs
+            interact_func, options, fname=new_fw._widgets["files"], **kwargs
         )
 
         out.files_widget = new_fw  # save reference to FilesWidget
@@ -798,7 +798,7 @@ class BandsWidget(VBox):
 
             serializer.dump(
                 data_dict,
-                dump_to="json",
+                format="json",
                 outfile=self.files_widget.selected.parent / "result.json",
             )
 

@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="API" href="apidoc.html" />
 
     <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
-        <title>IPyVASP - ipyvasp 0.2.0 documentation</title>
+        <title>IPyVASP - ipyvasp 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">ipyvasp 0.2.0 documentation</div></a>
+      <a href="index.html"><div class="brand">ipyvasp 0.3.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,7 +146,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">ipyvasp 0.2.0 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 0.3.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -160,8 +160,23 @@
 </ul>
 </li>
 </ul>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="summary.html">API Summary</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of API Summary</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/ipyvasp.lattice.html">ipyvasp.lattice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/ipyvasp.bsdos.html">ipyvasp.bsdos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/ipyvasp.potential.html">ipyvasp.potential</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/ipyvasp.widgets.html">ipyvasp.widgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/ipyvasp.misc.html">ipyvasp.misc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/ipyvasp.utils.html">ipyvasp.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/ipyvasp.core.parser.html">ipyvasp.core.parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/ipyvasp.core.serializer.html">ipyvasp.core.serializer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/ipyvasp.core.plot_toolkit.html">ipyvasp.core.plot_toolkit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/ipyvasp.core.spatial_toolkit.html">ipyvasp.core.spatial_toolkit</a></li>
+</ul>
+</li>
+</ul>
 <ul class="current">
-<li class="toctree-l1 current has-children"><a class="reference internal" href="apidoc.html">API</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="apidoc.html">API</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">IPyVASP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-ipyvasp.core.parser">Data Parsers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-ipyvasp.core.serializer">Data Serializer</a></li>
@@ -171,6 +186,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-ipyvasp.bsdos">Bandstructure and Density of States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-ipyvasp.lattice">Lattice Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-ipyvasp.widgets">Widgets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ipyvasp.potential">Potential and Charge Density</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-ipyvasp.misc">Miscellaneous</a></li>
 </ul>
 </li>
@@ -274,14 +290,13 @@ If both <cite>nrows and ncols &gt; 1</cite>, provide list of tuples (x_index,y_i
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ipyvasp.plt2html">
-<span class="sig-prename descclassname"><span class="pre">ipyvasp.</span></span><span class="sig-name descname"><span class="pre">plt2html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plt_fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/plot_toolkit.html#plt2html"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.plt2html" title="Permalink to this definition">#</a></dt>
-<dd><p>Display svg image in notebook, or return &lt;svg&gt; or show image from terminal.</p>
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.</span></span><span class="sig-name descname"><span class="pre">plt2html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plt_fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/plot_toolkit.html#plt2html"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.plt2html" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns <code class="docutils literal notranslate"><span class="pre">ipython.display.HTML(&lt;svg</span> <span class="pre">of</span> <span class="pre">figure&gt;)</span></code>. It clears figure after use. So <code class="docutils literal notranslate"><span class="pre">plt.show()</span></code> will not work after this.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>plt_fig</strong> (<em>Matplotlib's figure instance</em><em>, </em><em>auto picks as well.</em>) – </p></li>
 <li><p><strong>transparent</strong> (<em>True</em><em> of </em><em>False for fig background.</em>) – </p></li>
-<li><p><strong>out_string</strong> (<em>If True</em><em>, </em><em>returns &lt;svg&gt; string.</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -289,14 +304,15 @@ If both <cite>nrows and ncols &gt; 1</cite>, provide list of tuples (x_index,y_i
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ipyvasp.iplot2html">
-<span class="sig-prename descclassname"><span class="pre">ipyvasp.</span></span><span class="sig-name descname"><span class="pre">iplot2html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modebar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/plot_toolkit.html#iplot2html"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.iplot2html" title="Permalink to this definition">#</a></dt>
-<dd><p>Writes plotly’s figure as HTML file or display in IPython which is accessible when online. It is different than plotly’s <cite>fig.to_html</cite> as it is minimal in memory. If you need to have offline working file, just use <cite>fig.write_html(‘file.html’)</cite> which will be larger in size.</p>
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.</span></span><span class="sig-name descname"><span class="pre">iplot2html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modebar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/plot_toolkit.html#iplot2html"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.iplot2html" title="Permalink to this definition">#</a></dt>
+<dd><p>Writes plotly’s figure as HTML file or display in IPython which is accessible when online.
+It is different than plotly’s <cite>fig.to_html</cite> as it is minimal in memory. If you need to have
+offline working file, just use <cite>fig.write_html(‘file.html’)</cite> which will be larger in size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fig</strong> (<em>A plotly's figure object.</em>) – </p></li>
-<li><p><strong>filename</strong> (<em>Name</em><em> of </em><em>file to save fig. Defualt is None and show plot in Colab/Online</em><em> or </em><em>return hrml string.</em>) – </p></li>
-<li><p><strong>out_string</strong> (<em>If True</em><em>, </em><em>returns HTML string</em><em>, </em><em>if False displays graph if possible.</em>) – </p></li>
+<li><p><strong>outfile</strong> (<em>Name</em><em> of </em><em>file to save fig. Defualt is None and show plot in Notebook.</em>) – </p></li>
 <li><p><strong>modebar</strong> (<em>If True</em><em>, </em><em>shows modebar in graph. Default is True. Not used if saving to file.</em>) – </p></li>
 </ul>
 </dd>
@@ -413,23 +429,26 @@ Last item is considered to be columns.</p></li>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.core.parser.</span></span><span class="sig-name descname"><span class="pre">Vasprun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./vasprun.xml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/parser.html#Vasprun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.parser.Vasprun" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DataSource</span></code></p>
 <p>Reads vasprun.xml file lazily. It reads only the required data from the file when a plot or data access is requested.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.core.parser.Vasprun.bands">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bands</span></span><a class="headerlink" href="#ipyvasp.core.parser.Vasprun.bands" title="Permalink to this definition">#</a></dt>
-<dd><p>Access ipyvasp.bsdos.Bands class singleton instance for current Vasprun class.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.core.parser.Vasprun.dos">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dos</span></span><a class="headerlink" href="#ipyvasp.core.parser.Vasprun.dos" title="Permalink to this definition">#</a></dt>
-<dd><p>Access ipyvasp.bsdos.DOS class singleton instance for current Vasprun class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.parser.Vasprun.get_evals_dataframe">
+<span class="sig-name descname"><span class="pre">get_evals_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.core.parser.Vasprun.get_evals_dataframe" title="Permalink to this definition">#</a></dt>
+<dd><p>Initialize and return an EvalsDataFrame instance, with the given parameters.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ipyvasp.core.parser.Vasprun.poscar">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">poscar</span></span><a class="headerlink" href="#ipyvasp.core.parser.Vasprun.poscar" title="Permalink to this definition">#</a></dt>
-<dd><p>Access ipyvasp.lattice.POSCAR class instance.</p>
-</dd></dl>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.parser.Vasprun.dos">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dos</span></span><a class="headerlink" href="#ipyvasp.core.parser.Vasprun.dos" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.parser.Vasprun.bands">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bands</span></span><a class="headerlink" href="#ipyvasp.core.parser.Vasprun.bands" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.core.parser.Vasprun.read">
@@ -532,23 +551,26 @@ Last item is considered to be columns.</p></li>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.core.parser.</span></span><span class="sig-name descname"><span class="pre">Vaspout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/parser.html#Vaspout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.parser.Vaspout" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DataSource</span></code></p>
 <p>Read data from vaspout.h5 file on demand.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.core.parser.Vaspout.bands">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bands</span></span><a class="headerlink" href="#ipyvasp.core.parser.Vaspout.bands" title="Permalink to this definition">#</a></dt>
-<dd><p>Access ipyvasp.bsdos.Bands class singleton instance for current Vaspout class.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.core.parser.Vaspout.dos">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dos</span></span><a class="headerlink" href="#ipyvasp.core.parser.Vaspout.dos" title="Permalink to this definition">#</a></dt>
-<dd><p>Access ipyvasp.bsdos.DOS class singleton instance for current Vaspout class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.parser.Vaspout.get_evals_dataframe">
+<span class="sig-name descname"><span class="pre">get_evals_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.core.parser.Vaspout.get_evals_dataframe" title="Permalink to this definition">#</a></dt>
+<dd><p>Initialize and return an EvalsDataFrame instance, with the given parameters.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="ipyvasp.core.parser.Vaspout.poscar">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">poscar</span></span><a class="headerlink" href="#ipyvasp.core.parser.Vaspout.poscar" title="Permalink to this definition">#</a></dt>
-<dd><p>Access ipyvasp.lattice.POSCAR class instance.</p>
-</dd></dl>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.parser.Vaspout.dos">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dos</span></span><a class="headerlink" href="#ipyvasp.core.parser.Vaspout.dos" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.parser.Vaspout.bands">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bands</span></span><a class="headerlink" href="#ipyvasp.core.parser.Vaspout.bands" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -572,15 +594,15 @@ All output text is in string format, so further processing is required to conver
 <span id="data-serializer"></span><h1>Data Serializer<a class="headerlink" href="#module-ipyvasp.core.serializer" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="ipyvasp.core.serializer.dump">
-<span class="sig-prename descclassname"><span class="pre">ipyvasp.core.serializer.</span></span><span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_to</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pickle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.dump" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.core.serializer.</span></span><span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pickle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.dump" title="Permalink to this definition">#</a></dt>
 <dd><p>Dump <code class="docutils literal notranslate"><span class="pre">Dict2Data</span></code> or subclass object or any dictionary to json or pickle string/file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dict_data</strong> (<em>dict</em><em> or </em><em>instance</em><em> of </em><a class="reference internal" href="#ipyvasp.core.serializer.Dict2Data" title="ipyvasp.core.serializer.Dict2Data"><em>Dict2Data</em></a><em>, </em><em>Any dictionary/Dict2Data</em><em>(or </em><em>subclass Data</em><em>) </em><em>object containg numpy arrays.</em>) – </p></li>
-<li><p><strong>dump_to</strong> (str, Defualt is <code class="docutils literal notranslate"><span class="pre">pickle</span></code> or <code class="docutils literal notranslate"><span class="pre">json</span></code>.) – </p></li>
-<li><p><strong>outfile</strong> (<em>str</em><em>, </em><em>Defualt is None and return string. File name does not require extension.</em>) – </p></li>
-<li><p><strong>indent</strong> (<em>int</em><em>, </em><em>Defualt is 1. Only works for json.</em>) – </p></li>
+<li><p><strong>data</strong> (<em>dict</em><em> or </em><em>instance</em><em> of </em><a class="reference internal" href="#ipyvasp.core.serializer.Dict2Data" title="ipyvasp.core.serializer.Dict2Data"><em>Dict2Data</em></a>) – Any dictionary/Dict2Data(or subclass Data) object can be saved.</p></li>
+<li><p><strong>format</strong> (<em>str</em><em>,</em>) – Defualt is <code class="docutils literal notranslate"><span class="pre">pickle</span></code>. Should be <code class="docutils literal notranslate"><span class="pre">pickle</span></code> or <code class="docutils literal notranslate"><span class="pre">json</span></code>.</p></li>
+<li><p><strong>outfile</strong> (<em>str</em>) – Defualt is None and return string. File name does not require extension as it is added from <code class="docutils literal notranslate"><span class="pre">format</span></code>.</p></li>
+<li><p><strong>indent</strong> (<em>int</em>) – Defualt is 1. Only works for json.</p></li>
 </ul>
 </dd>
 </dl>
@@ -697,6 +719,299 @@ Once an attribute is created, it can not be changed from outside.</p>
 <dt class="sig sig-object py" id="ipyvasp.core.serializer.Dict2Data.items">
 <span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#Dict2Data.items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.Dict2Data.items" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.PoscarData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.core.serializer.</span></span><span class="sig-name descname"><span class="pre">PoscarData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#PoscarData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.PoscarData" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ipyvasp.core.serializer.Dict2Data" title="ipyvasp.core.serializer.Dict2Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict2Data</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.PoscarData.coords">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coords</span></span><a class="headerlink" href="#ipyvasp.core.serializer.PoscarData.coords" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the lattice coordinates in cartesian space of the atoms in the poscar data.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.PoscarData.rec_basis">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rec_basis</span></span><a class="headerlink" href="#ipyvasp.core.serializer.PoscarData.rec_basis" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the reciprocal lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.PoscarData.norms">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">norms</span></span><a class="headerlink" href="#ipyvasp.core.serializer.PoscarData.norms" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the norm of the lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.PoscarData.rec_norms">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rec_norms</span></span><a class="headerlink" href="#ipyvasp.core.serializer.PoscarData.rec_norms" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the norm of the reciprocal lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.PoscarData.angles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">angles</span></span><a class="headerlink" href="#ipyvasp.core.serializer.PoscarData.angles" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the angles of the lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.PoscarData.rec_angles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rec_angles</span></span><a class="headerlink" href="#ipyvasp.core.serializer.PoscarData.rec_angles" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the angles of reciprocal lattice basis of the atoms in the poscar data. Gets automatically updated when the lattice is changed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.PoscarData.volume">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">volume</span></span><a class="headerlink" href="#ipyvasp.core.serializer.PoscarData.volume" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the volume of the lattice.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.PoscarData.rec_volume">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rec_volume</span></span><a class="headerlink" href="#ipyvasp.core.serializer.PoscarData.rec_volume" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the volume of the reciprocal lattice.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.PoscarData.labels">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#ipyvasp.core.serializer.PoscarData.labels" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the labels of the atoms in the poscar data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.PoscarData.get_distance">
+<span class="sig-name descname"><span class="pre">get_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#PoscarData.get_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.PoscarData.get_distance" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the distance between two atoms.
+Provide atom1 and atom2 as strings such as get_distance(‘Ga’, ‘As’) to get a mimimal distance between two types
+or as a dict with a single key as get_distance({‘Ga’:0}, {‘As’:0}) to get distance between specific atoms,
+or mixed as get_distance(‘Ga’, {‘As’:0}) to get minimum distance between a type and a specific atom.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.PoscarData.get_selective_dynamics">
+<span class="sig-name descname"><span class="pre">get_selective_dynamics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#PoscarData.get_selective_dynamics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.PoscarData.get_selective_dynamics" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a dictionary of {‘Ga 1’: ‘T T T’, ‘As 1’: ‘T F F’,…} for each atom in the poscar data.</p>
+<p><cite>func</cite> should be a callable like <cite>f(index,x,y,z) -&gt; (bool, bool, bool)</cite> which turns on/off selective dynamics for each atom based in each dimension.</p>
+<p>You can visualize selective dynamics sites by their labels as follows:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">poscar</span> <span class="o">=</span> <span class="n">POSCAR</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s1">&#39;POSCAR&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span> <span class="o">=</span> <span class="n">poscar</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_selective_dynamics</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span> <span class="c1"># Just an example</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">poscar</span><span class="o">.</span><span class="n">splot_lattice</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">fmt_label</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">lab</span><span class="p">:</span> <span class="n">sd</span><span class="p">[</span><span class="n">lab</span><span class="p">])</span> <span class="c1"># This will label sites as T T T, F F F, ... and so so on</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.BrZoneData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.core.serializer.</span></span><span class="sig-name descname"><span class="pre">BrZoneData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#BrZoneData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.BrZoneData" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ipyvasp.core.serializer.Dict2Data" title="ipyvasp.core.serializer.Dict2Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict2Data</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.BrZoneData.splot">
+<span class="sig-name descname"><span class="pre">splot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'blue'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">2)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shade</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoffset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.core.serializer.BrZoneData.splot" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots matplotlib’s static figure of Brillouin zone. You can also plot in 2D on a 3D axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plane</strong> (<em>str</em>) – Default is None and plots 3D surface. Can take ‘xy’,’yz’,’zx’ to plot in 2D.</p></li>
+<li><p><strong>fill</strong> (<em>bool</em>) – True by defult, determines whether to fill surface of BZ or not.</p></li>
+<li><p><strong>color</strong> (<em>Any</em>) – Color to fill surface and stroke color. Default is ‘blue’. Can be any valid matplotlib color.</p></li>
+<li><p><strong>vectors</strong> (<em>tuple</em>) – Tuple of indices of basis vectors to plot. Default is (0,1,2). All three are plotted in 3D
+(you can turn of by None or empty tuple), whhile you can specify any two/three in 2D.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.pyplot.Axes</em>) – Auto generated by default, 2D/3D axes, auto converts in 3D on demand as well.</p></li>
+<li><p><strong>colormap</strong> (<em>str</em>) – If None, single color is applied, only works in 3D and <cite>fill=True</cite>. Colormap is applied along z.</p></li>
+<li><p><strong>shade</strong> (<em>bool</em>) – Shade polygons or not. Only works in 3D and <cite>fill=True</cite>.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – Opacity of filling in range [0,1]. Increase for clear viewpoint.</p></li>
+<li><p><strong>zoffset</strong> (<em>float</em>) – Only used if plotting in 2D over a 3D axis. Default is 0. Any plane ‘xy’,’yz’ etc.</p></li>
+</ul>
+</dd>
+</dl>
+<p>kwargs are passed to <cite>plt.plot</cite> or <cite>Poly3DCollection</cite> if <cite>fill=True</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Matplotlib’s 2D axes if <cite>plane=None</cite> otherswise 3D axes.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>matplotlib.pyplot.Axes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.BrZoneData.iplot">
+<span class="sig-name descname"><span class="pre">iplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rgba(168,204,216,0.8)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_kpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ortho3d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.core.serializer.BrZoneData.iplot" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots interactive figure showing axes,BZ surface, special points and basis, each of which could be hidden or shown.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fill</strong> (<em>bool</em>) – False by defult, determines whether to fill surface of BZ or not.</p></li>
+<li><p><strong>color</strong> (<em>str</em>) – Color to fill surface ‘rgba(168,204,216,0.4)` by default. This sholud be a valid Plotly color.</p></li>
+<li><p><strong>special_kpoints</strong> (<em>bool</em><em> or </em><em>callable</em>) – True by default, determines whether to plot special points or not.
+You can also proivide a mask function f(x,y,z) -&gt; bool which will be used to filter special points
+based on their fractional coordinates. This is ignored if BZ is primitive.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – Opacity of BZ planes.</p></li>
+<li><p><strong>ortho3d</strong> (<em>bool</em>) – Default is True, decides whether x,y,z are orthogonal or perspective.</p></li>
+<li><p><strong>fig</strong> (<em>plotly.graph_objects.Figure</em>) – Plotly’s <cite>go.Figure</cite>. If you want to plot on another plotly’s figure, provide that.</p></li>
+</ul>
+</dd>
+</dl>
+<p>kwargs are passed to <cite>plotly.graph_objects.Scatter3d</cite> for BZ lines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>plotly.graph_objects.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.BrZoneData.get_special_points">
+<span class="sig-name descname"><span class="pre">get_special_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orderby</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#BrZoneData.get_special_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.BrZoneData.get_special_points" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the special points in the brillouin zone in the order relative
+to a given point in cartesian coordinates. Gamma is always first.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.BrZoneData.specials">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">specials</span></span><a class="headerlink" href="#ipyvasp.core.serializer.BrZoneData.specials" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the special points in the brillouin zone ordered by point (1,1,1) in cartesian coordinates. Gamma is always first.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.BrZoneData.faces_coords">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">faces_coords</span></span><a class="headerlink" href="#ipyvasp.core.serializer.BrZoneData.faces_coords" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the coordinates of the faces of the brillouin zone in list of N faces of shape (M,3) where M is the number of vertices of the face.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.BrZoneData.normals">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normals</span></span><a class="headerlink" href="#ipyvasp.core.serializer.BrZoneData.normals" title="Permalink to this definition">#</a></dt>
+<dd><p>Get normal vectors to the faces of BZ. Returns a tuple of 6 arrays as (X,Y,Z,U,V,W) where (X,Y,Z) is the center of the faces and (U,V,W) is the normal direction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.BrZoneData.to_fractional">
+<span class="sig-name descname"><span class="pre">to_fractional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#BrZoneData.to_fractional"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.BrZoneData.to_fractional" title="Permalink to this definition">#</a></dt>
+<dd><p>Converts cartesian coordinates to fractional coordinates in the basis of the brillouin zone.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.BrZoneData.to_cartesian">
+<span class="sig-name descname"><span class="pre">to_cartesian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#BrZoneData.to_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.BrZoneData.to_cartesian" title="Permalink to this definition">#</a></dt>
+<dd><p>Converts fractional coordinates in the basis of the brillouin zone to cartesian coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.BrZoneData.map_kpoints">
+<span class="sig-name descname"><span class="pre">map_kpoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpoints</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#BrZoneData.map_kpoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.BrZoneData.map_kpoints" title="Permalink to this definition">#</a></dt>
+<dd><p>Map kpoints (fractional) from this to other Brillouin zone.
+This operation is useful when you do POSCAR.transform() and want to map kpoints between given and transformed BZ.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.BrZoneData.translate_inside">
+<span class="sig-name descname"><span class="pre">translate_inside</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kpoints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#BrZoneData.translate_inside"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.BrZoneData.translate_inside" title="Permalink to this definition">#</a></dt>
+<dd><p>Brings kpoints inside BZ. Mostly useful for regular kmesh to bring all kpoints inside BZ.
+<cite>shift</cite> is a number or a list of three numbers that will be added to kpoints before any other operation,
+in case points are not symmetric around origin.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you made cartesian kpoints, you should not translate them with this function, just shift them by adding a vector.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.BrZoneData.get_subzone">
+<span class="sig-name descname"><span class="pre">get_subzone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#BrZoneData.get_subzone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.BrZoneData.get_subzone" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.CellData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.core.serializer.</span></span><span class="sig-name descname"><span class="pre">CellData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#CellData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.CellData" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ipyvasp.core.serializer.Dict2Data" title="ipyvasp.core.serializer.Dict2Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict2Data</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.CellData.splot">
+<span class="sig-name descname"><span class="pre">splot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'blue'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">2)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shade</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoffset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.core.serializer.CellData.splot" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots matplotlib’s static figure of Brillouin zone. You can also plot in 2D on a 3D axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plane</strong> (<em>str</em>) – Default is None and plots 3D surface. Can take ‘xy’,’yz’,’zx’ to plot in 2D.</p></li>
+<li><p><strong>fill</strong> (<em>bool</em>) – True by defult, determines whether to fill surface of BZ or not.</p></li>
+<li><p><strong>color</strong> (<em>Any</em>) – Color to fill surface and stroke color. Default is ‘blue’. Can be any valid matplotlib color.</p></li>
+<li><p><strong>vectors</strong> (<em>tuple</em>) – Tuple of indices of basis vectors to plot. Default is (0,1,2). All three are plotted in 3D
+(you can turn of by None or empty tuple), whhile you can specify any two/three in 2D.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.pyplot.Axes</em>) – Auto generated by default, 2D/3D axes, auto converts in 3D on demand as well.</p></li>
+<li><p><strong>colormap</strong> (<em>str</em>) – If None, single color is applied, only works in 3D and <cite>fill=True</cite>. Colormap is applied along z.</p></li>
+<li><p><strong>shade</strong> (<em>bool</em>) – Shade polygons or not. Only works in 3D and <cite>fill=True</cite>.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – Opacity of filling in range [0,1]. Increase for clear viewpoint.</p></li>
+<li><p><strong>zoffset</strong> (<em>float</em>) – Only used if plotting in 2D over a 3D axis. Default is 0. Any plane ‘xy’,’yz’ etc.</p></li>
+</ul>
+</dd>
+</dl>
+<p>kwargs are passed to <cite>plt.plot</cite> or <cite>Poly3DCollection</cite> if <cite>fill=True</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Matplotlib’s 2D axes if <cite>plane=None</cite> otherswise 3D axes.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>matplotlib.pyplot.Axes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.CellData.iplot">
+<span class="sig-name descname"><span class="pre">iplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rgba(168,204,216,0.8)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_kpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ortho3d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ipyvasp.core.serializer.CellData.iplot" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots interactive figure showing axes,BZ surface, special points and basis, each of which could be hidden or shown.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fill</strong> (<em>bool</em>) – False by defult, determines whether to fill surface of BZ or not.</p></li>
+<li><p><strong>color</strong> (<em>str</em>) – Color to fill surface ‘rgba(168,204,216,0.4)` by default. This sholud be a valid Plotly color.</p></li>
+<li><p><strong>special_kpoints</strong> (<em>bool</em><em> or </em><em>callable</em>) – True by default, determines whether to plot special points or not.
+You can also proivide a mask function f(x,y,z) -&gt; bool which will be used to filter special points
+based on their fractional coordinates. This is ignored if BZ is primitive.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>) – Opacity of BZ planes.</p></li>
+<li><p><strong>ortho3d</strong> (<em>bool</em>) – Default is True, decides whether x,y,z are orthogonal or perspective.</p></li>
+<li><p><strong>fig</strong> (<em>plotly.graph_objects.Figure</em>) – Plotly’s <cite>go.Figure</cite>. If you want to plot on another plotly’s figure, provide that.</p></li>
+</ul>
+</dd>
+</dl>
+<p>kwargs are passed to <cite>plotly.graph_objects.Scatter3d</cite> for BZ lines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>plotly.graph_objects.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.CellData.faces_coords">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">faces_coords</span></span><a class="headerlink" href="#ipyvasp.core.serializer.CellData.faces_coords" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the coordinates of the faces of the cell in list of N faces of shape (M,3) where M is the number of vertices of the face.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.CellData.normals">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normals</span></span><a class="headerlink" href="#ipyvasp.core.serializer.CellData.normals" title="Permalink to this definition">#</a></dt>
+<dd><p>Get normal vectors to the faces of Cell. Returns a tuple of 6 arrays as (X,Y,Z,U,V,W) where (X,Y,Z) is the center of the faces and (U,V,W) is the normal direction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.CellData.to_fractional">
+<span class="sig-name descname"><span class="pre">to_fractional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#CellData.to_fractional"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.CellData.to_fractional" title="Permalink to this definition">#</a></dt>
+<dd><p>Converts cartesian coordinates to fractional coordinates in the basis of the cell.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.core.serializer.CellData.to_cartesian">
+<span class="sig-name descname"><span class="pre">to_cartesian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/serializer.html#CellData.to_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.serializer.CellData.to_cartesian" title="Permalink to this definition">#</a></dt>
+<dd><p>Converts fractional coordinates in the basis of the cell to cartesian coordinates.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -886,6 +1201,7 @@ basis are 3x3 matrices with basis vectors as rows like [[b1x, b1y, b1z],[b2x, b2
 <li><p><strong>bz_data</strong> (<em>Output</em><em> of </em><em>get_bz</em><em>(</em><em>)</em><em>.</em>) – </p></li>
 <li><p><strong>kpoints</strong> (<em>List</em><em> or </em><em>array</em><em> of </em><em>KPOINTS to transorm into BZ</em><em> or </em><em>R3.</em>) – </p></li>
 <li><p><strong>shift</strong> (<em>This value is added to kpoints before any other operation</em><em>, </em><em>single number</em><em> of </em><em>list</em><em> of </em><em>3 numbers for each direction.</em>) – </p></li>
+<li><p><strong>warning::</strong> (<em>..</em>) – Do not use this function to translate kpoints created as cartesian, just shift by adding a vector.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1128,14 +1444,13 @@ to given data for real aspect. Also plot the same data on each axes and set axes
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ipyvasp.core.plot_toolkit.plt2html">
-<span class="sig-prename descclassname"><span class="pre">ipyvasp.core.plot_toolkit.</span></span><span class="sig-name descname"><span class="pre">plt2html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plt_fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/plot_toolkit.html#plt2html"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.plot_toolkit.plt2html" title="Permalink to this definition">#</a></dt>
-<dd><p>Display svg image in notebook, or return &lt;svg&gt; or show image from terminal.</p>
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.core.plot_toolkit.</span></span><span class="sig-name descname"><span class="pre">plt2html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plt_fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/plot_toolkit.html#plt2html"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.plot_toolkit.plt2html" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns <code class="docutils literal notranslate"><span class="pre">ipython.display.HTML(&lt;svg</span> <span class="pre">of</span> <span class="pre">figure&gt;)</span></code>. It clears figure after use. So <code class="docutils literal notranslate"><span class="pre">plt.show()</span></code> will not work after this.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>plt_fig</strong> (<em>Matplotlib's figure instance</em><em>, </em><em>auto picks as well.</em>) – </p></li>
 <li><p><strong>transparent</strong> (<em>True</em><em> of </em><em>False for fig background.</em>) – </p></li>
-<li><p><strong>out_string</strong> (<em>If True</em><em>, </em><em>returns &lt;svg&gt; string.</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -1143,14 +1458,15 @@ to given data for real aspect. Also plot the same data on each axes and set axes
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ipyvasp.core.plot_toolkit.iplot2html">
-<span class="sig-prename descclassname"><span class="pre">ipyvasp.core.plot_toolkit.</span></span><span class="sig-name descname"><span class="pre">iplot2html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modebar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/plot_toolkit.html#iplot2html"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.plot_toolkit.iplot2html" title="Permalink to this definition">#</a></dt>
-<dd><p>Writes plotly’s figure as HTML file or display in IPython which is accessible when online. It is different than plotly’s <cite>fig.to_html</cite> as it is minimal in memory. If you need to have offline working file, just use <cite>fig.write_html(‘file.html’)</cite> which will be larger in size.</p>
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.core.plot_toolkit.</span></span><span class="sig-name descname"><span class="pre">iplot2html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modebar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/core/plot_toolkit.html#iplot2html"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.core.plot_toolkit.iplot2html" title="Permalink to this definition">#</a></dt>
+<dd><p>Writes plotly’s figure as HTML file or display in IPython which is accessible when online.
+It is different than plotly’s <cite>fig.to_html</cite> as it is minimal in memory. If you need to have
+offline working file, just use <cite>fig.write_html(‘file.html’)</cite> which will be larger in size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fig</strong> (<em>A plotly's figure object.</em>) – </p></li>
-<li><p><strong>filename</strong> (<em>Name</em><em> of </em><em>file to save fig. Defualt is None and show plot in Colab/Online</em><em> or </em><em>return hrml string.</em>) – </p></li>
-<li><p><strong>out_string</strong> (<em>If True</em><em>, </em><em>returns HTML string</em><em>, </em><em>if False displays graph if possible.</em>) – </p></li>
+<li><p><strong>outfile</strong> (<em>Name</em><em> of </em><em>file to save fig. Defualt is None and show plot in Notebook.</em>) – </p></li>
 <li><p><strong>modebar</strong> (<em>If True</em><em>, </em><em>shows modebar in graph. Default is True. Not used if saving to file.</em>) – </p></li>
 </ul>
 </dd>
@@ -1175,7 +1491,12 @@ to given data for real aspect. Also plot the same data on each axes and set axes
 <dl class="py function">
 <dt class="sig sig-object py" id="ipyvasp.utils.set_dir">
 <span class="sig-prename descclassname"><span class="pre">ipyvasp.utils.</span></span><span class="sig-name descname"><span class="pre">set_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/utils.html#set_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.utils.set_dir" title="Permalink to this definition">#</a></dt>
-<dd><p>Context manager to work in some directory and come back</p>
+<dd><p>Context manager to work in some directory and come back.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">set_dir</span><span class="p">(</span><span class="s1">&#39;some_folder&#39;</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="n">do_something</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Now you are back in starting directory</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -1933,7 +2254,7 @@ data should be volumetric data for ase.visualize.view, such as charge density, s
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.lattice.POSCAR.view_ngl">
-<span class="sig-name descname"><span class="pre">view_ngl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sizes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linewidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0.2]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bond_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'whitesmoke'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_vectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/lattice.html#POSCAR.view_ngl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.lattice.POSCAR.view_ngl" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">view_ngl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sizes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linewidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0.2]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bond_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'whitesmoke'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_vectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dashboard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/lattice.html#POSCAR.view_ngl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.lattice.POSCAR.view_ngl" title="Permalink to this definition">#</a></dt>
 <dd><p>Display structure in Jupyter notebook using nglview.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1950,12 +2271,14 @@ If colors is None, then default colors from ipyvasp will be used that are same i
 <li><p><strong>width</strong> (<em>str</em>) – Width of viewer. Default “400px”.</p></li>
 <li><p><strong>height</strong> (<em>str</em>) – Height of viewer. Default “400px”.</p></li>
 <li><p><strong>plot_vectors</strong> (<em>bool</em>) – Plot vectors. Default True. Only works if <cite>plot_cell = True</cite>.</p></li>
+<li><p><strong>dashboard</strong> (<em>bool</em>) – Show dashboard. Default False. It just sets <cite>view.gui_style = ‘NGL’</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><em>NGLWidget</em> – An instance of nglview.NGLWidget object. You can use <cite>.render_image()</cite>, <cite>.download_image()</cite> etc. on it or can add more representations.</p></li>
 <li><p><em>.. note::</em> – <cite>nglview</cite> sometimes does not work in Jupyter lab. You can switch to classic notebook in that case.</p></li>
+<li><p><em>.. tip::</em> – See <a class="reference external" href="https://projects.volkamerlab.org/teachopencadd/talktorials/T017_advanced_nglview_usage.html">Advanced NGLView usage</a>.</p></li>
 </ul>
 </p>
 </dd>
@@ -2082,6 +2405,12 @@ Get your API key from <a class="reference external" href="https://legacy.materia
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.lattice.POSCAR.set_bz">
+<span class="sig-name descname"><span class="pre">set_bz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primitive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/lattice.html#POSCAR.set_bz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.lattice.POSCAR.set_bz" title="Permalink to this definition">#</a></dt>
+<dd><p>Set BZ to primitve/regular on demand. All successive operations follow the current set BZ.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.lattice.POSCAR.get_cell">
 <span class="sig-name descname"><span class="pre">get_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/lattice.html#POSCAR.get_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.lattice.POSCAR.get_cell" title="Permalink to this definition">#</a></dt>
 <dd><p>See docs of <cite>get_bz</cite>, same except space is inverted and no factor of 2pi.</p>
@@ -2121,7 +2450,7 @@ Get your API key from <a class="reference external" href="https://legacy.materia
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.lattice.POSCAR.splot_kpath">
 <span class="sig-name descname"><span class="pre">splot_kpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kpoints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt_label=&lt;function</span> <span class="pre">POSCAR.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/lattice.html#POSCAR.splot_kpath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.lattice.POSCAR.splot_kpath" title="Permalink to this definition">#</a></dt>
-<dd><p>Plot k-path over existing BZ.</p>
+<dd><p>Plot k-path over existing BZ. It will take <code class="docutils literal notranslate"><span class="pre">ax</span></code>, <code class="docutils literal notranslate"><span class="pre">plane</span></code> and <code class="docutils literal notranslate"><span class="pre">zoffset</span></code> internally from most recent call to <code class="docutils literal notranslate"><span class="pre">self.splot_bz</span></code>/<code class="docutils literal notranslate"><span class="pre">self.bz.splot</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2156,7 +2485,8 @@ Then you can reorder them by an indexer like <code class="docutils literal notra
 <li><p><strong>fill</strong> (<em>bool</em>) – False by defult, determines whether to fill surface of BZ or not.</p></li>
 <li><p><strong>color</strong> (<em>str</em>) – Color to fill surface ‘rgba(168,204,216,0.4)` by default. This sholud be a valid Plotly color.</p></li>
 <li><p><strong>special_kpoints</strong> (<em>bool</em><em> or </em><em>callable</em>) – True by default, determines whether to plot special points or not.
-You can also proivide a mask function f(x,y,z) -&gt; bool which will be used to filter special points based on their fractional coordinates.</p></li>
+You can also proivide a mask function f(x,y,z) -&gt; bool which will be used to filter special points
+based on their fractional coordinates. This is ignored if BZ is primitive.</p></li>
 <li><p><strong>alpha</strong> (<em>float</em>) – Opacity of BZ planes.</p></li>
 <li><p><strong>ortho3d</strong> (<em>bool</em>) – Default is True, decides whether x,y,z are orthogonal or perspective.</p></li>
 <li><p><strong>fig</strong> (<em>plotly.graph_objects.Figure</em>) – Plotly’s <cite>go.Figure</cite>. If you want to plot on another plotly’s figure, provide that.</p></li>
@@ -2568,7 +2898,6 @@ Number of points in each interval is at least 2 even if <cite>n</cite> is less t
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bz_data</strong> (Output of <cite>get_bz</cite>.) – </p></li>
 <li><p><strong>plane</strong> (<em>str</em>) – Default is None and plots 3D surface. Can take ‘xy’,’yz’,’zx’ to plot in 2D.</p></li>
 <li><p><strong>fill</strong> (<em>bool</em>) – True by defult, determines whether to fill surface of BZ or not.</p></li>
 <li><p><strong>color</strong> (<em>Any</em>) – Color to fill surface and stroke color. Default is ‘blue’. Can be any valid matplotlib color.</p></li>
@@ -2600,11 +2929,11 @@ Number of points in each interval is at least 2 even if <cite>n</cite> is less t
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bz_data</strong> (Output of <cite>get_bz</cite>.) – </p></li>
 <li><p><strong>fill</strong> (<em>bool</em>) – False by defult, determines whether to fill surface of BZ or not.</p></li>
 <li><p><strong>color</strong> (<em>str</em>) – Color to fill surface ‘rgba(168,204,216,0.4)` by default. This sholud be a valid Plotly color.</p></li>
 <li><p><strong>special_kpoints</strong> (<em>bool</em><em> or </em><em>callable</em>) – True by default, determines whether to plot special points or not.
-You can also proivide a mask function f(x,y,z) -&gt; bool which will be used to filter special points based on their fractional coordinates.</p></li>
+You can also proivide a mask function f(x,y,z) -&gt; bool which will be used to filter special points
+based on their fractional coordinates. This is ignored if BZ is primitive.</p></li>
 <li><p><strong>alpha</strong> (<em>float</em>) – Opacity of BZ planes.</p></li>
 <li><p><strong>ortho3d</strong> (<em>bool</em>) – Default is True, decides whether x,y,z are orthogonal or perspective.</p></li>
 <li><p><strong>fig</strong> (<em>plotly.graph_objects.Figure</em>) – Plotly’s <cite>go.Figure</cite>. If you want to plot on another plotly’s figure, provide that.</p></li>
@@ -2615,6 +2944,40 @@ You can also proivide a mask function f(x,y,z) -&gt; bool which will be used to 
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>plotly.graph_objects.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.lattice.ngl_viewer">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.lattice.</span></span><span class="sig-name descname"><span class="pre">ngl_viewer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poscar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sizes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linewidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0.2]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bond_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'whitesmoke'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_vectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dashboard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/lattice.html#ngl_viewer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.lattice.ngl_viewer" title="Permalink to this definition">#</a></dt>
+<dd><p>Display structure in Jupyter notebook using nglview.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>poscar</strong> (<em>ipyvasp.POSCAR</em>) – </p></li>
+<li><p><strong>colors</strong> (<em>list</em><em> or </em><em>str</em>) – List of colors for each atom type. If str, use sames colors for all.
+If <cite>colors = ‘element’</cite>, then element colors from <cite>nglview</cite> will be used.
+You can use <cite>nglview.color.COLOR_SCHEME</cite> to see available color schemes to use.
+If colors is None, then default colors from ipyvasp will be used that are same in <cite>[i,s]plot_lattice</cite>.</p></li>
+<li><p><strong>sizes</strong> (<em>list</em>) – List of sizes for each atom type.</p></li>
+<li><p><strong>plot_cell</strong> (<em>bool</em>) – Plot unit cell. Default True.</p></li>
+<li><p><strong>linewidth</strong> (<em>float</em>) – Linewidth of cell edges.</p></li>
+<li><p><strong>color</strong> (<em>list</em><em> or </em><em>str</em>) – Color of cell edges. Must be a valid color to support conversion to RGB via matplotlib.</p></li>
+<li><p><strong>bond_color</strong> (<em>str</em>) – Color of bonds. Default “whitesmoke”. Can be “element” or any other scheme from <cite>nglview</cite>.</p></li>
+<li><p><strong>width</strong> (<em>str</em>) – Width of viewer. Default “400px”.</p></li>
+<li><p><strong>height</strong> (<em>str</em>) – Height of viewer. Default “400px”.</p></li>
+<li><p><strong>plot_vectors</strong> (<em>bool</em>) – Plot vectors. Default True. Only works if <cite>plot_cell = True</cite>.</p></li>
+<li><p><strong>dashboard</strong> (<em>bool</em>) – Show dashboard. Default False. It just sets <cite>view.gui_style = ‘NGL’</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>NGLWidget</em> – An instance of nglview.NGLWidget object. You can use <cite>.render_image()</cite>, <cite>.download_image()</cite> etc. on it or can add more representations.</p></li>
+<li><p><em>.. note::</em> – <cite>nglview</cite> sometimes does not work in Jupyter lab. You can switch to classic notebook in that case.</p></li>
+<li><p><em>.. tip::</em> – See <a class="reference external" href="https://projects.volkamerlab.org/teachopencadd/talktorials/T017_advanced_nglview_usage.html">Advanced NGLView usage</a>.</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2913,6 +3276,188 @@ Number of points in each interval is at least 2 even if <cite>n</cite> is less t
 </dd></dl>
 
 </section>
+<section id="module-ipyvasp.potential">
+<span id="potential-and-charge-density"></span><h1>Potential and Charge Density<a class="headerlink" href="#module-ipyvasp.potential" title="Permalink to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="ipyvasp.potential.splot_potential">
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.potential.</span></span><span class="sig-name descname"><span class="pre">splot_potential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean_c'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_right</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interface</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.25,</span> <span class="pre">0.75)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('$V(z)$',</span> <span class="pre">'$\\langle</span> <span class="pre">V</span> <span class="pre">\\rangle</span> <span class="pre">_{roll}(z)$',</span> <span class="pre">'$\\langle</span> <span class="pre">V</span> <span class="pre">\\rangle</span> <span class="pre">$')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">((0,</span> <span class="pre">0.2,</span> <span class="pre">0.7),</span> <span class="pre">'b',</span> <span class="pre">'r')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/potential.html#splot_potential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.potential.splot_potential" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns tuple(ax,Data) where Data contains resultatnt parameters of averaged potential of LOCPOT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<cite>epxort_potential().values</cite> is 3D grid data. As <cite>epxort_potential</cite> is slow, so compute it once and then plot the output data.) – </p></li>
+<li><p><strong>operation</strong> (<em>Default is 'mean_c'. What to do with provided volumetric potential data. Anyone</em><em> of </em><em>these 'mean_a'</em><em>,</em><em>'min_a'</em><em>,</em><em>'max_a'</em><em>,</em><em>'mean_b'</em><em>,</em><em>'min_b'</em><em>,</em><em>'max_b'</em><em>,</em><em>'mean_c'</em><em>,</em><em>'min_c'</em><em>,</em><em>'max_c'.</em>) – </p></li>
+<li><p><strong>ax</strong> (<em>Matplotlib axes</em><em>, </em><em>if not given auto picks.</em>) – </p></li>
+<li><p><strong>period</strong> (<em>Periodicity</em><em> of </em><em>potential in fraction between 0 and 1. For example if a slab is made</em><em> of </em><em>4 super cells in z-direction</em><em>, </em><em>period=0.25.</em>) – </p></li>
+<li><p><strong>period_right</strong> (<em>Periodicity</em><em> of </em><em>potential in fraction between 0 and 1 if right half</em><em> of </em><em>slab has different periodicity.</em>) – </p></li>
+<li><p><strong>lr_pos</strong> (<em>Locations around which averages are taken.Default</em><em> (</em><em>0.25</em><em>,</em><em>0.75</em><em>)</em><em>. Provide in fraction between 0 and 1. Center</em><em> of </em><em>period is located at these given fractions. Work only if period is given.</em>) – </p></li>
+<li><p><strong>interface</strong> (<em>Default is 0.5 if not given</em><em>, </em><em>you may have slabs which have different lengths on left and right side. Provide in fraction between 0 and 1 where slab is divided in left and right halves.</em>) – </p></li>
+<li><p><strong>smoothness</strong> (<em>Default is 3. Large value will smooth the curve</em><em> of </em><em>potential. Only works if period is given.</em>) – </p></li>
+<li><p><strong>labels</strong> (<em>List</em><em> of </em><em>three labels for legend. Use plt.legend</em><em>(</em><em>) or </em><em>ipv.add_legend</em><em>(</em><em>) </em><em>for labels to appear. First entry is data plot</em><em>, </em><em>second is its convolution and third is complete average.</em>) – </p></li>
+<li><p><strong>colors</strong> (<em>List</em><em> of </em><em>three colors for lines.</em>) – </p></li>
+<li><p><strong>annotate</strong> (<em>True by default</em><em>, </em><em>writes difference</em><em> of </em><em>right and left averages on plot.</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.potential.LOCPOT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.potential.</span></span><span class="sig-name descname"><span class="pre">LOCPOT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/potential.html#LOCPOT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.potential.LOCPOT" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for LOCPOT file. Loads only single set out of 2/4 magnetization data to avoid performance/memory cost while can load electrostatic and one set of magnetization together.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>path/to/LOCPOT. LOCPOT is auto picked in CWD.</em>) – </p></li>
+<li><p><strong>data_set</strong> (<em>0 for electrostatic data</em><em>, </em><em>1 for magnetization data if ISPIN = 2. If non-colinear calculations</em><em>, </em><em>1</em><em>,</em><em>2</em><em>,</em><em>3 will pick Mx</em><em>,</em><em>My</em><em>,</em><em>Mz data sets respectively. Only one data set is loaded</em><em>, </em><em>so you should know what you are loading.</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To avoid memory issues while loading multiple LOCPOT files, use this class as a context manager which cleans up the memory after use.</p>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">LOCPOT</span><span class="p">(</span><span class="s1">&#39;path/to/LOCPOT&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">tmp</span><span class="o">.</span><span class="n">splot</span><span class="p">()</span>
+<span class="go">The object tmp is destroyed here and memory is freed.</span>
+</pre></div>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.potential.LOCPOT.poscar">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">poscar</span></span><a class="headerlink" href="#ipyvasp.potential.LOCPOT.poscar" title="Permalink to this definition">#</a></dt>
+<dd><p>POSCAR class object</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ipyvasp.potential.LOCPOT.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#ipyvasp.potential.LOCPOT.data" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.potential.LOCPOT.splot">
+<span class="sig-name descname"><span class="pre">splot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean_c'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_right</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interface</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.25,</span> <span class="pre">0.75)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('$V(z)$',</span> <span class="pre">'$\\langle</span> <span class="pre">V</span> <span class="pre">\\rangle</span> <span class="pre">_{roll}(z)$',</span> <span class="pre">'$\\langle</span> <span class="pre">V</span> <span class="pre">\\rangle</span> <span class="pre">$')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">((0,</span> <span class="pre">0.2,</span> <span class="pre">0.7),</span> <span class="pre">'b',</span> <span class="pre">'r')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/potential.html#LOCPOT.splot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.potential.LOCPOT.splot" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns tuple(ax,Data) where Data contains resultatnt parameters of averaged potential of LOCPOT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>operation</strong> (<em>Default is 'mean_c'. What to do with provided volumetric potential data. Anyone</em><em> of </em><em>these 'mean_a'</em><em>,</em><em>'min_a'</em><em>,</em><em>'max_a'</em><em>,</em><em>'mean_b'</em><em>,</em><em>'min_b'</em><em>,</em><em>'max_b'</em><em>,</em><em>'mean_c'</em><em>,</em><em>'min_c'</em><em>,</em><em>'max_c'.</em>) – </p></li>
+<li><p><strong>ax</strong> (<em>Matplotlib axes</em><em>, </em><em>if not given auto picks.</em>) – </p></li>
+<li><p><strong>period</strong> (<em>Periodicity</em><em> of </em><em>potential in fraction between 0 and 1. For example if a slab is made</em><em> of </em><em>4 super cells in z-direction</em><em>, </em><em>period=0.25.</em>) – </p></li>
+<li><p><strong>period_right</strong> (<em>Periodicity</em><em> of </em><em>potential in fraction between 0 and 1 if right half</em><em> of </em><em>slab has different periodicity.</em>) – </p></li>
+<li><p><strong>lr_pos</strong> (<em>Locations around which averages are taken.Default</em><em> (</em><em>0.25</em><em>,</em><em>0.75</em><em>)</em><em>. Provide in fraction between 0 and 1. Center</em><em> of </em><em>period is located at these given fractions. Work only if period is given.</em>) – </p></li>
+<li><p><strong>interface</strong> (<em>Default is 0.5 if not given</em><em>, </em><em>you may have slabs which have different lengths on left and right side. Provide in fraction between 0 and 1 where slab is divided in left and right halves.</em>) – </p></li>
+<li><p><strong>smoothness</strong> (<em>Default is 3. Large value will smooth the curve</em><em> of </em><em>potential. Only works if period is given.</em>) – </p></li>
+<li><p><strong>labels</strong> (<em>List</em><em> of </em><em>three labels for legend. Use plt.legend</em><em>(</em><em>) or </em><em>ipv.add_legend</em><em>(</em><em>) </em><em>for labels to appear. First entry is data plot</em><em>, </em><em>second is its convolution and third is complete average.</em>) – </p></li>
+<li><p><strong>colors</strong> (<em>List</em><em> of </em><em>three colors for lines.</em>) – </p></li>
+<li><p><strong>annotate</strong> (<em>True by default</em><em>, </em><em>writes difference</em><em> of </em><em>right and left averages on plot.</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.potential.LOCPOT.view_period">
+<span class="sig-name descname"><span class="pre">view_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mean_c'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interface</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.25,</span> <span class="pre">0.75)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">3)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/potential.html#LOCPOT.view_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.potential.LOCPOT.view_period" title="Permalink to this definition">#</a></dt>
+<dd><p>Check periodicity using ipywidgets interactive plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>operation</strong> (<em>What to do</em><em>, </em><em>such as 'mean_c'</em><em> or </em><em>'mean_a' etc.</em>) – </p></li>
+<li><p><strong>interface</strong> (<em>Interface in range</em><em> [</em><em>0</em><em>,</em><em>1</em><em>] </em><em>to divide left and right halves.</em>) – </p></li>
+<li><p><strong>lr_pos</strong> (<em>Tuple</em><em> of </em><em>(</em><em>left</em><em>,</em><em>right</em><em>) </em><em>positions in range</em><em> [</em><em>0</em><em>,</em><em>1</em><em>] </em><em>to get ΔV</em><em> of </em><em>right relative to left.</em>) – </p></li>
+<li><p><strong>smoothness</strong> (<em>int. Default is 2. Smoothing parameter for rolling mean. Larger is better.</em>) – </p></li>
+<li><p><strong>figsize</strong> (<em>Tuple</em><em> of </em><em>(</em><em>width</em><em>,</em><em>height</em><em>) of </em><em>figure. Since each time a figure is created</em><em>, </em><em>we can't reuse it</em><em>, </em><em>so we need to specify the size.</em>) – </p></li>
+<li><p><strong>styling.</strong> (<em>kwargs are passed to the plt.Axes.set</em><em>(</em><em>kwargs</em><em>) </em><em>method to handle the plot</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can use return value to retrieve information, like output.f(<a href="#id2"><span class="problematic" id="id3">*</span></a>output.args, <a href="#id4"><span class="problematic" id="id5">**</span></a>output.kwargs) in a cell to plot the current state and save it.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.potential.LOCPOT.view_slice">
+<span class="sig-name descname"><span class="pre">view_slice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/potential.html#LOCPOT.view_slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.potential.LOCPOT.view_slice" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.potential.CHG">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.potential.</span></span><span class="sig-name descname"><span class="pre">CHG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/potential.html#CHG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.potential.CHG" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ipyvasp.potential.LOCPOT" title="ipyvasp.potential.LOCPOT"><code class="xref py py-class docutils literal notranslate"><span class="pre">LOCPOT</span></code></a></p>
+<p>Class for CHG file. Loads only single set out of 2/4 magnetization data to avoid performance/memory cost while can load electrostatic and one set of magnetization together.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>path/to/CHG. CHG is auto picked in CWD.</em>) – </p></li>
+<li><p><strong>data_set</strong> (<em>0 for electrostatic data</em><em>, </em><em>1 for magnetization data if ISPIN = 2. If non-colinear calculations</em><em>, </em><em>1</em><em>,</em><em>2</em><em>,</em><em>3 will pick Mx</em><em>,</em><em>My</em><em>,</em><em>Mz data sets respectively. Only one data set is loaded</em><em>, </em><em>so you should know what you are loading.</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To avoid memory issues while loading multiple CHG files, use this class as a context manager which cleans up the memory after use.</p>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">CHG</span><span class="p">(</span><span class="s1">&#39;path/to/CHG&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">tmp</span><span class="o">.</span><span class="n">splot</span><span class="p">()</span>
+<span class="go">The object tmp is destroyed here and memory is freed.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.potential.ELFCAR">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.potential.</span></span><span class="sig-name descname"><span class="pre">ELFCAR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/potential.html#ELFCAR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.potential.ELFCAR" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ipyvasp.potential.LOCPOT" title="ipyvasp.potential.LOCPOT"><code class="xref py py-class docutils literal notranslate"><span class="pre">LOCPOT</span></code></a></p>
+<p>Class for ELFCAR file. Loads only single set out of 2/4 magnetization data to avoid performance/memory cost while can load electrostatic and one set of magnetization together.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>path/to/ELFCAR. ELFCAR is auto picked in CWD.</em>) – </p></li>
+<li><p><strong>data_set</strong> (<em>0 for electrostatic data</em><em>, </em><em>1 for magnetization data if ISPIN = 2. If non-colinear calculations</em><em>, </em><em>1</em><em>,</em><em>2</em><em>,</em><em>3 will pick Mx</em><em>,</em><em>My</em><em>,</em><em>Mz data sets respectively. Only one data set is loaded</em><em>, </em><em>so you should know what you are loading.</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To avoid memory issues while loading multiple ELFCAR files, use this class as a context manager which cleans up the memory after use.</p>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">ELFCAR</span><span class="p">(</span><span class="s1">&#39;path/to/ELFCAR&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">tmp</span><span class="o">.</span><span class="n">splot</span><span class="p">()</span>
+<span class="go">The object tmp is destroyed here and memory is freed.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ipyvasp.potential.PARCHG">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.potential.</span></span><span class="sig-name descname"><span class="pre">PARCHG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_set</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/potential.html#PARCHG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.potential.PARCHG" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ipyvasp.potential.LOCPOT" title="ipyvasp.potential.LOCPOT"><code class="xref py py-class docutils literal notranslate"><span class="pre">LOCPOT</span></code></a></p>
+<p>Class for PARCHG file. Loads only single set out of 2/4 magnetization data to avoid performance/memory cost while can load electrostatic and one set of magnetization together.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>path/to/PARCHG. PARCHG is auto picked in CWD.</em>) – </p></li>
+<li><p><strong>data_set</strong> (<em>0 for electrostatic data</em><em>, </em><em>1 for magnetization data if ISPIN = 2. If non-colinear calculations</em><em>, </em><em>1</em><em>,</em><em>2</em><em>,</em><em>3 will pick Mx</em><em>,</em><em>My</em><em>,</em><em>Mz data sets respectively. Only one data set is loaded</em><em>, </em><em>so you should know what you are loading.</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To avoid memory issues while loading multiple PARCHG files, use this class as a context manager which cleans up the memory after use.</p>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">PARCHG</span><span class="p">(</span><span class="s1">&#39;path/to/PARCHG&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">tmp</span><span class="o">.</span><span class="n">splot</span><span class="p">()</span>
+<span class="go">The object tmp is destroyed here and memory is freed.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
 <section id="module-ipyvasp.misc">
 <span id="miscellaneous"></span><h1>Miscellaneous<a class="headerlink" href="#module-ipyvasp.misc" title="Permalink to this heading">#</a></h1>
 <dl class="py function">
@@ -3039,9 +3584,10 @@ Last item is considered to be columns.</p></li>
 </li>
 <li><a class="reference internal" href="#module-ipyvasp.core.parser">Data Parsers</a><ul>
 <li><a class="reference internal" href="#ipyvasp.core.parser.Vasprun"><code class="docutils literal notranslate"><span class="pre">Vasprun</span></code></a><ul>
-<li><a class="reference internal" href="#ipyvasp.core.parser.Vasprun.bands"><code class="docutils literal notranslate"><span class="pre">Vasprun.bands</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.core.parser.Vasprun.dos"><code class="docutils literal notranslate"><span class="pre">Vasprun.dos</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.parser.Vasprun.get_evals_dataframe"><code class="docutils literal notranslate"><span class="pre">Vasprun.get_evals_dataframe()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.core.parser.Vasprun.poscar"><code class="docutils literal notranslate"><span class="pre">Vasprun.poscar</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.parser.Vasprun.dos"><code class="docutils literal notranslate"><span class="pre">Vasprun.dos</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.parser.Vasprun.bands"><code class="docutils literal notranslate"><span class="pre">Vasprun.bands</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.core.parser.Vasprun.read"><code class="docutils literal notranslate"><span class="pre">Vasprun.read()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.core.parser.Vasprun.get_skipk"><code class="docutils literal notranslate"><span class="pre">Vasprun.get_skipk()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.core.parser.Vasprun.get_summary"><code class="docutils literal notranslate"><span class="pre">Vasprun.get_summary()</span></code></a></li>
@@ -3055,9 +3601,10 @@ Last item is considered to be columns.</p></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#ipyvasp.core.parser.Vaspout"><code class="docutils literal notranslate"><span class="pre">Vaspout</span></code></a><ul>
-<li><a class="reference internal" href="#ipyvasp.core.parser.Vaspout.bands"><code class="docutils literal notranslate"><span class="pre">Vaspout.bands</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.core.parser.Vaspout.dos"><code class="docutils literal notranslate"><span class="pre">Vaspout.dos</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.parser.Vaspout.get_evals_dataframe"><code class="docutils literal notranslate"><span class="pre">Vaspout.get_evals_dataframe()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.core.parser.Vaspout.poscar"><code class="docutils literal notranslate"><span class="pre">Vaspout.poscar</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.parser.Vaspout.dos"><code class="docutils literal notranslate"><span class="pre">Vaspout.dos</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.parser.Vaspout.bands"><code class="docutils literal notranslate"><span class="pre">Vaspout.bands</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#ipyvasp.core.parser.minify_vasprun"><code class="docutils literal notranslate"><span class="pre">minify_vasprun()</span></code></a></li>
@@ -3078,6 +3625,43 @@ Last item is considered to be columns.</p></li>
 <li><a class="reference internal" href="#ipyvasp.core.serializer.Dict2Data.keys"><code class="docutils literal notranslate"><span class="pre">Dict2Data.keys()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.core.serializer.Dict2Data.values"><code class="docutils literal notranslate"><span class="pre">Dict2Data.values()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.core.serializer.Dict2Data.items"><code class="docutils literal notranslate"><span class="pre">Dict2Data.items()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.PoscarData"><code class="docutils literal notranslate"><span class="pre">PoscarData</span></code></a><ul>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.PoscarData.coords"><code class="docutils literal notranslate"><span class="pre">PoscarData.coords</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.PoscarData.rec_basis"><code class="docutils literal notranslate"><span class="pre">PoscarData.rec_basis</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.PoscarData.norms"><code class="docutils literal notranslate"><span class="pre">PoscarData.norms</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.PoscarData.rec_norms"><code class="docutils literal notranslate"><span class="pre">PoscarData.rec_norms</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.PoscarData.angles"><code class="docutils literal notranslate"><span class="pre">PoscarData.angles</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.PoscarData.rec_angles"><code class="docutils literal notranslate"><span class="pre">PoscarData.rec_angles</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.PoscarData.volume"><code class="docutils literal notranslate"><span class="pre">PoscarData.volume</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.PoscarData.rec_volume"><code class="docutils literal notranslate"><span class="pre">PoscarData.rec_volume</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.PoscarData.labels"><code class="docutils literal notranslate"><span class="pre">PoscarData.labels</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.PoscarData.get_distance"><code class="docutils literal notranslate"><span class="pre">PoscarData.get_distance()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.PoscarData.get_selective_dynamics"><code class="docutils literal notranslate"><span class="pre">PoscarData.get_selective_dynamics()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.BrZoneData"><code class="docutils literal notranslate"><span class="pre">BrZoneData</span></code></a><ul>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.BrZoneData.splot"><code class="docutils literal notranslate"><span class="pre">BrZoneData.splot()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.BrZoneData.iplot"><code class="docutils literal notranslate"><span class="pre">BrZoneData.iplot()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.BrZoneData.get_special_points"><code class="docutils literal notranslate"><span class="pre">BrZoneData.get_special_points()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.BrZoneData.specials"><code class="docutils literal notranslate"><span class="pre">BrZoneData.specials</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.BrZoneData.faces_coords"><code class="docutils literal notranslate"><span class="pre">BrZoneData.faces_coords</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.BrZoneData.normals"><code class="docutils literal notranslate"><span class="pre">BrZoneData.normals</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.BrZoneData.to_fractional"><code class="docutils literal notranslate"><span class="pre">BrZoneData.to_fractional()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.BrZoneData.to_cartesian"><code class="docutils literal notranslate"><span class="pre">BrZoneData.to_cartesian()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.BrZoneData.map_kpoints"><code class="docutils literal notranslate"><span class="pre">BrZoneData.map_kpoints()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.BrZoneData.translate_inside"><code class="docutils literal notranslate"><span class="pre">BrZoneData.translate_inside()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.BrZoneData.get_subzone"><code class="docutils literal notranslate"><span class="pre">BrZoneData.get_subzone()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.CellData"><code class="docutils literal notranslate"><span class="pre">CellData</span></code></a><ul>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.CellData.splot"><code class="docutils literal notranslate"><span class="pre">CellData.splot()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.CellData.iplot"><code class="docutils literal notranslate"><span class="pre">CellData.iplot()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.CellData.faces_coords"><code class="docutils literal notranslate"><span class="pre">CellData.faces_coords</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.CellData.normals"><code class="docutils literal notranslate"><span class="pre">CellData.normals</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.CellData.to_fractional"><code class="docutils literal notranslate"><span class="pre">CellData.to_fractional()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.core.serializer.CellData.to_cartesian"><code class="docutils literal notranslate"><span class="pre">CellData.to_cartesian()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -3194,6 +3778,7 @@ Last item is considered to be columns.</p></li>
 <li><a class="reference internal" href="#ipyvasp.lattice.POSCAR.bz"><code class="docutils literal notranslate"><span class="pre">POSCAR.bz</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.lattice.POSCAR.cell"><code class="docutils literal notranslate"><span class="pre">POSCAR.cell</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.lattice.POSCAR.get_bz"><code class="docutils literal notranslate"><span class="pre">POSCAR.get_bz()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.lattice.POSCAR.set_bz"><code class="docutils literal notranslate"><span class="pre">POSCAR.set_bz()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.lattice.POSCAR.get_cell"><code class="docutils literal notranslate"><span class="pre">POSCAR.get_cell()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.lattice.POSCAR.splot_bz"><code class="docutils literal notranslate"><span class="pre">POSCAR.splot_bz()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.lattice.POSCAR.splot_kpath"><code class="docutils literal notranslate"><span class="pre">POSCAR.splot_kpath()</span></code></a></li>
@@ -3227,6 +3812,7 @@ Last item is considered to be columns.</p></li>
 <li><a class="reference internal" href="#ipyvasp.lattice.get_kmesh"><code class="docutils literal notranslate"><span class="pre">get_kmesh()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.lattice.splot_bz"><code class="docutils literal notranslate"><span class="pre">splot_bz()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.lattice.iplot_bz"><code class="docutils literal notranslate"><span class="pre">iplot_bz()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.lattice.ngl_viewer"><code class="docutils literal notranslate"><span class="pre">ngl_viewer()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-ipyvasp.widgets">Widgets</a><ul>
@@ -3267,6 +3853,21 @@ Last item is considered to be columns.</p></li>
 <li><a class="reference internal" href="#ipyvasp.widgets.KpathWidget.iplot"><code class="docutils literal notranslate"><span class="pre">KpathWidget.iplot()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-ipyvasp.potential">Potential and Charge Density</a><ul>
+<li><a class="reference internal" href="#ipyvasp.potential.splot_potential"><code class="docutils literal notranslate"><span class="pre">splot_potential()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.potential.LOCPOT"><code class="docutils literal notranslate"><span class="pre">LOCPOT</span></code></a><ul>
+<li><a class="reference internal" href="#ipyvasp.potential.LOCPOT.poscar"><code class="docutils literal notranslate"><span class="pre">LOCPOT.poscar</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.potential.LOCPOT.data"><code class="docutils literal notranslate"><span class="pre">LOCPOT.data</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.potential.LOCPOT.splot"><code class="docutils literal notranslate"><span class="pre">LOCPOT.splot()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.potential.LOCPOT.view_period"><code class="docutils literal notranslate"><span class="pre">LOCPOT.view_period()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.potential.LOCPOT.view_slice"><code class="docutils literal notranslate"><span class="pre">LOCPOT.view_slice()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ipyvasp.potential.CHG"><code class="docutils literal notranslate"><span class="pre">CHG</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.potential.ELFCAR"><code class="docutils literal notranslate"><span class="pre">ELFCAR</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.potential.PARCHG"><code class="docutils literal notranslate"><span class="pre">PARCHG</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-ipyvasp.misc">Miscellaneous</a><ul>

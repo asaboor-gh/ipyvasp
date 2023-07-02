@@ -1,7 +1,0 @@
-Data Serializer
-===============
-
-.. automodule:: ipyvasp.core.serializer
-   :members:
-   :undoc-members:
-   :show-inheritance:
