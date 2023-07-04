@@ -23,6 +23,8 @@ from .spatial_toolkit import (
     to_R3,
     kpoints2bz,
     order,
+    coplanar,
+    angle_deg,
     ConvexHull,
 )
 from ..utils import _sub_doc
@@ -549,17 +551,21 @@ class BrZoneData(Dict2Data):
     def translate_inside(self, kpoints, shift=0, keep_geometry=False):
         return kpoints2bz(self, kpoints, shift=shift, keep_geomerty=keep_geometry)
 
-    def subzone(self, func):
+    def subzone(self, func, loop=True):
         """Returns a subzone of the brillouin zone by applying a function on the fractional special points of the zone.
+
+        .. tip::
+            You can get a 2D subzone by using ``lambda x,y,z: -0.1 < z < 0.1`` where 0.1 is taken as a tolerance.
 
         .. warning::
             We do not check if output is an irreducible zone or not. It is just a subzone based on the function.
         """
-        if not callable(func):
-            raise TypeError(f"func must be callable, got {type(func)}")
-
-        if not isinstance(func(0, 0, 0), bool):
-            raise TypeError(f"func must return bool, got {type(func(0,0,0))}")
+        try:
+            out = func(0, 0, 0)
+            if not isinstance(out, bool):
+                raise TypeError(f"func must return bool, got {type(out)}")
+        except:
+            raise TypeError(f"func must be callable with 3 arguments, got {type(func)}")
 
         spoints = self.specials.kpoints
         fverts = []
@@ -567,22 +573,37 @@ class BrZoneData(Dict2Data):
             if func(*vert):
                 fverts.append(vert)
 
+        if len(fverts) < 3:
+            raise ValueError(
+                "subzone should at least have 3 special points. Try another function."
+            )
+
         cverts = self.to_cartesian(fverts)
+        specials = SpecialPoints(
+            {"kpoints": np.array(fverts), "coords": cverts}
+        )  # save befor other operations
 
-        chull = ConvexHull(cverts)
-        vertices = cverts[chull.vertices]  # those are indices
+        if coplanar(cverts):
+            verts = cverts[order(cverts, loop=False)]
+            if tuple(verts[0]) == (0, 0, 0):  # gamma is first always
+                if angle_deg(verts[1], verts[-1]) < 90:
+                    verts = verts[1:]  # remove gamma to avoid concavity
 
-        vertidx = chull.vertices.tolist()
-        faces = []
-        for sim in chull.simplices.tolist():
-            face = [vertidx.index(s) for s in sim]
-            faces.append(face)
+            vertices = np.vstack([verts, verts[:1]]) if loop else verts
+            faces = [list(range(len(vertices)))]  # still list of list
+        else:
+            chull = ConvexHull(cverts)
+            vertices = cverts[chull.vertices]  # those are indices
 
-        # TODO: Merge faces if they share an edge and are coplanar
+            vertidx = chull.vertices.tolist()
+            faces = []
+            for sim in chull.simplices.tolist():
+                face = [vertidx.index(s) for s in sim]
+                faces.append(face)
+            # TODO: Merge faces if they share an edge and are coplanar using simplify_faces from spatial_toolkit
 
         d = self.copy().to_dict()
-        d.update({"faces": faces, "vertices": vertices})
-        d["_specials"] = SpecialPoints({"kpoints": np.array(fverts), "coords": cverts})
+        d.update({"faces": faces, "vertices": vertices, "_specials": specials})
         return self.__class__(d)
 
 

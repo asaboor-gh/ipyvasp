@@ -1,4 +1,4 @@
-from itertools import product
+from itertools import product, combinations
 from collections import Iterable
 
 import numpy as np
@@ -66,7 +66,12 @@ def order(points, loop=True):
     center = np.mean(points, axis=0)  # 3D cent point.
     vectors = points - center  # Relative to center
 
-    ex = vectors[0] / np.linalg.norm(vectors[0])  # i
+    for v in vectors:
+        start = v  # Start with first non-zero vector.
+        if not np.allclose(start, [0, 0, 0]):
+            break
+
+    ex = start / np.linalg.norm(start)  # i
     ey = np.cross(center, ex)
     ey = ey / np.linalg.norm(ey)  # j
 
@@ -149,14 +154,17 @@ def coplanar(points, tol=1e-5):
     """Returns true if points are coplanar within `tol` tolerance."""
     if np.ndim(points) != 2 and np.shape(points)[-1] != 3:
         raise ValueError("points should be a 2D array of shape (N,3).")
+    if len(points) < 3:
+        raise ValueError("points should have at least 3 points.")
 
     points = np.array(points)
-    try:
-        hull = ConvexHull(points)
-    except:
-        return False
-    else:
-        return hull.volume < tol
+    have_volume = []
+    for p1, p2, p3 in combinations(points, 3):
+        if np.abs(p1.dot(np.cross(p2, p3))) < np.abs(tol):
+            have_volume.append(False)
+        else:
+            have_volume.append(True)
+    return not any(have_volume)  # If all are coplanar.
 
 
 def inside_convexhull(hull, points):
@@ -359,3 +367,54 @@ def kpoints2bz(bz_data, kpoints, shift=0, keep_geomerty=False):
                 StopIteration
 
     return out_coords  # These may have duplicates, apply np.unique(out_coords,axis=0). do this in surface plots
+
+
+def simplify_faces(vertices, faces, loop=True):
+    """Simplifies faces by merging adjacent coplanar faces.
+
+    Parameters
+    ----------
+    vertices : array_like
+        List of vertices of faces. Should be cartesian coordinates.
+    faces : array_like
+        List of faces, each face is a list of indices of vertices.
+    loop : bool
+        If True, joins the last vertex of a face to starting vertex in order to complete loop.
+
+    Returns
+    -------
+    faces
+    """
+    if np.ndim(vertices) != 2 and np.shape(vertices)[1] != 3:
+        raise ValueError("vertices must be a Nx3 array.")
+    if not isinstance(faces, Iterable):
+        raise ValueError("faces must be an iterable.")
+    for face in faces:
+        if not isinstance(face, Iterable):
+            raise ValueError("faces must be an iterable of iterables.")
+        for idx in face:
+            if not isinstance(idx, (int, np.integer)):
+                raise ValueError("faces must be an iterable of iterables of integers.")
+    raise NotImplementedError("This function is not ready yet.")
+
+    # TODO: This needs a lot of thoughts
+    # new_faces = []
+    # for fi in faces:
+    #     face = list(fi)
+    #     for fj in faces:
+    #         if fi != fj:
+    #             if len(set(face) & set(fj)) >= 2 and coplanar(vertices[[*face, *fj]]):
+    #                 face.extend(fj)  # adjacent and coplanar face
+    #     # else:
+    #     #     new_faces.append(fi)
+    #     new_faces.append(list(set(face)))  # remove duplicates
+
+    new_faces = list(reversed(sorted(new_faces, key=len)))  # sort by number of vertices
+    # Remove overlapping faces
+    unique_faces = new_faces[:1]  # first face is always unique
+    for face in new_faces[1:]:
+        if not any(set(face).issubset(f) for f in unique_faces):
+            _order = order(vertices[face], loop=loop)
+            unique_faces.append([face[i] for i in _order])
+
+    return unique_faces

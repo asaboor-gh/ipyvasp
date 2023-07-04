@@ -35,7 +35,6 @@
       PoscarData
       SpecialPoints
       SpinData
-      SubZoneData
    
    
 

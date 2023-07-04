@@ -15,6 +15,7 @@
    
       angle_deg
       angle_rad
+      coplanar
       get_TM
       get_bz
       inside_convexhull
@@ -22,6 +23,7 @@
       order
       outer_side
       rotation
+      simplify_faces
       tan_inv
       to_R3
       to_basis
