@@ -844,7 +844,8 @@ def splot_bz(
     plane=None,
     ax=None,
     color="blue",
-    fill=True,
+    fill=False,
+    fill_zorder=0,
     vectors=(0, 1, 2),
     colormap=None,
     shade=True,
@@ -861,6 +862,8 @@ def splot_bz(
         Default is None and plots 3D surface. Can take 'xy','yz','zx' to plot in 2D.
     fill : bool
         True by defult, determines whether to fill surface of BZ or not.
+    fill_zorder : int
+        Default is 0, determines zorder of filled surface in 2D plots if `fill=True`.
     color : Any
         Color to fill surface and stroke color. Default is 'blue'. Can be any valid matplotlib color.
     vectors : tuple
@@ -887,11 +890,6 @@ def splot_bz(
     """
     vname = "a" if bz_data.__class__.__name__ == "CellData" else "b"
     label = r"$k_{}/2π$" if vname == "b" else "{}"
-    if not ax:  # For both 3D and 2D, initialize 2D axis.
-        ax = ptk.get_axes(figsize=(3.4, 3.4))  # For better display
-
-    if vname == "b":  # These needed for splot_kpath internally
-        type(bz_data)._splot_kws = dict(plane=plane, zoffset=zoffset, ax=ax)
 
     _label = r"\vec{" + vname + "}"  # For both
 
@@ -906,9 +904,12 @@ def splot_bz(
             raise ValueError(f"`vectors` expects values in [0,1,2], got {vectors!r}")
 
     name = kwargs.pop("label", None)  # will set only on single line
-    kwargs.pop("zdir", None)  # 2D plot on 3D axes is only supported in xy plane.
+    kwargs.pop("zdir", None)  # remove , no need
 
     if plane:  # Project 2D, works on 3D axes as well
+        if not ax:  # Create 2D axes if not given
+            ax = ptk.get_axes(figsize=(3.4, 3.4))  # For better display
+
         kwargs = {"solid_capstyle": "round", **kwargs}
         is3d = getattr(ax, "name", "") == "3d"
         normals = {
@@ -946,6 +947,27 @@ def splot_bz(
             )
             if idx == 0:
                 line.set_label(name)  # only one line
+
+            if fill and not is3d:
+                ax.fill(
+                    *g[:, idxs[plane]].T,
+                    facecolor=color,
+                    edgecolor=color,
+                    linewidth=0.0001,
+                    alpha=alpha,
+                    zorder=fill_zorder,
+                )
+            elif fill and is3d:
+                poly = Poly3DCollection(
+                    [g],  # 3D fill in plane
+                    edgecolors=[color],
+                    facecolors=[color],
+                    alpha=alpha,
+                    shade=shade,
+                    zorder=fill_zorder,
+                )
+                ax.add_collection(poly)
+                ax.autoscale_view()
 
         if vectors:
             s_basis = to_plane(normals[plane], bz_data.basis[(vectors,)])
@@ -994,19 +1016,13 @@ def splot_bz(
             ax.set_zlim([zmin, zmax])
         else:
             ax.set_aspect("equal")  # Must for 2D axes to show actual lengths of BZ
-        return ax
+
     else:  # Plot 3D
-        if getattr(ax, "name", "") == "3d":  # handle None or 2D axes passed.
-            ax3d = ax
-        else:
-            pos = ax.get_position()
-            fig = ax.get_figure()
-            ax.remove()
-            ax3d = fig.add_axes(
-                pos, projection="3d", azim=45, elev=30, proj_type="ortho"
-            )
-            if vname == "b":  # it wont be ther for a
-                type(bz_data)._splot_kws["ax"] = ax3d
+        if not ax:  # For 3D.
+            ax = ptk.get_axes(figsize=(3.4, 3.4), axes_3d=True)
+
+        if getattr(ax, "name", "") != "3d":
+            raise ValueError("3D axes required for 3D plot.")
 
         if fill:
             if colormap:
@@ -1032,47 +1048,138 @@ def splot_bz(
                 **kwargs,
             )
 
-            ax3d.add_collection(poly)
-            ax3d.autoscale_view()
+            ax.add_collection(poly)
+            ax.autoscale_view()
         else:
             kwargs = {"solid_capstyle": "round", **kwargs}
             (line,) = [
-                ax3d.plot3D(f[:, 0], f[:, 1], f[:, 2], color=(color), **kwargs)
+                ax.plot3D(f[:, 0], f[:, 1], f[:, 2], color=(color), **kwargs)
                 for f in bz_data.faces_coords
             ][0]
             line.set_label(name)  # only one line
 
         if vectors:
             for k, v in enumerate(0.35 * bz_data.basis):
-                ax3d.text(
-                    *v, r"${}_{}$".format(_label, k + 1), va="center", ha="center"
-                )
+                ax.text(*v, r"${}_{}$".format(_label, k + 1), va="center", ha="center")
 
             XYZ, UVW = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], 0.3 * bz_data.basis.T
             quiver3d(
-                *XYZ, *UVW, C="k", L=0.7, ax=ax3d, arrowstyle="-|>", mutation_scale=7
+                *XYZ, *UVW, C="k", L=0.7, ax=ax, arrowstyle="-|>", mutation_scale=7
             )
 
         l_ = np.min(bz_data.vertices, axis=0)
         h_ = np.max(bz_data.vertices, axis=0)
-        ax3d.set_xlim([l_[0], h_[0]])
-        ax3d.set_ylim([l_[1], h_[1]])
-        ax3d.set_zlim([l_[2], h_[2]])
+        ax.set_xlim([l_[0], h_[0]])
+        ax.set_ylim([l_[1], h_[1]])
+        ax.set_zlim([l_[2], h_[2]])
 
         # Set aspect to same as data.
-        ax3d.set_box_aspect(np.ptp(bz_data.vertices, axis=0))
+        ax.set_box_aspect(np.ptp(bz_data.vertices, axis=0))
 
-        ax3d.set_xlabel(label.format("x"))
-        ax3d.set_ylabel(label.format("y"))
-        ax3d.set_zlabel(label.format("z"))
-        return ax3d
+        ax.set_xlabel(label.format("x"))
+        ax.set_ylabel(label.format("y"))
+        ax.set_zlabel(label.format("z"))
+
+    if vname == "b":  # These needed for splot_kpath internally
+        type(bz_data)._splot_kws = dict(plane=plane, zoffset=zoffset, ax=ax)
+
+    return ax
+
+
+def splot_kpath(
+    bz_data, kpoints, labels=None, fmt_label=lambda x: (x, {"color": "blue"}), **kwargs
+):
+    """Plot k-path over existing BZ. It will take ``ax``, ``plane`` and ``zoffset`` internally from most recent call to ``splot_bz``/``bz.splot``.
+
+    Parameters
+    ----------
+    kpoints : array_like
+        List of k-points in fractional coordinates. e.g. [(0,0,0),(0.5,0.5,0.5),(1,1,1)] in order of path.
+    labels : list
+        List of labels for each k-point in same order as kpoints.
+    fmt_label : callable
+        Function that takes a label from labels and should return a string or (str, dict) of which dict is passed to ``plt.text``.
+
+
+    kwargs are passed to ``plt.plot`` with some defaults.
+
+    You can get ``kpoints = POSCAR.get_bz().specials.masked(lambda x,y,z : (-0.1 < z 0.1) & (x >= 0) & (y >= 0))`` to get k-points in positive xy plane.
+    Then you can reorder them by an indexer like ``kpoints = kpoints[[0,1,2,0,7,6]]``, note double brackets, and also that point at zero index is taken twice.
+
+    .. tip::
+        You can use this function multiple times to plot multiple/broken paths over same BZ.
+    """
+    if not hasattr(bz_data, "_splot_kws"):
+        raise ValueError("Plot BZ first to get ax, plane and zoffset.")
+
+    if not np.ndim(kpoints) == 2 and np.shape(kpoints)[-1] == 3:
+        raise ValueError("kpoints must be 2D array of shape (N,3)")
+
+    plane, ax, zoffset = [
+        bz_data._splot_kws.get(attr, default)  # class level attributes
+        for attr, default in zip(["plane", "ax", "zoffset"], [None, None, 0])
+    ]
+
+    ijk = [0, 1, 2]
+    _mapping = {
+        "xy": [0, 1],
+        "xz": [0, 2],
+        "yz": [1, 2],
+        "zx": [2, 0],
+        "zy": [2, 1],
+        "yx": [1, 0],
+    }
+    _zoffset = [0, 0, 0]
+    if plane:
+        _zoffset = (
+            [0, 0, zoffset]
+            if plane in "xyx"
+            else [0, zoffset, 0]
+            if plane in "xzx"
+            else [zoffset, 0, 0]
+        )
+
+    if isinstance(plane, str) and plane in _mapping:
+        if getattr(ax, "name", None) != "3d":
+            ijk = _mapping[
+                plane
+            ]  # only change indices if axes is not 3d, even if plane is given
+
+    if not labels:
+        labels = [
+            "[{0:5.2f}, {1:5.2f}, {2:5.2f}]".format(x, y, z) for x, y, z in kpoints
+        ]
+
+    _validate_label_func(fmt_label, labels[0])
+
+    coords = bz_data.to_cartesian(kpoints)
+    if _zoffset and plane:
+        normal = (
+            [0, 0, 1] if plane in "xyx" else [0, 1, 0] if plane in "xzx" else [1, 0, 0]
+        )
+        coords = to_plane(normal, coords) + _zoffset
+
+    coords = coords[:, ijk]  # select only required indices
+    kwargs = {
+        **dict(color="blue", linewidth=0.8, marker=".", markersize=10),
+        **kwargs,
+    }  # need some defaults
+    ax.plot(*coords.T, **kwargs)
+
+    for c, text in zip(coords, labels):
+        lab, textkws = fmt_label(text), {}
+        if isinstance(lab, (list, tuple)):
+            lab, textkws = lab
+        ax.text(*c, lab, **textkws)
+
+    return ax
 
 
 # Cell
 def iplot_bz(
     bz_data,
     fill=False,
-    color="rgba(168,204,216,0.8)",
+    color="rgba(84,102,108,0.8)",
     special_kpoints=True,
     alpha=0.4,
     ortho3d=True,
@@ -1087,7 +1194,7 @@ def iplot_bz(
     fill : bool
         False by defult, determines whether to fill surface of BZ or not.
     color : str
-        Color to fill surface 'rgba(168,204,216,0.4)` by default. This sholud be a valid Plotly color.
+        Color to fill surface 'rgba(84,102,108,0.8)` by default. This sholud be a valid Plotly color.
     special_kpoints : bool or callable
         True by default, determines whether to plot special points or not.
         You can also proivide a mask function f(x,y,z) -> bool which will be used to filter special points

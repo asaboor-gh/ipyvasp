@@ -440,10 +440,15 @@ class POSCAR:
 
     @property
     def bz(self):
-        "Regular BZ data. To get primitive BZ use `get_bz(primitive = True)`."
+        "Regular BZ data. Shortcut for `get_bz(primitive = False)`."
         if not hasattr(self, "_bz"):
             self._bz = self.get_bz(primitive=False)
         return self._bz
+
+    @property
+    def pbz(self):
+        "Primitive BZ data. Shortcut for `get_bz(primitive = True)`."
+        return self.get_bz(primitive=True)
 
     @property
     def cell(self):
@@ -469,99 +474,10 @@ class POSCAR:
     def splot_bz(self, plane=None, **kwargs):
         return plat.splot_bz(bz_data=self.bz, plane=plane, **kwargs)
 
-    def splot_kpath(
-        self, kpoints, labels=None, fmt_label=lambda x: (x, {"color": "blue"}), **kwargs
-    ):
-        """Plot k-path over existing BZ. It will take ``ax``, ``plane`` and ``zoffset`` internally from most recent call to ``self.splot_bz``/``self.bz.splot``.
-
-        Parameters
-        ----------
-        kpoints : array_like
-            List of k-points in fractional coordinates. e.g. [(0,0,0),(0.5,0.5,0.5),(1,1,1)] in order of path.
-        labels : list
-            List of labels for each k-point in same order as kpoints.
-        fmt_label : callable
-            Function that takes a label from labels and should return a string or (str, dict) of which dict is passed to ``plt.text``.
-
-
-        kwargs are passed to ``plt.plot`` with some defaults.
-
-        You can get ``kpoints = POSCAR.get_bz().specials.masked(lambda x,y,z : (-0.1 < z 0.1) & (x >= 0) & (y >= 0))`` to get k-points in positive xy plane.
-        Then you can reorder them by an indexer like ``kpoints = kpoints[[0,1,2,0,7,6]]``, note double brackets, and also that point at zero index is taken twice.
-
-        .. tip::
-            You can use this function multiple times to plot multiple/broken paths over same BZ.
-        """
-        if not self.bz or not hasattr(self.bz, "_splot_kws"):
-            raise ValueError(
-                "BZ data or plot not found, use `self.splot_bz` or `self.bz.splot` first"
-            )
-
-        if not np.ndim(kpoints) == 2 and np.shape(kpoints)[-1] == 3:
-            raise ValueError("kpoints must be 2D array of shape (N,3)")
-
-        plane, ax, zoffset = [
-            self.bz._splot_kws.get(attr, default)  # class level attributes
-            for attr, default in zip(["plane", "ax", "zoffset"], [None, None, 0])
-        ]
-
-        ijk = [0, 1, 2]
-        _mapping = {
-            "xy": [0, 1],
-            "xz": [0, 2],
-            "yz": [1, 2],
-            "zx": [2, 0],
-            "zy": [2, 1],
-            "yx": [1, 0],
-        }
-        _zoffset = [0, 0, 0]
-        if plane:
-            _zoffset = (
-                [0, 0, zoffset]
-                if plane in "xyx"
-                else [0, zoffset, 0]
-                if plane in "xzx"
-                else [zoffset, 0, 0]
-            )
-
-        if isinstance(plane, str) and plane in _mapping:
-            if getattr(ax, "name", None) != "3d":
-                ijk = _mapping[
-                    plane
-                ]  # only change indices if axes is not 3d, even if plane is given
-
-        if not labels:
-            labels = [
-                "[{0:5.2f}, {1:5.2f}, {2:5.2f}]".format(x, y, z) for x, y, z in kpoints
-            ]
-
-        plat._validate_label_func(fmt_label, labels[0])
-
-        coords = self.bz.to_cartesian(kpoints)
-        if _zoffset and plane:
-            normal = (
-                [0, 0, 1]
-                if plane in "xyx"
-                else [0, 1, 0]
-                if plane in "xzx"
-                else [1, 0, 0]
-            )
-            coords = plat.to_plane(normal, coords) + _zoffset
-
-        coords = coords[:, ijk]  # select only required indices
-        kwargs = {
-            **dict(color="blue", linewidth=0.8, marker=".", markersize=10),
-            **kwargs,
-        }  # need some defaults
-        ax.plot(*coords.T, **kwargs)
-
-        for c, text in zip(coords, labels):
-            lab, textkws = fmt_label(text), {}
-            if isinstance(lab, (list, tuple)):
-                lab, textkws = lab
-            ax.text(*c, lab, **textkws)
-
-        return ax
+    @_sub_doc(plat.splot_kpath)
+    @_sig_kwargs(plat.splot_kpath, ("bz_data",))
+    def splot_kpath(self, kpoints, **kwargs):
+        return plat.splot_kpath(self.bz, kpoints=kpoints, **kwargs)
 
     @_sig_kwargs(plat.splot_bz, ("bz_data",))
     def splot_cell(self, plane=None, **kwargs):

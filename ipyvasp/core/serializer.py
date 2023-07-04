@@ -17,7 +17,14 @@ from pathlib import Path
 
 import numpy as np
 
-from .spatial_toolkit import angle_deg, to_basis, to_R3, kpoints2bz
+from .spatial_toolkit import (
+    angle_deg,
+    to_basis,
+    to_R3,
+    kpoints2bz,
+    order,
+    ConvexHull,
+)
 from ..utils import _sub_doc
 
 
@@ -420,21 +427,6 @@ class SpecialPoints(Dict2Data):
         )
 
 
-class SubZoneData(Dict2Data):
-    _req_keys = ("vertices", "faces", "specials")
-
-    def __init__(self, d):
-        super().__init__(d)
-
-    def splot(plane=None):
-        # Implemenet using splot under BrZoneData
-        raise NotImplementedError("Not implemented yet")
-
-    def iplot():
-        # Implemenet using iplot under BrZoneData
-        raise NotImplementedError("Not implemented yet")
-
-
 def _methods_imported():
     # These imports work as methods of the class
     from .._lattice import splot_bz as splot, iplot_bz as iplot  # Avoid circular import
@@ -450,6 +442,8 @@ def _methods_imported():
 
 class BrZoneData(Dict2Data):
     splot, iplot = _methods_imported()
+    from .._lattice import splot_kpath  # no change in this
+
     _req_keys = ("basis", "faces", "vertices", "primitive")
 
     def __init__(self, d):
@@ -463,15 +457,18 @@ class BrZoneData(Dict2Data):
                 {"coords": np.empty((0, 3)), "kpoints": np.empty((0, 3))}
             )  # Primitive Zone has no meaning for special points
 
+        if hasattr(self, "_specials"):  # Transformed BZ
+            return self._specials
+
         mid_faces = np.array(
             [np.mean(np.unique(face, axis=0), axis=0) for face in self.faces_coords]
         )
         mid_edges = []
-        for f in self.faces_coords:
-            for i in range(len(f) - 1):
+        for face in self.faces_coords:
+            for f, g in zip(face[:-1], face[1:]):
                 # NOTE: Do not insert point between unique vertices, is it necessary?
-                if np.isclose(np.linalg.norm(f[i]), np.linalg.norm(f[i + 1])):
-                    mid_edges.append(np.mean([f[i], f[i + 1]], axis=0))
+                if np.isclose(np.linalg.norm(f), np.linalg.norm(g)):
+                    mid_edges.append(np.mean([f, g], axis=0))
 
         if mid_edges != []:
             mid_edges = np.unique(mid_edges, axis=0)  # because faces share edges
@@ -552,13 +549,41 @@ class BrZoneData(Dict2Data):
     def translate_inside(self, kpoints, shift=0, keep_geometry=False):
         return kpoints2bz(self, kpoints, shift=shift, keep_geomerty=keep_geometry)
 
-    def get_subzone(self, func):
-        # Disclaimer: Reuduction totally depends on given function, we only test for volume to satify the condition V_old = N * V_new
-        # This should add an attrivute to not recalculate special points, just return old points including in this zone
-        # How to plot the reduced zone, as it will be nowhere? or make this a plotting function? or add new namespace to POSACR? like splot_bzr(func), thing?
-        # return SubZoneData({"vertices","faces", "specials"})
-        # specials here should not be recalculated, old ones with in this zone
-        raise NotImplementedError("Not implemented yet")
+    def subzone(self, func):
+        """Returns a subzone of the brillouin zone by applying a function on the fractional special points of the zone.
+
+        .. warning::
+            We do not check if output is an irreducible zone or not. It is just a subzone based on the function.
+        """
+        if not callable(func):
+            raise TypeError(f"func must be callable, got {type(func)}")
+
+        if not isinstance(func(0, 0, 0), bool):
+            raise TypeError(f"func must return bool, got {type(func(0,0,0))}")
+
+        spoints = self.specials.kpoints
+        fverts = []
+        for vert in spoints:
+            if func(*vert):
+                fverts.append(vert)
+
+        cverts = self.to_cartesian(fverts)
+
+        chull = ConvexHull(cverts)
+        vertices = cverts[chull.vertices]  # those are indices
+
+        vertidx = chull.vertices.tolist()
+        faces = []
+        for sim in chull.simplices.tolist():
+            face = [vertidx.index(s) for s in sim]
+            faces.append(face)
+
+        # TODO: Merge faces if they share an edge and are coplanar
+
+        d = self.copy().to_dict()
+        d.update({"faces": faces, "vertices": vertices})
+        d["_specials"] = SpecialPoints({"kpoints": np.array(fverts), "coords": cverts})
+        return self.__class__(d)
 
 
 class CellData(Dict2Data):

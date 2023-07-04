@@ -1,4 +1,5 @@
 from itertools import product
+from collections import Iterable
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -142,6 +143,20 @@ def rotation(angle_deg, axis_vec):
     axis_vec = np.array(axis_vec) / np.linalg.norm(axis_vec)  # Normalization
     angle_rad = np.deg2rad(angle_deg)
     return Rotation.from_rotvec(angle_rad * axis_vec)
+
+
+def coplanar(points, tol=1e-5):
+    """Returns true if points are coplanar within `tol` tolerance."""
+    if np.ndim(points) != 2 and np.shape(points)[-1] != 3:
+        raise ValueError("points should be a 2D array of shape (N,3).")
+
+    points = np.array(points)
+    try:
+        hull = ConvexHull(points)
+    except:
+        return False
+    else:
+        return hull.volume < tol
 
 
 def inside_convexhull(hull, points):
