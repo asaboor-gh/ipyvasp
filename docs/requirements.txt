@@ -1,4 +1,4 @@
-ipyvasp
+ipyvasp>=0.6.0
 furo
 nbsphinx
 ipywidgets==8.0.2

@@ -575,7 +575,14 @@ def _str2kpoints(kpts_str):
     return hsk_list
 
 
-def get_kpath(kpoints, n=5, weight=None, ibzkpt=None, outfile=None, rec_basis=None):
+def get_kpath(
+    kpoints,
+    n: int = 5,
+    weight: float = None,
+    ibzkpt: str = None,
+    outfile: str = None,
+    rec_basis=None,
+):
     """Generate list of kpoints along high symmetry path. Options are write to file or return KPOINTS list.
     It generates uniformly spaced point with input `n` as just a scale factor of number of points per average length of `rec_basis`.
 

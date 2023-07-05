@@ -27,6 +27,7 @@ REQUIRED = [
     "pandas==1.4.4",
     "plotly==5.14.1",
     "requests==2.28.1",
+    "typer==0.9.0",
 ]
 
 # What packages are optional?
@@ -128,7 +129,7 @@ setup(
     # for command line interface
     entry_points={
         "console_scripts": [
-            "ipyvasp=ipyvasp.cli:main",
+            "ipyvasp=ipyvasp.cli:app",
         ]
     },
 )
