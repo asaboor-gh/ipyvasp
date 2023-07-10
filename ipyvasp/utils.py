@@ -98,15 +98,16 @@ def _fmt_doc(fmt_dict):
 @contextmanager
 def set_dir(path: str):
     """Context manager to work in some directory and come back.
-    
+
     >>> with set_dir('some_folder'):
     >>>    do_something()
     >>> # Now you are back in starting directory
     """
     current = os.getcwd()  # not available in pathlib yet
+    abspath = Path(path).resolve(strict=True).absolute()
     try:
-        os.chdir(path)
-        yield
+        os.chdir(abspath)
+        yield abspath
     finally:
         os.chdir(current)
 

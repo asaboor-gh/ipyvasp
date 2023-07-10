@@ -551,6 +551,12 @@ class InvokeMaterialsProject:
 
 
 def _str2kpoints(kpts_str):
+    try:
+        with open(kpts_str, "r", encoding="utf-8") as f:
+            kpts_str = f.read()
+    except:
+        pass
+
     hsk_list = []
     for j, line in enumerate(kpts_str.splitlines()):
         if line.strip():  # Make sure line is not empty
@@ -592,6 +598,7 @@ def get_kpath(
         Any number points as [(x,y,z,[label],[N]), ...]. N adds as many points in current interval.
         To disconnect path at a point, provide it as (x,y,z,[label], 0), next point will be start of other patch.
         If `kpoints` is a multiline string, it is converted to list of points. Each line should be in format "x y z [label] [N]".
+        A file path can be provided to read kpoints from file with same format as multiline string.
     n : int
         Number of point per averge length of `rec_basis`, this makes uniform steps based on distance between points.
         If (x,y,z,[label], N) is provided, this is ignored for that specific interval. If `rec_basis` is not provided, each interval has exactly `n` points.
