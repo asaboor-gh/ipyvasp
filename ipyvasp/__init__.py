@@ -40,6 +40,9 @@ from .core.plot_toolkit import (
     webshow,
 )
 
+show = plot_toolkit.plt.show  # for convenience (and already imported)
+savefig = plot_toolkit.plt.savefig  # for convenience
+
 version = __version__
 # Set global matplotlib settings for notebook.
 from cycler import cycler as __cycler

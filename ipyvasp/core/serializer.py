@@ -25,6 +25,7 @@ from .spatial_toolkit import (
     order,
     coplanar,
     angle_deg,
+    get_TM,
     ConvexHull,
 )
 from ..utils import _sub_doc
@@ -537,15 +538,24 @@ class BrZoneData(Dict2Data):
         "Converts fractional coordinates in the basis of the brillouin zone to cartesian coordinates."
         return to_R3(self.basis, points)
 
-    def map_kpoints(self, other, kpoints):
+    def map_kpoints(self, other, kpoints, fold=True):
         """Map kpoints (fractional) from this to other Brillouin zone.
+        In simple words, how other BZ sees the kpoints of this BZ into their basis.
         This operation is useful when you do POSCAR.transform() and want to map kpoints between given and transformed BZ.
+
+        .. note::
+            Points outside the first BZ of `other` BZ will be mapped to the first BZ of `other` if `fold` is True (defualt).
         """
         if not isinstance(other, self.__class__):
             raise TypeError(
                 f"other must be a {self.__class__} object, got {type(other)}"
             )
-        return other.to_fractional(self.to_cartesian(kpoints))
+        pts = other.to_fractional(self.to_cartesian(kpoints))
+        if fold:
+            # remove integer part to bring back in first BZ by using .round(0)
+            # I tried .astype(int) but it left 1 as it is, so strange.
+            pts = pts - pts.round(0)
+        return pts
 
     @_sub_doc(kpoints2bz, {"bz_data :.*kpoints :": "kpoints :"})
     def translate_inside(self, kpoints, shift=0, keep_geometry=False):

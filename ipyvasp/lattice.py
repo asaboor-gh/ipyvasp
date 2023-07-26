@@ -187,7 +187,6 @@ def ngl_viewer(
                 shape.add_cone(
                     tail.tolist(), b.tolist(), _color, linewidth * 3, f"a{i}"
                 )
-                shape.add_text((b / 2).tolist(), [0.2, 0.15, 0.2], 2, f"a{i}")
     if dashboard:
         view.gui_style = "NGL"
     return view
@@ -344,8 +343,15 @@ class POSCAR:
 
         return cls.from_string(poscar_content)
 
+    def to_dict(self):
+        "Returns a dictionary that can be modified generally and passed to `POSCAR.new` method."
+        data = self.data.copy()  # avoid overwriting numpy arrays
+        out = {"system": data.SYSTEM, "basis": data.basis}
+        out["sites"] = {k: data.positions[v] for k, v in data.types.items()}
+        return out
+
     @classmethod
-    def new(cls, basis, sites, scale=1, name=None):
+    def new(cls, basis, sites, scale=1, system=None):
         """
         Crate a new POSCAR instance from basis and sites.
 
@@ -355,7 +361,7 @@ class POSCAR:
         sites : dict, key is element and value is array_like of shape (n, 3)
             For example, {'Mg': [[0, 0, 0]], 'Cl': [[1/3, 2/3,0.214],[2/3,1/3,0.786]]} for MgCl2.
         scale : int or float used to scale basis and kept in metadata to use when writing to file.
-        name : str, name of the structure, if None, will be inferred from sites.
+        system : str, name of the structure, if None, will be inferred from sites.
         """
         if np.ndim(basis) != 2 and np.shape(basis) != (3, 3):
             raise ValueError("basis should be a 3x3 array")
@@ -385,7 +391,7 @@ class POSCAR:
         positions = np.array(positions)
 
         out_dict = {
-            "SYSTEM": name if name else "".join(type_dict.keys()),
+            "SYSTEM": system if system else "".join(type_dict.keys()),
             "basis": basis,
             "metadata": {
                 "scale": scale,
@@ -575,6 +581,21 @@ class POSCAR:
             data=plat.add_atoms(self.data, name=name, positions=positions)
         )
 
+    @_sub_doc(plat.remove_atoms)
+    def remove_atoms(self, func, fillby=None):
+        if fillby and not isinstance(fillby, POSCAR):
+            raise TypeError("fillby should be an instance of POSCAR class.")
+
+        return self.__class__(
+            data=plat.remove_atoms(
+                self.data, func=func, fillby=fillby.data if fillby else None
+            )
+        )
+
+    @_sub_doc(plat.replace_atoms)
+    def replace_atoms(self, func, name):
+        return self.__class__(data=plat.replace_atoms(self.data, func=func, name=name))
+
     @_sub_doc(plat.convert_poscar)
     def convert(self, atoms_mapping, basis_factor):
         return self.__class__(
@@ -583,10 +604,10 @@ class POSCAR:
             )
         )
 
-    @_sub_doc(plat.strain_poscar)
-    def strain(self, strain_matrix):
+    @_sub_doc(plat.deform_poscar)
+    def deform(self, deformation):
         return self.__class__(
-            data=plat.strain_poscar(self.data, strain_matrix=strain_matrix)
+            data=plat.deform_poscar(self.data, deformation=deformation)
         )
 
     @_sub_doc(get_kmesh, {"poscar_data :.*\*args :": "*args :"})
@@ -596,5 +617,5 @@ class POSCAR:
 
     @_sub_doc(get_kpath, {"rec_basis :.*\n\n": "\n\n"})
     @_sig_kwargs(get_kpath, ("rec_basis",))
-    def get_kpath(self, kpoints, n : int=5, **kwargs):
+    def get_kpath(self, kpoints, n: int = 5, **kwargs):
         return get_kpath(kpoints, n=n, **kwargs, rec_basis=self.data.rec_basis)

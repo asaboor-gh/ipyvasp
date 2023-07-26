@@ -202,7 +202,7 @@ def periodic_table():
 
     array = np.reshape(array, (10, 18, 3))
     names = np.reshape(names, (10, 18))
-    ax = ptk.get_axes((9, 4.5))
+    ax = ptk.get_axes((8, 4.5))
     ax.imshow(array)
 
     for i in range(18):
@@ -210,6 +210,7 @@ def periodic_table():
             c = "k" if np.linalg.norm(array[j, i]) > 1 else "w"
             plt.text(i, j, names[j, i], color=c, ha="center", va="center")
     ax.set_axis_off()
+    plt.tight_layout(pad=0.5)
     return ax
 
 
@@ -2273,6 +2274,10 @@ def transform_poscar(poscar_data, transformation, zoom=2, tol=1e-2):
     - FCC primitive → 111 hexagonal cell: ``lambda a,b,c: (a-c,b-c,a+b+c) ~ [[1,0,-1],[0,1,-1],[1,1,1]]``
     - FCC primitive → FCC unit cell: ``lambda a,b,c: (b+c -a,a+c-b,a+b-c) ~ [[-1,1,1],[1,-1,1],[1,1,-1]]``
     - FCC unit cell → 110 tetragonal cell: ``lambda a,b,c: (a-b,a+b,c) ~ [[1,-1,0],[1,1,0],[0,0,1]]``
+
+
+    .. note::
+        This function keeps underlying lattice same.
     """
     if callable(transformation):
         new_basis = np.array(transformation(*poscar_data.basis))  # mostly a tuple
@@ -2436,21 +2441,135 @@ def add_atoms(poscar_data, name, positions):
     return serializer.PoscarData(data)  # Return new POSCAR
 
 
-def strain_poscar(poscar_data, strain_matrix):
-    "Strain a POSCAR by a given 3x3 `strain_matrix` to be multiplied with basis (elementwise) and return a new POSCAR."
-    if not isinstance(strain_matrix, np.ndarray):
-        strain_matrix = np.array(strain_matrix)
+def _validate_func(func, nargs, return_type):
+    if not callable(func):
+        raise ValueError("`func` must be a callable function.")
 
-    if strain_matrix.shape != (3, 3):
-        raise ValueError("`strain_matrix` must be a 3x3 matrix to multiply with basis.")
+    if len(inspect.signature(func).parameters) != nargs:
+        raise ValueError(
+            f"`func` must be a function with {nargs} arguments, got {len(inspect.signature(func).parameters)}."
+        )
+    ret = func(*range(nargs))
+    if not isinstance(ret, return_type):
+        raise ValueError(
+            f"`func` must be a function that returns {return_type}, got {type(ret)}."
+        )
+
+
+def replace_atoms(poscar_data, func, name):
+    """Replace atoms satisfying a `func(i,x,y,z) -> bool` with a new `name`"""
+    if name in poscar_data.types.keys():
+        return poscar_data  # no change
+
+    _validate_func(func, 4, bool)
+    data = poscar_data.to_dict()  # Copy data to avoid modifying original
+    mask = _masked_data(poscar_data, func)
+    new_types = {**{k: [] for k in poscar_data.types.keys()}, name: []}
+
+    for k, vs in data["types"].items():
+        for idx in vs:
+            if idx in mask:
+                new_types[name].append(idx)
+            else:
+                new_types[k].append(idx)
+
+    data["positions"] = np.vstack([data["positions"][t] for t in new_types.values()])
+    idxs = np.cumsum([0, *map(len, new_types.values())])
+    data["types"] = {
+        k: range(idxs[i], idxs[i + 1])
+        for i, k in enumerate(new_types.keys())
+        if len(new_types[k]) != 0
+    }
+    return serializer.PoscarData(data)  # Return new POSCAR
+
+
+def remove_atoms(poscar_data, func, fillby=None):
+    """Remove atoms that satisfy `func(x,y,z) -> bool` on their fractional coordinates x,y,z.
+    If `fillby` is given, it will fill the removed atoms with atoms from fillby POSCAR.
+
+    .. note::
+        The coordinates of fillby POSCAR are transformed to basis of given POSCAR, before filling.
+        So a good filling is only guaranteed if both POSCARs have smaller lattice mismatch.
+    """
+    _validate_func(func, 3, bool)
+    data = poscar_data.to_dict()  # Copy data to avoid modifying original
+    positions = data["positions"]
+    mask = _masked_data(poscar_data, lambda i, x, y, z: not func(x, y, z))
+
+    new_types = {k: [] for k in poscar_data.types.keys()}
+    for k, vs in data["types"].items():
+        for idx in vs:
+            if idx in mask:
+                new_types[k].append(idx)
+
+    if fillby:
+        if not isinstance(fillby, serializer.PoscarData):
+            raise ValueError("`fillby` must be instance of PoscarData class.")
+
+        filldata = fillby.to_dict()
+        positions = np.vstack(
+            [data["positions"], to_basis(poscar_data.basis, fillby.coords)]
+        )  # update positions of fillby in given data basis, not fillby basis
+
+        def keep_pos(i, x, y, z):  # keep positions in basis of given data
+            u, v, w = to_basis(poscar_data.basis, to_R3(fillby.basis, [[x, y, z]]))[0]
+            return bool(func(u, v, w))
+
+        mask = _masked_data(fillby, keep_pos)
+        N_prev = len(data["positions"])  # before filling
+        new_types = {
+            **{k: [] for k in filldata["types"]},
+            **new_types,
+        }  # Add new types from fillby but keep old types values
+
+        for k, vs in filldata["types"].items():
+            for idx in vs:
+                if idx in mask:
+                    new_types[k].append(N_prev + idx)
+
+    data["positions"] = np.vstack([positions[t] for t in new_types.values()])
+    idxs = np.cumsum([0, *map(len, new_types.values())])
+    data["types"] = {
+        k: range(idxs[i], idxs[i + 1])
+        for i, k in enumerate(new_types.keys())
+        if len(new_types[k]) != 0
+    }
+
+    return serializer.PoscarData(data)  # Return new POSCAR
+
+
+def deform_poscar(poscar_data, deformation):
+    """Deform a POSCAR by a deformation as 3x3 ArrayLike, or a function that takee basis and returns a 3x3 ArrayLike,
+    to be multiplied with basis (elementwise) and return a new POSCAR.
+
+    .. note::
+        This function can change underlying crystal structure if cell shape changes, to just change cell shape, use `transform` function instead.
+    """
+    if callable(deformation):
+        try:
+            dmatrix = deformation(*poscar_data.basis)
+        except:
+            raise ValueError(
+                "`deformation` function must be a function(a,b,c) -> 3x3 matrix to multiply with basis."
+            )
+    else:
+        dmatrix = deformation
+
+    if not isinstance(dmatrix, np.ndarray):
+        dmatrix = np.array(dmatrix)
+
+    if dmatrix.shape != (3, 3):
+        raise ValueError(
+            "`deformation` must be a 3x3 matrix or a function(a,b,c) -> 3x3 matrix to multiply with basis."
+        )
 
     poscar_data = poscar_data.to_dict()  #
     poscar_data["basis"] = (
-        poscar_data["basis"] * strain_matrix
+        poscar_data["basis"] * dmatrix
     )  # Update basis by elemetwise multiplication
     poscar_data["metadata"][
         "comment"
-    ] = f'{poscar_data["metadata"]["comment"]} + Strained POSCAR'  # Update comment
+    ] = f'{poscar_data["metadata"]["comment"]} + Deformed POSCAR'  # Update comment
     return serializer.PoscarData(poscar_data)  # Return new POSCAR
 
 

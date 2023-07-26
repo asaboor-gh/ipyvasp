@@ -922,15 +922,17 @@ def plt2text(
         pixels = [chars[int(v * len(chars) / 255) - 1] for v in img.getdata()]
         pixels = np.reshape(pixels, (height, -1))  # Make row/columns
 
-    out_str = "\n".join(["".join([p for p in ps]) for ps in pixels])
+    out_str = " " + "\n ".join(["".join([p for p in ps]) for ps in pixels])
 
     if outfile:
         with open(outfile, "w", encoding="utf-8") as f:  # unicode
             f.write(out_str)
     else:
-        # For loop is important for printing lines, otherwise breaks appear.
-        for line in out_str.splitlines():
-            print(line)
+        if colorful:
+            for line in out_str.splitlines():
+                print(line)  # for loop to give time to termail to adjust
+        else:
+            print(out_str)
 
 
 def plt2html(plt_fig=None, transparent=True):

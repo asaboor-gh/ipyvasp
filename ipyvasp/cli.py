@@ -1,6 +1,10 @@
 # Testing a flexible command line interface for ipyvasp
+from typing import List
+from pathlib import Path
 
 import typer
+from typing_extensions import Annotated
+
 from .core.parser import minify_vasprun
 from .lattice import POSCAR, get_kpath
 from .utils import _sig_kwargs
@@ -56,45 +60,59 @@ vasprun_app.command("minify")(minify_vasprun)
 
 
 @vasprun_app.command("get-gap")
-def get_gap(glob: str = "vasprun.xml"):
-    from pathlib import Path
+def get_gap(glob: List[Path]):
     from .core.parser import Vasprun
-    from .utils import list_files
     from .widgets import summarize
 
     def gap_summary(path):
         gap = Vasprun(path).bands.gap
         delattr(gap, "coords")  # remove coords info
         d = gap.to_dict()
-        d["kvbm"] = "|".join(str(round(k, 4)) for k in d["kvbm"])
-        d["kcbm"] = "|".join(str(round(k, 4)) for k in d["kcbm"])
+        d["kvbm"] = "(" + ",".join(str(round(k, 4)) for k in d["kvbm"]) + ")"
+        d["kcbm"] = "(" + ",".join(str(round(k, 4)) for k in d["kcbm"]) + ")"
         return d
 
     name = str(Path(".").absolute())
     print("\n", name, "\n", "=" * len(name), "\n")
-    print(summarize(list_files(glob=glob), gap_summary))
+    print(summarize(glob, gap_summary).to_string())  # make all data visible
 
 
 @vasprun_app.command("get-summary")
-def get_summary(glob: str = "vasprun.xml"):
+def get_summary(glob: List[Path]):
     from .core.parser import Vasprun
-    from .utils import list_files
 
-    for path in list_files(glob=glob):
+    for path in glob:
         name = str(path.absolute())
         print("\n", name, "\n", "=" * len(name))
         print(Vasprun(path).summary)
 
 
 @app.command("set-dir")
-def _set_dir(glob: str = "*", command: str = ""):
+def _set_dir(glob: List[Path], command: str = ""):
+    from platform import system
     from subprocess import Popen
-    from .utils import set_dir, list_files
+    from .utils import set_dir
 
-    for path in list_files(glob=glob, dirs_only=True):
+    os = system()  # operating system
+
+    dirs = [f.absolute() for f in glob if f.is_dir()]  # only dirs
+    if not dirs:
+        raise RuntimeError(
+            "Provided paths do not exist or are not directories. Exiting..."
+        )
+
+    for path in dirs:
         with set_dir(path) as p:
-            print("Working in : ", p)  # to give info about the cwd
-            p = Popen(command, shell=False)
+            print("Working in -> ", p)  # to give info about the cwd
+            if os == "Windows":
+                try:
+                    p = Popen("pwsh.exe -NoProfile -c " + command, shell=False)
+                except:
+                    p = Popen("powershell.exe -NoProfile -c " + command, shell=False)
+
+            else:
+                p = Popen(command, shell=False)  # Linux, MacOS
+
             p.wait()
             if p.returncode != 0:
                 raise RuntimeError(f"Command {command} failed in {path}. Exiting...")
