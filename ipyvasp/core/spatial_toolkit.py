@@ -328,7 +328,7 @@ def kpoints2bz(bz_data, kpoints, shift=0, keep_geomerty=False):
     ----------
     bz_data : Output of get_bz().
     kpoints : array_like
-        List or array of KPOINTS to transorm into BZ or R3.
+        List or array of KPOINTS to transform into BZ or R3.
     shift : float
         This value is added to kpoints before any other operation, single number of list of 3 numbers for each direction.
     keep_geomerty : bool

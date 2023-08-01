@@ -1874,10 +1874,14 @@ def splot_lattice(
 
     # Before doing other stuff, create something for legend.
     for (k, v), c, s in zip(uelems.items(), colors, sizes):
-        ax.scatter([], [], s=s, color=c, label=k)  # Works both for 3D and 2D.
+        ax.scatter(
+            [], [], s=s, color=c, label=k, **site_kws
+        )  # Works both for 3D and 2D.
 
     # Now change colors and sizes to whole array size
-    colors = np.array([colors[i] for i, vs in enumerate(uelems.values()) for v in vs])
+    colors = np.array(
+        [mplc.to_rgb(colors[i]) for i, vs in enumerate(uelems.values()) for v in vs]
+    )
     sizes = np.array([sizes[i] for i, vs in enumerate(uelems.values()) for v in vs])
 
     if sites:
@@ -1925,8 +1929,9 @@ def splot_lattice(
                 if isinstance(lab, (list, tuple)):
                     lab, textkws = lab
                 ax.text(*coord, lab, **textkws)
-        # Set aspect to same as data.
-        ax.set_box_aspect(np.ptp(bz_data.vertices, axis=0))
+        # Set aspect to same as data if cell plotted
+        if plot_cell:
+            ax.set_box_aspect(np.ptp(bz_data.vertices, axis=0))
 
     elif plane in "xyzxzyx":
         site_kws = {**dict(alpha=0.7, zorder=3), **site_kws}

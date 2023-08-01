@@ -12,10 +12,12 @@ import json, re
 import pickle
 import inspect
 from collections import namedtuple
+from itertools import product
 from copy import deepcopy
 from pathlib import Path
 
 import numpy as np
+from scipy.spatial import KDTree
 
 from .spatial_toolkit import (
     angle_deg,
@@ -311,6 +313,25 @@ class PoscarData(Dict2Data):
         return np.array(
             [f"{k} {v - vs.start + 1}" for k, vs in self.types.items() for v in vs]
         )
+
+    @property
+    def neighbors(self, k=5):
+        """Get the k nearest neighbors of each atom (including itself) in the lattice.
+        Returns array (N, k) of indices of atomsGet-NetAdapterGet-NetAdapter. The first index is the atom itself.
+        """
+        if not isinstance(k, int):
+            raise ValueError("k must be an integer to include that many neighbors")
+
+        # To take care of periodic boundary conditions, we need to replicate the atoms in the lattice
+        ps = np.vstack(
+            [self.positions + tr for tr in product([0, 1, -1], [0, 1, -1], [0, 1, -1])]
+        )
+        cs = to_R3(self.basis, ps)
+        tree = KDTree(cs)
+        _, inn = tree.query(cs, k=k)
+        return inn % len(
+            self.positions
+        )  # to get the index of the atom in the original list
 
     def get_distance(self, atom1, atom2):
         """
