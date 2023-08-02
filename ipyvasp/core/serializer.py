@@ -314,10 +314,17 @@ class PoscarData(Dict2Data):
             [f"{k} {v - vs.start + 1}" for k, vs in self.types.items() for v in vs]
         )
 
-    @property
-    def neighbors(self, k=5):
+    def get_neighbors(self, k=5):
         """Get the k nearest neighbors of each atom (including itself) in the lattice.
-        Returns array (N, k) of indices of atomsGet-NetAdapterGet-NetAdapter. The first index is the atom itself.
+        Returns array (N, k) of indices of atoms. The first index is the atom itself.
+
+
+        >>> import ipyvasp as ipv
+        >>> data = ipv.POSCAR('POSCAR').data # Assume 8 atoms
+        >>> knn = data.get_neighbors(5) # or .get_knn, Array of shape (8, 5) with indices of neighbors
+        >>> data.labels[knn] # Array of shape (8, 5) with labels of neighbors
+        >>> data.positions[knn] # Array of shape (8, 5, 3) with positions of neighbors
+        >>> data.labels[knn[0]] # Array of shape (5,) with labels of neighbors of first atom including itself
         """
         if not isinstance(k, int):
             raise ValueError("k must be an integer to include that many neighbors")
@@ -332,6 +339,8 @@ class PoscarData(Dict2Data):
         return inn % len(
             self.positions
         )  # to get the index of the atom in the original list
+
+    get_knn = get_neighbors  # important alias
 
     def get_distance(self, atom1, atom2):
         """

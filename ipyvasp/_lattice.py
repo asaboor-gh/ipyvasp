@@ -1421,6 +1421,9 @@ def _fix_sites(poscar_data, tol=1e-2, eqv_sites=False, translate=None):
     pos = (
         poscar_data.positions.copy()
     )  # We can also do poscar_data.copy().positions that copies all contents.
+    if hasattr(poscar_data.metadata, "origin"):
+        pos = pos + poscar_data.metadata.origin  # Move towards origin of basis
+
     labels = np.array(poscar_data.labels)  # We need to store equivalent labels as well
     out_dict = poscar_data.to_dict()  # For output
 
@@ -1487,6 +1490,9 @@ def _fix_sites(poscar_data, tol=1e-2, eqv_sites=False, translate=None):
             start += len(new_dict[k]["pos"])
 
         out_dict["positions"] = np.vstack([new_dict[k]["pos"] for k in new_dict.keys()])
+        if hasattr(poscar_data.metadata, "origin"):
+            out_dict["positions"] -= poscar_data.metadata.origin  # origin given by user
+
         out_dict["metadata"]["eqv_labels"] = np.hstack(
             [new_dict[k]["lab"] for k in new_dict.keys()]
         )
@@ -2091,13 +2097,15 @@ def scale_poscar(poscar_data, scale=(1, 1, 1), tol=1e-2):
     tol : float
         It is used such that site positions are blow `1 - tol`, as 1 belongs to next cell, not previous one.
 
-
     .. note::
         ``scale = (2,2,2)`` enlarges a cell and next operation of ``(1/2,1/2,1/2)`` should bring original cell back.
 
     .. warning::
-        A POSCAR scaled with Non-integer values should only be used for visualization purposes, Not for any other opration such as making supercells, joining POSCARs.
+        A POSCAR scaled with Non-integer values should only be used for visualization purposes, Not for any other opration such as making supercells, joining POSCARs etc.
     """
+    if not isinstance(scale, (tuple, list)) or len(scale) != 3:
+        raise ValueError("scale must be a tuple of three values.")
+
     ii, jj, kk = np.ceil(scale).astype(int)  # Need int for joining.
 
     if tuple(scale) == (1, 1, 1):  # No need to scale.
@@ -2123,6 +2131,7 @@ def scale_poscar(poscar_data, scale=(1, 1, 1), tol=1e-2):
     # Clip at end according to scale, change length of basis as fractions.
     pos = poscar_data.positions.copy() / np.array([fi, fj, fk])  # rescale for clip
     basis = poscar_data.basis.copy()
+
     for i, f in zip(range(3), [fi, fj, fk]):
         basis[i] = f * basis[i]  # Basis rescale for clip
 
@@ -2168,6 +2177,28 @@ def rotate_poscar(poscar_data, angle_deg, axis_vec):
     )  # Rotate basis so that they are transpose
     p_dict["metadata"]["comment"] = f"Modified by ipyvasp"
     return serializer.PoscarData(p_dict)
+
+
+def set_origin(poscar_data, origin):
+    """Set origin of POSCAR sites to a given position in fractional coordinates.
+    The following example demonstrates the use of this function.
+
+    >>> import ipyvasp as ipv
+    >>> poscar = ipv.POSCAR("POSCAR")
+    >>> ax = poscar.splot_cell() # plot original cell
+    >>> poscar_shifted = poscar.scale((3,3,3)).set_origin((1/3,1/3,1/3))
+    >>> poscar_shifted.splot_lattice(ax=ax, plot_cell=False) # displays sites around original cell
+
+    .. warning::
+        The shifted origin will be used in all subsequent operations such as joining, rotating, writing etc.
+        You must know what you are doing after setting origin. It is recommended to use this function only for visualization purposes.
+    """
+    if not isinstance(origin, (tuple, list, np.ndarray)) or len(origin) != 3:
+        raise ValueError("origin must be a list, tuple or numpy array of length 3.")
+    new_poscar = poscar_data.to_dict()
+    new_poscar["positions"] = poscar_data.positions - np.array(origin)
+    new_poscar["metadata"]["origin"] = origin  # need this info in fixing sites
+    return serializer.PoscarData(new_poscar)
 
 
 def set_zdir(poscar_data, hkl, phi=0):
@@ -2586,3 +2617,4 @@ def view_poscar(poscar_data, **kwargs):
         ax.view_init(elev=elev, azim=azim, roll=roll)
 
     return interactive(view, elev=(0, 180), azim=(0, 360), roll=(0, 360))
+

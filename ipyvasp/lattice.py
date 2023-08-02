@@ -20,6 +20,7 @@ import matplotlib.colors as mcolors
 
 from .core import serializer
 from .core import spatial_toolkit as stk
+from .core.plot_toolkit import iplot2widget
 from .utils import _sig_kwargs, _sub_doc
 from . import _lattice as plat
 from ._lattice import (
@@ -195,6 +196,7 @@ def ngl_viewer(
 class POSCAR:
     _cb_instance = {}  # Loads last clipboard data if not changed
     _mp_instance = {}  # Loads last mp data if not changed
+    _update_kws = {}  # kwargs to pass to auto update figurewidget
 
     def __init__(self, path=None, content=None, data=None):
         """
@@ -287,6 +289,15 @@ class POSCAR:
         from .widgets import KpathWidget
 
         return KpathWidget(path=str(self.path.parent), glob=self.path.name)
+
+    @_sig_kwargs(plat.iplot_lattice, ("poscar_data",))
+    def view_widegt(self, **kwargs):
+        self.__class__._update_kws = kwargs  # attach to class, not self
+        return iplot2widget(self.iplot_lattice(**kwargs))
+
+    def update_widget(self, handle):
+        "Update widget (if shown in notebook) after some operation on POSCAR with `handle` returned by `view_widget`"
+        iplot2widget(self.iplot_lattice(**self._update_kws), fig_widget=handle)
 
     @classmethod
     def from_file(cls, path):
@@ -528,6 +539,10 @@ class POSCAR:
     @_sig_kwargs(plat.scale_poscar, ("poscar_data",))
     def scale(self, scale=(1, 1, 1), **kwargs):
         return self.__class__(data=plat.scale_poscar(self.data, scale, **kwargs))
+
+    @_sub_doc(plat.set_origin)
+    def set_origin(self, origin):
+        return self.__class__(data=plat.set_origin(self.data, origin=origin))
 
     @_sub_doc(plat.rotate_poscar)
     def rotate(self, angle_deg, axis_vec):
