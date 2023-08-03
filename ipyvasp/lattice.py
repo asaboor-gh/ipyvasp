@@ -82,6 +82,7 @@ def ngl_viewer(
     height="400px",
     plot_vectors=True,
     dashboard=False,
+    origin=(0, 0, 0),
 ):
     """Display structure in Jupyter notebook using nglview.
 
@@ -132,7 +133,9 @@ def ngl_viewer(
         raise ImportError("Please install nglview to use this function.")
 
     if plot_cell:  # Only show equivalent sites if plotting cell
-        poscar = POSCAR(data=plat._fix_sites(poscar.data, eqv_sites=True))
+        poscar = POSCAR(
+            data=plat._fix_sites(poscar.data, eqv_sites=True, origin=origin)
+        )
 
     _types = list(poscar.data.types.keys())
     _sizes = [0.5 for _ in _types]
@@ -290,14 +293,19 @@ class POSCAR:
 
         return KpathWidget(path=str(self.path.parent), glob=self.path.name)
 
+    @_sub_doc(plat.iplot_lattice)
     @_sig_kwargs(plat.iplot_lattice, ("poscar_data",))
     def view_widegt(self, **kwargs):
         self.__class__._update_kws = kwargs  # attach to class, not self
         return iplot2widget(self.iplot_lattice(**kwargs))
 
-    def update_widget(self, handle):
-        "Update widget (if shown in notebook) after some operation on POSCAR with `handle` returned by `view_widget`"
-        iplot2widget(self.iplot_lattice(**self._update_kws), fig_widget=handle)
+    @_sig_kwargs(plat.iplot_lattice, ("poscar_data",))
+    def update_widget(self, handle, **kwargs):
+        """Update widget (if shown in notebook) after some operation on POSCAR with `handle` returned by `view_widget`
+        kwargs are passed to `self.iplot_lattice` method.
+        """
+        kwargs = {**self.__class__._update_kws, **kwargs}
+        iplot2widget(self.iplot_lattice(**kwargs), fig_widget=handle)
 
     @classmethod
     def from_file(cls, path):
