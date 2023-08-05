@@ -132,10 +132,12 @@ def ngl_viewer(
     except ImportError:
         raise ImportError("Please install nglview to use this function.")
 
-    if plot_cell:  # Only show equivalent sites if plotting cell
-        poscar = POSCAR(
-            data=plat._fix_sites(poscar.data, eqv_sites=True, origin=origin)
+    # Only show equivalent sites if plotting cell, only shift origin otherwise
+    poscar = POSCAR(  # don't change instance itself, make new one
+        data=plat._fix_sites(
+            poscar.data, eqv_sites=True if plot_cell else False, origin=origin
         )
+    )
 
     _types = list(poscar.data.types.keys())
     _sizes = [0.5 for _ in _types]
@@ -295,7 +297,7 @@ class POSCAR:
 
     @_sub_doc(plat.iplot_lattice)
     @_sig_kwargs(plat.iplot_lattice, ("poscar_data",))
-    def view_widegt(self, **kwargs):
+    def view_widget(self, **kwargs):
         self.__class__._update_kws = kwargs  # attach to class, not self
         return iplot2widget(self.iplot_lattice(**kwargs))
 

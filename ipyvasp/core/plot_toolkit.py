@@ -1019,7 +1019,7 @@ def iplot2widget(fig, fig_widget=None, template=None):
 
     fig_widget.layout = fig.layout
 
-    with fig_widget.batch_animate(0):  # Disable animation to speed up
+    with fig_widget.batch_update():
         for data in fig.data:
             fig_widget.add_trace(data)
 
