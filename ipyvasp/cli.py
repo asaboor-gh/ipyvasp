@@ -9,10 +9,12 @@ from .core.parser import minify_vasprun
 from .lattice import POSCAR, get_kpath
 from .utils import _sig_kwargs
 
-app = typer.Typer(no_args_is_help=True)
-poscar_app = typer.Typer(no_args_is_help=True)
+app_kwargs = dict(no_args_is_help=True, pretty_exceptions_show_locals=False)
+
+app = typer.Typer(**app_kwargs)
+poscar_app = typer.Typer(**app_kwargs)
 app.add_typer(poscar_app, name="poscar", help="POSCAR related operations")
-vasprun_app = typer.Typer(no_args_is_help=True)
+vasprun_app = typer.Typer(**app_kwargs)
 app.add_typer(vasprun_app, name="vasprun", help="vasprun.xml related operations")
 
 
@@ -56,11 +58,16 @@ def _get_kpath(kpoints: str, n: int = 5, poscar: str = "POSCAR", **kwargs):
         return get_kpath(kpoints, n=n, **kwargs)
 
 
-vasprun_app.command("minify")(minify_vasprun)
+@vasprun_app.command("minify")
+def minify(files: List[Path]):
+    "Remove projected data from vasprun.xml file to reduce file size."
+    for file in files:
+        minify_vasprun(file)
 
 
 @vasprun_app.command("get-gap")
-def get_gap(glob: List[Path]):
+def get_gap(files: List[Path]):
+    "Get band gap information as table."
     from .core.parser import Vasprun
     from .widgets import summarize
 
@@ -74,28 +81,32 @@ def get_gap(glob: List[Path]):
 
     name = str(Path(".").absolute())
     print("\n", name, "\n", "=" * len(name), "\n")
-    print(summarize(glob, gap_summary).to_string())  # make all data visible
+    print(summarize(files, gap_summary).to_string())  # make all data visible
 
 
 @vasprun_app.command("get-summary")
-def get_summary(glob: List[Path]):
+def get_summary(files: List[Path]):
+    "Get summary of calculation output."
     from .core.parser import Vasprun
 
-    for path in glob:
+    for path in files:
         name = str(path.absolute())
         print("\n", name, "\n", "=" * len(name))
         print(Vasprun(path).summary)
 
 
 @app.command("set-dir")
-def _set_dir(glob: List[Path], command: str = ""):
+def _set_dir(
+    paths: List[Path], command: Annotated[str, typer.Option("-c", "--command")] = ""
+):
+    "Set multiple directories like a for loop to execute a shell command within each of them."
     from platform import system
     from subprocess import Popen
-    from .utils import set_dir
+    from .utils import set_dir, color
 
     os = system()  # operating system
 
-    dirs = [f.absolute() for f in glob if f.is_dir()]  # only dirs
+    dirs = [f.absolute() for f in paths if f.is_dir()]  # only dirs
     if not dirs:
         raise RuntimeError(
             "Provided paths do not exist or are not directories. Exiting..."
@@ -103,7 +114,7 @@ def _set_dir(glob: List[Path], command: str = ""):
 
     for path in dirs:
         with set_dir(path) as p:
-            print("Working in -> ", p)  # to give info about the cwd
+            print(color.gb(f"📁 → {str(p)!r}"))
             if os == "Windows":
                 try:
                     p = Popen("pwsh.exe -NoProfile -c " + command, shell=False)

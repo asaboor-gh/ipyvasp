@@ -625,9 +625,13 @@ class BrZoneData(Dict2Data):
 
         if coplanar(cverts):
             verts = cverts[order(cverts, loop=False)]
-            if tuple(verts[0]) == (0, 0, 0):  # gamma is first always
-                if angle_deg(verts[1], verts[-1]) < 90:
-                    verts = verts[1:]  # remove gamma to avoid concavity
+            zero_idxs = [i for i, a in enumerate(verts) if tuple(a) == (0, 0, 0)]
+            if zero_idxs:
+                idx0 = zero_idxs[0]  # only one gamma exists
+                a, b = verts[idx0 - 1], verts[(idx0 + 1) % len(verts)]
+                if angle_deg(a, b) < 90:
+                    verts = np.delete(verts, idx0, axis=0)
+                    # removed gamma to avoid concavity less than 90
 
             vertices = np.vstack([verts, verts[:1]]) if loop else verts
             faces = [list(range(len(vertices)))]  # still list of list
