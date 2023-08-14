@@ -597,6 +597,9 @@ class BrZoneData(Dict2Data):
         .. tip::
             You can get a 2D subzone by using ``lambda x,y,z: -0.1 < z < 0.1`` where 0.1 is taken as a tolerance.
 
+        .. tip::
+            ``func = lambda x,y,z: all([z >= 0, z - x <= 0, z - y <= 0])`` gives the irreducible BZ of cubic cell.
+
         .. warning::
             We do not check if output is an irreducible zone or not. It is just a subzone based on the function.
         """
@@ -629,9 +632,9 @@ class BrZoneData(Dict2Data):
             if zero_idxs:
                 idx0 = zero_idxs[0]  # only one gamma exists
                 a, b = verts[idx0 - 1], verts[(idx0 + 1) % len(verts)]
-                if angle_deg(a, b) < 90:
+                if angle_deg(a, b) < 90 and len(verts) > 3:
                     verts = np.delete(verts, idx0, axis=0)
-                    # removed gamma to avoid concavity less than 90
+                    # removed gamma to avoid concavity less than 90 when more than 3 points
 
             vertices = np.vstack([verts, verts[:1]]) if loop else verts
             faces = [list(range(len(vertices)))]  # still list of list

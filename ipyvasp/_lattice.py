@@ -1547,23 +1547,23 @@ def get_pairs(coords, r, tol=1e-3):
 
 
 def _get_bond_length(poscar_data, bond_length=None):
-    "Given `bond_length` should be in unit of Angstrom, and can be a number of dict like {1.2:['Fe','O'],...}"
+    "Given `bond_length` should be in unit of Angstrom, and can be a number of dict like {'Fe-O':1.2,...}"
     if bond_length is not None:
         if isinstance(bond_length, (int, float, np.integer)):
             return bond_length
         elif isinstance(bond_length, dict):
             for k, v in bond_length.items():
-                if not isinstance(k, (int, float, np.integer)):
+                if not isinstance(v, (int, float, np.integer)):
                     raise TypeError(
-                        f"Value of key `{k}` should be a number in unit of Angstrom."
+                        f"Value to key `{k}` should be a number in unit of Angstrom."
                     )
-                if not isinstance(v, (list, tuple, np.ndarray)) or len(v) != 2:
+                if not isinstance(k, str) or k.count("-") != 1:
                     raise TypeError(
-                        f"Value of key `{k}` should be a list of two elements like ['Fe', 'O']."
+                        f"key `{k}` should be a string connecting two elements like 'Fe-O'."
                     )
 
             return max(
-                list(bond_length.keys())
+                list(bond_length.values())
             )  # return the maximum distance, will filter later
         else:
             raise TypeError("`bon_length` should be a number or a dict.")
@@ -1603,14 +1603,15 @@ def _masked_data(poscar_data, mask_sites):
     return pick  # could be duplicate indices
 
 
-def _filter_pairs(poscar_data, pairs, dist, bond_length):
+def _filter_pairs(labels, pairs, dist, bond_length):
     """Filter pairs based on bond_length dict like {1.2:['Fe','O'],...}. Returns same pairs otherwise."""
     if isinstance(bond_length, dict):
         new_pairs = []
         for pair, d in zip(pairs, dist):
-            t1, t2 = [poscar_data.labels[idx].split()[0] for idx in pair]
+            t1, t2 = [labels[idx].split()[0] for idx in pair]
             for k, v in bond_length.items():
-                if tuple(v) in [(t1, t2), (t2, t1)] and d <= k:
+                p = tuple(k.split("-"))
+                if p in [(t1, t2), (t2, t1)] and d <= v:
                     new_pairs.append(pair)
 
         return np.unique(new_pairs, axis=0)  # remove duplicates
@@ -1645,8 +1646,8 @@ def iplot_lattice(
         Size of sites. Either one int/float or list equal to type of ions.
     colors : tuple
         Sequence of colors for each type. Automatically generated if not provided.
-    bond_length : float
-        Length of bond in Angstrom. Auto calculated if not provides. Can be a dict like {1.2:['Fe','O'],...} to specify bond length between specific types.
+    bond_length : float or dict
+        Length of bond in Angstrom. Auto calculated if not provides. Can be a dict like {'Fe-O':3.2,...} to specify bond length between specific types.
     mask_sites : callable
         Provide a mask function `f(index, x,y,z) -> bool` to show only selected sites.
         For example, to show only sites with z > 0.5, use `mask_sites = lambda i, x,y,z: x > 0.5`.
@@ -1679,7 +1680,8 @@ def iplot_lattice(
             raise ValueError("No sites found with given mask_sites function.")
 
     coords, pairs, dist = get_pairs(coords, r=blen)
-    pairs = _filter_pairs(poscar_data, pairs, dist, bond_length)
+    _labels = poscar_data.labels[sites] if sites else poscar_data.labels
+    pairs = _filter_pairs(_labels, pairs, dist, bond_length)
 
     if not fig:
         fig = go.Figure()
@@ -1846,8 +1848,8 @@ def splot_lattice(
         Size of sites. Either one int/float or list equal to type of ions.
     colors : tuple
         Sequence of colors for each ion type. If None, automatically generated.
-    bond_length : float
-        Length of bond in Angstrom. Auto calculated if not provides. Can be a dict like {1.2:['Fe','O'],...} to specify bond length between specific types.
+    bond_length : float or dict
+        Length of bond in Angstrom. Auto calculated if not provides. Can be a dict like {'Fe-O':3.2,...} to specify bond length between specific types.
     alpha : float
         Opacity of points and bonds.
     mask_sites : callable
@@ -1894,10 +1896,11 @@ def splot_lattice(
         if not sites:
             raise ValueError("No sites found with given mask_sites function.")
 
-    coords, pairs, dist = get_pairs(coords, r=blen)
-    pairs = _filter_pairs(poscar_data, pairs, dist, bond_length)
-
     labels = [poscar_data.labels[i] for i in sites] if sites else poscar_data.labels
+
+    coords, pairs, dist = get_pairs(coords, r=blen)
+    pairs = _filter_pairs(labels, pairs, dist, bond_length)
+
     if fmt_label is not None:
         _validate_label_func(fmt_label, labels[0])
 
@@ -1960,7 +1963,7 @@ def splot_lattice(
         }  # bond_kws overrides alpha and capstyle only
         # 3D LineCollection by default, very fast as compared to plot one by one.
         lc = Line3DCollection(coords_n, colors=colors_n, **bond_kws)
-        if plane in "xyzxzyx":
+        if plane and plane in "xyzxzyx":  # Avoid None
             lc = LineCollection(coords_n[:, :, [ix, iy]], colors=colors_n, **bond_kws)
 
         ax.add_collection(lc)
