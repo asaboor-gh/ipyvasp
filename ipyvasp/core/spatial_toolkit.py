@@ -1,5 +1,5 @@
 from itertools import product, combinations
-from collections import Iterable
+from collections.abc import Iterable
 
 import numpy as np
 from scipy.spatial.transform import Rotation

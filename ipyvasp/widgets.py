@@ -11,7 +11,7 @@ __all__ = [
 import inspect
 from time import time
 from pathlib import Path
-from collections import Iterable
+from collections.abc import Iterable
 from functools import partial
 
 # Widgets Imports

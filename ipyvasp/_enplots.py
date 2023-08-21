@@ -1,5 +1,5 @@
 import re
-from collections import Iterable
+from collections.abc import Iterable
 
 import numpy as np
 import matplotlib as mpl

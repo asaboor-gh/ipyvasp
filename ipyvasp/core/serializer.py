@@ -334,11 +334,10 @@ class PoscarData(Dict2Data):
             [self.positions + tr for tr in product([0, 1, -1], [0, 1, -1], [0, 1, -1])]
         )
         cs = to_R3(self.basis, ps)
+        N = len(self.positions)
         tree = KDTree(cs)
         _, inn = tree.query(cs, k=k)
-        return inn % len(
-            self.positions
-        )  # to get the index of the atom in the original list
+        return (inn % N)[:N]  # to get the index of the atom in the original list
 
     get_knn = get_neighbors  # important alias
 

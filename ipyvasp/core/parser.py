@@ -3,7 +3,7 @@ __all__ = ["Vasprun", "Vaspout", "minify_vasprun", "xml2dict"]
 import re
 from io import StringIO
 from itertools import islice, chain, product
-from collections import Iterable
+from collections.abc import Iterable
 import xml.etree.ElementTree as ET
 from pathlib import Path
 

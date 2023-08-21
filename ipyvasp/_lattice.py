@@ -1927,10 +1927,12 @@ def splot_lattice(
         colors = [_atom_colors[elem] for elem in uelems.keys()]
 
     # Before doing other stuff, create something for legend.
-    for (k, v), c, s in zip(uelems.items(), colors, sizes):
-        ax.scatter(
-            [], [], s=s, color=c, label=k, **site_kws
-        )  # Works both for 3D and 2D.
+    if showlegend:
+        for (k, v), c, s in zip(uelems.items(), colors, sizes):
+            ax.scatter(
+                [], [], s=s, color=c, label=k, **site_kws
+            )  # Works both for 3D and 2D.
+        ptk.add_legend(ax)
 
     # Now change colors and sizes to whole array size
     colors = np.array(
@@ -2013,8 +2015,6 @@ def splot_lattice(
         ax.set_aspect("equal")
 
     ax.set_axis_off()
-    if showlegend:
-        ptk.add_legend(ax)
     return ax
 
 
