@@ -94,6 +94,14 @@ def get_summary(files: List[Path]):
         print("\n", name, "\n", "=" * len(name))
         print(Vasprun(path).summary)
 
+@app.command("get-E0")
+def _get_E0(files: List[Path]):
+    "Get the E0 from the last line of OSZICAR file(s)."
+    from .misc import get_E0
+    from .widgets import summarize
+    
+    print(summarize(files, lambda path: {'E0': get_E0(path)}).to_string())
+
 
 @app.command("set-dir")
 def _set_dir(
@@ -122,7 +130,7 @@ def _set_dir(
                     p = Popen("powershell.exe -NoProfile -c " + command, shell=False)
 
             else:
-                p = Popen(command, shell=False)  # Linux, MacOS
+                p = Popen(command, shell=True)  # Linux, MacOS, shell to get args
 
             p.wait()
             if p.returncode != 0:

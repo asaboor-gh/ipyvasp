@@ -24,6 +24,22 @@ def parse_text(path, shape, slice, **kwargs):
         )  # should be under open file context
     return data
 
+def get_E0(path: Path = 'OSZICAR'):
+    "Get the E0 from the last line of OSZICAR."
+    fh = Path(path)
+    if fh.is_file():
+        lines = fh.read_text().splitlines()
+    else:
+        raise FileNotFoundError(f"File: {path!r} does not exists!")
+    if not lines:
+        raise ValueError(f"File: {path!r} is empty!")
+    
+    line = lines[-1]
+    if 'F=' not in line:
+        raise ValueError(f"File: {path!r} is not a valid OSZICAR file or calculation is not finished!")
+        
+    return float(line.split('=')[1].split()[0])
+
 
 class OUTCAR:
     "Parse some required data from OUTCAR file."
@@ -46,3 +62,4 @@ class OUTCAR:
         return vp.Vasprun.read(
             self, start_match, stop_match, **kwargs
         )  # Pass all the arguments to the function
+        
