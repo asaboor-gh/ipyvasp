@@ -180,7 +180,7 @@ class Vasprun(DataSource):
             for v in ET.fromstringlist(self.read("<incar", "</incar")).iter("i")
         }
 
-        info_dict = {"SYSTEM": incar["SYSTEM"]}
+        info_dict = {"SYSTEM": incar.get("SYSTEM", None)} # some people don't write system in incar
         info_dict["ISPIN"] = int(
             ET.fromstring(next(self.read("<i.*ISPIN", "</i>"))).text
         )
@@ -223,6 +223,9 @@ class Vasprun(DataSource):
         info_dict["types"] = {
             name: range(inds[i], inds[i + 1]) for i, name in enumerate(names)
         }
+        
+        if info_dict["SYSTEM"] is None:
+            info_dict["SYSTEM"] = "".join(names)
 
         # Getting projection fields
         fields = [
@@ -237,7 +240,7 @@ class Vasprun(DataSource):
             info_dict["NSETS"] = int(re.findall("(\d+)", sets_lines)[0])
             info_dict["orbs"] = [f for f in fields if "energy" not in f]
 
-        info_dict["incar"] = incar  # Just at end
+        info_dict["incar"] =   # Just at end
         return serializer.Dict2Data(info_dict)
 
     def get_structure(self):

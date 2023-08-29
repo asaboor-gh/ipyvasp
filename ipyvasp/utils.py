@@ -285,7 +285,7 @@ def list_files(path=".", glob="*", exclude=None, files_only=False, dirs_only=Fal
         files = [p for p in files if p.is_file()]
     if dirs_only:
         files = [p for p in files if p.is_dir()]
-    return tuple(files)
+    return tuple(sorted(files)) # sorting is important here
 
 
 @contextmanager

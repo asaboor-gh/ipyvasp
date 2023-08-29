@@ -305,7 +305,7 @@ class PoscarData(Dict2Data):
 
     @property
     def labels(self):
-        "Returns the labels of the atoms in the poscar data."
+        "Returns the numbered labels of the atoms in the poscar data"
         if hasattr(
             self.metadata, "eqv_labels"
         ):  # If eqv_labels are present, return them
@@ -313,6 +313,11 @@ class PoscarData(Dict2Data):
         return np.array(
             [f"{k} {v - vs.start + 1}" for k, vs in self.types.items() for v in vs]
         )
+        
+    @property
+    def symbols(self):
+        "Returns the symbols of the atoms in the poscar data without numbers"
+        return np.array([lab.split()[0] for lab in self.labels])
 
     def get_neighbors(self, k=5):
         """Get the k nearest neighbors of each atom (including itself) in the lattice.
@@ -337,7 +342,9 @@ class PoscarData(Dict2Data):
         N = len(self.positions)
         tree = KDTree(cs)
         _, inn = tree.query(cs, k=k)
-        return (inn % N)[:N]  # to get the index of the atom in the original list
+        output = (inn % N)[:N]  # to get the index of the atom in the original list
+        output[:,1:] = np.sort(output[:,1:], axis=1)  # sort the indices of neighbors
+        return output
 
     get_knn = get_neighbors  # important alias
 

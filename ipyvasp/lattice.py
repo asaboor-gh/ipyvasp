@@ -257,11 +257,8 @@ class POSCAR:
         """
         from ase import Atoms
 
-        symbols = [
-            lab.split()[0] for lab in self.data.labels
-        ]  # Remove numbers from labels
         return Atoms(  # ASE positions are cartesian, not fractional
-            symbols=symbols, positions=self.data.coords, cell=self.data.basis
+            symbols=self.data.symbols, positions=self.data.coords, cell=self.data.basis
         )
 
     def view(self, viewer=None, **kwargs):
