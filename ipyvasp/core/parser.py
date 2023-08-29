@@ -240,7 +240,7 @@ class Vasprun(DataSource):
             info_dict["NSETS"] = int(re.findall("(\d+)", sets_lines)[0])
             info_dict["orbs"] = [f for f in fields if "energy" not in f]
 
-        info_dict["incar"] =   # Just at end
+        info_dict["incar"] =  incar # Just at end
         return serializer.Dict2Data(info_dict)
 
     def get_structure(self):
