@@ -219,7 +219,11 @@ class Vasprun(DataSource):
         _inds = [int(a) for a in elems[-types:]]
 
         inds = np.cumsum([0, *_inds]).astype(int)
-        names = list(np.unique(elems[:-types]))
+        names = [] # for keeping order, do not use unique or set
+        for elem in elems[:-types]:
+            if elem not in names: 
+                names.append(elem)
+                
         info_dict["types"] = {
             name: range(inds[i], inds[i + 1]) for i, name in enumerate(names)
         }

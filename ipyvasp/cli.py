@@ -105,9 +105,14 @@ def _get_E0(files: List[Path]):
 
 @app.command("set-dir")
 def _set_dir(
-    paths: List[Path], command: Annotated[str, typer.Option("-c", "--command")] = ""
+    paths: List[Path], command: Annotated[str, typer.Option("-c", "--command")] = "",
+    ignore_error: Annotated[bool, typer.Option("-i", "--ignore-error")] = False
 ):
-    "Set multiple directories like a for loop to execute a shell command within each of them."
+    """Set multiple directories like a for loop to execute a shell command within each of them.
+    It will raise an error if the command fails in any of the directories. 
+    To ignore the error and keep running in other directiories in sequence, use -i/--ignore-error. 
+    It will raise the shell errors but python will go through all the directories.
+    """
     from platform import system
     from subprocess import Popen
     from .utils import set_dir, color
@@ -122,7 +127,7 @@ def _set_dir(
 
     for path in dirs:
         with set_dir(path) as p:
-            print(color.gb(f"📁 → {str(p)!r}"))
+            print(color.gb(f"📁 {str(p)!r}"))
             if os == "Windows":
                 try:
                     p = Popen("pwsh.exe -NoProfile -c " + command, shell=False)
@@ -133,5 +138,5 @@ def _set_dir(
                 p = Popen(command, shell=True)  # Linux, MacOS, shell to get args
 
             p.wait()
-            if p.returncode != 0:
+            if not ignore_error and p.returncode != 0:
                 raise RuntimeError(f"Command {command} failed in {path}. Exiting...")
