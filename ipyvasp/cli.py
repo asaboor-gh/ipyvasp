@@ -88,11 +88,14 @@ def get_gap(files: List[Path]):
 def get_summary(files: List[Path]):
     "Get summary of calculation output."
     from .core.parser import Vasprun
+    from .core.serializer import dump
 
+    output = []
     for path in files:
-        name = str(path.absolute())
-        print("\n", name, "\n", "=" * len(name))
-        print(Vasprun(path).summary)
+        summary = {'file': str(path.absolute()), **Vasprun(path).summary.to_dict()}
+        output.append(dump(summary, format="json", indent=2))
+        
+    print("[" + ',\n'.join(output) + "]")  # make all data json compatible
 
 @app.command("get-E0")
 def _get_E0(files: List[Path]):
@@ -106,17 +109,19 @@ def _get_E0(files: List[Path]):
 @app.command("set-dir")
 def _set_dir(
     paths: List[Path], command: Annotated[str, typer.Option("-c", "--command")] = "",
-    ignore_error: Annotated[bool, typer.Option("-i", "--ignore-error")] = False,
-    exclude: Annotated[str, typer.Option("-e", "--exclude", help="Regex to exclude directories")] = "",
+    ignore_error: Annotated[bool, typer.Option("-i", "--ignore-error")] = False
 ):
     """Set multiple directories like a for loop to execute a shell command within each of them.
     It will raise an error if the command fails in any of the directories. 
     To ignore the error and keep running in other directiories in sequence, use -i/--ignore-error. 
     It will raise the shell errors but python will go through all the directories.
-    To exclude certain directories, use -e/--exclude. It will exclude the directories that match the regex pattern.
-    Regex pattern is applied to relative path of the directory only.
+    
+    Examples:
+    
+    ipyvasp set-dir /path/to/dir1 /path/to/dir2 -c "echo $PWD" # print dir1 and dir2 paths
+    
+    ipyvasp set-dir /path/to/dir*[1-2] -c "echo $PWD" # same as above but using glob
     """
-    import re
     from platform import system
     from subprocess import Popen
     from .utils import set_dir, color
@@ -124,19 +129,17 @@ def _set_dir(
     os = system()  # operating system
 
     dirs = [f for f in paths if f.is_dir()]  # only dirs
-    if exclude:
-        dirs = [f for f in dirs if not re.search(exclude, str(f))]  # exclude
     
     if not dirs:
         raise RuntimeError(
             "Provided paths do not exist or are not directories. Exiting..."
         )
     
-    abs_paths = [f.absolute() for f in dirs] # absolute path is must but before filtering
+    abs_paths = [f.absolute() for f in dirs] # absolute path is must but after filtering
     
     for path, d in zip(abs_paths,dirs):
         with set_dir(path):
-            print(color.gb(f"📁 {str(d)!r}"))
+            print(color.gb(f"📁  {str(d)!r}"))
             
             if command:
                 if os == "Windows":
