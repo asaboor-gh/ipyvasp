@@ -1,4 +1,4 @@
-__all__ = ["parse_text", "OUTCAR"]
+__all__ = ["parse_text", "get_E0", "OUTCAR"]
 
 from pathlib import Path
 from itertools import islice
@@ -37,6 +37,9 @@ def get_E0(path: Path = 'OSZICAR'):
     line = lines[-1]
     if 'F=' not in line:
         raise ValueError(f"File: {path!r} is not a valid OSZICAR file or calculation is not finished!")
+    
+    if not line.lstrip().startswith('1'):
+        print(f"Calculation may not be converged for {path!r}\n{line}")
         
     return float(line.split('=')[1].split()[0])
 

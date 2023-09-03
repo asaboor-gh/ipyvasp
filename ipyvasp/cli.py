@@ -106,37 +106,48 @@ def _get_E0(files: List[Path]):
 @app.command("set-dir")
 def _set_dir(
     paths: List[Path], command: Annotated[str, typer.Option("-c", "--command")] = "",
-    ignore_error: Annotated[bool, typer.Option("-i", "--ignore-error")] = False
+    ignore_error: Annotated[bool, typer.Option("-i", "--ignore-error")] = False,
+    exclude: Annotated[str, typer.Option("-e", "--exclude", help="Regex to exclude directories")] = "",
 ):
     """Set multiple directories like a for loop to execute a shell command within each of them.
     It will raise an error if the command fails in any of the directories. 
     To ignore the error and keep running in other directiories in sequence, use -i/--ignore-error. 
     It will raise the shell errors but python will go through all the directories.
+    To exclude certain directories, use -e/--exclude. It will exclude the directories that match the regex pattern.
+    Regex pattern is applied to relative path of the directory only.
     """
+    import re
     from platform import system
     from subprocess import Popen
     from .utils import set_dir, color
 
     os = system()  # operating system
 
-    dirs = [f.absolute() for f in paths if f.is_dir()]  # only dirs
+    dirs = [f for f in paths if f.is_dir()]  # only dirs
+    if exclude:
+        dirs = [f for f in dirs if not re.search(exclude, str(f))]  # exclude
+    
     if not dirs:
         raise RuntimeError(
             "Provided paths do not exist or are not directories. Exiting..."
         )
+    
+    abs_paths = [f.absolute() for f in dirs] # absolute path is must but before filtering
+    
+    for path, d in zip(abs_paths,dirs):
+        with set_dir(path):
+            print(color.gb(f"📁 {str(d)!r}"))
+            
+            if command:
+                if os == "Windows":
+                    try:
+                        p = Popen("pwsh.exe -NoProfile -c " + command, shell=False)
+                    except:
+                        p = Popen("powershell.exe -NoProfile -c " + command, shell=False)
 
-    for path in dirs:
-        with set_dir(path) as p:
-            print(color.gb(f"📁 {str(p)!r}"))
-            if os == "Windows":
-                try:
-                    p = Popen("pwsh.exe -NoProfile -c " + command, shell=False)
-                except:
-                    p = Popen("powershell.exe -NoProfile -c " + command, shell=False)
+                else:
+                    p = Popen(command, shell=True)  # Linux, MacOS, shell to get args
 
-            else:
-                p = Popen(command, shell=True)  # Linux, MacOS, shell to get args
-
-            p.wait()
-            if not ignore_error and p.returncode != 0:
-                raise RuntimeError(f"Command {command} failed in {path}. Exiting...")
+                p.wait()
+                if not ignore_error and p.returncode != 0:
+                    raise RuntimeError(f"Command {command} failed in {path}. Exiting...")
