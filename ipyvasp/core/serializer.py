@@ -755,8 +755,7 @@ class EncodeFromNumpy(json.JSONEncoder):
         elif isinstance(obj, np.floating):
             return float(obj)
         elif isinstance(obj, range):
-            value = list(obj)
-            return {"_kind_": "range", "_value_": [value[0], value[-1] + 1]}
+            return {"_kind_": "range", "_value_": {"start": obj.start, "stop": obj.stop, "step": obj.step}}
         return super(EncodeFromNumpy, self).default(obj)
 
 
@@ -780,7 +779,7 @@ class DecodeToNumpy(json.JSONDecoder):
             return np.array(obj["_value_"])
         elif kind == "range":
             value = obj["_value_"]
-            return range(value[0], value[-1])
+            return range(value["start"], value["stop"], value["step"])
         return obj
 
 
