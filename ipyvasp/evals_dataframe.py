@@ -1,4 +1,4 @@
-__all__ = ["EvalsDataFrame"]
+__all__ = ["visualize_df","EvalsDataFrame"]
 
 import numpy as np
 import pandas as pd
@@ -8,6 +8,16 @@ import matplotlib.pyplot as plt
 # Inside packages import
 from .core.parser import DataSource
 from .core import plot_toolkit as ptk
+
+
+def visualize_df(df, **kwargs):
+    "Visualize dataframe using pygwalker interactively in notebook. kwargs are passed to `pygwalker.walk`"
+    try:
+        import pygwalker
+    except ImportError:
+        raise ImportError("pygwalker is required to visualize dataframe. Install it using `pip install pygwalker`")
+
+    return pygwalker.walk(df, **kwargs)
 
 
 def _collect_data(source, spins=None, bands=None, atoms=None, orbs=None):
@@ -107,6 +117,10 @@ class EvalsDataFrame(pd.DataFrame):
     def _constructor(self):
         "That's main hero of this class. This is called when you apply some method of slice it."
         return EvalsDataFrame
+    
+    def visualize(self, **kwargs):
+        "Visualize dataframe using pygwalker interactively in notebook. kwargs are passed to `pygwalker.walk`"
+        return visualize_df(self, **kwargs)
 
     def masked(self, column, value, tol=1e-2, n=None, band=None, method="linear"):
         """Mask dataframe with a given value, using a tolerance.

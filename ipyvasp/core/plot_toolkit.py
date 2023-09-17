@@ -12,6 +12,7 @@ from matplotlib.colors import LinearSegmentedColormap as LSC
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.mplot3d import proj3d
 from matplotlib.patches import FancyArrowPatch
+from cycler import cycler
 
 from IPython import get_ipython
 from IPython.display import HTML, set_matplotlib_formats
@@ -34,9 +35,26 @@ def global_matplotlib_settings(rcParams={}, display_format="svg"):
     # Gloabal settings matplotlib with some defaults
     rcParams = {
         "axes.linewidth": 0.4,
+        "axes.axisbelow": True,
         "font.serif": "STIXGeneral",
         "font.family": "serif",
         "mathtext.fontset": "stix",
+        "figure.dpi": 144,  # Better to See
+        "figure.figsize": [3.4, 2.8],
+        "axes.prop_cycle": cycler(
+            color=[
+                "#636EFA",
+                "#EF553B",
+                "#00CC96",
+                "#AB63FA",
+                "#FFA15A",
+                "#19D3F3",
+                "#FF6692",
+                "#B6E880",
+                "#FF97FF",
+                "#FECB52",
+            ]
+        ),
         **rcParams,
     }
     mpl.rcParams.update(rcParams)  # Update rcParams
@@ -161,8 +179,6 @@ def get_axes(
         ``add_text``, ``add_legend``, ``add_colorbar``, ``color_wheel``,
         ``break_spines``, ``adjust_axes``, ``append_axes``, ``join_axes``.
     """
-    global_matplotlib_settings()  # Set global matplotlib settings.
-
     if figsize[0] <= 2.38:
         mpl.rc("font", size=8)
     gs_kw = dict({})  # Define Empty Dictionary.

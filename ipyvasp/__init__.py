@@ -45,25 +45,4 @@ savefig = plot_toolkit.plt.savefig  # for convenience
 
 version = __version__
 # Set global matplotlib settings for notebook.
-from cycler import cycler as __cycler
-
-global_matplotlib_settings(
-    {
-        "figure.dpi": 144,  # Better to See
-        "figure.figsize": [4, 2.8],
-        "axes.prop_cycle": __cycler(
-            color=[
-                "#636EFA",
-                "#EF553B",
-                "#00CC96",
-                "#AB63FA",
-                "#FFA15A",
-                "#19D3F3",
-                "#FF6692",
-                "#B6E880",
-                "#FF97FF",
-                "#FECB52",
-            ]
-        ),
-    }
-)
+global_matplotlib_settings()

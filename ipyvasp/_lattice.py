@@ -1890,11 +1890,14 @@ def splot_lattice(
 
     sites = None
     coords = poscar_data.coords  # take all sites
+    filtered_elems = list(poscar_data.types.keys())
     if mask_sites is not None:  # not None is important, user can give anything
         sites = _masked_data(poscar_data, mask_sites)
-        coords = poscar_data.coords[sites]
         if not sites:
             raise ValueError("No sites found with given mask_sites function.")
+        
+        coords = poscar_data.coords[sites]
+        filtered_elems = np.unique(poscar_data.symbols[sites]).tolist()
 
     labels = [poscar_data.labels[i] for i in sites] if sites else poscar_data.labels
 
@@ -1912,12 +1915,19 @@ def splot_lattice(
     else:
         ax = ax or ptk.get_axes(axes_3d=True if plane is None else False)
         if kwargs:
-            print("Warning: kwargs are not used when plot_cell = False.")
+            print(f"Warning: Parameters {list(kwargs.keys())} are not used when `plot_cell = False`.")
 
     uelems = poscar_data.types.to_dict()
     if not isinstance(sizes, (list, tuple, np.ndarray)):
-        sizes = [sizes for elem in uelems.keys()]
-
+        if not isinstance(sizes, (int, float, np.integer)):
+            raise ValueError("sizes must be a number or a list/tuple of numbers.")
+        sizes = [sizes for _ in uelems]
+    
+    if len(sizes) != len(uelems):
+        raise ValueError(
+            f"Length of `sizes` must be equal to number of elements in POSCAR. Got {len(sizes)} sizes for {len(uelems)} elements."
+        )
+        
     if colors and len(colors) != len(uelems.keys()):
         print(
             "Warning: Number of colors does not match number of atom types. Using default colors."
@@ -1927,11 +1937,12 @@ def splot_lattice(
         colors = [_atom_colors[elem] for elem in uelems.keys()]
 
     # Before doing other stuff, create something for legend.
-    if showlegend:
-        for (k, v), c, s in zip(uelems.items(), colors, sizes):
-            ax.scatter(
-                [], [], s=s, color=c, label=k, **site_kws
-            )  # Works both for 3D and 2D.
+    if showlegend:    
+        for key, c, s in zip(uelems.keys(), colors, sizes):
+            if key in filtered_elems:
+                ax.scatter(
+                    [], [], s=s, color=c, label=key, **site_kws
+                )  # Works both for 3D and 2D.
         ptk.add_legend(ax)
 
     # Now change colors and sizes to whole array size
