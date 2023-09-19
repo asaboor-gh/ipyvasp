@@ -11,6 +11,8 @@ __all__ = [  # For documentation purpose
     "plt2html",
     "iplot2html",
     "iplot2widget",
+    "image2plt",
+    "iplot2plt",
     "webshow",
     "list_files",
     "parse_text",
@@ -37,6 +39,7 @@ from .core.plot_toolkit import (
     plt2html,
     iplot2html,
     iplot2widget,
+    image2plt,
     webshow,
 )
 

@@ -22,6 +22,7 @@ import plotly.graph_objects as go
 from plotly.io._base_renderers import open_html_in_browser
 
 from .spatial_toolkit import to_R3, rotation
+from ..utils import _sig_kwargs
 
 
 def global_matplotlib_settings(rcParams={}, display_format="svg"):
@@ -1040,3 +1041,35 @@ def iplot2widget(fig, fig_widget=None, template=None):
             fig_widget.add_trace(data)
 
     return fig_widget
+
+@_sig_kwargs(plt.imshow, ('ax','X'))
+def image2plt(image_or_fname, ax = None, crop = None, **kwargs):
+    """Plot PIL image, numpy array or image file on given matploltib axes. 
+    `crop` is list or tuple of [x0,y0,x1,y1] in [0,1] interval.
+    kwargs are passed to plt.imshow."""
+    if ax is None:
+        ax = get_axes()
+    if isinstance(image_or_fname, str):
+        im_array = plt.imread(image_or_fname)
+    else:
+        try:
+            im_array = np.asarray(image_or_fname) # PIL image to array
+        except:
+            raise ValueError("Not a valid PIL image or filename.")
+    
+    if crop:
+        if not isinstance(crop, (list, tuple)):
+            raise ValueError("crop must be list or tuple of [x0,y0,x1,y1]")
+        if max(crop) > 1 and min(crop) < 0:
+            raise ValueError("crop values must be in [0,1] interval.")
+        if len(crop) != 4:
+            raise ValueError("crop must be list or tuple of [x0,y0,x1,y1]")
+        (x0,y0),(x1,y1) = [int(im_array.shape[0]*v) for v in crop[:2]], [int(im_array.shape[1]*v) for v in crop[2:]]
+        
+        im_array = im_array[y0:y1+1,x0:x1+1] # image origin is top left, so y0 is first
+    
+    # Some kwargs are very important to be default. User can override them.
+    aspect = im_array.shape[0]/im_array.shape[1]
+    kwargs = {'interpolation':'none', 'extent': [0,1,0,1], 'aspect': aspect, **kwargs}
+    ax.imshow(im_array, **kwargs)
+    return ax
