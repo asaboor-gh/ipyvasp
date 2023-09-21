@@ -498,7 +498,10 @@ class _PropPicker(VBox):
             orbs.update({k: [idx] for idx, k in enumerate(sorbs[16:], start=16)})
 
         self._orbs = orbs
+        old_orb = self._widgets["orbs"].value
         self._widgets["orbs"].options = list(orbs.keys())
+        if old_orb in self._widgets["orbs"].options:
+            self._widgets["orbs"].value = old_orb
 
         atoms = {"-": [], "All": range(system_summary.NIONS)}
         for key, tp in system_summary.types.to_dict().items():
@@ -507,7 +510,10 @@ class _PropPicker(VBox):
                 atoms[f"{key}{n}"] = [v]
 
         self._atoms = atoms
+        old_atom = self._widgets["atoms"].value
         self._widgets["atoms"].options = list(atoms.keys())
+        if old_atom in self._widgets["atoms"].options:
+            self._widgets["atoms"].value = old_atom
 
     def update(self, system_summary):
         return self._process(system_summary)
@@ -758,14 +764,14 @@ class BandsWidget(VBox):
                 self._kwargs = {"projections": self._ppicks.projections, **self._kwargs}
                 fig = self.bands.iplot_rgb_lines(**self._kwargs, name="Up")
                 if self.bands.source.summary.ISPIN == 2:
-                    self.bands.iplot_rgb_lines(**self._kwargs, name="Down", fig=fig)
+                    self.bands.iplot_rgb_lines(**self._kwargs, spin=1, name="Down", fig=fig)
 
                 self.iplot = partial(self.bands.iplot_rgb_lines, **self._kwargs)
                 self.splot = partial(self.bands.splot_rgb_lines, **self._kwargs)
             else:
                 fig = self.bands.iplot_bands(**self._kwargs, name="Up")
                 if self.bands.source.summary.ISPIN == 2:
-                    self.bands.iplot_bands(**self._kwargs, name="Down", fig=fig)
+                    self.bands.iplot_bands(**self._kwargs, spin=1, name="Down", fig=fig)
 
                 self.iplot = partial(self.bands.iplot_bands, **self._kwargs)
                 self.splot = partial(self.bands.splot_bands, **self._kwargs)

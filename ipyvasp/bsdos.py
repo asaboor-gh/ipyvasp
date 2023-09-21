@@ -396,12 +396,8 @@ class Bands(_BandsDosBase):
         )  # picks available spins if uspins is None
 
         if not spins:
-            spins = data.spins  # because they will be loaded anyway
-            if len(spins) == 1 and labels:  # in case projections not given, check label
-                spins = [
-                    spins[0] for _ in labels
-                ]  # only one spin channel is available, so use it for all projections
-
+            spins = [data.spins[0] for _ in labels]
+            
         output = {
             "kpath": kpts.kpath,
             "kpoints": kpts.kpoints,
@@ -621,12 +617,8 @@ class DOS(_BandsDosBase):
         )
 
         if not spins:
-            spins = dos.spins  # because they will be loaded anyway
-            if len(spins) == 1 and labels:  # in case projections not given, check label
-                spins = [
-                    spins[0] for _ in labels
-                ]  # only one spin channel is available, so use it for all projections
-
+            spins = [dos.spins[0] for _ in labels]
+            
         out = dos.to_dict()
         out["labels"] = labels
 
