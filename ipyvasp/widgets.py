@@ -726,6 +726,11 @@ class BandsWidget(VBox):
             )
             self._click_save_data(None)  # Load into view
             self._warn_update(None)
+    
+    @property
+    def source(self):
+        "Returns data source object such as Vasprun or Vaspout."
+        return self.bands.source
 
     @property
     def bands(self):

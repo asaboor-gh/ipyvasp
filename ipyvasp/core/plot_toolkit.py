@@ -244,7 +244,7 @@ def adjust_axes(
     xlabel=None,
     ylabel=None,
     vlines=False,
-    zeroline=True,
+    zeroline=False,
     **kwargs,
 ):
     """

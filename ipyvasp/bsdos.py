@@ -236,7 +236,8 @@ class Bands(_BandsDosBase):
 
     Parameters
     ----------
-    source : instance of `ipyvasp.DataSource` such as `ipyvasp.Vasprun` or `ipyvasp.Vaspout`. You can define your own class to parse data with same attributes and methods by subclassing `ipyvasp.DataSource`.
+    source : instance of `ipyvasp.DataSource` such as `ipyvasp.Vasprun` or `ipyvasp.Vaspout`. 
+    You can define your own class to parse data with same attributes and methods by subclassing `ipyvasp.DataSource`.
     """
 
     def __init__(self, source):
@@ -593,7 +594,8 @@ class DOS(_BandsDosBase):
 
     Parameters
     ----------
-    source : instance of `ipyvasp.DataSource` such as `ipyvasp.Vasprun` or `ipyvasp.Vaspout`. You can define your own class to parse data with same attributes and methods by subclassing `ipyvasp.DataSource`.
+    source : instance of `ipyvasp.DataSource` such as `ipyvasp.Vasprun` or `ipyvasp.Vaspout`. 
+    You can define your own class to parse data with same attributes and methods by subclassing `ipyvasp.DataSource`.
     """
 
     def __init__(self, source):
