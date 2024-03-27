@@ -244,7 +244,6 @@ def adjust_axes(
     xlabel=None,
     ylabel=None,
     vlines=False,
-    zeroline=False,
     **kwargs,
 ):
     """
@@ -256,8 +255,6 @@ def adjust_axes(
         Matplotlib axes object on which settings are applied.
     vlines : bool
         If True, draw vertical lines at points of xticks.
-    zeroline : bool
-        If True, drawn when `xlim` is not empty.
 
 
     Other parameters are well known matplotlib parameters.
@@ -275,15 +272,6 @@ def adjust_axes(
             ax.set_yticklabels(yticklabels if yticklabels else list(map(str, yticks)))
         if xlim:
             ax.set_xlim(xlim)
-            if zeroline:
-                ax.hlines(
-                    0,
-                    min(xlim),
-                    max(xlim),
-                    color=(0, 0, 0, 0.6),
-                    linestyle="dashed",
-                    lw=0.3,
-                )
         if ylim:
             ax.set_ylim(ylim)
 

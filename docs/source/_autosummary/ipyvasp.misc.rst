@@ -13,6 +13,7 @@
 
    .. autosummary::
    
+      get_E0
       parse_text
    
    

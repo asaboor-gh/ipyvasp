@@ -23,6 +23,7 @@
       color_wheel
       get_axes
       global_matplotlib_settings
+      image2plt
       iplot2html
       iplot2widget
       join_axes

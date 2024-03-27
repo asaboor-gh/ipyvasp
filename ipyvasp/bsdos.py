@@ -492,6 +492,8 @@ class Bands(_BandsDosBase):
             kwargs["kticks"] = (
                 kwargs.get("kticks", None) or self.get_kticks()
             )  # User can provide kticks, but if not, use default
+        if isinstance(kwargs["kticks"], zip):
+            kwargs["kticks"] = list(kwargs["kticks"]) # otherwise it will consumed below
 
         # Need to fetch data for gap and plot later
         self._breaks = [

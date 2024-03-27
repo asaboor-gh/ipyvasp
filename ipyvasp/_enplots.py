@@ -51,16 +51,15 @@ def _validate_data(K, E, elim, kticks, interp):
     if np.shape(E)[0] != len(K):
         raise ValueError("Length of first dimension of E must be equal to length of K.")
 
-    if kticks is None:
+    if isinstance(kticks, zip):
+        kticks = list(kticks)  # otherwise it will be empty after first use
+    elif kticks is None:
         kticks = []
 
-    if not isinstance(kticks, (list, tuple, zip)):
+    if not isinstance(kticks, (list, tuple)):
         raise ValueError(
             "kticks must be a list, tuple or zip consisting of (index, label) pairs. index must be an int or tuple of (i, i+1) to join broken path."
         )
-
-    if isinstance(kticks, zip):
-        kticks = list(kticks)  # otherwise it will be empty after first use
 
     for k, v in kticks:
         if not isinstance(k, (np.integer, int)):
@@ -159,7 +158,6 @@ def splot_bands(K, E, ax=None, elim=None, kticks=None, interp=None, **kwargs):
 
     lines = ax.plot(K, E, **kwargs)
     _ = [line.set_label(None) for line in lines[1:]]
-
     adjust_axes(
         ax=ax,
         ylabel="Energy (eV)",
@@ -723,7 +721,7 @@ def splot_dos_lines(
     xlabel, ylabel = "Energy (eV)", "DOS"
     if vertical:
         xlabel, ylabel = ylabel, xlabel
-    adjust_axes(ax, xlabel=xlabel, ylabel=ylabel, zeroline=False, **kws)
+    adjust_axes(ax, xlabel=xlabel, ylabel=ylabel, **kws)
     return ax
 
 

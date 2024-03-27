@@ -5,7 +5,7 @@ from pathlib import Path
 import typer
 from typing_extensions import Annotated
 
-from .core.parser import minify_vasprun
+
 from .lattice import POSCAR, get_kpath
 from .utils import _sig_kwargs
 
@@ -61,6 +61,8 @@ def _get_kpath(kpoints: str, n: int = 5, poscar: str = "POSCAR", **kwargs):
 @vasprun_app.command("minify")
 def minify(files: List[Path]):
     "Remove projected data from vasprun.xml file to reduce file size."
+    from .core.parser import minify_vasprun
+
     for file in files:
         minify_vasprun(file)
 
@@ -153,4 +155,6 @@ def _set_dir(
 
                 p.wait()
                 if not ignore_error and p.returncode != 0:
-                    raise RuntimeError(f"Command {command} failed in {path}. Exiting...")
+                    raise RuntimeError(f"Command {command} failed in {path}. Exiting...\n" +
+                    "Use -i or --ignore-error switch to suppress error and continue in other directories silently."
+                    )

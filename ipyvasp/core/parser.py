@@ -192,8 +192,8 @@ class Vasprun(DataSource):
                 ).iter("v")
             ]
         )
-        info_dict["NBANDS"] = int(
-            ET.fromstring(next(self.read("<i.*NBANDS", "</i>"))).text
+        info_dict["NBANDS"] = int( # Bad initializations, read last one
+            ET.fromstring(list(self.read("<i.*NBANDS", "</i>"))[-1]).text 
         )
         info_dict["NELECTS"] = int(
             float(ET.fromstring(next(self.read("<i.*NELECT", "</i>"))).text)
@@ -512,7 +512,7 @@ class Vasprun(DataSource):
             for b in bands:
                 if (not isinstance(b, (int, np.integer))) and (b < 0):
                     raise TypeError(
-                        "bands should be a tuple/list/range of of positive integers"
+                        "bands should be a tuple/list/range of positive integers"
                     )
             _bands = list(bands)
             evals = evals[:, :, _bands]
