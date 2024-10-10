@@ -504,6 +504,11 @@ class Vasprun(DataSource):
                 0
             ]  # bring closer points first by sorting and take closest ones
 
+        if ezero is not None:
+            if not isinstance(ezero, (int, np.integer, float)):
+                raise TypeError("ezero should be a float or integer")
+            zero = ezero
+        
         if bands:
             if not isinstance(bands, (list, tuple, range)):
                 raise TypeError(
@@ -521,11 +526,6 @@ class Vasprun(DataSource):
         elif elim:
             if (not isinstance(elim, (list, tuple))) and (len(elim) != 2):
                 raise TypeError("elim should be a tuple of length 2")
-
-            if ezero is not None:
-                if not isinstance(ezero, (int, np.integer, float)):
-                    raise TypeError("ezero should be a float or integer")
-                zero = ezero
 
             idx_max = np.max(np.where(evals - zero <= np.max(elim))[2]) + 1
             idx_min = np.min(np.where(evals - zero >= np.min(elim))[2])

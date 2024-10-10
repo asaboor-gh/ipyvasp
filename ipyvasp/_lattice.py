@@ -2502,11 +2502,6 @@ def transpose_poscar(poscar_data, axes=[1, 0, 2]):
 
 def add_atoms(poscar_data, name, positions):
     "Add atoms with a `name` to a POSCAR at given `positions` in fractional coordinates."
-    if name in poscar_data.types.keys():
-        raise Exception(
-            f"{name!r} already exists in POSCAR. Cannot add duplicate atoms."
-        )
-
     positions = np.array(positions)
     if (not np.ndim(positions) == 2) or (not positions.shape[1] == 3):
         raise ValueError("`positions` must be a 2D array of shape (n,3)")
@@ -2544,9 +2539,6 @@ def _validate_func(func, nargs, return_type):
 
 def replace_atoms(poscar_data, func, name):
     """Replace atoms satisfying a `func(i,x,y,z) -> bool` with a new `name`"""
-    if name in poscar_data.types.keys():
-        return poscar_data  # no change
-
     _validate_func(func, 4, bool)
     data = poscar_data.to_dict()  # Copy data to avoid modifying original
     mask = _masked_data(poscar_data, func)

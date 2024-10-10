@@ -1,9 +1,12 @@
 __all__ = ["visualize_df","EvalsDataFrame"]
 
+from contextlib import suppress
+
 import numpy as np
 import pandas as pd
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
+
 
 # Inside packages import
 from .core.parser import DataSource
@@ -112,6 +115,13 @@ class EvalsDataFrame(pd.DataFrame):
             raise ValueError("source must be a single DataSource object!")
         else:
             super().__init__(*source, **kwargs)  # For other opertaions on dataframe
+        
+        with suppress(BaseException): # Does not work first time
+            # Add currently available path after each operation
+            if 'kpath' in self.columns:
+                self['kpath'] = self._kpath()
+            else:
+                self.insert(7,'kpath', self._kpath()) # after kpt
 
     @property
     def _constructor(self):
@@ -304,7 +314,7 @@ class EvalsDataFrame(pd.DataFrame):
         kxyz, kij = self._collect_kxyz(*args[:2], shift=shift)
         ax = ax or ptk.get_axes()
         minmax_c = [0, 1]
-        cmap = kwargs.get("cmap", self.current_attrs["cmap"])
+        cmap = kwargs.get("cmap", self.current_attrs.get("cmap",None))
 
         if arrows:
             arrows_data = self._collect_arrows_data(arrows)
@@ -382,7 +392,7 @@ class EvalsDataFrame(pd.DataFrame):
         kxyz, kij = self._collect_kxyz(*args[:3], shift=shift)
         ax = ax or ptk.get_axes(axes_3d=True)
         minmax_c = [0, 1]
-        cmap = kwargs.get("cmap", self.current_attrs["cmap"])
+        cmap = kwargs.get("cmap", self.current_attrs.get("cmap",None))
 
         if arrows:
             arrows_data = self._collect_arrows_data(arrows)
@@ -429,16 +439,16 @@ class EvalsDataFrame(pd.DataFrame):
 
     def colorbar(self, cax=None, nticks=6, digits=2, **kwargs):
         "Add colobar to most recent plot. kwargs are passed to ipyvasp.splots.add_colorbar"
-        if not self.current_attrs["ax"]:
+        if not self.current_attrs.get("ax",None):
             raise ValueError(
                 "No plot has been made yet by using `splot, splot3d` or already consumed by `colorbar`"
             )
-        if not self.current_attrs["cmap"]:
+        if not self.current_attrs.get("cmap",None):
             raise ValueError("No Mappable for colorbar found!")
 
-        ax = self.current_attrs["ax"]
-        cmap = self.current_attrs["cmap"]
-        minmax_c = self.current_attrs["minmax_c"]
+        ax = self.current_attrs.get("ax",None)
+        cmap = self.current_attrs.get("cmap",None)
+        minmax_c = self.current_attrs.get("minmax_c",[0,1])
         self.current_attrs["ax"] = None  # Reset
         self.current_attrs["cmap"] = None  # Reset
         if ax.name == "3d":
@@ -463,6 +473,12 @@ class EvalsDataFrame(pd.DataFrame):
         "Returns cartesian coodinates of kpoints as numpy array"
         return self["x y z".split()].to_numpy()
 
+    def _kpath(self):
+        kindex = sorted(np.unique(self["kpt"]))
+        coords = self.coords[kindex]
+        kpath = np.cumsum([0, *np.linalg.norm(coords[1:] - coords[:-1], axis=1)])
+        kpath = kpath / kpath[-1] # Normalized
+        return kpath[self["kpt"]] # full array in current order
 
 # from ipywidgets import interact
 # import matplotlib.pyplot as plt

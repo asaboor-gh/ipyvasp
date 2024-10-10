@@ -322,16 +322,16 @@ class FilesWidget(VBox):
 
         others = out.children[1:-1]  # exclude files_dd and Output widget
         _style = """<style>
-        .FilesWidget-Interact {
+        .FW-Interact {
             --jp-widgets-inline-label-width: 4em;
             --jp-widgets-inline-width: 18em;
             --jp-widgets-inline-width-short: 9em;
         }
-        .FilesWidget-Interact {max-height:90vh;width:100%;}
-        .FilesWidget-Interact > div {overflow:auto;max-height:100%;padding:8px;}
-        .FilesWidget-Interact > div:first-child {width:20em}
-        .FilesWidget-Interact > div:last-child {width:calc(100% - 20em)}
-        .FilesWidget-Interact .FW-Progess {position:absolute !important; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1}
+        .FW-Interact {max-height:90vh;width:100%;}
+        .FW-Interact > div {overflow:auto;max-height:100%;padding:8px;}
+        .FW-Interact > div:first-child {width:20em}
+        .FW-Interact > div:last-child {width:calc(100% - 20em)}
+        .FW-Interact .FW-Progess {position:absolute !important; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1}
         </style>"""
         if others:
             others = [ipw.HTML(f"<hr/>{_style}"), *others]
@@ -375,7 +375,7 @@ class FilesWidget(VBox):
                     ),  # output in box to make scrollable,
                 ],
                 layout=Layout(height=height, max_height=height),
-            ).add_class("FilesWidget-Interact")
+            ).add_class("FW-Interact")
         ]  # important for every widget separately
         return out
 
@@ -388,7 +388,7 @@ class FilesWidget(VBox):
         **kwargs,
     ):
         """Interact with a function that takes a selected Path as first argument.
-        A CSS class 'FilesWidget-Interact' is added to the final widget to let you style it.
+        A CSS class 'FW-Interact' is added to the final widget to let you style it.
 
         Parameters
         ----------

@@ -15,6 +15,7 @@ __all__ = [  # For documentation purpose
     "iplot2plt",
     "webshow",
     "list_files",
+    "load_results",
     "parse_text",
     "summarize",
     "OUTCAR",
@@ -29,7 +30,7 @@ from .bsdos import *
 from .potential import *
 from .evals_dataframe import *
 from .utils import *
-from .widgets import summarize, BandsWidget, KpathWidget, FilesWidget
+from .widgets import BandsWidget, KpathWidget, FilesWidget, summarize, load_results
 from .core import plot_toolkit, spatial_toolkit
 from .core.spatial_toolkit import to_basis, to_R3, get_TM, get_bz, rotation
 from .core.plot_toolkit import (
