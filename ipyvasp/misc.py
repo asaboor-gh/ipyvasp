@@ -1,5 +1,6 @@
-__all__ = ["parse_text", "get_E0", "OUTCAR"]
+__all__ = ["parse_text", "get_bib", "get_E0", "OUTCAR"]
 
+import requests
 from pathlib import Path
 from itertools import islice
 
@@ -23,6 +24,16 @@ def parse_text(path, shape, slice, **kwargs):
             gen, shape, slice, **kwargs
         )  # should be under open file context
     return data
+
+def get_bib(DOI):
+    "Get bibligraphy entry from DOI"
+    response = requests.get(
+        f'http://dx.doi.org/{DOI}', 
+        headers={'Accept':'text/bibliography;style=bibtex'})
+    if response.status_code == 200:
+        return response.content.decode('utf-8')
+    
+    return response.status_code
 
 def get_E0(path: Path = 'OSZICAR'):
     "Get the E0 from the last line of OSZICAR."

@@ -170,3 +170,10 @@ def _set_dir(
             sleep(time_interval)
     else:
         run(abs_paths, dirs, command, ignore_error)
+
+@app.command('get-bib')
+def _get_bib(doi: List[str]):
+    "Get bibliography entries from doi. Can provide many DOIs."
+    from .misc import get_bib
+    for d in doi: # all of them
+        print(get_bib(d))
