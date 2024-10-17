@@ -917,7 +917,7 @@ class KpathWidget(VBox):
         return self._poscar
 
     def _update_fig(self, path):
-        from .misc import POSCAR  # to avoid circular import
+        from .lattice import POSCAR  # to avoid circular import
 
         with self._interact.output_widget:
             template = (

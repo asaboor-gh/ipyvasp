@@ -350,7 +350,7 @@ class PoscarData(Dict2Data):
 
     def get_distance(self, atom1, atom2):
         """
-        Returns the distance between two atoms.
+        Returns the mimimum distance between two atoms taking translations into account.
         Provide atom1 and atom2 as strings such as get_distance('Ga', 'As') to get a mimimal distance between two types
         or as a dict with a single key as get_distance({'Ga':0}, {'As':0}) to get distance between specific atoms,
         or mixed as get_distance('Ga', {'As':0}) to get minimum distance between a type and a specific atom.
@@ -378,16 +378,25 @@ class PoscarData(Dict2Data):
 
         dists = []
         for idx in idx1:
-            dists = [
-                *dists,
-                *np.linalg.norm(
-                    self.coords[tuple(idx2),] - self.coords[idx, :], axis=1
-                ),
-            ]  # Get the second closest distance, first is itself
+            for trans in set(product([-1,0,1],[-1,0,1],[-1,0,1])):
+                C = self.to_cartesian(self.positions[idx] + trans) # translate around to get lowest distance
+
+                dists = [
+                    *dists,
+                    *np.linalg.norm(self.coords[tuple(idx2),] - C, axis=1),
+                ]  # Get the second closest distance, first is itself
 
         dists = np.array(dists)
         dists = dists[dists > 0]  # Remove distance with itself
         return np.min(dists)
+    
+    def to_fractional(self, coords):
+        "Converts cartesian coordinates to fractional coordinates in the basis of cell."
+        return to_basis(self.basis, coords)
+
+    def to_cartesian(self, points):
+        "Converts fractional coordinates in the basis of cell to cartesian coordinates."
+        return to_R3(self.basis, points)
 
     def get_selective_dynamics(self, func):
         """
