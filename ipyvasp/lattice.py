@@ -454,6 +454,11 @@ class POSCAR:
     def copy(self):
         "Copy POSCAR object. It avoids accidental changes to numpy arrays in original object."
         return self.__class__(data=self.data.copy())
+    
+    @_sub_doc(plat.sort_poscar)
+    def sort(self, new_order):
+        return self.__class__(data=plat.sort_poscar(self.data, new_order))
+
 
     @property
     def content(self):

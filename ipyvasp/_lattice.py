@@ -215,7 +215,7 @@ def periodic_table():
     return ax
 
 
-def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=False):
+def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=False, comment=""):
     """Writes POSCAR data to a file or returns string
 
     Parameters
@@ -227,13 +227,15 @@ def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=F
         See `ipyvasp.POSCAR.data.get_selective_dynamics` for more info.
     overwrite: bool
         If file already exists, overwrite=True changes it.
+    comment: str
+        Add comment, previous comment will be there too.
 
 
     .. note::
         POSCAR is only written in direct format even if it was loaded from cartesian format.
     """
-    _comment = poscar_data.metadata.comment
-    out_str = f"{poscar_data.SYSTEM}  # " + (_comment or "Created by Pivopty")
+    _comment = poscar_data.metadata.comment + comment
+    out_str = f"{poscar_data.SYSTEM}  # " + (_comment or "Created by ipyvasp")
     scale = poscar_data.metadata.scale
     out_str += "\n  {:<20.14f}\n".format(scale)
     out_str += "\n".join(
@@ -531,9 +533,9 @@ class InvokeMaterialsProject:
                 else:
                     print(self._cif)
 
-            def write_poscar(self, outfile=None, overwrite=False):
+            def write_poscar(self, outfile=None, overwrite=False, comment=""):
                 "Use `ipyvasp.lattice.POSCAR.write` if you need extra options."
-                write_poscar(self.export_poscar(), outfile=outfile, overwrite=overwrite)
+                write_poscar(self.export_poscar(), outfile=outfile, overwrite=overwrite, comment=comment)
 
             def export_poscar(self):
                 "Export poscar data form cif content."
@@ -2559,6 +2561,26 @@ def replace_atoms(poscar_data, func, name):
         if len(new_types[k]) != 0
     }
     return serializer.PoscarData(data)  # Return new POSCAR
+
+def sort_poscar(poscar_data, new_order):
+    "sort poscar with new_order list/tuple of species."
+    if not isinstance(new_order, (list, tuple)):
+        raise TypeError(f"new_order should be a list/tuple of types, got {type(new_order)}")
+    
+    data = poscar_data.to_dict() 
+    if not all([set(new_order).issubset(data["types"]), set(data["types"]).issubset(new_order)]):
+        raise ValueError(f"new_order should contain all existings types {list(data['types'])}")
+    
+    data["types"] = {key:data["types"][key] for key in new_order}
+    data["positions"] = data["positions"][[i for tp in data["types"].values() for i in tp]]
+    idxs = np.cumsum([0, *map(len, data["types"].values())])
+    data["types"] = {
+        k: range(idxs[i], idxs[i + 1])
+        for i, k in enumerate(data["types"].keys())
+        if len(data["types"][k]) != 0
+    }
+
+    return serializer.PoscarData(data)
 
 
 def remove_atoms(poscar_data, func, fillby=None):

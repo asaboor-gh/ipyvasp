@@ -247,7 +247,11 @@ class PoscarData(Dict2Data):
     _req_keys = ("basis", "types", "metadata")
 
     def __init__(self, d):
-        super().__init__(d)
+        D = d.to_dict() if isinstance(d, Dict2Data) else d
+        for tp in D['types'].values(): # order positions along x for quick realization of atoms sites
+            D['positions'][tp] = sorted(D['positions'][tp], key=lambda p: p[0])
+
+        super().__init__(D)
 
     @property
     def coords(self):
@@ -375,6 +379,9 @@ class PoscarData(Dict2Data):
             raise ValueError(
                 "atom2 must be a string such as 'As' or a dict with a single key as {'As':0}"
             )
+        
+        if len(set([*idx1, *idx2])) < 2: # itself or no atom exists
+            return None # No mean of distnace in this case
 
         dists = []
         for idx in idx1:
