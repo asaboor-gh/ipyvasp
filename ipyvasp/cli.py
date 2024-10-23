@@ -112,14 +112,16 @@ def _get_E0(files: List[Path]):
 def _set_dir(
     paths: List[Path], command: Annotated[str, typer.Option("-c", "--command")] = "",
     ignore_error: Annotated[bool, typer.Option("-i", "--ignore-error")] = False,
-    time_interval: Annotated[int, typer.Option("-t",'--time-interval')] = 0
+    time_interval: Annotated[int, typer.Option("-t",'--time-interval')] = 0,
+    extra_command: Annotated[str, typer.Option("-e", "--extra-command")] = "",
 ):
     """Set multiple directories like a for loop to execute a shell command within each of them.
     It will raise an error if the command fails in any of the directories. 
     To ignore the error and keep running in other directiories in sequence, use -i/--ignore-error. 
     It will raise the shell errors but python will go through all the directories.
 
-    To keep repeating a command after some time interval, use -t/--time-interval (seconds). Only works for a command
+    To keep repeating a command after some time interval, use -t/--time-interval (seconds). Only works for a command.
+    Use -e/--extra-command to run (in pwd) before looping over directories. This can be used to cleanup (previous results etc.) with each time recursion.
     
     Examples:
     
@@ -143,33 +145,39 @@ def _set_dir(
     
     abs_paths = [f.absolute() for f in dirs] # absolute path is must but after filtering
     
-    def run(abs_paths, dirs, command, ignore_error):
+    def exec_cmd(command, path, ignore_error=ignore_error):
+        if command:
+            if os == "Windows":
+                try:
+                    p = Popen("pwsh.exe -NoProfile -c " + command, shell=False)
+                except:
+                    p = Popen("powershell.exe -NoProfile -c " + command, shell=False)
+
+            else:
+                p = Popen(command, shell=True)  # Linux, MacOS, shell to get args
+
+            p.wait()
+            if not ignore_error and p.returncode != 0:
+                raise RuntimeError(f"Command {command} failed in {path}. Exiting...\n" +
+                "Use -i or --ignore-error switch to suppress error and continue in other directories silently."
+                )
+
+    def run(abs_paths, dirs, command, ec=extra_command):
+        if ec:
+            exec_cmd(ec, Path('.').absolute())
+            print(color.bb("\n"+f" {command} ".center(80,"-")))
+
         for path, d in zip(abs_paths,dirs):
             with set_dir(path):
                 print(color.gb(f"📁  {str(d)!r}"))
-
-                if command:
-                    if os == "Windows":
-                        try:
-                            p = Popen("pwsh.exe -NoProfile -c " + command, shell=False)
-                        except:
-                            p = Popen("powershell.exe -NoProfile -c " + command, shell=False)
-
-                    else:
-                        p = Popen(command, shell=True)  # Linux, MacOS, shell to get args
-
-                    p.wait()
-                    if not ignore_error and p.returncode != 0:
-                        raise RuntimeError(f"Command {command} failed in {path}. Exiting...\n" +
-                        "Use -i or --ignore-error switch to suppress error and continue in other directories silently."
-                        )
-    
+                exec_cmd(command, path)
+                
     if time_interval > 0 and command: # repeat only if command given
         while True: # keep going until interrupted
-            run(abs_paths, dirs, command, ignore_error)
+            run(abs_paths, dirs, command)
             sleep(time_interval)
     else:
-        run(abs_paths, dirs, command, ignore_error)
+        run(abs_paths, dirs, command)
 
 @app.command('get-bib')
 def _get_bib(doi: List[str]):
