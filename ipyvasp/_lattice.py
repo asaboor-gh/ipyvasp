@@ -4,7 +4,7 @@ import numpy as np
 from pathlib import Path
 import requests as req
 import inspect
-from itertools import combinations
+from itertools import combinations, product
 from functools import lru_cache
 
 from scipy.spatial import ConvexHull, KDTree
@@ -1580,18 +1580,18 @@ def _get_bond_length(poscar_data, bond_length=None):
         )  # Add 5% margin over mean distance, this covers same species too, and in multiple species, this will stop bonding between same species.
 
 
-def _masked_data(poscar_data, mask_sites):
-    "Returns indices of sites which satisfy the mask_sites function."
-    if not callable(mask_sites):
-        raise TypeError("`mask_sites` should be a callable function.")
+def _masked_data(poscar_data, func):
+    "Returns indices of sites which satisfy the func."
+    if not callable(func):
+        raise TypeError("`func` should be a callable function.")
 
-    if len(inspect.signature(mask_sites).parameters) != 4:
+    if len(inspect.signature(func).parameters) != 4:
         raise ValueError(
-            "`mask_sites` takes exactly 4 arguments: (index,x,y,z) in fractional coordinates"
+            "`func` takes exactly 4 arguments: (index,x,y,z) in fractional coordinates"
         )
 
-    if not isinstance(mask_sites(0, 0, 0, 0), bool):
-        raise TypeError("`mask_sites` should return a boolean value.")
+    if not isinstance(func(0, 0, 0, 0), bool):
+        raise TypeError("`func` should return a boolean value.")
 
     eqv_inds = None
     if hasattr(poscar_data.metadata, "eqv_indices"):
@@ -1600,7 +1600,7 @@ def _masked_data(poscar_data, mask_sites):
     pick = []
     for i, pos in enumerate(poscar_data.positions):
         idx = eqv_inds[i] if eqv_inds else i  # map to original index
-        if mask_sites(idx, *pos):
+        if func(idx, *pos):
             pick.append(i)
     return pick  # could be duplicate indices
 
@@ -1622,6 +1622,43 @@ def _filter_pairs(labels, pairs, dist, bond_length):
     return pairs  # None -> auto calculate bond_length, number -> use that number
 
 
+def filter_sites(poscar_data, func, tol = 0.01):
+    """Filter sites based on a function that acts on index and fractional positions such as `lambda i,x,y,z: condition`. 
+    This may include equivalent sites, so it should be used for plotting purpose only, e.g. showing atoms on a plane."""
+    idxs = _masked_data(poscar_data, func)
+    data = poscar_data.to_dict() 
+    all_pos, npos = [], []
+    for value in poscar_data.types.values():
+        indices = [i for i in value if i in idxs]
+        others = [j for j in value if not (j in indices)]
+        pos = data['positions'][indices]
+        qos = data['positions'][others] # need edge items to include
+
+        if qos.shape:
+            qos = np.concatenate([[[i] for i in others], qos], axis=1) # need to keep index
+            qos = np.array([qos + [0, *p] for p in product([-1,0,1],[-1,0,1],[-1,0,1])]).reshape((-1,4)) # all possible translations
+            qos = qos[(qos[:,1:] < 1 + tol).all(axis=1) & (qos[:,1:] > -tol).all(axis=1)]# only in cell range
+            qos = qos[[func(*q) for q in qos]] # masked only those are true
+        
+        if qos.shape:
+            pos = np.concatenate([pos, qos[:,1:]],axis=0)
+
+        all_pos.append(pos)
+        npos.append(len(pos))
+    
+    if not np.sum(npos):
+        raise ValueError("No sites found with given filter func!")
+    
+    if not 'prev_positions' in data['metadata']: # keep always the starting one
+        data['metadata']['prev_positions'] = poscar_data.positions 
+        data['metadata']['prev_types'] = poscar_data.types
+    
+    data['positions'] = np.concatenate(all_pos, axis = 0)
+
+    ranges = np.cumsum([0, *npos])
+    data['types'] = {key: range(i,j) for key, i,j in zip(data['types'],ranges[:-1],ranges[1:]) if range(i,j)} # avoid empty
+    return serializer.PoscarData(data)
+
 # Cell
 def iplot_lattice(
     poscar_data,
@@ -1634,7 +1671,6 @@ def iplot_lattice(
     origin=(0, 0, 0),
     fig=None,
     ortho3d=True,
-    mask_sites=None,
     bond_kws=dict(line_width=4),
     site_kws=dict(line_color="rgba(1,1,1,0)", line_width=0.001, opacity=1),
     plot_cell=True,
@@ -1650,9 +1686,6 @@ def iplot_lattice(
         Sequence of colors for each type. Automatically generated if not provided.
     bond_length : float or dict
         Length of bond in Angstrom. Auto calculated if not provides. Can be a dict like {'Fe-O':3.2,...} to specify bond length between specific types.
-    mask_sites : callable
-        Provide a mask function `f(index, x,y,z) -> bool` to show only selected sites.
-        For example, to show only sites with z > 0.5, use `mask_sites = lambda i, x,y,z: x > 0.5`.
     bond_kws : dict
         Keyword arguments passed to `plotly.graph_objects.Scatter3d` for bonds.
         Default is jus hint, you can use any keyword argument that is accepted by `plotly.graph_objects.Scatter3d`.
@@ -1666,23 +1699,17 @@ def iplot_lattice(
 
     kwargs are passed to `iplot_bz`.
     """
+    if len(poscar_data.positions) < 1:
+        raise ValueError("Need at least 1 atom!")
+    
     poscar_data = _fix_sites(
         poscar_data, tol=tol, eqv_sites=eqv_sites, translate=translate, origin=origin
     )
+    
     blen = _get_bond_length(poscar_data, bond_length)
 
-    sites = None
-    coords = poscar_data.coords
-    if (
-        mask_sites is not None
-    ):  # not None is important, as it can be False given by user
-        sites = _masked_data(poscar_data, mask_sites)
-        coords = poscar_data.coords[sites]
-        if not sites:
-            raise ValueError("No sites found with given mask_sites function.")
-
-    coords, pairs, dist = get_pairs(coords, r=blen)
-    _labels = poscar_data.labels[sites] if sites else poscar_data.labels
+    coords, pairs, dist = get_pairs(poscar_data.coords, r=blen)
+    _labels = poscar_data.labels
     pairs = _filter_pairs(_labels, pairs, dist, bond_length)
 
     if not fig:
@@ -1740,13 +1767,8 @@ def iplot_lattice(
         **site_kws,
     }
     for (k, v), c, s in zip(uelems.items(), colors, sizes):
-        if sites:
-            v = [i for i in v if i in sites]  # Only show selected sites.
-            coords = poscar_data.coords[v]
-            labs = poscar_data.labels[v]
-        else:
-            coords = poscar_data.coords[v]
-            labs = poscar_data.labels[v]
+        coords = poscar_data.coords[v]
+        labs = poscar_data.labels[v]
 
         fig.add_trace(
             go.Scatter3d(
@@ -1832,7 +1854,6 @@ def splot_lattice(
     translate=None,
     origin=(0, 0, 0),
     ax=None,
-    mask_sites=None,
     showlegend=True,
     fmt_label=None,
     site_kws=dict(alpha=0.7),
@@ -1854,9 +1875,6 @@ def splot_lattice(
         Length of bond in Angstrom. Auto calculated if not provides. Can be a dict like {'Fe-O':3.2,...} to specify bond length between specific types.
     alpha : float
         Opacity of points and bonds.
-    mask_sites : callable
-        Provide a mask function `f(index, x,y,z) -> bool` to show only selected sites.
-        For example, to show only sites with z > 0.5, use `mask_sites = lambda i,x,y,z: x > 0.5`.
     showlegend : bool
         Default is True, show legend for each ion type.
     site_kws : dict
@@ -1877,6 +1895,9 @@ def splot_lattice(
     .. tip::
         Use `plt.style.use('ggplot')` for better 3D perception.
     """
+    if len(poscar_data.positions) < 1:
+        raise ValueError("Need at least 1 atom!")
+    
     # Plane fix
     if plane and plane not in "xyzxzyx":
         raise ValueError("plane expects in 'xyzxzyx' or None.")
@@ -1889,21 +1910,8 @@ def splot_lattice(
         poscar_data, tol=tol, eqv_sites=eqv_sites, translate=translate, origin=origin
     )
     blen = _get_bond_length(poscar_data, bond_length)
-
-    sites = None
-    coords = poscar_data.coords  # take all sites
-    filtered_elems = list(poscar_data.types.keys())
-    if mask_sites is not None:  # not None is important, user can give anything
-        sites = _masked_data(poscar_data, mask_sites)
-        if not sites:
-            raise ValueError("No sites found with given mask_sites function.")
-        
-        coords = poscar_data.coords[sites]
-        filtered_elems = np.unique(poscar_data.symbols[sites]).tolist()
-
-    labels = [poscar_data.labels[i] for i in sites] if sites else poscar_data.labels
-
-    coords, pairs, dist = get_pairs(coords, r=blen)
+    labels = poscar_data.labels
+    coords, pairs, dist = get_pairs(poscar_data.coords, r=blen)
     pairs = _filter_pairs(labels, pairs, dist, bond_length)
 
     if fmt_label is not None:
@@ -1941,10 +1949,7 @@ def splot_lattice(
     # Before doing other stuff, create something for legend.
     if showlegend:    
         for key, c, s in zip(uelems.keys(), colors, sizes):
-            if key in filtered_elems:
-                ax.scatter(
-                    [], [], s=s, color=c, label=key, **site_kws
-                )  # Works both for 3D and 2D.
+            ax.scatter([], [], s=s, color=c, label=key, **site_kws)  # Works both for 3D and 2D.
         ptk.add_legend(ax)
 
     # Now change colors and sizes to whole array size
@@ -1952,10 +1957,6 @@ def splot_lattice(
         [mplc.to_rgb(colors[i]) for i, vs in enumerate(uelems.values()) for v in vs]
     )
     sizes = np.array([sizes[i] for i, vs in enumerate(uelems.values()) for v in vs])
-
-    if sites:
-        colors = colors[sites]
-        sizes = sizes[sites]
 
     if np.any(pairs):
         coords_p = coords[pairs]  # paired points
@@ -2219,6 +2220,40 @@ def scale_poscar(poscar_data, scale=(1, 1, 1), tol=1e-2):
     new_poscar["types"] = uelems
     new_poscar["positions"] = np.array(positions)
     return serializer.PoscarData(new_poscar)
+
+def set_boundary(poscar_data, a = [0,1], b = [0,1], c = [0,1]):
+    "View atoms outside cell boundary along a,b,c directions."
+    for d, name in zip([a,b,c],'abc'):
+        if not isinstance(d,(list,tuple)) or len(d) != 2:
+            raise ValueError(f"{name} should be a list/tuple of type [min, max]")
+        if d[1] < d[0]:
+            raise ValueError(f"{name} should be in increasing order as [min, max]")
+        
+    data = poscar_data.to_dict()
+    upos = {}
+    for key, value in poscar_data.types.items():
+        pos = data['positions'][value]
+        for i, (l,h), shift in zip(range(3), [a,b,c],np.eye(3)):
+            while pos[:,i].min() > np.floor(l):
+                pos = np.concatenate([pos, pos - shift],axis=0)
+            
+            while pos[:,i].max() < np.ceil(h):
+                pos = np.concatenate([pos, pos + shift],axis=0)
+
+            pos = pos[(pos[:,i] >= l) & (pos[:,i] <= h)]
+        
+        upos[key] = pos
+    
+    data['positions'] = np.concatenate(list(upos.values()), axis = 0)
+
+    ranges = np.cumsum([0, *[len(v) for v in upos.values()]])
+    data['types'] = {key: range(i,j) for key, i,j in zip(upos,ranges[:-1],ranges[1:])}
+    del upos
+    return serializer.PoscarData(data)
+
+    
+
+
 
 
 def rotate_poscar(poscar_data, angle_deg, axis_vec):

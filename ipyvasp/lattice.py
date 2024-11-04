@@ -12,6 +12,8 @@ __all__ = [
 from pathlib import Path
 from contextlib import redirect_stdout
 from io import StringIO
+from itertools import permutations
+from contextlib import suppress
 
 import numpy as np
 from pandas.io.clipboard import clipboard_get, clipboard_set
@@ -198,6 +200,78 @@ def ngl_viewer(
     return view
 
 
+def weas_viewer(poscar,
+    sizes=None,
+    colors=None,
+    bond_length=None,
+    model_style = 1,
+    plot_cell=True
+    ):
+    """
+    colors : list or str
+        List of colors for each atom type. If str, use 'VESTA','JMOL','CPK'.
+        By default, ipyvasp colors are used.
+    sizes : list
+        List of sizes for each atom type.
+    model_type: int
+        whether to show Balls (0), Ball + Stick (1), Polyheda (2) or Sticks (3).
+    plot_cell : bool
+        Plot unit cell. Default True.
+    bond_length : float or dict
+        Length of bond in Angstrom. Auto calculated if not provides. Can be a dict like {'Fe-O':3.2,...} to specify bond length between specific types.
+    
+    Returns a WeasWidget instance. You can use `.export_image`, `save_image` and other operations on it.
+    """
+    
+    from weas_widget import WeasWidget
+
+    if len(poscar.data.positions) < 1:
+        raise ValueError("Need at least 1 atom!")
+
+    w = WeasWidget(from_ase=poscar.to_ase())
+    w.avr.show_bonded_atoms = True
+    w.avr.model_style = model_style
+    w.avr.show_cell = plot_cell  
+              
+
+    if bond_length:
+        if isinstance(bond_length,(int,float)):
+            for a,b in permutations(list(poscar.data.types.keys()),2):
+                with suppress(KeyError):
+                    w.avr.bond.settings[f'{a}-{b}'].update({'max': bond_length})
+        elif isinstance(bond_length, dict):
+            for key, value in bond_length.items():
+                w.avr.bond.settings[key].update({'max': value})
+
+    if sizes is not None:
+        if not isinstance(sizes, (list,tuple)) or len(sizes) != len(poscar.data.types):
+            raise ValueError(f"sizes should be list/tuple of same sizes as atom types = {len(poscar.data.types)}.")
+        for key, value in zip(poscar.data.types,sizes):
+            w.avr.species.settings[key].update({"radius": value})
+    
+    if colors is None:
+        colors = [plat._atom_colors[key] for key in poscar.data.types]
+
+    if isinstance(colors, str):
+        if not colors in ['VESTA','JMOL','CPK']:
+            raise ValueError("colors should be one of ['VESTA','JMOL','CPK'] if given as string!")
+        
+        w.avr.color_type = colors
+
+    if not isinstance(colors, str):
+        if not isinstance(colors, (list,tuple)) or len(colors) != len(poscar.data.types):
+            raise ValueError(f"colors should be list/tuple of same sizes as atom types = {len(poscar.data.types)}.")
+
+        colors = {key: value for key, value in zip(poscar.data.types,colors)}
+        for key,value in colors.items():
+            w.avr.species.settings[key].update({"color": value})
+        for (k1,c1), (k2,c2) in permutations(colors.items(),2):
+            with suppress(KeyError):
+                w.avr.bond.settings[f'{k1}-{k2}'].update({'color1':c1,'color2':c2})
+                
+    return w
+
+
 class POSCAR:
     _cb_instance = {}  # Loads last clipboard data if not changed
     _mp_instance = {}  # Loads last mp data if not changed
@@ -272,6 +346,8 @@ class POSCAR:
         """
         if viewer is None:
             return plat.view_poscar(self.data, **kwargs)
+        elif viewer in "weas":
+            return weas_viewer(self, **kwargs)
         elif viewer in "nglview":
             return print(
                 f"Use `self.view_ngl()` for better customization in case of viewer={viewer!r}"
@@ -285,6 +361,12 @@ class POSCAR:
     @_sig_kwargs(ngl_viewer, ("poscar",))
     def view_ngl(self, **kwargs):
         return ngl_viewer(self, **kwargs)
+    
+    @_sub_doc(weas_viewer)
+    @_sig_kwargs(weas_viewer, ("poscar",))
+    def view_weas(self, **kwargs):
+        return weas_viewer(self, **kwargs)
+    
 
     def view_kpath(self):
         "Initialize a KpathWidget instance to view kpath for current POSCAR, and you can select others too."
@@ -446,6 +528,14 @@ class POSCAR:
         "Writes POSCAR to clipboard (as implemented by pandas library) for copy in other programs such as vim."
         clipboard_set(self.content)  # write to clipboard
 
+
+    def update_weas(self, handle):
+        """Send result of any options to view on opened weas widget handle with default parameters becuase any operations 
+        can be incompatible with presious state of POSCAR. VESTA color scheme is used here.
+        Useful in Jupyterlab side panel to look operations results on POSCAR."""
+        handle.from_ase(self.to_ase())
+        handle.avr.color_type = 'VESTA'
+
     @property
     def data(self):
         "Data object in POSCAR."
@@ -551,6 +641,16 @@ class POSCAR:
     @_sig_kwargs(plat.scale_poscar, ("poscar_data",))
     def scale(self, scale=(1, 1, 1), **kwargs):
         return self.__class__(data=plat.scale_poscar(self.data, scale, **kwargs))
+    
+    @_sub_doc(plat.set_boundary)
+    @_sig_kwargs(plat.set_boundary,("poscar_data",))
+    def set_boundary(self, a = [0,1], b=[0,1],c=[0,1]):
+        return self.__class__(data = plat.set_boundary(self.data, a=a,b=b,c=c))
+    
+    @_sub_doc(plat.filter_sites)
+    @_sig_kwargs(plat.filter_sites,("poscar_data",))
+    def filter_sites(self, func):
+        return self.__class__(data = plat.filter_sites(self.data, func))
 
     @_sub_doc(plat.set_origin)
     def set_origin(self, origin):

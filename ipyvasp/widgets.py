@@ -252,7 +252,7 @@ class FilesWidget(VBox):
         other_widgets=None,
         other_controls=None,
         options={"manual": False},
-        height="90vh",
+        height="400px",
         **kwargs,
     ):
         """
@@ -384,7 +384,7 @@ class FilesWidget(VBox):
         other_widgets=None,
         other_controls=None,
         options={"manual": False},
-        height="90vh",
+        height="400px",
         **kwargs,
     ):
         """Interact with a function that takes a selected Path as first argument.
@@ -649,7 +649,7 @@ class BandsWidget(VBox):
     self.selected_data returns the last selection of points within a box or lasso. You can plot that output separately as plt.plot(data.xs, data.ys) after a selection.
     """
 
-    def __init__(self, use_vaspout=False, height="90vh", **file_widget_kwargs):
+    def __init__(self, use_vaspout=False, height="450px", **file_widget_kwargs):
         super().__init__(_dom_classes=["BandsWidget"])
         self._bands = None
         self._use_vaspout = use_vaspout
@@ -659,7 +659,7 @@ class BandsWidget(VBox):
         )
         self._click = Dropdown(description="Click", options=["None", "VBM", "CBM"])
         self._ktcicks = Text(description="kticks")
-        self._elim = Text(description="elim", value="-10, 10")
+        self._brange = ipw.IntRangeSlider(description="bands",min=1, max=1) # number, not index
         self._ppicks = PropsPicker(
             on_button_click=self._update_graph, on_selection_changed=self._warn_update
         )
@@ -677,7 +677,7 @@ class BandsWidget(VBox):
             other_widgets=[self._fig],
             other_controls=[
                 self._tsd,
-                self._elim,
+                self._brange,
                 self._ktcicks,
                 ipw.HTML("<hr/>"),
                 self._ppicks,
@@ -691,7 +691,7 @@ class BandsWidget(VBox):
         self._tsd.observe(self._change_theme, "value")
         self._click.observe(self._click_save_data, "value")
         self._ktcicks.observe(self._warn_update, "value")
-        self._elim.observe(self._warn_update, "value")
+        self._brange.observe(self._warn_update, "value")
 
     @property
     def path(self):
@@ -708,6 +708,7 @@ class BandsWidget(VBox):
             self._ktcicks.value = ", ".join(
                 f"{k}:{v}" for k, v in self.bands.get_kticks()
             )
+            self._brange.max = self.bands.source.summary.NBANDS
             if self.bands.source.summary.LSORBIT:
                 self._click.options = ["None", "VBM", "CBM", "so_max", "so_min"]
             else:
@@ -762,8 +763,8 @@ class BandsWidget(VBox):
                 for vs in self._ktcicks.value.split(",")
             ]
             kticks = [(int(vs[0]), vs[1]) for vs in hsk if len(vs) == 2] or None
-            elim = [float(v) for v in self._elim.value.split(",") if v.strip()] or None
-            self._kwargs = {"elim": elim, "kticks": kticks}
+            self._kwargs = {"kticks": kticks, # below numbers instead of index and full shown range
+                "bands": range(self._brange.value[0] - 1, self._brange.value[1]) if self._brange.value else None}
 
             if self._ppicks.projections:
                 self._kwargs = {"projections": self._ppicks.projections, **self._kwargs}
@@ -871,7 +872,7 @@ class KpathWidget(VBox):
     - To break the path between two points "Γ" and "X" type "Γ 0,X" in the "Labels" box, zero means no points in interval.
     """
 
-    def __init__(self, height="90vh", **files_widget_kwargs):
+    def __init__(self, height="400px", **files_widget_kwargs):
         super().__init__(_dom_classes=["KpathWidget"])
         self._fig = go.FigureWidget()
         self._sm = SelectMultiple(options=[], layout=Layout(width="auto"))

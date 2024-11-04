@@ -149,7 +149,9 @@ _spin_doc = """spin : int
     plotting other with same parameters will use the same data."""
 _kind_doc = """kpairs : list/tuple
     List of pair of indices to rearrange a computed path. For example, if you computed
-    0:L, 15:G, 25:X, 34:M path and want to plot it as X-G|M-X, use [(25,15), (34,25)] as kpairs."""
+    0:L, 15:G, 25:X, 34:M path and want to plot it as X-G|M-X, use [(25,15), (34,25)] as kpairs.  
+bands : list/tuple
+    List of indices of bands. If given, this ovverides elim."""
 _proj_doc = """projections : dict
     Mapping from str -> [atoms, orbs]. Use dict to select specific projections, 
     e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict 
@@ -335,7 +337,7 @@ class Bands(_BandsDosBase):
 
         return serializer.Dict2Data(out)
 
-    def get_data(self, elim=None, ezero=None, projections: dict = None, kpairs=None):
+    def get_data(self, elim=None, ezero=None, projections: dict = None, kpairs=None, bands=None):
         """
         Selects bands and projections to use in plotting functions. If input arguments are same as previous call, returns cached data.
 
@@ -345,12 +347,13 @@ class Bands(_BandsDosBase):
         ezero : float, None by default. If not None, elim is applied around this energy.
         projections : dict, str -> [atoms, orbs]. Use dict to select specific projections, e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict are callable, they must accept two arguments evals, occs of shape (spin,kpoints, bands) and return array of shape (kpoints, bands).
         kpairs : list, tuple of integers, None by default to select all kpoints in given order. Use this to select specific kpoints intervals in specific order.
+        bands : list,tuple of integers, this ovverides elim if given.
 
         Returns
         -------
         data : Selected bands and projections data to be used in bandstructure plotting functions under this class as `data` argument.
         """
-        if self.data and self._data_args == (elim, ezero, projections, kpairs):
+        if self.data and self._data_args == (elim, ezero, projections, kpairs, bands):
             return self.data
 
         if kpairs and not isinstance(kpairs, (list, tuple)):
@@ -377,7 +380,7 @@ class Bands(_BandsDosBase):
                 kpairs[-1][-1],
             ]  # flatten and add last index
 
-        self._data_args = (elim, ezero, projections)
+        self._data_args = (elim, ezero, projections, bands)
 
         (
             (spins, uspins),
@@ -393,7 +396,7 @@ class Bands(_BandsDosBase):
             atoms=uatoms,
             orbs=uorbs,
             spins=uspins or None,
-            bands=None,
+            bands=bands,
         )  # picks available spins if uspins is None
 
         if not spins:
@@ -508,9 +511,9 @@ class Bands(_BandsDosBase):
         {"K :.*ax :": f"{_spin_doc}\n{_kind_doc}\nax :"},
     )
     @_sig_kwargs(splot_bands, ("K", "E"))
-    def splot_bands(self, spin=0, kpairs=None, ezero=None, **kwargs):
+    def splot_bands(self, spin=0, kpairs=None, ezero=None, bands=None, **kwargs):
         kwargs, elim = self._handle_kwargs(spin=spin, **kwargs)
-        data = self.get_data(elim=elim, ezero=ezero, kpairs=kpairs)
+        data = self.get_data(elim=elim, ezero=ezero, kpairs=kpairs, bands=bands)
         return splot_bands(data.kpath, data.evals[spin] - data.ezero, **kwargs)
 
     @_sub_doc(
@@ -518,9 +521,9 @@ class Bands(_BandsDosBase):
         {"K :.*ax :": f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\nax :"},
     )
     @_sig_kwargs(splot_rgb_lines, ("K", "E", "pros", "labels"))
-    def splot_rgb_lines(self, projections, spin=0, kpairs=None, ezero=None, **kwargs):
+    def splot_rgb_lines(self, projections, spin=0, kpairs=None, ezero=None, bands=None, **kwargs):
         kwargs, elim = self._handle_kwargs(spin=spin, **kwargs)
-        data = self.get_data(elim, ezero, projections, kpairs=kpairs)
+        data = self.get_data(elim, ezero, projections, kpairs=kpairs, bands=bands)
         return splot_rgb_lines(
             data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **kwargs
         )
@@ -530,10 +533,10 @@ class Bands(_BandsDosBase):
         {"K :.*axes :": f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\naxes :"},
     )
     @_sig_kwargs(splot_color_lines, ("K", "E", "pros", "labels"))
-    def splot_color_lines(self, projections, spin=0, kpairs=None, ezero=None, **kwargs):
+    def splot_color_lines(self, projections, spin=0, kpairs=None, ezero=None, bands=None, **kwargs):
         kwargs, elim = self._handle_kwargs(spin=spin, **kwargs)
         data = self.get_data(
-            elim, ezero, projections, kpairs=kpairs
+            elim, ezero, projections, kpairs=kpairs, bands=bands
         )  # picked relative limit
         return splot_color_lines(
             data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **kwargs
@@ -544,9 +547,9 @@ class Bands(_BandsDosBase):
         {"K :.*fig :": f"{_proj_doc}\n{_spin_doc}\n{_kind_doc}\nfig :"},
     )
     @_sig_kwargs(iplot_rgb_lines, ("K", "E", "pros", "labels", "occs", "kpoints"))
-    def iplot_rgb_lines(self, projections, spin=0, kpairs=None, ezero=None, **kwargs):
+    def iplot_rgb_lines(self, projections, spin=0, kpairs=None, ezero=None, bands=None, **kwargs):
         kwargs, elim = self._handle_kwargs(spin=spin, **kwargs)
-        data = self.get_data(elim, ezero, projections, kpairs=kpairs)
+        data = self.get_data(elim, ezero, projections, kpairs=kpairs, bands=bands)
         # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number
         return iplot_rgb_lines(
             {"K": data.kpath, "indices": data.bands},
@@ -563,9 +566,9 @@ class Bands(_BandsDosBase):
         {"K :.*fig :": f"{_spin_doc}\n{_kind_doc}\nfig :"},
     )
     @_sig_kwargs(iplot_bands, ("K", "E"))
-    def iplot_bands(self, spin=0, kpairs=None, ezero=None, **kwargs):
+    def iplot_bands(self, spin=0, kpairs=None, ezero=None, bands=None, **kwargs):
         kwargs, elim = self._handle_kwargs(spin=spin, **kwargs)
-        data = self.get_data(elim, ezero, kpairs=kpairs)
+        data = self.get_data(elim, ezero, kpairs=kpairs, bands=bands)
         # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number
         return iplot_bands(
             {"K": data.kpath, "indices": data.bands},
@@ -573,13 +576,14 @@ class Bands(_BandsDosBase):
             **kwargs,
         )
 
-    def view_bands(self):
+    def view_bands(self, height="450px"):
         "Initialize and return `ipyvasp.widgets.BandsWidget` to view bandstructure interactively."
         use_vaspout = True if isinstance(self.source, vp.Vaspout) else False
         return wdg.BandsWidget(
             use_vaspout=use_vaspout,
-            path=self.source.path.parent,
+            path=str(self.source.path.parent),
             glob=self.source.path.name,
+            height=height,
         )
 
 
@@ -677,6 +681,7 @@ class DOS(_BandsDosBase):
             raise ValueError("spin must be 0,1,2,3 for dos")
 
         kwargs.pop("spin", None)  # remove from kwargs as plots don't need it
+        kwargs.pop("bands", None) # not required internally
         return kwargs, kwargs.get("elim", None)
 
     @_sub_doc(

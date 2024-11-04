@@ -14,6 +14,7 @@
    .. autosummary::
    
       get_E0
+      get_bib
       parse_text
    
    

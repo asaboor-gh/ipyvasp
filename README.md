@@ -1,6 +1,6 @@
 # ipyvasp
 
-An successor of [pivotpy](https://github.com/massgh/pivotpy) for VASP-based DFT pre and post processing tool.
+An VASP-based DFT pre and post processing tool.
 
 ## Install
 Currently the package is being built and not stable. If you want to use development version, install this way:(recommended to install in a virtual environment)
@@ -36,6 +36,9 @@ Interactively select bandstructure path by clicking on high symmetry points on p
 
 ![KP](KP.png)
 
+Apply operations on POSCAR and simultaneously view using plotly's `FigureWidget` or `WeasWidget` in Jupyterlab side by side.
+
+![snip](op.png)
+
+
 More coming soon!
-
-

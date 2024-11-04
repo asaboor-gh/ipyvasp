@@ -15,6 +15,7 @@
    
       download_structure
       ngl_viewer
+      weas_viewer
    
    
 

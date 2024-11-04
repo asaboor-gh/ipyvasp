@@ -211,11 +211,20 @@ class Dict2Data:
     def values(self):
         return self.__dict__.values()
 
-    def __getitem__(self, key):
-        return self.__dict__[key]
-
     def items(self):
         return self.__dict__.items()
+    
+    def __getitem__(self, key):
+        return self.__dict__[key]
+    
+    def __contains__(self, key):
+        return key in self.__dict__
+    
+    def __iter__(self):
+        return iter(self.__dict__)
+    
+    def __len__(self):
+        return len(self.__dict__)
 
 
 class SpinData(Dict2Data):
@@ -247,11 +256,7 @@ class PoscarData(Dict2Data):
     _req_keys = ("basis", "types", "metadata")
 
     def __init__(self, d):
-        D = d.to_dict() if isinstance(d, Dict2Data) else d
-        for tp in D['types'].values(): # order positions along x for quick realization of atoms sites
-            D['positions'][tp] = sorted(D['positions'][tp], key=lambda p: p[0])
-
-        super().__init__(D)
+        super().__init__(d)
 
     @property
     def coords(self):
@@ -381,7 +386,7 @@ class PoscarData(Dict2Data):
             )
         
         if len(set([*idx1, *idx2])) < 2: # itself or no atom exists
-            return None # No mean of distnace in this case
+            return np.nan # No mean of distnace in this case
 
         dists = []
         for idx in idx1:
@@ -395,7 +400,7 @@ class PoscarData(Dict2Data):
 
         dists = np.array(dists)
         dists = dists[dists > 0]  # Remove distance with itself
-        return np.min(dists)
+        return np.min(dists) if dists.size else np.nan
     
     def to_fractional(self, coords):
         "Converts cartesian coordinates to fractional coordinates in the basis of cell."
