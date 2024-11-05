@@ -1728,7 +1728,7 @@ def iplot_lattice(
         colors = [_atom_colors[elem] for elem in uelems.keys()]
         colors = ["rgb({},{},{})".format(*[int(_c * 255) for _c in c]) for c in colors]
 
-    _colors = np.array([colors[i] for i, vs in enumerate(uelems.values()) for v in vs])
+    _colors = np.array([colors[i] for i, vs in enumerate(uelems.values()) for v in vs],dtype=object) # could be mixed color types
 
     if np.any(pairs):
         coords_p = coords[pairs]  # paired points
@@ -1742,25 +1742,37 @@ def iplot_lattice(
             colors_n = [*colors_n, *_c]  # same shape.
 
         coords_n = np.array(coords_n)
-        colors_n = np.array(colors_n)
+        colors_n = np.array(colors_n, dtype=object)
+
+        # Instead of plotting for each pair, we can make only as little lines as types of atoms to speec up
+        unqc = [] # mixed colors type can't be sorted otherwise
+        for c in colors_n:
+            if c not in unqc:
+                unqc.append(c)
+
+        clabs = [unqc.index(c) for c in colors_n] # few colors categories
+        corder = np.argsort(clabs) # coordinates order for those categories
+
+        groups = {0:[],1:[],2:[]}
+        for co in corder:
+            groups[clabs[co]].append(coords_n[co])
+            groups[clabs[co]].append([[np.nan, np.nan, np.nan]])
+
+        for i in range(3):
+            groups[i] = np.concatenate(groups[i], axis=0)
 
         bond_kws = {"line_width": 4, **bond_kws}
 
-        for (i, cp), c in zip(enumerate(coords_n), colors_n):
+        for i, cp in groups.items():
             showlegend = True if i == 0 else False
-            fig.add_trace(
-                go.Scatter3d(
-                    x=cp[:, 0].T,
-                    y=cp[:, 1].T,
-                    z=cp[:, 2].T,
-                    mode="lines",
-                    line_color=c,
-                    legendgroup="Bonds",
-                    showlegend=showlegend,
-                    name="Bonds",
-                    **bond_kws,
-                )
-            )
+            fig.add_trace(go.Scatter3d(x=cp[:, 0].T, y=cp[:, 1].T, z=cp[:, 2].T,
+                mode="lines",
+                line_color=unqc[i],
+                legendgroup="Bonds",
+                showlegend=showlegend,
+                name="Bonds",
+                **bond_kws,
+            ))
 
     site_kws = {
         **dict(line_color="rgba(1,1,1,0)", line_width=0.001, opacity=1),

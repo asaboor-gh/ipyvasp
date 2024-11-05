@@ -530,7 +530,7 @@ class POSCAR:
 
 
     def update_weas(self, handle):
-        """Send result of any options to view on opened weas widget handle with default parameters becuase any operations 
+        """Send result of any operation to view on opened weas widget handle with default parameters becuase any operations 
         can be incompatible with presious state of POSCAR. VESTA color scheme is used here.
         Useful in Jupyterlab side panel to look operations results on POSCAR."""
         handle.from_ase(self.to_ase())
