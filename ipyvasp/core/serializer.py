@@ -12,11 +12,12 @@ import json, re
 import pickle
 import inspect
 from collections import namedtuple
-from itertools import product
+from itertools import product,combinations
 from copy import deepcopy
 from pathlib import Path
 
 import numpy as np
+from pandas import DataFrame
 from scipy.spatial import KDTree
 
 from .spatial_toolkit import (
@@ -352,7 +353,6 @@ class PoscarData(Dict2Data):
         tree = KDTree(cs)
         _, inn = tree.query(cs, k=k)
         output = (inn % N)[:N]  # to get the index of the atom in the original list
-        output[:,1:] = np.sort(output[:,1:], axis=1)  # sort the indices of neighbors
         return output
 
     get_knn = get_neighbors  # important alias
@@ -401,6 +401,50 @@ class PoscarData(Dict2Data):
         dists = np.array(dists)
         dists = dists[dists > 0]  # Remove distance with itself
         return np.min(dists) if dists.size else np.nan
+    
+    
+    def get_distances(self, type1, type2, min=-np.infty, max=np.infty):
+        """Get an array of all distnaces in a range set by min and max between type 1 and type2.
+        For example `get_distances('Ga','As',2,3)[:,-1].mean()` can be used to get average bond length between Ga and As in GaAs. 
+        Returned array is of shape (N,3) where first two entries in columns are indices of pairs between which distance was calculated.
+        """
+        out = []
+        for i in self.types[type1]:
+            for j in [k for k in self.types[type2] if k != i]:
+                a = self.coords[i]
+                bs = [self.to_cartesian(self.positions[j] + p) for p in set(product([-1,0,1],[-1,0,1],[-1,0,1]))]
+                ds = np.array([np.linalg.norm(a-b) for b in bs])
+                d = ds[ds > 0].min() # no same site distance
+                if min < d < max:
+                    out.append([i, j, d])
+        out = np.array(out,dtype=object)
+        return out[out[:,-1].argsort()] if out.size else out
+    
+
+    def get_bond_data(self, site_indices, k = 5):
+        "Returns a DataFrame with bonds angle, bond length, vector positions etc. that can be used for plotting."
+        if k < 3:
+            raise ValueError("k >= 3 is required!")
+    
+        idxs = self.get_knn(k)[list(site_indices)]
+        out = []
+        for i, *js in idxs:
+            a = self.coords[i]
+            nears = []  # neaigbors could be on other side, bring close
+            for j in js:
+                bs = np.array([self.to_cartesian(self.positions[j] + p) for p in product([-1,0,1],[-1,0,1],[-1,0,1])])
+                ds = np.array([np.linalg.norm(a-b) for b in bs])
+                nears.append((j, bs[ds.argsort()][0]))
+            
+            for (m,b),(n, c) in combinations(nears,2):
+                v1, v2 = b-a, c-a
+                n1, n2 = np.linalg.norm(v1), np.linalg.norm(v2)
+                name = '-'.join(self.symbols[[m,i,n]])
+                angle = np.degrees(np.arccos(v1.dot(v2)/(n1*n2)))
+                out.append([name, m,i,n, angle, n1, n2, *b, *a,  *c])
+                
+        columns = 'bond a o b angle d_ao d_bo ax ay az ox oy oz bx by bz'.split()
+        return DataFrame(out, columns=columns)
     
     def to_fractional(self, coords):
         "Converts cartesian coordinates to fractional coordinates in the basis of cell."
