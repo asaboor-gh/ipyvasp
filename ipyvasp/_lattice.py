@@ -1753,12 +1753,12 @@ def iplot_lattice(
         clabs = [unqc.index(c) for c in colors_n] # few colors categories
         corder = np.argsort(clabs) # coordinates order for those categories
 
-        groups = {0:[],1:[],2:[]}
+        groups = dict([(i,[]) for i in range(len(unqc))])
         for co in corder:
             groups[clabs[co]].append(coords_n[co])
-            groups[clabs[co]].append([[np.nan, np.nan, np.nan]])
+            groups[clabs[co]].append([[np.nan, np.nan, np.nan]]) # nan to break links outside bonds
 
-        for i in range(3):
+        for i in range(len(unqc)):
             groups[i] = np.concatenate(groups[i], axis=0)
 
         bond_kws = {"line_width": 4, **bond_kws}
