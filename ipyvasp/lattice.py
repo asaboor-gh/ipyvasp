@@ -136,9 +136,7 @@ def ngl_viewer(
 
     # Only show equivalent sites if plotting cell, only shift origin otherwise
     poscar = POSCAR(  # don't change instance itself, make new one
-        data=plat._fix_sites(
-            poscar.data, eqv_sites=True if plot_cell else False, origin=origin
-        )
+        data=plat._fix_sites(poscar.data, eqv_sites=True if plot_cell else False, origin=origin)
     )
 
     _types = list(poscar.data.types.keys())
@@ -205,7 +203,8 @@ def weas_viewer(poscar,
     colors=None,
     bond_length=None,
     model_style = 1,
-    plot_cell=True
+    plot_cell=True,
+    origin = (0,0,0)
     ):
     """
     colors : list or str
@@ -221,15 +220,21 @@ def weas_viewer(poscar,
         Length of bond in Angstrom. Auto calculated if not provides. Can be a dict like {'Fe-O':3.2,...} to specify bond length between specific types.
     
     Returns a WeasWidget instance. You can use `.export_image`, `save_image` and other operations on it.
+    Read what you can do more with `WeasWidget` [here](https://weas-widget.readthedocs.io/en/latest/index.html).
     """
     
     from weas_widget import WeasWidget
 
     if len(poscar.data.positions) < 1:
         raise ValueError("Need at least 1 atom!")
+    
+    # Only show equivalent sites if plotting cell, only shift origin otherwise
+    poscar = POSCAR(  # don't change instance itself, make new one
+        data=plat._fix_sites(poscar.data, eqv_sites=True if plot_cell else False, origin=origin)
+    )
 
     w = WeasWidget(from_ase=poscar.to_ase())
-    w.avr.show_bonded_atoms = True
+    w.avr.show_bonded_atoms = False if plot_cell else True # plot_cell fix atoms itself
     w.avr.model_style = model_style
     w.avr.show_cell = plot_cell  
               
