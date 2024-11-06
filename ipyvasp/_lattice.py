@@ -23,7 +23,7 @@ from .core import parser as vp, serializer
 from .core.spatial_toolkit import (
     to_plane,
     rotation,
-    inside_convexhull,
+    inside_convexhull, # be there for export
     to_basis,
     to_R3,
     get_TM,
@@ -31,6 +31,7 @@ from .core.spatial_toolkit import (
     coplanar,
 )
 from .core.plot_toolkit import quiver3d
+from .utils import color as tcolor
 
 
 # These colors are taken from Mathematica's ColorData["Atoms"]
@@ -2397,12 +2398,12 @@ def convert_poscar(poscar_data, atoms_mapping, basis_factor):
     return serializer.PoscarData(poscar_data)  # Return new POSCAR
 
 
-def transform_poscar(poscar_data, transformation, zoom=2, tol=1e-2):
+def transform_poscar(poscar_data, transformation, fill_factor=2, tol=1e-2):
     """Transform a POSCAR with a given transformation matrix or function that takes old basis and return target basis.
     Use `get_TM(basis1, basis2)` to get transformation matrix from one basis to another or function to return new basis of your choice.
     An example of transformation function is `lambda a,b,c: a + b, a-b, c` which will give a new basis with a+b, a-b, c as basis vectors.
 
-    You may find errors due to missing atoms in the new basis, use `zoom` to increase the size of given cell to include any possible site in new cell.
+    You may find errors due to missing atoms in the new basis, use `fill_factor` and `tol` to include any possible site in new cell.
 
     Examples
     --------
@@ -2426,74 +2427,38 @@ def transform_poscar(poscar_data, transformation, zoom=2, tol=1e-2):
         raise Exception(
             "transformation should be a function that accept 3 arguemnts or 3x3 matrix"
         )
+    if not isinstance(fill_factor,int):
+        raise TypeError(f'fill_factor should be int, got {type(fill_factor)}')
 
-    def get_cell_vertices(basis):
-        verts = get_bz(basis, primitive=True).vertices
-        return verts - np.mean(
-            verts, axis=0
-        )  # Center around origin, otherwise it never going to be inside convex hull
-
-    TM = get_TM(
-        poscar_data.basis, new_basis
-    )  # Transformation matrix to save before scaling
-    old_numbers = [len(v) for v in poscar_data.types.to_dict().values()]
-    chull = ConvexHull(
-        np.max([zoom, 2]) * get_cell_vertices(new_basis)
-    )  # Convex hull of new cell, make it at least two times to avoid losing sites because of translation
-
-    while any(
-        inside_convexhull(chull, get_cell_vertices(poscar_data.basis))
-    ):  # Check if all vertices of old cell are inside new cell
-        poscar_data = scale_poscar(
-            poscar_data, [2, 2, 2], tol=tol
-        )  # Repeat in all directions
-
-    points = to_basis(
-        new_basis, poscar_data.coords
-    )  # Transform coordinates to new basis around origin
-
-    # Let's bring the most central point to origin
-    close_to_origin = np.linalg.norm(points - np.mean(points, axis=0), axis=1)
-    nearest_idx = np.argsort(close_to_origin)[0]
-    points = points - points[nearest_idx]  # one point is at origin now
+    _p = range(-fill_factor, fill_factor + 1)
+    pos = np.concatenate([poscar_data.positions,[[i] for i,_ in enumerate(poscar_data.positions)]], axis=1) # keep track of index
+    pos = np.concatenate([pos + [*p,0] for p in set(product(_p,_p,_p))],axis=0) # increaser by fill_factor^3
+    pos[:,:3] = to_basis(new_basis, poscar_data.to_cartesian(pos[:,:3])) # convert to coords in this and to points in new
+    pos = pos[(pos[:,:3] <= 1 - tol).all(axis=1) & (pos[:,:3] >= -tol).all(axis=1)]
+    pos = pos[pos[:,-1].argsort()] # sort for species
 
     new_poscar = poscar_data.to_dict()  # Update in it
     new_poscar["basis"] = new_basis
     new_poscar["metadata"]["scale"] = np.linalg.norm(new_basis[0])
     new_poscar["metadata"]["comment"] = f"Transformed by ipyvasp"
-    new_poscar["metadata"][
-        "TM"
-    ] = TM  # Save transformation matrix in both function and matrix given
+    new_poscar["metadata"]["TM"] = get_TM(poscar_data.basis, new_basis)  # save Transformation matrix
+    old_numbers = [len(v) for v in poscar_data.types.values()]
 
-    uelems = poscar_data.types.to_dict()
-    positions, shift, unique_dict = [], 0, {}
-    for key, value in uelems.items():
-        s_p = points[value]
-        s_p = s_p[
-            ((s_p > -tol) & (s_p < 1 - tol)).all(axis=1)
-        ]  # Get sites within tolerance, for very far sites
 
-        if s_p.size == 0:
-            raise Exception(
-                f"No sites found for {key!r}, transformation stopped! You may need to modify `transformation` or increase `zoom` value."
-            )
+    uelems, start = {}, 0
+    for k, v in poscar_data.types.items():
+        uelems[k] = range(start, start + len(pos[(pos[:,-1] >= v.start) & (pos[:,-1] < v.stop)]))
+        start = uelems[k].stop
 
-        unique_dict[key] = range(shift, shift + len(s_p))
-        positions = [*positions, *s_p]  # Pick sites
-        shift += len(s_p)  # Update for next element
-
-    # Final check if crystal is still same
-    new_numbers = [len(v) for v in unique_dict.values()]
-    ratio = [
-        round(new / old, 4) for new, old in zip(new_numbers, old_numbers)
-    ]  # Round to avoid floating point errors,can cover 1 to 10000 atoms transformation
+    # warn if crystal formula changes
+    new_numbers = [len(v) for v in uelems.values()]
+    ratio = (np.array(new_numbers)/old_numbers).round(4) # Round to avoid floating point errors,can cover 1 to 10000 atoms transformation
     if len(np.unique(ratio)) != 1:
-        raise Exception(
-            f"Transformation failed, atoms proportion changed: {old_numbers} -> {new_numbers}, if your transformation is an allowed one for this structure, increase `zoom` value."
-        )
+        print(tcolor.rb(f"WARNING: Transformation failed, atoms proportion changed: {old_numbers} -> {new_numbers}." 
+              " If your transformation is an allowed one for this structure, increase `fill_factor` or `tol`."))
 
-    new_poscar["types"] = unique_dict
-    new_poscar["positions"] = np.array(positions)
+    new_poscar["types"] = uelems
+    new_poscar["positions"] = np.array(pos[:,:3])
     return serializer.PoscarData(new_poscar)
 
 

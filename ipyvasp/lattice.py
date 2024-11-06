@@ -685,9 +685,9 @@ class POSCAR:
         return stk.get_TM(self.data.basis, target_basis)
 
     @_sub_doc(plat.transform_poscar)
-    def transform(self, transformation, zoom=2, tol=1e-2):
+    def transform(self, transformation, fill_factor=2, tol=1e-2):
         return self.__class__(
-            data=plat.transform_poscar(self.data, transformation, zoom=zoom, tol=tol)
+            data=plat.transform_poscar(self.data, transformation, fill_factor=fill_factor, tol=tol)
         )
 
     @_sub_doc(plat.transpose_poscar)
