@@ -1015,14 +1015,18 @@ def iplot2widget(fig, fig_widget=None, template=None):
 
     if fig_widget is None:
         fig_widget = go.FigureWidget()
+        scene = fig.layout.scene # need to copy scane form given fig
     elif not isinstance(fig_widget, go.FigureWidget):
         raise ValueError("fig_widget must be FigureWidget")
+    else:
+        scene = fig_widget.layout.scene # keep scene from widget
 
     fig_widget.data = []  # Clear previous data
     if template is not None:
-        fig.layout.template = template  # will make white flash if not done before
-
+        fig.layout.template = template  # will make white flash if not done before 
+    
     fig_widget.layout = fig.layout
+    fig_widget.layout.scene = scene # reset scene back
 
     with fig_widget.batch_update():
         for data in fig.data:

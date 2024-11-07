@@ -250,11 +250,54 @@ def weas_viewer(poscar,
     return w
 
 
+class _AutoRenderer:
+    _figw = None
+    _kws = {} 
+
+    def __init__(self, pc_instance):
+        self._pc = pc_instance
+
+    def on(self, template=None):
+        "Enable auto rendering. In Jupyterlab, you can use `Create New View for Output` to drag a view on side."
+        self.off()
+        type(self)._figw = iplot2widget(self._pc.iplot_lattice(**self._kws), fig_widget=self._figw,template=template)
+        
+        def ip_display(that):
+            iplot2widget(that.iplot_lattice(**self._kws), fig_widget=self._figw, template=template)
+        
+        type(self._pc)._ipython_display_ = ip_display
+        
+        from ipywidgets import Button, VBox
+        btn = Button(description='Disable Auto Rendering',icon='close',layout={'width': 'max-content'})
+        btn.on_click(lambda btn: self.off())
+        type(self)._box = VBox([btn, self._figw])
+        return display(self._box)
+
+    def off(self):
+        "Disable auto rendering."
+        if hasattr(self, '_box'):
+            self._box.close()
+            type(self)._figw = None # no need to close figw, it raise warning, but now garbage collected
+        
+        if hasattr(type(self._pc), '_ipython_display_'):
+            del type(self._pc)._ipython_display_
+
+    @_sig_kwargs(plat.iplot_lattice,('poscar_data',))
+    def update_params(self, **kwargs):
+        type(self)._kws = kwargs
+        if hasattr(type(self._pc), '_ipython_display_'):
+            self._pc._ipython_display_()
+    
+    @property
+    def params(self):
+        return self._kws.copy() # avoid messing original
+    
+    def __repr__(self):
+        return f"AutoRenderer({self._kws})"
+
 class POSCAR:
     _cb_instance = {}  # Loads last clipboard data if not changed
     _mp_instance = {}  # Loads last mp data if not changed
-    _plotly_kws = {}  # kwargs to pass to auto update figurewidget
-    _weas_kws = {}
 
     def __init__(self, path=None, content=None, data=None):
         """
@@ -268,9 +311,15 @@ class POSCAR:
         data : PoscarData object. This assumes positions are in fractional coordinates.
 
         Prefrence order: data > content > path
+
+        Tip: You can use `self.auto_renderer.on()` to keep doing opertions and visualize while last line of any cell is a POSCAR object.
         """
         self._path = Path(path or "POSCAR")  # Path to file
         self._content = content
+
+        if not hasattr(self, '_renderer'): # Only once
+            type(self)._renderer = _AutoRenderer(self) # assign to class
+        self._renderer._pc = self # keep latest refrence there too, for update_params on right one
 
         if data:
             self._data = serializer.PoscarData.validated(data)
@@ -295,6 +344,19 @@ class POSCAR:
     @property
     def path(self):
         return self._path
+    
+    @property
+    def auto_renderer(self):
+        """A renderer for auto viewing POSCAR when at last line of cell.
+
+        Use `auto_renderer.on()` to enable it.
+        Use `auto_renderer.off()` to disable it.
+        Use `auto_renderer.[params, update_params()]` to view and update parameters.
+        
+        In Jupyterlab, you can use `Create New View for Output` to drag a view on side.
+        In VS Code, you can open another view of Notebook to see it on side while doing operations.
+        """
+        return self._renderer
 
     def to_ase(self):
         """Convert to ase.Atoms format. You need to have ase installed.
@@ -327,6 +389,8 @@ class POSCAR:
             return plat.view_poscar(self.data, **kwargs)
         elif viewer in "weas":
             return weas_viewer(self, **kwargs)
+        elif viewer in "plotly":
+            return self.view_plotly(**kwargs)
         elif viewer in "nglview":
             return print(
                 f"Use `self.view_ngl()` for better customization in case of viewer={viewer!r}"
@@ -344,9 +408,7 @@ class POSCAR:
     @_sub_doc(weas_viewer)
     @_sig_kwargs(weas_viewer, ("poscar",))
     def view_weas(self, **kwargs):
-        self.__class__._weas_kws = kwargs  # attach to class, not self
         return weas_viewer(self, **kwargs)
-    
 
     def view_kpath(self):
         "Initialize a KpathWidget instance to view kpath for current POSCAR, and you can select others too."
@@ -357,12 +419,7 @@ class POSCAR:
     @_sub_doc(plat.iplot_lattice)
     @_sig_kwargs(plat.iplot_lattice, ("poscar_data",))
     def view_plotly(self, **kwargs):
-        self.__class__._plotly_kws = kwargs  # attach to class, not self
         return iplot2widget(self.iplot_lattice(**kwargs))
-
-    def update_plotly(self, handle):
-        "Update plotly widget (already shown in notebook) after some operation on POSCAR with `handle` returned by `view_plotly`."
-        iplot2widget(self.iplot_lattice(**self._plotly_kws), fig_widget=handle)
 
     @classmethod
     def from_file(cls, path):
@@ -503,12 +560,6 @@ class POSCAR:
     def to_clipboard(self):
         "Writes POSCAR to clipboard (as implemented by pandas library) for copy in other programs such as vim."
         clipboard_set(self.content)  # write to clipboard
-
-
-    def update_weas(self, handle):
-        """Send result of any operation to view on opened weas widget handle.
-        Useful in Jupyterlab side panel to look operations results on POSCAR."""
-        handle.children = weas_viewer(self, **self._weas_kws).children # does not work properly otherwise
 
     @property
     def data(self):

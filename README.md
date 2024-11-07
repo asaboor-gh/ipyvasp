@@ -36,7 +36,7 @@ Interactively select bandstructure path by clicking on high symmetry points on p
 
 ![KP](KP.png)
 
-Apply operations on POSCAR and simultaneously view using plotly's `FigureWidget` or `WeasWidget` in Jupyterlab side by side.
+Apply operations on POSCAR and simultaneously view using plotly's `FigureWidget` in Jupyterlab side by side.
 
 ![snip](op.png)
 

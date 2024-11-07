@@ -1867,10 +1867,10 @@ def _fix_color_size(types, colors, sizes, default_size, backend=None):
     if isinstance(colors,dict):
         for k,v in colors.items():
             cs[k]['color'] = v 
-    elif colors is not None and isinstance(colors,(str,list,tuple,np.ndarray)):
+    elif isinstance(colors,(str,list,tuple,np.ndarray)):
         for k in cs:
             cs[k]['color'] = colors
-    else:
+    elif colors is not None:
         raise TypeError("colors should be a single valid color or dict as {'Ga':'red','As':'blue',...}")
     return cs
 
