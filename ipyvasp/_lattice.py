@@ -15,7 +15,7 @@ from matplotlib.collections import LineCollection
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import matplotlib.colors as mplc
 
-from ipywidgets import interactive
+from ipywidgets import interactive, IntSlider
 
 # Inside packages import
 from .core import plot_toolkit as ptk
@@ -1635,13 +1635,13 @@ def filter_sites(poscar_data, func, tol = 0.01):
         pos = data['positions'][indices]
         qos = data['positions'][others] # need edge items to include
 
-        if qos.shape:
+        if qos.size:
             qos = np.concatenate([[[i] for i in others], qos], axis=1) # need to keep index
             qos = np.array([qos + [0, *p] for p in product([-1,0,1],[-1,0,1],[-1,0,1])]).reshape((-1,4)) # all possible translations
             qos = qos[(qos[:,1:] < 1 + tol).all(axis=1) & (qos[:,1:] > -tol).all(axis=1)]# only in cell range
             qos = qos[[func(*q) for q in qos]] # masked only those are true
         
-        if qos.shape:
+        if qos.size:
             pos = np.concatenate([pos, qos[:,1:]],axis=0)
 
         all_pos.append(pos)
@@ -1681,10 +1681,10 @@ def iplot_lattice(
 
     Parameters
     ----------
-    sizes : float or tuple
-        Size of sites. Either one int/float or list equal to type of ions.
-    colors : tuple
-        Sequence of colors for each type. Automatically generated if not provided.
+    sizes : float or dict of type -> float
+        Size of sites. Either one int/float or a mapping like {'Ga': 2, ...}.
+    colors : color or dict of type -> color
+        Mapping of colors like {'Ga': 'red, ...} or a single color. Automatically generated color for missing types.
     bond_length : float or dict
         Length of bond in Angstrom. Auto calculated if not provides. Can be a dict like {'Fe-O':3.2,...} to specify bond length between specific types.
     bond_kws : dict
@@ -1717,17 +1717,9 @@ def iplot_lattice(
         fig = go.Figure()
 
     uelems = poscar_data.types.to_dict()
-    if not isinstance(sizes, (list, tuple, np.ndarray)):
-        sizes = [sizes for elem in uelems.keys()]
-
-    if colors and len(colors) != len(uelems.keys()):
-        print(
-            "Warning: Number of colors does not match number of atom types. Using default colors."
-        )
-
-    if (colors is None) or len(colors) != len(uelems.keys()):
-        colors = [_atom_colors[elem] for elem in uelems.keys()]
-        colors = ["rgb({},{},{})".format(*[int(_c * 255) for _c in c]) for c in colors]
+    _fcs = _fix_color_size(uelems, colors, sizes, 10, backend = 'plotly')
+    sizes  = [v['size'] for v in _fcs.values()]
+    colors = [v['color'] for v in _fcs.values()]
 
     _colors = np.array([colors[i] for i, vs in enumerate(uelems.values()) for v in vs],dtype=object) # could be mixed color types
 
@@ -1854,6 +1846,33 @@ def _validate_label_func(fmt_label, parameter):
     elif not isinstance(test_out, str):
         raise ValueError("fmt_label must return a string or a list/tuple of length 2.")
 
+def _fix_color_size(types, colors, sizes, default_size, backend=None):
+    cs = {key: {'color': _atom_colors.get(key, 'blue'), 'size': default_size} for key in types}
+    for k in cs:
+        if len(cs[k]['color']) == 3: # otherwise its blue
+            if backend == 'plotly':
+                cs[k]['color'] = "rgb({},{},{})".format(*[int(255*c) for c in cs[k]['color']])
+            elif backend == 'ngl':
+                cs[k]['color'] = mplc.to_hex(cs[k]['color'])
+    
+    if isinstance(sizes,(int,float,np.integer)):
+        for k in cs:
+            cs[k]['size'] = sizes 
+    elif isinstance(sizes, dict):
+        for k,v in sizes.items():
+            cs[k]['size'] = v 
+    else:
+        raise TypeError("sizes should be a single int/float or dict as {'Ga':10,'As':15,...}")
+    
+    if isinstance(colors,dict):
+        for k,v in colors.items():
+            cs[k]['color'] = v 
+    elif colors is not None and isinstance(colors,(str,list,tuple,np.ndarray)):
+        for k in cs:
+            cs[k]['color'] = colors
+    else:
+        raise TypeError("colors should be a single valid color or dict as {'Ga':'red','As':'blue',...}")
+    return cs
 
 # Cell
 def splot_lattice(
@@ -1880,10 +1899,10 @@ def splot_lattice(
     ----------
     plane : str
         Plane to plot. Either 'xy','xz','yz' or None for 3D plot.
-    sizes : float or tuple
-        Size of sites. Either one int/float or list equal to type of ions.
-    colors : tuple
-        Sequence of colors for each ion type. If None, automatically generated.
+    sizes : float or dict of type -> float
+        Size of sites. Either one int/float or a mapping like {'Ga': 2, ...}.
+    colors : color or dict of type -> color
+        Mapping of colors like {'Ga': 'red, ...} or a single color. Automatically generated color for missing types.
     bond_length : float or dict
         Length of bond in Angstrom. Auto calculated if not provides. Can be a dict like {'Fe-O':3.2,...} to specify bond length between specific types.
     alpha : float
@@ -1941,23 +1960,10 @@ def splot_lattice(
             print(f"Warning: Parameters {list(kwargs.keys())} are not used when `plot_cell = False`.")
 
     uelems = poscar_data.types.to_dict()
-    if not isinstance(sizes, (list, tuple, np.ndarray)):
-        if not isinstance(sizes, (int, float, np.integer)):
-            raise ValueError("sizes must be a number or a list/tuple of numbers.")
-        sizes = [sizes for _ in uelems]
-    
-    if len(sizes) != len(uelems):
-        raise ValueError(
-            f"Length of `sizes` must be equal to number of elements in POSCAR. Got {len(sizes)} sizes for {len(uelems)} elements."
-        )
-        
-    if colors and len(colors) != len(uelems.keys()):
-        print(
-            "Warning: Number of colors does not match number of atom types. Using default colors."
-        )
 
-    if (colors is None) or len(colors) != len(uelems.keys()):
-        colors = [_atom_colors[elem] for elem in uelems.keys()]
+    _fcs = _fix_color_size(uelems, colors, sizes, 50)
+    sizes  = [v['size'] for v in _fcs.values()]
+    colors = [v['color'] for v in _fcs.values()]
 
     # Before doing other stuff, create something for legend.
     if showlegend:    
@@ -2691,8 +2697,12 @@ def deform_poscar(poscar_data, deformation):
 def view_poscar(poscar_data, **kwargs):
     "View a POSCAR in a jupyter notebook. kwargs are passed to splot_lattice. After setting a view, you can do view.f(**view.kwargs) to get same plot in a cell."
 
-    def view(elev=30, azim=30, roll=0):
+    def view(elev, azim, roll):
         ax = splot_lattice(poscar_data, **kwargs)
         ax.view_init(elev=elev, azim=azim, roll=roll)
+    
+    elev = IntSlider(description='elev', min=0,max=180,value=30, continuous_update=False)
+    azim = IntSlider(description='azim', min=0,max=360,value=30, continuous_update=False)
+    roll = IntSlider(description='roll', min=0,max=360,value=0, continuous_update=False)
 
-    return interactive(view, elev=(0, 180), azim=(0, 360), roll=(0, 360))
+    return interactive(view, elev=elev, azim=azim, roll=roll)

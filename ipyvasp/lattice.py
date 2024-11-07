@@ -75,7 +75,7 @@ def download_structure(
 def ngl_viewer(
     poscar,
     colors=None,
-    sizes=None,
+    sizes=0.5,
     plot_cell=True,
     linewidth=0.05,
     color=[0, 0, 0.2],
@@ -91,13 +91,12 @@ def ngl_viewer(
     Parameters
     ----------
     poscar : ipyvasp.POSCAR
-    colors : list or str
-        List of colors for each atom type. If str, use sames colors for all.
+    sizes : float or dict of type -> float
+        Size of sites. Either one int/float or a mapping like {'Ga': 2, ...}.
+    colors : color or sheme name or dict of type -> color
+        Mapping of colors like {'Ga': 'red, ...} or a single color. Automatically generated color for missing types.
         If `colors = 'element'`, then element colors from `nglview` will be used.
         You can use `nglview.color.COLOR_SCHEME` to see available color schemes to use.
-        If colors is None, then default colors from ipyvasp will be used that are same in `[i,s]plot_lattice`.
-    sizes : list
-        List of sizes for each atom type.
     plot_cell : bool
         Plot unit cell. Default True.
     linewidth : float
@@ -139,26 +138,10 @@ def ngl_viewer(
         data=plat._fix_sites(poscar.data, eqv_sites=True if plot_cell else False, origin=origin)
     )
 
-    _types = list(poscar.data.types.keys())
-    _sizes = [0.5 for _ in _types]
-    _colors = [mcolors.to_hex(plat._atom_colors[e]) for e in _types]
-
-    if sizes:
-        if len(sizes) != len(_types):
-            raise ValueError(
-                "sizes must have the same length as the number of atom types."
-            )
-        _sizes = sizes
-
-    if colors:
-        if isinstance(colors, str):
-            _colors = [colors for _ in _types]  # All same color, may be 'element'
-        else:
-            if len(colors) != len(_types):
-                raise ValueError(
-                    "colors must have the same length as the number of atom types."
-                )
-            _colors = [mcolors.to_hex(c) for c in colors]
+    _types = poscar.data.types.to_dict()
+    _fcs = plat._fix_color_size(_types,colors,sizes,0.5, backend='ngl')
+    _sizes = [v['size'] for v in _fcs.values()]
+    _colors = [v['color'] for v in _fcs.values()]
 
     view = nv.NGLWidget(
         nv.ASEStructure(poscar.to_ase()),
@@ -199,7 +182,7 @@ def ngl_viewer(
 
 
 def weas_viewer(poscar,
-    sizes=None,
+    sizes=1,
     colors=None,
     bond_length=None,
     model_style = 1,
@@ -207,9 +190,11 @@ def weas_viewer(poscar,
     origin = (0,0,0)
     ):
     """
-    colors : list or str
-        List of colors for each atom type. If str, use 'VESTA','JMOL','CPK'.
-        By default, ipyvasp colors are used.
+    sizes : float or dict of type -> float
+        Size of sites. Either one int/float or a mapping like {'Ga': 2, ...}.
+    colors : color, color scheme or dict of type -> color
+        Mapping of colors like {'Ga': 'red, ...} or a single color. Automatically generated color for missing types.
+        You can use color schemes as 'VESTA','JMOL','CPK'.
     sizes : list
         List of sizes for each atom type.
     model_type: int
@@ -236,8 +221,7 @@ def weas_viewer(poscar,
     w = WeasWidget(from_ase=poscar.to_ase())
     w.avr.show_bonded_atoms = False if plot_cell else True # plot_cell fix atoms itself
     w.avr.model_style = model_style
-    w.avr.show_cell = plot_cell  
-              
+    w.avr.show_cell = plot_cell         
 
     if bond_length:
         if isinstance(bond_length,(int,float)):
@@ -247,40 +231,30 @@ def weas_viewer(poscar,
         elif isinstance(bond_length, dict):
             for key, value in bond_length.items():
                 w.avr.bond.settings[key].update({'max': value})
-
-    if sizes is not None:
-        if not isinstance(sizes, (list,tuple)) or len(sizes) != len(poscar.data.types):
-            raise ValueError(f"sizes should be list/tuple of same sizes as atom types = {len(poscar.data.types)}.")
-        for key, value in zip(poscar.data.types,sizes):
-            w.avr.species.settings[key].update({"radius": value})
     
-    if colors is None:
-        colors = [plat._atom_colors[key] for key in poscar.data.types]
+    _fcs = plat._fix_color_size(poscar.data.types.to_dict(), colors, sizes, 1)
 
-    if isinstance(colors, str):
-        if not colors in ['VESTA','JMOL','CPK']:
-            raise ValueError("colors should be one of ['VESTA','JMOL','CPK'] if given as string!")
-        
+    for key, value in _fcs.items():
+        w.avr.species.settings[key].update({"radius": value["size"]})
+
+    if isinstance(colors, str) and colors in ['VESTA','JMOL','CPK']:
         w.avr.color_type = colors
-
-    if not isinstance(colors, str):
-        if not isinstance(colors, (list,tuple)) or len(colors) != len(poscar.data.types):
-            raise ValueError(f"colors should be list/tuple of same sizes as atom types = {len(poscar.data.types)}.")
-
-        colors = {key: value for key, value in zip(poscar.data.types,colors)}
+    else:
+        colors = {key: value["color"] for key, value in _fcs.items()}
         for key,value in colors.items():
             w.avr.species.settings[key].update({"color": value})
         for (k1,c1), (k2,c2) in permutations(colors.items(),2):
             with suppress(KeyError):
                 w.avr.bond.settings[f'{k1}-{k2}'].update({'color1':c1,'color2':c2})
-                
+    
     return w
 
 
 class POSCAR:
     _cb_instance = {}  # Loads last clipboard data if not changed
     _mp_instance = {}  # Loads last mp data if not changed
-    _update_kws = {}  # kwargs to pass to auto update figurewidget
+    _plotly_kws = {}  # kwargs to pass to auto update figurewidget
+    _weas_kws = {}
 
     def __init__(self, path=None, content=None, data=None):
         """
@@ -370,6 +344,7 @@ class POSCAR:
     @_sub_doc(weas_viewer)
     @_sig_kwargs(weas_viewer, ("poscar",))
     def view_weas(self, **kwargs):
+        self.__class__._weas_kws = kwargs  # attach to class, not self
         return weas_viewer(self, **kwargs)
     
 
@@ -381,17 +356,13 @@ class POSCAR:
 
     @_sub_doc(plat.iplot_lattice)
     @_sig_kwargs(plat.iplot_lattice, ("poscar_data",))
-    def view_widget(self, **kwargs):
-        self.__class__._update_kws = kwargs  # attach to class, not self
+    def view_plotly(self, **kwargs):
+        self.__class__._plotly_kws = kwargs  # attach to class, not self
         return iplot2widget(self.iplot_lattice(**kwargs))
 
-    @_sig_kwargs(plat.iplot_lattice, ("poscar_data",))
-    def update_widget(self, handle, **kwargs):
-        """Update widget (if shown in notebook) after some operation on POSCAR with `handle` returned by `view_widget`
-        kwargs are passed to `self.iplot_lattice` method.
-        """
-        kwargs = {**self.__class__._update_kws, **kwargs}
-        iplot2widget(self.iplot_lattice(**kwargs), fig_widget=handle)
+    def update_plotly(self, handle):
+        "Update plotly widget (already shown in notebook) after some operation on POSCAR with `handle` returned by `view_plotly`."
+        iplot2widget(self.iplot_lattice(**self._plotly_kws), fig_widget=handle)
 
     @classmethod
     def from_file(cls, path):
@@ -535,11 +506,9 @@ class POSCAR:
 
 
     def update_weas(self, handle):
-        """Send result of any operation to view on opened weas widget handle with default parameters becuase any operations 
-        can be incompatible with presious state of POSCAR. VESTA color scheme is used here.
+        """Send result of any operation to view on opened weas widget handle.
         Useful in Jupyterlab side panel to look operations results on POSCAR."""
-        handle.from_ase(self.to_ase())
-        handle.avr.color_type = 'VESTA'
+        handle.children = weas_viewer(self, **self._weas_kws).children # does not work properly otherwise
 
     @property
     def data(self):
