@@ -422,7 +422,9 @@ class PoscarData(Dict2Data):
     
 
     def get_bond_data(self, site_indices, k = 5):
-        "Returns a DataFrame with bonds angle, bond length, vector positions etc. that can be used for plotting."
+        """Returns a DataFrame with bonds angle, bond length, vector positions etc. that can be used for plotting.
+        t_a and t_b are translation vectors to get them near selected sites. You can use `POSCAR.translate` if somehow need nearest coordinates.
+        """
         if k < 3:
             raise ValueError("k >= 3 is required!")
     
@@ -434,16 +436,18 @@ class PoscarData(Dict2Data):
             for j in js:
                 bs = np.array([self.to_cartesian(self.positions[j] + p) for p in product([-1,0,1],[-1,0,1],[-1,0,1])])
                 ds = np.array([np.linalg.norm(a-b) for b in bs])
-                nears.append((j, bs[ds.argsort()][0]))
+                b = bs[ds.argsort()][0]
+                t = tuple((self.to_fractional(b) - self.positions[j]).astype(int)) # keep track of translation vector
+                nears.append((j, b, t))
             
-            for (m,b),(n, c) in combinations(nears,2):
-                v1, v2 = b-a, c-a
+            for (m,b,t1),(n, c,t2) in combinations(nears,2):
+                v1, v2 = b - a, c - a
                 n1, n2 = np.linalg.norm(v1), np.linalg.norm(v2)
                 name = '-'.join(self.symbols[[m,i,n]])
                 angle = np.degrees(np.arccos(v1.dot(v2)/(n1*n2)))
-                out.append([name, m,i,n, angle, n1, n2, *b, *a,  *c])
+                out.append([name, m,i,n, angle, n1, n2, t1,t2])
                 
-        columns = 'bond a o b angle d_ao d_bo ax ay az ox oy oz bx by bz'.split()
+        columns = 'bond a o b angle d_ao d_bo t_a t_b'.split()
         return DataFrame(out, columns=columns)
     
     def to_fractional(self, coords):

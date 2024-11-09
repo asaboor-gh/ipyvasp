@@ -293,7 +293,7 @@ class _AutoRenderer:
         return self._kws.copy() # avoid messing original
     
     def __repr__(self):
-        return f"AutoRenderer({self._kws})"
+        return f"AutoRenderer(params = {self._kws})"
 
 class POSCAR:
     _cb_instance = {}  # Loads last clipboard data if not changed
