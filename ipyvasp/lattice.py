@@ -85,6 +85,7 @@ def ngl_viewer(
     plot_vectors=True,
     dashboard=False,
     origin=(0, 0, 0),
+    eqv_sites = True,
 ):
     """Display structure in Jupyter notebook using nglview.
 
@@ -135,7 +136,7 @@ def ngl_viewer(
 
     # Only show equivalent sites if plotting cell, only shift origin otherwise
     poscar = POSCAR(  # don't change instance itself, make new one
-        data=plat._fix_sites(poscar.data, eqv_sites=True if plot_cell else False, origin=origin)
+        data=plat._fix_sites(poscar.data, eqv_sites=eqv_sites, origin=origin)
     )
 
     _types = poscar.data.types.to_dict()
@@ -187,7 +188,8 @@ def weas_viewer(poscar,
     bond_length=None,
     model_style = 1,
     plot_cell=True,
-    origin = (0,0,0)
+    origin = (0,0,0),
+    eqv_sites = True,
     ):
     """
     sizes : float or dict of type -> float
@@ -215,7 +217,7 @@ def weas_viewer(poscar,
     
     # Only show equivalent sites if plotting cell, only shift origin otherwise
     poscar = POSCAR(  # don't change instance itself, make new one
-        data=plat._fix_sites(poscar.data, eqv_sites=True if plot_cell else False, origin=origin)
+        data=plat._fix_sites(poscar.data, eqv_sites=eqv_sites, origin=origin)
     )
 
     w = WeasWidget(from_ase=poscar.to_ase())
@@ -565,6 +567,11 @@ class POSCAR:
     def data(self):
         "Data object in POSCAR."
         return self._data
+    
+    @property
+    def metadata(self):
+        "Metadata associated with this POSCAR."
+        return self._data.metadata
 
     def copy(self):
         "Copy POSCAR object. It avoids accidental changes to numpy arrays in original object."
@@ -674,8 +681,8 @@ class POSCAR:
     
     @_sub_doc(plat.filter_sites)
     @_sig_kwargs(plat.filter_sites,("poscar_data",))
-    def filter_sites(self, func):
-        return self.__class__(data = plat.filter_sites(self.data, func))
+    def filter_sites(self, func, tol=0.01):
+        return self.__class__(data = plat.filter_sites(self.data, func,tol=tol))
 
     @_sub_doc(plat.set_origin)
     def set_origin(self, origin):

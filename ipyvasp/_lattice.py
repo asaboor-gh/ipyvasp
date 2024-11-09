@@ -1447,9 +1447,9 @@ def _fix_sites(
         pos = pos + (txyz - txyz.astype(int))
 
     # Fix coordinates of sites distributed on edges and faces
-    pos -= (pos > (1 - tol)).astype(
-        int
-    )  # Move towards orign for common fixing like in joining POSCARs
+    if not hasattr(poscar_data.metadata, 'source_indices'): # no more fixing over there
+        pos -= (pos > (1 - tol)).astype(int)  # Move towards orign for common fixing like in joining POSCARs
+    
     out_dict["positions"] = pos
     out_dict["metadata"]["comment"] = "Modified by ipyvasp"
 
@@ -1460,45 +1460,14 @@ def _fix_sites(
             vpos = pos[v]
             vlabs = labels[v]
             inds = np.array(v)
-            cond_ops = [
-                (
-                    ((vpos[:, 0] + 1) < (tol + 1)),
-                    [[1, 0, 0]],
-                ),  # Add 1 to x if within tol
-                (
-                    ((vpos[:, 1] + 1) < (tol + 1)),
-                    [[0, 1, 0]],
-                ),  # Add 1 to y on modified and if within tol
-                (
-                    ((vpos[:, 2] + 1) < (tol + 1)),
-                    [[0, 0, 1]],
-                ),  # Add 1 to z and if within tol
-                (
-                    ((vpos[:, 0:2] + 1) < (tol + 1)).all(axis=1),
-                    [[1, 1, 0]],
-                ),  # Add 1 to x and y if within tol
-                (
-                    ((vpos[:, 1:3] + 1) < (tol + 1)).all(axis=1),
-                    [[0, 1, 1]],
-                ),  # Add 1 to y and z if within tol
-                (
-                    ((vpos[:, [0, 2]] + 1) < (tol + 1)).all(axis=1),
-                    [[1, 0, 1]],
-                ),  # Add 1 to x and z if within tol
-                (
-                    ((vpos + 1) < (tol + 1)).all(axis=1),
-                    [[1, 1, 1]],
-                ),  # Add 1 to all if within tol
-            ]
-            spos = [vpos[c] + op for c, op in cond_ops]
-            slab = [vlabs[c] for c, op in cond_ops]
-            sinds = [inds[c] for c, op in cond_ops]
 
-            new_dict[k] = {
-                "pos": np.vstack([vpos, *spos]),
-                "lab": np.hstack([vlabs, *slab]),
-                "inds": np.hstack([inds, *sinds]),
-            }
+            ivpos = np.concatenate([np.indices((len(vpos),)).reshape((-1,1)),vpos],axis=1) # track of indices
+            ivpos = np.array([ivpos + [0, *p] for p in set(product([-1,0,1],[-1,0,1],[-1,0,1]))]).reshape((-1,4))
+            ivpos = ivpos[(ivpos[:,1:] > -tol).all(axis=1) & (ivpos[:,1:] < 1 + tol).all(axis=1)]
+            ivpos = ivpos[ivpos[:,0].argsort()]
+            idxs = ivpos[:,0].ravel().astype(int).tolist()
+
+            new_dict[k] = {"pos": ivpos[:,1:], "lab": vlabs[idxs], "inds": inds[idxs]}
             new_dict[k]["range"] = range(start, start + len(new_dict[k]["pos"]))
             start += len(new_dict[k]["pos"])
 
@@ -1622,41 +1591,35 @@ def _filter_pairs(labels, pairs, dist, bond_length):
     # Return all pairs otherwise
     return pairs  # None -> auto calculate bond_length, number -> use that number
 
-
 def filter_sites(poscar_data, func, tol = 0.01):
     """Filter sites based on a function that acts on index and fractional positions such as `lambda i,x,y,z: condition`. 
-    This may include equivalent sites, so it should be used for plotting purpose only, e.g. showing atoms on a plane."""
+    This may include equivalent sites, so it should be used for plotting purpose only, e.g. showing atoms on a plane.
+    An attribute `source_indices` is added to metadata which is useful to pick other things such as `OUTCAR.ion_pot[POSCAR.filter(...).data.metadata.source_indices]`. 
+    """
+    if hasattr(poscar_data.metadata, 'source_indices'):
+        raise ValueError("Cannot filter an already filtered POSCAR data.")
+    
+    poscar_data = _fix_sites(poscar_data, tol = tol, eqv_sites=True)
     idxs = _masked_data(poscar_data, func)
     data = poscar_data.to_dict() 
-    all_pos, npos = [], []
+    all_pos, npos, eqv_labs, finds = [], [0,],[],[]
     for value in poscar_data.types.values():
-        indices = [i for i in value if i in idxs]
-        others = [j for j in value if not (j in indices)]
+        indices = [i for i in value if i in idxs] # search from value make sure only non-equivalent sites added
+        finds.extend(poscar_data.metadata.eqv_indices[indices])
+        eqv_labs.extend(poscar_data.labels[indices])
         pos = data['positions'][indices]
-        qos = data['positions'][others] # need edge items to include
-
-        if qos.size:
-            qos = np.concatenate([[[i] for i in others], qos], axis=1) # need to keep index
-            qos = np.array([qos + [0, *p] for p in product([-1,0,1],[-1,0,1],[-1,0,1])]).reshape((-1,4)) # all possible translations
-            qos = qos[(qos[:,1:] < 1 + tol).all(axis=1) & (qos[:,1:] > -tol).all(axis=1)]# only in cell range
-            qos = qos[[func(*q) for q in qos]] # masked only those are true
-        
-        if qos.size:
-            pos = np.concatenate([pos, qos[:,1:]],axis=0)
-
         all_pos.append(pos)
         npos.append(len(pos))
     
     if not np.sum(npos):
         raise ValueError("No sites found with given filter func!")
     
-    if not 'prev_positions' in data['metadata']: # keep always the starting one
-        data['metadata']['prev_positions'] = poscar_data.positions 
-        data['metadata']['prev_types'] = poscar_data.types
-    
     data['positions'] = np.concatenate(all_pos, axis = 0)
+    data['metadata']['source_indices'] = np.array(finds)
+    data['metadata']['eqv_labels']  = np.array(eqv_labs) # need these for compare to previous
+    data['metadata'].pop('eqv_indices', None) # no need of this
 
-    ranges = np.cumsum([0, *npos])
+    ranges = np.cumsum(npos)
     data['types'] = {key: range(i,j) for key, i,j in zip(data['types'],ranges[:-1],ranges[1:]) if range(i,j)} # avoid empty
     return serializer.PoscarData(data)
 
