@@ -1640,6 +1640,7 @@ def iplot_lattice(
     bond_kws=dict(line_width=4),
     site_kws=dict(line_color="rgba(1,1,1,0)", line_width=0.001, opacity=1),
     plot_cell=True,
+    label_sites = False,
     **kwargs,
 ):
     """Plotly's interactive plot of lattice.
@@ -1728,6 +1729,7 @@ def iplot_lattice(
                 line_color=unqc[i],
                 legendgroup="Bonds",
                 showlegend=showlegend,
+                hoverinfo='skip',
                 name="Bonds",
                 **bond_kws,
             ))
@@ -1736,18 +1738,24 @@ def iplot_lattice(
         **dict(line_color="rgba(1,1,1,0)", line_width=0.001, opacity=1),
         **site_kws,
     }
+
+    eqv_idxs = getattr(poscar_data.metadata, 'eqv_indices',np.array(range(poscar_data.positions.shape[0])))
+
     for (k, v), c, s in zip(uelems.items(), colors, sizes):
         coords = poscar_data.coords[v]
         labs = poscar_data.labels[v]
+        idxs = eqv_idxs[v]
+        hovertext = [f"<br>{x:7.3f} {y:7.3f} {z:7.3f}<br>Index: {idx}  Label: {lab}" for lab,idx, (x,y,z) in zip(labs,idxs, poscar_data.positions[idxs])]
 
         fig.add_trace(
             go.Scatter3d(
                 x=coords[:, 0].T,
                 y=coords[:, 1].T,
                 z=coords[:, 2].T,
-                mode="markers",
+                mode="markers+text" if label_sites else "markers",
                 marker_color=c,
-                hovertext=labs,
+                hovertext=hovertext,
+                text=["{}<sub>{}</sub>".format(*l.split()) for l in labs] if label_sites else None,
                 marker_size=s,
                 name=k,
                 **site_kws,

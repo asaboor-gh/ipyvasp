@@ -338,7 +338,7 @@ class PoscarData(Dict2Data):
             raise TypeError("type_or_indices should be a species type like 'Ga' or list-like of indices to pick positions.")
         return points[type_or_indices]
 
-    def get_neighbors(self, k=5):
+    def get_neighbors(self, k=5, as_symbols=False):
         """Get the k nearest neighbors of each atom (including itself) in the lattice.
         Returns array (N, k) of indices of atoms. The first index is the atom itself.
 
@@ -362,7 +362,7 @@ class PoscarData(Dict2Data):
         tree = KDTree(cs)
         _, inn = tree.query(cs, k=k)
         output = (inn % N)[:N]  # to get the index of the atom in the original list
-        return output
+        return self.symbols[output] if as_symbols else output
 
     get_knn = get_neighbors  # important alias
 
@@ -445,7 +445,7 @@ class PoscarData(Dict2Data):
             for j in js:
                 bs = np.array([self.to_cartesian(self.positions[j] + p) for p in product([-1,0,1],[-1,0,1],[-1,0,1])])
                 ds = np.array([np.linalg.norm(a-b) for b in bs])
-                b = bs[ds.argsort()][0]
+                b = bs[ds.argsort()][0] # closest
                 t = tuple((self.to_fractional(b) - self.positions[j]).astype(int)) # keep track of translation vector
                 nears.append((j, b, t))
             
