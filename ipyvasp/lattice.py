@@ -256,18 +256,18 @@ class _AutoRenderer:
     _figw = None
     _kws = {} 
 
-    def __init__(self, pc_instance):
-        self._pc = pc_instance
+    def __init__(self, pc_cls):
+        self._pc = pc_cls
 
     def on(self, template=None):
         "Enable auto rendering. In Jupyterlab, you can use `Create New View for Output` to drag a view on side."
         self.off()
-        type(self)._figw = iplot2widget(self._pc.iplot_lattice(**self._kws), fig_widget=self._figw,template=template)
+        type(self)._figw = iplot2widget(self._pc._last.iplot_lattice(**self._kws), fig_widget=self._figw,template=template)
         
         def ip_display(that):
             iplot2widget(that.iplot_lattice(**self._kws), fig_widget=self._figw, template=template)
         
-        type(self._pc)._ipython_display_ = ip_display
+        self._pc._ipython_display_ = ip_display
         
         from ipywidgets import Button, VBox
         btn = Button(description='Disable Auto Rendering',icon='close',layout={'width': 'max-content'})
@@ -281,14 +281,14 @@ class _AutoRenderer:
             self._box.close()
             type(self)._figw = None # no need to close figw, it raise warning, but now garbage collected
         
-        if hasattr(type(self._pc), '_ipython_display_'):
-            del type(self._pc)._ipython_display_
+        if hasattr(self._pc, '_ipython_display_'):
+            del self._pc._ipython_display_
 
     @_sig_kwargs(plat.iplot_lattice,('poscar_data',))
     def update_params(self, **kwargs):
         type(self)._kws = kwargs
-        if hasattr(type(self._pc), '_ipython_display_'):
-            self._pc._ipython_display_()
+        if hasattr(self._pc, '_ipython_display_'):
+            self._pc._last._ipython_display_()
     
     @property
     def params(self):
@@ -304,7 +304,6 @@ class POSCAR:
     def __init__(self, path=None, content=None, data=None):
         """
         POSCAR class to contain data and related methods, data is PoscarData, json/tuple file/string.
-        Do not use `data` yourself, it's for operations on poscar.
 
         Parameters
         ----------
@@ -314,14 +313,20 @@ class POSCAR:
 
         Prefrence order: data > content > path
 
+        Note: During chained operations where functions are acting on index of sites, use `self.last` instead of `self` to point to latest POSCAR in chain.
+        
+        ```python
+        pc = POSCAR()
+        pc.filter_sites(lambda i,x,y,z: i in pc.data.types.Ga) # FINE
+        pc.set_boundary([-2,2]).filter_sites(lambda i,x,y,z: i in pc.data.types.Ga) # INCORRECT sites may be picked
+        pc.set_boundary([-2,2]).filter_sites(lambda i,x,y,z: i in pc.last.data.types.Ga) # PERFECT, pc.last is output of set_boundary
+        ```
+
         Tip: You can use `self.auto_renderer.on()` to keep doing opertions and visualize while last line of any cell is a POSCAR object.
         """
         self._path = Path(path or "POSCAR")  # Path to file
         self._content = content
-
-        if not hasattr(self, '_renderer'): # Only once
-            type(self)._renderer = _AutoRenderer(self) # assign to class
-        self._renderer._pc = self # keep latest refrence there too, for update_params on right one
+        self.__class__._last = self # need this to access in lambda in chain operations
 
         if data:
             self._data = serializer.PoscarData.validated(data)
@@ -348,6 +353,19 @@ class POSCAR:
         return self._path
     
     @property
+    def last(self):
+        """Points to last created POSCAR instance during chained operations!
+        
+        ```python
+        pc = POSCAR()
+        pc.filter_sites(lambda i,x,y,z: i in pc.data.types.Ga) # FINE
+        pc.set_boundary([-2,2]).filter_sites(lambda i,x,y,z: i in pc.data.types.Ga) # INCORRECT sites may be picked
+        pc.set_boundary([-2,2]).filter_sites(lambda i,x,y,z: i in pc.last.data.types.Ga) # PERFECT, pc.last is output set_boundary
+        ```
+        """
+        return self._last
+    
+    @property
     def auto_renderer(self):
         """A renderer for auto viewing POSCAR when at last line of cell.
 
@@ -358,6 +376,8 @@ class POSCAR:
         In Jupyterlab, you can use `Create New View for Output` to drag a view on side.
         In VS Code, you can open another view of Notebook to see it on side while doing operations.
         """
+        if not hasattr(self, '_renderer'):
+            self.__class__._renderer = _AutoRenderer(self.__class__) # assign to class
         return self._renderer
 
     def to_ase(self):
@@ -683,10 +703,6 @@ class POSCAR:
     @_sig_kwargs(plat.filter_sites,("poscar_data",))
     def filter_sites(self, func, tol=0.01):
         return self.__class__(data = plat.filter_sites(self.data, func,tol=tol))
-
-    @_sub_doc(plat.set_origin)
-    def set_origin(self, origin):
-        return self.__class__(data=plat.set_origin(self.data, origin=origin))
 
     @_sub_doc(plat.rotate_poscar)
     def rotate(self, angle_deg, axis_vec):

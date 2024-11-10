@@ -328,6 +328,15 @@ class PoscarData(Dict2Data):
     def symbols(self):
         "Returns the symbols of the atoms in the poscar data without numbers"
         return np.array([lab.split()[0] for lab in self.labels])
+    
+    def get_sites(self, type_or_indices, as_coords=False):
+        "Shortcut method for `POSCAR.data.positions[POSCAR.data.types['name']]` or with regular indexing."
+        points = self.coords if as_coords else self.positions
+        if isinstance(type_or_indices,str) and type_or_indices in self.types:
+            return points[self.types[type_or_indices]]
+        elif not isinstance(type_or_indices,(list,range,tuple)):
+            raise TypeError("type_or_indices should be a species type like 'Ga' or list-like of indices to pick positions.")
+        return points[type_or_indices]
 
     def get_neighbors(self, k=5):
         """Get the k nearest neighbors of each atom (including itself) in the lattice.
@@ -390,7 +399,7 @@ class PoscarData(Dict2Data):
 
         dists = []
         for idx in idx1:
-            for trans in set(product([-1,0,1],[-1,0,1],[-1,0,1])):
+            for trans in product([-1,0,1],[-1,0,1],[-1,0,1]):
                 C = self.to_cartesian(self.positions[idx] + trans) # translate around to get lowest distance
 
                 dists = [
@@ -412,7 +421,7 @@ class PoscarData(Dict2Data):
         for i in self.types[type1]:
             for j in [k for k in self.types[type2] if k != i]:
                 a = self.coords[i]
-                bs = [self.to_cartesian(self.positions[j] + p) for p in set(product([-1,0,1],[-1,0,1],[-1,0,1]))]
+                bs = [self.to_cartesian(self.positions[j] + p) for p in product([-1,0,1],[-1,0,1],[-1,0,1])]
                 ds = np.array([np.linalg.norm(a-b) for b in bs])
                 d = ds[ds > 0].min() # no same site distance
                 if min < d < max:

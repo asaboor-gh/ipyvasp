@@ -1440,21 +1440,21 @@ def _fix_sites(
     labels = np.array(poscar_data.labels)  # We need to store equivalent labels as well
     out_dict = poscar_data.to_dict()  # For output
 
-    if translate and isinstance(translate, (int, np.integer, float)):
+    if isinstance(translate, (int, np.integer, float)):
         pos = pos + (translate - int(translate))  # Only translate in 0 - 1
-    elif translate and len(translate) == 3:
+    elif isinstance(translate,(tuple, list, np.ndarray)) and len(translate) == 3:
         txyz = np.array([translate])
         pos = pos + (txyz - txyz.astype(int))
 
     # Fix coordinates of sites distributed on edges and faces
-    if not hasattr(poscar_data.metadata, 'source_indices'): # no more fixing over there
+    if getattr(poscar_data.metadata, 'eqv_fix', True): # no more fixing over there
         pos -= (pos > (1 - tol)).astype(int)  # Move towards orign for common fixing like in joining POSCARs
     
     out_dict["positions"] = pos
     out_dict["metadata"]["comment"] = "Modified by ipyvasp"
 
     # Add equivalent sites on edges and faces if given,handle each sepecies separately
-    if eqv_sites:
+    if eqv_sites and getattr(poscar_data.metadata, 'eqv_fix', True): 
         new_dict, start = {}, 0
         for k, v in out_dict["types"].items():
             vpos = pos[v]
@@ -1462,7 +1462,7 @@ def _fix_sites(
             inds = np.array(v)
 
             ivpos = np.concatenate([np.indices((len(vpos),)).reshape((-1,1)),vpos],axis=1) # track of indices
-            ivpos = np.array([ivpos + [0, *p] for p in set(product([-1,0,1],[-1,0,1],[-1,0,1]))]).reshape((-1,4))
+            ivpos = np.array([ivpos + [0, *p] for p in product([-1,0,1],[-1,0,1],[-1,0,1])]).reshape((-1,4))
             ivpos = ivpos[(ivpos[:,1:] > -tol).all(axis=1) & (ivpos[:,1:] < 1 + tol).all(axis=1)]
             ivpos = ivpos[ivpos[:,0].argsort()]
             idxs = ivpos[:,0].ravel().astype(int).tolist()
@@ -1563,9 +1563,7 @@ def _masked_data(poscar_data, func):
     if not isinstance(func(0, 0, 0, 0), bool):
         raise TypeError("`func` should return a boolean value.")
 
-    eqv_inds = None
-    if hasattr(poscar_data.metadata, "eqv_indices"):
-        eqv_inds = tuple(poscar_data.metadata.eqv_indices)
+    eqv_inds  = tuple(getattr(poscar_data.metadata, "eqv_indices",[]))
 
     pick = []
     for i, pos in enumerate(poscar_data.positions):
@@ -1595,6 +1593,8 @@ def filter_sites(poscar_data, func, tol = 0.01):
     """Filter sites based on a function that acts on index and fractional positions such as `lambda i,x,y,z: condition`. 
     This may include equivalent sites, so it should be used for plotting purpose only, e.g. showing atoms on a plane.
     An attribute `source_indices` is added to metadata which is useful to pick other things such as `OUTCAR.ion_pot[POSCAR.filter(...).data.metadata.source_indices]`. 
+
+    Note: If you are filtering a plane with more than one non-zero hkl like 110, you may first need to translate or set boundary on POSCAR to bring desired plane in full view to include all atoms.
     """
     if hasattr(poscar_data.metadata, 'source_indices'):
         raise ValueError("Cannot filter an already filtered POSCAR data.")
@@ -1602,10 +1602,12 @@ def filter_sites(poscar_data, func, tol = 0.01):
     poscar_data = _fix_sites(poscar_data, tol = tol, eqv_sites=True)
     idxs = _masked_data(poscar_data, func)
     data = poscar_data.to_dict() 
+    eqvi = data['metadata'].pop('eqv_indices', []) # no need of this
+    
     all_pos, npos, eqv_labs, finds = [], [0,],[],[]
     for value in poscar_data.types.values():
         indices = [i for i in value if i in idxs] # search from value make sure only non-equivalent sites added
-        finds.extend(poscar_data.metadata.eqv_indices[indices])
+        finds.extend(eqvi[indices] if len(eqvi) else indices)
         eqv_labs.extend(poscar_data.labels[indices])
         pos = data['positions'][indices]
         all_pos.append(pos)
@@ -1616,8 +1618,8 @@ def filter_sites(poscar_data, func, tol = 0.01):
     
     data['positions'] = np.concatenate(all_pos, axis = 0)
     data['metadata']['source_indices'] = np.array(finds)
+    data['metadata']['eqv_fix'] = False
     data['metadata']['eqv_labels']  = np.array(eqv_labs) # need these for compare to previous
-    data['metadata'].pop('eqv_indices', None) # no need of this
 
     ranges = np.cumsum(npos)
     data['types'] = {key: range(i,j) for key, i,j in zip(data['types'],ranges[:-1],ranges[1:]) if range(i,j)} # avoid empty
@@ -2204,7 +2206,7 @@ def scale_poscar(poscar_data, scale=(1, 1, 1), tol=1e-2):
     return serializer.PoscarData(new_poscar)
 
 def set_boundary(poscar_data, a = [0,1], b = [0,1], c = [0,1]):
-    "View atoms outside cell boundary along a,b,c directions."
+    "View atoms in a given boundary along a,b,c directions."
     for d, name in zip([a,b,c],'abc'):
         if not isinstance(d,(list,tuple)) or len(d) != 2:
             raise ValueError(f"{name} should be a list/tuple of type [min, max]")
@@ -2216,17 +2218,13 @@ def set_boundary(poscar_data, a = [0,1], b = [0,1], c = [0,1]):
     for key, value in poscar_data.types.items():
         pos = data['positions'][value]
         for i, (l,h), shift in zip(range(3), [a,b,c],np.eye(3)):
-            while pos[:,i].min() > np.floor(l):
-                pos = np.concatenate([pos, pos - shift],axis=0)
-            
-            while pos[:,i].max() < np.ceil(h):
-                pos = np.concatenate([pos, pos + shift],axis=0)
-
+            pos = np.concatenate([pos + shift*k for k in np.arange(np.floor(l), np.ceil(h))],axis=0)
             pos = pos[(pos[:,i] >= l) & (pos[:,i] <= h)]
         
         upos[key] = pos
     
     data['positions'] = np.concatenate(list(upos.values()), axis = 0)
+    data['metadata']['eqv_fix'] = False
 
     ranges = np.cumsum([0, *[len(v) for v in upos.values()]])
     data['types'] = {key: range(i,j) for key, i,j in zip(upos,ranges[:-1],ranges[1:])}
@@ -2255,20 +2253,6 @@ def rotate_poscar(poscar_data, angle_deg, axis_vec):
     )  # Rotate basis so that they are transpose
     p_dict["metadata"]["comment"] = f"Modified by ipyvasp"
     return serializer.PoscarData(p_dict)
-
-
-def set_origin(poscar_data, origin):
-    """Set origin of POSCAR sites to a given position in fractional coordinates.
-    The following example demonstrates the use of this function.
-
-    >>> import ipyvasp as ipv
-    >>> poscar = ipv.POSCAR("POSCAR")
-    >>> ax = poscar.splot_cell() # plot original cell
-    >>> poscar_shifted = poscar.scale((3,3,3)).set_origin((1/3,1/3,1/3))
-    >>> poscar_shifted.splot_lattice(ax=ax, plot_cell=False) # displays sites around original cell
-    """
-    return _fix_sites(poscar_data, eqv_sites=False, origin=origin)
-
 
 def set_zdir(poscar_data, hkl, phi=0):
     """Set z-direction of POSCAR along a given hkl direction and returns new data.
@@ -2401,7 +2385,7 @@ def transform_poscar(poscar_data, transformation, fill_factor=2, tol=1e-2):
 
     _p = range(-fill_factor, fill_factor + 1)
     pos = np.concatenate([poscar_data.positions,[[i] for i,_ in enumerate(poscar_data.positions)]], axis=1) # keep track of index
-    pos = np.concatenate([pos + [*p,0] for p in set(product(_p,_p,_p))],axis=0) # increaser by fill_factor^3
+    pos = np.concatenate([pos + [*p,0] for p in product(_p,_p,_p)],axis=0) # increaser by fill_factor^3
     pos[:,:3] = to_basis(new_basis, poscar_data.to_cartesian(pos[:,:3])) # convert to coords in this and to points in new
     pos = pos[(pos[:,:3] <= 1 - tol).all(axis=1) & (pos[:,:3] >= -tol).all(axis=1)]
     pos = pos[pos[:,-1].argsort()] # sort for species
