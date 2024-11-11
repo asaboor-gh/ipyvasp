@@ -11,7 +11,8 @@ from scipy.spatial import ConvexHull, KDTree
 import plotly.graph_objects as go
 
 import matplotlib.pyplot as plt  # For viewpoint
-from matplotlib.collections import LineCollection
+from matplotlib.collections import LineCollection, PatchCollection
+from matplotlib.patches import Rectangle
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import matplotlib.colors as mplc
 
@@ -171,17 +172,25 @@ def atoms_color():
     )
 
 
-def periodic_table():
-    "Display colorerd elements in periodic table."
+def periodic_table(selection=None):
+    "Display colorerd elements in periodic table. Use a list of atoms to only color a selection."
     _copy_names = np.array(
         [f"$^{{{str(i+1)}}}${k}" for i, k in enumerate(_atom_colors.keys())]
     )
-    _copy_array = np.array(list(_atom_colors.values()))
+    blank = []
+    if isinstance(selection,(list, tuple, str)):
+        if isinstance(selection, str):
+            selection = selection.split()
+        blank = [key for key in _atom_colors if not (key in selection)]   
 
-    array = np.ones((180, 3))
+    _copy_array = np.array([[1,1,1,0] if key in blank else [*value,1]  for key, value in _atom_colors.items()])
+
     names = ["" for i in range(180)]  # keep as list before modification
+    fc = np.ones((180, 4))
+    ec = np.zeros((180,3)) + (0.4 if blank else 0.9 )
+    offsets = np.array([[(i,j) for i in range(18)] for j in range(10)]).reshape((-1,2)) - 0.5
 
-    inds = [
+    inds = np.array([
         (0, 0),
         (17, 1),
         (18, 2),
@@ -196,23 +205,28 @@ def periodic_table():
         *[(111 + i, 103 + i) for i in range(15)],
         *[(147 + i, 57 + i) for i in range(14)],
         *[(165 + i, 89 + i) for i in range(14)],
-    ]
+    ], dtype=int)
 
     for i, j in inds:
-        array[i] = _copy_array[j]
+        fc[i,:] = _copy_array[j]
         names[i] = _copy_names[j]
 
-    array = np.reshape(array, (10, 18, 3))
-    names = np.reshape(names, (10, 18))
-    ax = ptk.get_axes((8, 4.5))
-    ax.imshow(array)
+    fidx = [i for i, _ in inds] # only plot at elements posistions,otherwise they overlap
+    offsets = offsets[fidx]
+    fc, ec = fc[fidx], ec[fidx]
+    names = np.array(names)[fidx]
+    
+    ax = ptk.get_axes((7, 3.9),left=0.01,right=0.99,top=0.99,bottom=0.01)
+    patches = np.array([Rectangle(offset,0.9 if i in [92,110] else 1,1) for i, offset in zip(fidx,offsets)])
+    pc = PatchCollection(patches, facecolors=fc, edgecolors=ec,linewidths=(0.7,))
+    ax.add_collection(pc)
+    
+    for (x,y), text, c in zip(offsets + 0.5, names, fc):
+        c = "k" if np.linalg.norm(c[:3]) > 1 else "w"
+        plt.text(x,y, text, color=c, ha="center", va="center")
 
-    for i in range(18):
-        for j in range(10):
-            c = "k" if np.linalg.norm(array[j, i]) > 1 else "w"
-            plt.text(i, j, names[j, i], color=c, ha="center", va="center")
     ax.set_axis_off()
-    plt.tight_layout(pad=0.5)
+    ax.set(xlim=[-0.6,17.6],ylim=[9.6,-0.6]) # to show borders correctly
     return ax
 
 
