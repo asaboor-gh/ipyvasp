@@ -1019,7 +1019,7 @@ def iplot2widget(fig, fig_widget=None, template=None):
     elif not isinstance(fig_widget, go.FigureWidget):
         raise ValueError("fig_widget must be FigureWidget")
     else:
-        scene = fig_widget.layout.scene # keep scene from widget
+        scene = fig_widget.layout.scene if fig_widget.data else fig.layout.scene# keep scene from widget, but if looks a new fig, keep from previous
 
     fig_widget.data = []  # Clear previous data
     if template is not None:

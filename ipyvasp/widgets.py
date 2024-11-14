@@ -159,6 +159,10 @@ class Files:
     def __len__(self): return len(self._files)
     def __bool__(self): return bool(self._files)
 
+    def map(self,func):
+        "Map files to a function!"
+        return map(func, self._files)
+
     def with_name(self, name):
         "Change name of all files. Only keeps existing files."
         return self.__class__([f.with_name(name) for f in self._files])
@@ -204,19 +208,28 @@ class Files:
             if old in dd.options:
                 dd.value = old
     
-    def interactive(self, func,
-        other_widgets=None,
-        other_controls=None,
+    def interactive(self, func, *args,
+        free_widgets=None,
         options={"manual": False},
         height="400px",
+        panel_size = 25,
         **kwargs):
         """
-        Interact with a function that takes selected Path as first argument. Returns a widget that saves attributes of the function call such as .f, .args, .kwargs.
+        Interact with `func(path, *args, <free_widgets,optional>, **kwargs)` that takes selected Path as first argument. Returns a widget that saves attributes of the function call such as .f, .args, .kwargs.
+        `args` are widgets to be modified by func, such as plotly's FigureWidget.
+        Note that `free_widgets` can also be passed to function but does not run function when changed.
+
         See docs of self.interact for more details on the parameters. kwargs are passed to ipywidgets.interactive to create controls.
 
+        >>> import plotly.graph_objects as go
+        >>> import ipyvasp as ipv
+        >>> fs = ipv.Files('.','**/POSCAR')
+        >>> def plot(path, fig, bl,plot_cell,eqv_sites):
+        >>>     ipv.iplot2widget(ipv.POSCAR(path).iplot_lattice(
+        >>>         bond_length=bl,plot_cell=plot_cell,eqv_sites=eqv_sites
+        >>>      ),fig_widget=fig) # it keeps updating same view
+        >>> out = fs.interactive(plot, go.FigureWidget(),bl=(0,6,2),plot_cell=True, eqv_sites=True)
 
-        >>> fls = Files()
-        >>> out = fls.interactive(lambda path: print(path.read_text())) # prints contents of selected file on output widget
         >>> out.f # function
         >>> out.args # arguments
         >>> out.kwargs # keyword arguments
@@ -228,13 +241,16 @@ class Files:
         info = ipw.HTML().add_class("fprogess")
         dd = Dropdown(description='File', options=self._files)
 
-        def interact_func(fname, **kwargs):
+        def interact_func(fname, **kws):
             if fname:  # This would be None if no file is selected
                 info.value = _progress_svg
                 try:
                     start = time()
-                    print(f"Running {func.__name__}({fname!r}, {kwargs})")  
-                    func(Path(fname).absolute(), **kwargs)  # Have Path object absolue if user changes directory
+                    if 'free_widgets' in func.__code__.co_varnames:
+                        kws['free_widgets'] = free_widgets # user allowed to pass this
+                    names = ', '.join(func.__code__.co_varnames)
+                    print(f"Running {func.__name__}({names})")  
+                    func(Path(fname).absolute(), *args, **kws)  # Have Path object absolue if user changes directory
                     print(f"Finished in {time() - start:.3f} seconds.")
                 finally:
                     info.value = ""
@@ -253,38 +269,45 @@ class Files:
         )  # make output scrollable and avoid overflow
 
         others = out.children[1:-1]  # exclude files_dd and Output widget
-        _style = """<style>
-        .files-interact {
+        if not isinstance(panel_size,int):
+            raise TypeError('panel_size should be integer in units of em')
+        
+        _style = f"""<style>
+        .files-interact {{
             --jp-widgets-inline-label-width: 4em;
-            --jp-widgets-inline-width: 18em;
+            --jp-widgets-inline-width: {panel_size-2}em;
             --jp-widgets-inline-width-short: 9em;
-        }
-        .files-interact {max-height:90vh;width:100%;}
-        .files-interact > div {overflow:auto;max-height:100%;padding:8px;}
-        .files-interact > div:first-child {width:20em}
-        .files-interact > div:last-child {width:calc(100% - 20em)}
-        .files-interact .fprogess {position:absolute !important; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1}
+        }}
+        .files-interact {{max-height:{height};width:100%;}}
+        .files-interact > div {{overflow:auto;max-height:100%;padding:8px;}}
+        .files-interact > div:first-child {{width:{panel_size}em}}
+        .files-interact > div:last-child {{width:calc(100% - {panel_size}em)}}
+        .files-interact .fprogess {{position:absolute !important; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1}}
         </style>"""
         if others:
             others = [ipw.HTML(f"<hr/>{_style}"), *others]
         else:
             others = [ipw.HTML(_style)]
 
-        if other_controls and not isinstance(other_controls, (list, tuple)):
-            raise TypeError("other_controls must be a list or tuple of widgets.")
-
-        if other_widgets and not isinstance(other_widgets, (list, tuple)):
-            raise TypeError("other_widgets must be a list or tuple of widgets.")
-
-        if other_widgets:
+        if free_widgets and not isinstance(free_widgets, (list, tuple)):
+            raise TypeError("free_widgets must be a list or tuple of widgets.")
+        
+        for w in args:
+            if not isinstance(w,ipw.DOMWidget):
+                raise TypeError(f'args can only contain a DOMWidget instance, got {type(w)}')
+        
+        if args:
             output.layout.max_height = "200px"
+            output.layout.min_height = "8em" # fisrt fix
             out_collapser = Checkbox(description="Hide output widget", value=False)
 
             def toggle_output(change):
                 if out_collapser.value:
                     output.layout.height = "0px"  # dont use display = 'none' as it will clear widgets and wont show again
+                    output.layout.min_height = "0px"
                 else:
                     output.layout.height = "auto"
+                    output.layout.min_height = "8em"
 
             out_collapser.observe(toggle_output, "value")
             others.append(out_collapser)
@@ -293,7 +316,7 @@ class Files:
         others = [
             *others,
             ipw.HTML(f"<hr/>"),
-            *(other_controls or []),
+            *(free_widgets or []),
         ]  # add hr to separate other controls
 
         out.children = [
@@ -303,7 +326,7 @@ class Files:
                         children=[dd, VBox(others)]
                     ),  # other widgets in box to make scrollable independent file selection
                     VBox(
-                        children=[Box([output]), *(other_widgets or []), info]
+                        children=[output, *args, info]
                     ),  # output in box to make scrollable,
                 ],
                 layout=Layout(height=height, max_height=height),
@@ -317,61 +340,64 @@ class Files:
         box.children = box._interact.children
         box._files._dd = box._interact._dd
     
-    def interact(self,
-        other_widgets=None,
-        other_controls=None,
+    def interact(self, *args,
+        free_widgets=None,
         options={"manual": False},
         height="400px",
+        panel_size=25,
         **kwargs,
     ):
-        """Interact with a function that takes a selected Path as first argument.
+        """Interact with a `func(path, *args, <free_widgets,optional>, **kwargs)`. `path` is passed from selected File.
         A CSS class 'files-interact' is added to the final widget to let you style it.
 
         Parameters
         ----------
-        other_widgets : list/tuple
+        args : 
             Any displayable widget can be passed. These are placed below the output widget of interact.
-            For example you can add plotly's FigureWidget that updates based on the selection, but is not part of the function, so it is displayed only once.
-        other_controls : list/tuple
-            Default is None. If not None, these are assumed to be ipywidgets and are placed below the widgets created by kwargs. These are not passed to the decorated function.
+            For example you can add plotly's FigureWidget that updates based on the selection, these are passed to function after path.
+        free_widgets : list/tuple
+            Default is None. If not None, these are assumed to be ipywidgets and are placed below the widgets created by kwargs. 
+            These can be passed to the decorated function if added as arguemnt there like `func(..., free_widgets)`, but don't trigger execution.
         options : dict
-            Default is {'manua':False}. If True, the decorated function is not called automatically, and you have to call it manually on button press. You can pass button name as 'manual_name' in options.
+            Default is {'manual':False}. If True, the decorated function is not called automatically, and you have to call it manually on button press. You can pass button name as 'manual_name' in options.
         height : str
             Default is '90vh'. height of the final widget. This is important to avoid very long widgets.
+        panel_size: int
+            Side panel size in units of em.
 
         kwargs are passed to ipywidgets.interactive and decorated function. Resulting widgets are placed below the file selection widget.
-        `other_widgets` can be controlled by `other_controls` externally. For example, you can add a button to update a plotly's FigureWidget.
+        Widgets in `args` can be controlled by `free_widgets` externally if defined gloablly or inside function if you pass `free_widgets` as argument like `func(..., free_widgets)`.
 
         The decorated function can be called later separately as well, and has .args and .kwargs attributes to access the latest arguments
         and .result method to access latest. For a function `f`, `f.result` is same as `f(*f.args, **f.kwargs)`.
 
-
-        >>> fls = Files()
-        >>> @fls.interact(x = False)
-        >>> def f(path,x):
-        >>>     print('path:',path)
-        >>>     print('Path Type: ', type(path))
-        >>>     print('x: ',x)
+        >>> import plotly.graph_objects as go
+        >>> import ipyvasp as ipv
+        >>> fs = ipv.Files('.','**/POSCAR')
+        >>> @fs.interact(go.FigureWidget(),bl=(0,6,2),plot_cell=True, eqv_sites=True)
+        >>> def plot(path, fig, bl,plot_cell,eqv_sites):
+        >>>     ipv.iplot2widget(ipv.POSCAR(path).iplot_lattice(
+        >>>         bond_length=bl,plot_cell=plot_cell,eqv_sites=eqv_sites
+        >>>      ),fig_widget=fig) # it keeps updating same view
 
         .. note::
             Use self.interactive to get a widget that stores the argements and can be called later in a notebook cell.
         """
 
         def inner(func):
-            display(self.interactive(func,
-                other_widgets=other_widgets,
-                other_controls=other_controls,
+            display(self.interactive(func, *args,
+                free_widgets=free_widgets,
                 options=options,
                 height=height,
+                panel_size=panel_size,
                 **kwargs)
             )
             return func
         return inner
     
-
     def kpath_widget(self, height='400px'):
         "Get KpathWidget instance with these files."
-        return KpathWidget(files = self._files, height = height)
+        return KpathWidget(files = self.with_name('POSCAR'), height = height)
 
     def bands_widget(self, height='450px'):
         "Get BandsWidget instance with these files."
@@ -596,10 +622,8 @@ class BandsWidget(VBox):
         self._select_dict = {}  # store selection data
         self._kwargs = {}
         
-        Files(files)._attributed_interactive(self,
-            self._load_data,
-            other_widgets=[self._fig],
-            other_controls=[
+        Files(files)._attributed_interactive(self, self._load_data, self._fig,
+            free_widgets=[
                 self._tsd,
                 self._brange,
                 self._ktcicks,
@@ -626,7 +650,8 @@ class BandsWidget(VBox):
         "Use slef.files.update(...) to keep state of widget preserved."
         return self._files
 
-    def _load_data(self, path):  # Automatically redirectes to output widget
+    def _load_data(self, path, fig):  # Automatically redirectes to output widget
+        if not hasattr(self, '_interact'): return  # First time not availablebu 
         self._interact.output_widget.clear_output(wait=True)  # Why need again?
         with self._interact.output_widget:
             self._bands = (
@@ -684,6 +709,7 @@ class BandsWidget(VBox):
         return self._select_dict.get("data", None)
 
     def _update_graph(self, btn):
+        if not hasattr(self, '_interact'): return  # First time not available
         self._interact.output_widget.clear_output(wait=True)  # Why need again?
         with self._interact.output_widget:
             hsk = [
@@ -815,7 +841,7 @@ class KpathWidget(VBox):
         self._clicktime = None
         self._kpoints = {}
 
-        other_controls = [
+        free_widgets = [
             HBox([self._add, self._del, self._tsb], layout=Layout(min_height="24px")),
             ipw.HTML(
                 "<style>.KpathWidget .widget-select-multiple { min-height: 180px; }\n .widget-select-multiple > select {height: 100%;}</style>"
@@ -826,7 +852,7 @@ class KpathWidget(VBox):
         ]
         
         Files(files)._attributed_interactive(self,
-            self._update_fig, [self._fig], other_controls, height=height
+            self._update_fig, self._fig, free_widgets=free_widgets, height=height
         )
         
         self._tsb.on_click(self._update_theme)
@@ -850,7 +876,8 @@ class KpathWidget(VBox):
         "POSCAR class associated to current selection."
         return self._poscar
 
-    def _update_fig(self, path):
+    def _update_fig(self, path, fig):
+        if not hasattr(self, '_interact'): return  # First time not available
         from .lattice import POSCAR  # to avoid circular import
 
         with self._interact.output_widget:
@@ -859,10 +886,10 @@ class KpathWidget(VBox):
             )
             self._poscar = POSCAR(path)
             ptk.iplot2widget(
-                self._poscar.iplot_bz(fill=False, color="red"), self._fig, template
+                self._poscar.iplot_bz(fill=False, color="red"), fig, template
             )
-            with self._fig.batch_animate():
-                self._fig.add_trace(
+            with fig.batch_animate():
+                fig.add_trace(
                     go.Scatter3d(
                         x=[],
                         y=[],
