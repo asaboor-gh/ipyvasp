@@ -27,7 +27,7 @@
    .. autosummary::
    
       BandsWidget
-      FilesWidget
+      Files
       KpathWidget
       PropsPicker
    

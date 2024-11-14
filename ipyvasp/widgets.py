@@ -1,14 +1,14 @@
 __all__ = [
     "load_results",
     "summarize",
-    "FilesWidget",
+    "Files",
     "PropsPicker",
     "BandsWidget",
     "KpathWidget",
 ]
 
 
-import inspect
+import inspect, re
 from time import time
 from pathlib import Path
 from collections.abc import Iterable
@@ -57,8 +57,8 @@ def summarize(files, func, **kwargs):
     if not callable(func):
         raise TypeError("Argument `func` must be a function.")
 
-    if not isinstance(files, Iterable):
-        raise TypeError("Argument `files` must be an iterable of PathLike objects.")
+    if not isinstance(files, Iterable): # Files is instance of Iterable due to __iter__ method
+        raise TypeError("Argument `files` must be an iterable of PathLike objects")
 
     if not isinstance(files, dict):
         files = {str(path): path for path in files}  # make a dictionary of paths
@@ -78,15 +78,12 @@ def summarize(files, func, **kwargs):
             {**output, "FILE": name}
         )  # add the file name to the output at the end
 
-    unique_keys = (
-        []
-    )  # get all unique keys, there would be missing or extra keys, handle all
-    for key in [key for out in outputs for key in out.keys()]:
-        if key not in unique_keys:
-            unique_keys.append(key)
+    unique_keys = {} # handle missing keys with types
+    for key,value in [item for out in outputs for item in out.items()]:
+        unique_keys[key] = '' if isinstance(value, str) else None
 
     return pd.DataFrame(
-        {ukey: [out.get(ukey, None) for out in outputs] for ukey in unique_keys}
+        {key: [out.get(key, ph) for out in outputs] for key,ph in unique_keys.items()}
     )
 
 
@@ -102,236 +99,171 @@ def fix_signature(cls):
     cls.__signature__ = inspect.signature(cls.__init__)
     return cls
 
-
-@fix_signature
-class FilesWidget(VBox):
-    """A widget for selecting files from a directory and its subdirectories.
+class Files:
+    """Creates a Batch of files in a directory recursively based on glob pattern or given list of files.
+    This is a boilerplate abstraction to do analysis in multiple calculations simultaneously.
 
     Parameters
     ----------
-    path : str, default is '.'. The path to the directory to search.
-    glob : str, default is '*'. The glob pattern to match files against. See https://docs.python.org/3/library/glob.html
-    exclude : str, default is None. A regex pattern to exclude files from the selection.
-    on_file_changed : callable, default is None.
-        A function that takes path as an argument and is called when the selected file changes. Output is displayed below the widget.
-        To add extra controls and widgets, use `.interactive`/`.interact` methods instead.
+    path_or_files : str, current directory by default or list of files or an instance of Files.
+    glob : str, glob pattern, '*' by default. Not used if files supplied above.
+    exclude : str, regular expression pattern to exclude files.
+    files_only : bool, if True, returns only files.
+    dirs_only : bool, if True, returns only directories.
 
-    Returns
-    -------
-    A FilesWidget object where you can filter files by typing in the text box, and select files from the dropdown.
+    Use methods on return such as `summarize`, `with_name`, `filtered`, `interact` and others.
     """
+    def __init__(self, path_or_files = '.', glob = '*', exclude = None,files_only = False, dirs_only=False):
+        if isinstance(path_or_files, Files):
+            self._files = path_or_files._files
+            return # Do nothing
+        
+        if files_only and dirs_only:
+            raise ValueError("files_only and dirs_only cannot be both True")
 
-    def __init__(
-        self,
-        path: str = ".",
-        glob: str = "*",
-        exclude: str = None,
-        on_file_changed=None,
-    ) -> None:
-        for prop in (path, glob, exclude):
-            if prop and not isinstance(prop, str):
-                raise ValueError(f"Expected string, got {type(prop)}")
-
-        super().__init__(_dom_classes=["FilesWidget"])  # This makes it truely a widget
-        self._files = []  # Selections stored as Path objects
-        self._widgets = {
-            "input": Text(
-                value=path,
-                description="Path:",
-                tooltip="The path to the directory to search.",
-            ),
-            "glob": Text(
-                value=glob,
-                description="Glob:",
-                tooltip="The glob pattern to match files against. See https://docs.python.org/3/library/glob.html",
-            ),
-            "exclude": Text(
-                value=exclude or "",
-                description="Exclude:",
-                tooltip="A regex pattern to exclude files from the selection.",
-            ),
-            "lock": Checkbox(
-                value=False,
-                description="Lock selection",
-                tooltip="Lock the current selection and prevent changes.",
-            ),
-            "files": Dropdown(
-                options=[], description="File:", tooltip="Select a file from the list."
-            ),
-        }
-        self.children = [
-            self._widgets["input"],
-            self._widgets["glob"],
-            self._widgets["exclude"],
-        ]
-        self._widgets["lock"].observe(self._lock_selection, names=["value"])
-
-        for key, value in self._widgets.items():
-            if key not in ["files", "lock"]:
-                value.on_submit(self._process)
-
-        if on_file_changed:
-            if not callable(on_file_changed):
-                raise TypeError(
-                    "Argument `on_file_changed` must be a function that takes path as an argument."
-                )
-
-            out = ipw.Output()
-            self.layout.max_height = "90vh"  # Only if output is present
-            self._widgets["output"] = out
-
-            @out.capture(clear_output=True, wait=True)
-            def on_change(change):
-                on_file_changed(self.selected)
-
-            self._widgets["files"].observe(on_change, names=["value"])
-
-        self._process(None)  # Initial processing based on given values
-
-    def _lock_selection(self, change):
-        for key, value in self._widgets.items():
-            if key not in ["files", "lock"]:
-                value.disabled = self._widgets[
-                    "lock"
-                ].value  # Don't allow changes even programatically
-
-        if self._widgets["lock"].value:
-            self._widgets["lock"].description = f"{len(self._files)} files selected"
-            self.children = [self._widgets["lock"], self._widgets["files"]]
+        files = []
+        if isinstance(path_or_files,(str, Path)):
+            path = Path(path_or_files)
+            files = [p for p in path.glob(glob)]
         else:
-            self.children = [
-                self._widgets["input"],
-                self._widgets["glob"],
-                self._widgets["exclude"],
-            ]
+            others = []
+            for item in path_or_files:
+                if isinstance(item, str):
+                    item = Path(item)
+                elif not isinstance(item, Path):
+                    raise TypeError(f"Expected str or Path in sequence, got {type(item)}")
+                
+                if item.exists():
+                    files.append(item)
+                else:
+                    others.append(str(item))
+                    
+            if others:
+                print(f"Skipping paths that do not exist: {list(set(others))}")
+                
+        if exclude:
+            files = [p for p in files if not re.search(exclude, str(p))]
+        if files_only:
+            files = [p for p in files if p.is_file()]
+        if dirs_only:
+            files = [p for p in files if p.is_dir()]
+            
+        self._files =  tuple(sorted(files))
 
-        if self._widgets.get("output"):
-            self.children = [*self.children, self._widgets["output"]]
+    def __repr__(self):
+        if not self: return "Files()"
+        return "Files(\n" + ',\n'.join(f'  {f!r}' for f in self._files) + "\n)"
 
-    def _process(self, change):
-        self._widgets["lock"].description = "Processing..."
-        files = gu.list_files(
-            self._widgets["input"].value,
-            glob=self._widgets["glob"].value,
-            exclude=self._widgets["exclude"].value,
-        )
+    def __getitem__(self, index): return self._files[index]
+    def __iter__(self): return self._files.__iter__()
+    def __len__(self): return len(self._files)
+    def __bool__(self): return bool(self._files)
 
-        self._widgets["files"].options = [
-            str(p) for p in files
-        ]  # shows only relative path
-        self._files = [path.absolute() for path in files]  # Store as full path
-        self.children = list(self._widgets.values())  #  show all widgets
-        self._widgets[
-            "lock"
-        ].description = f"{len(self._files)} files found. Lock selection?"
+    def with_name(self, name):
+        "Change name of all files. Only keeps existing files."
+        return self.__class__([f.with_name(name) for f in self._files])
 
-    @property
-    def paths(self):
-        "Returns all availble paths."
-        return tuple(self._files)
+    def filtered(self, include=None, exclude=None, files_only = False, dirs_only=False):
+        "Filter all files. Only keeps existing file."
+        files = [p for p in self._files if re.search(include, str(p))] if include else self._files
+        return self.__class__(files, exclude=exclude,dirs_only=dirs_only,files_only=files_only)
 
-    @property
-    def dropdown(self):
-        "Returns the dropdown widget to select files."
-        return self._widgets["files"]
+    def summarize(self, func, **kwargs):
+        "Apply a func(apth) -> dict and create a dataframe."
+        return summarize(self._files,func, **kwargs)
+    
+    def load_results(self):
+        "Load result.json files from these paths into a dataframe."
+        return load_results(self._files)
+    
+    def input_info(self, *tags):
+        "Grab input information into a dataframe from POSCAR and INCAR. Provide INCAR tags (case-insinsitive) to select only few of them."
+        from .lattice import POSCAR
 
-    @property
-    def selected(self) -> Path:
-        "Returns selected item in the dropdown as Path object."
-        if self._widgets["files"].value:  # if not empty, otherwise it throws error
-            return Path(self._widgets["files"].value).absolute()  # return full path
+        def info(path, tags):
+            p = POSCAR(path).data 
+            lines = [[v.strip() for v in line.split('=')] 
+                     for line in path.with_name('INCAR').read_text().splitlines() 
+                     if '=' in line]
+            if tags:
+                tags = [t.upper() for t in tags] # can send lowercase tag
+                lines = [(k,v) for k,v in lines if k in tags]
+            d = {k:v for k,v in lines if not k.startswith('#')}
+            d.update({k:len(v) for k,v in p.types.items()})
+            d.update(zip('abcvαβγ', [*p.norms,p.volume,*p.angles]))
+            return d
+        
+        return self.with_name('POSCAR').summarize(info, tags=tags)
 
-    @property
-    def path(self):  # This is in consistent with other widgets too
-        "Return currently selected path."
-        return self.selected
-
-    def interactive(
-        self,
-        func,
+    def update(self, path_or_files, glob = '*',**kwargs):
+        "Update files inplace with similar parameters as initialization. Useful for widgets such as BandsWidget to preserve their state while files swapping."
+        self._files = self.__class__(path_or_files, glob = glob, **kwargs)
+        if (dd := getattr(self, '_dd', None)): # update dropdown
+            old = dd.value
+            dd.options = self._files
+            if old in dd.options:
+                dd.value = old
+    
+    def interactive(self, func,
         other_widgets=None,
         other_controls=None,
         options={"manual": False},
         height="400px",
-        **kwargs,
-    ):
+        **kwargs):
         """
         Interact with a function that takes selected Path as first argument. Returns a widget that saves attributes of the function call such as .f, .args, .kwargs.
         See docs of self.interact for more details on the parameters. kwargs are passed to ipywidgets.interactive to create controls.
 
 
-        >>> fw = FilesWidget()
-        >>> out = fw.interactive(lambda path: print(path.read_text())) # prints contents of selected file on output widget
+        >>> fls = Files()
+        >>> out = fls.interactive(lambda path: print(path.read_text())) # prints contents of selected file on output widget
         >>> out.f # function
         >>> out.args # arguments
         >>> out.kwargs # keyword arguments
         >>> out.result # result of function call which is same as out.f(*out.args, **out.kwargs)
-        >>> out.files_widget # reference to FilesWidget created, not the same as fw because it is a new instance
-
 
         .. note::
             If you don't need to interpret the result of the function call, you can use the @self.interact decorator instead.
-
-        .. note::
-            Each time an underlying new FilesWidget instance is created which picks input from previous one but stays separate. You can access it with `.files_widget` attribute of interactive.
         """
-        # Make new FilesWidget with same parameters, to allow multiple interact calls
-        new_fw = self.__class__(
-            path=self._widgets["input"].value,
-            glob=self._widgets["glob"].value,
-            exclude=self._widgets["exclude"].value,
-        )
-        info = ipw.HTML().add_class("FW-Progess")
+        info = ipw.HTML().add_class("fprogess")
+        dd = Dropdown(description='File', options=self._files)
 
         def interact_func(fname, **kwargs):
             if fname:  # This would be None if no file is selected
                 info.value = _progress_svg
                 try:
                     start = time()
-                    print(
-                        f"Running {func.__name__}({fname!r}, {kwargs})"
-                    )  # it also serves as removing the output errors
-                    func(
-                        Path(fname).absolute(), **kwargs
-                    )  # Have Path object absolue if user changes directory
+                    print(f"Running {func.__name__}({fname!r}, {kwargs})")  
+                    func(Path(fname).absolute(), **kwargs)  # Have Path object absolue if user changes directory
                     print(f"Finished in {time() - start:.3f} seconds.")
                 finally:
                     info.value = ""
 
-        out = ipw.interactive(
-            interact_func, options, fname=new_fw._widgets["files"], **kwargs
-        )
-
-        out.files_widget = new_fw  # save reference to FilesWidget
-        out.output_widget = out.children[
-            -1
-        ]  # save reference to output widget for other widgets to use
+        out = ipw.interactive(interact_func, options, fname=dd, **kwargs)
+        out._dd = dd  # save reference to dropdown
+        out.output_widget = out.children[-1]  # save reference to output widget for other widgets to use
 
         if options.get("manual", False):
-            out.interact_button = out.children[
-                -2
-            ]  # save reference to interact button for other widgets to use
+            out.interact_button = out.children[-2]  # save reference to interact button for other widgets to use
 
         output = out.children[-1]  # get output widget
-        output.clear_output(
-            wait=True
-        )  # clear output by waiting to avoid flickering, this is important
+        output.clear_output(wait=True)  # clear output by waiting to avoid flickering, this is important
         output.layout = Layout(
             overflow="auto", max_height="100%", width="100%"
         )  # make output scrollable and avoid overflow
 
         others = out.children[1:-1]  # exclude files_dd and Output widget
         _style = """<style>
-        .FW-Interact {
+        .files-interact {
             --jp-widgets-inline-label-width: 4em;
             --jp-widgets-inline-width: 18em;
             --jp-widgets-inline-width-short: 9em;
         }
-        .FW-Interact {max-height:90vh;width:100%;}
-        .FW-Interact > div {overflow:auto;max-height:100%;padding:8px;}
-        .FW-Interact > div:first-child {width:20em}
-        .FW-Interact > div:last-child {width:calc(100% - 20em)}
-        .FW-Interact .FW-Progess {position:absolute !important; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1}
+        .files-interact {max-height:90vh;width:100%;}
+        .files-interact > div {overflow:auto;max-height:100%;padding:8px;}
+        .files-interact > div:first-child {width:20em}
+        .files-interact > div:last-child {width:calc(100% - 20em)}
+        .files-interact .fprogess {position:absolute !important; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1}
         </style>"""
         if others:
             others = [ipw.HTML(f"<hr/>{_style}"), *others]
@@ -368,19 +300,24 @@ class FilesWidget(VBox):
             HBox(
                 [  # reset children to include new widgets
                     VBox(
-                        children=[new_fw, VBox(others)]
+                        children=[dd, VBox(others)]
                     ),  # other widgets in box to make scrollable independent file selection
                     VBox(
                         children=[Box([output]), *(other_widgets or []), info]
                     ),  # output in box to make scrollable,
                 ],
                 layout=Layout(height=height, max_height=height),
-            ).add_class("FW-Interact")
+            ).add_class("files-interact")
         ]  # important for every widget separately
         return out
-
-    def interact(
-        self,
+    
+    def _attributed_interactive(self, box, func, *args, **kwargs):
+        box._files = self
+        box._interact = self.interactive(func, *args, **kwargs)
+        box.children = box._interact.children
+        box._files._dd = box._interact._dd
+    
+    def interact(self,
         other_widgets=None,
         other_controls=None,
         options={"manual": False},
@@ -388,7 +325,7 @@ class FilesWidget(VBox):
         **kwargs,
     ):
         """Interact with a function that takes a selected Path as first argument.
-        A CSS class 'FW-Interact' is added to the final widget to let you style it.
+        A CSS class 'files-interact' is added to the final widget to let you style it.
 
         Parameters
         ----------
@@ -402,53 +339,43 @@ class FilesWidget(VBox):
         height : str
             Default is '90vh'. height of the final widget. This is important to avoid very long widgets.
 
-
         kwargs are passed to ipywidgets.interactive and decorated function. Resulting widgets are placed below the file selection widget.
-
         `other_widgets` can be controlled by `other_controls` externally. For example, you can add a button to update a plotly's FigureWidget.
 
         The decorated function can be called later separately as well, and has .args and .kwargs attributes to access the latest arguments
         and .result method to access latest. For a function `f`, `f.result` is same as `f(*f.args, **f.kwargs)`.
 
 
-        >>> fw = FilesWidget()
-        >>> @fw.interact(x = False)
+        >>> fls = Files()
+        >>> @fls.interact(x = False)
         >>> def f(path,x):
         >>>     print('path:',path)
         >>>     print('Path Type: ', type(path))
         >>>     print('x: ',x)
-
 
         .. note::
             Use self.interactive to get a widget that stores the argements and can be called later in a notebook cell.
         """
 
         def inner(func):
-            display(
-                self.interactive(
-                    func,
-                    other_widgets=other_widgets,
-                    other_controls=other_controls,
-                    options=options,
-                    height=height,
-                    **kwargs,
-                )
+            display(self.interactive(func,
+                other_widgets=other_widgets,
+                other_controls=other_controls,
+                options=options,
+                height=height,
+                **kwargs)
             )
             return func
-
         return inner
+    
 
-    def summarize(self, func, **kwargs):
-        """Summarize the results from all selected files using a function that takes a Path object as first arguement.
-        kwargs are passed to function. Returns a dataframe."""
-        return summarize(
-            {
-                key: value
-                for key, value in zip(self._widgets["files"].options, self._files)
-            },
-            func,
-            **kwargs,
-        )
+    def kpath_widget(self, height='400px'):
+        "Get KpathWidget instance with these files."
+        return KpathWidget(files = self._files, height = height)
+
+    def bands_widget(self, height='450px'):
+        "Get BandsWidget instance with these files."
+        return BandsWidget(files=self._files, height=height)
 
 
 @fix_signature
@@ -647,12 +574,12 @@ class BandsWidget(VBox):
     Two attributes are important:
     self.clicked_data returns the last clicked point, that can also be stored as VBM, CBM etc, using Click dropdown.
     self.selected_data returns the last selection of points within a box or lasso. You can plot that output separately as plt.plot(data.xs, data.ys) after a selection.
+    You can use `self.files.update` method to change source files without effecting state of widget.
     """
 
-    def __init__(self, use_vaspout=False, height="450px", **file_widget_kwargs):
+    def __init__(self, files, height="450px"):
         super().__init__(_dom_classes=["BandsWidget"])
         self._bands = None
-        self._use_vaspout = use_vaspout
         self._fig = go.FigureWidget()
         self._tsd = Dropdown(
             description="Style", options=["plotly_white", "plotly_dark"]
@@ -668,11 +595,8 @@ class BandsWidget(VBox):
         self._click_dict = {}  # store clicked data
         self._select_dict = {}  # store selection data
         self._kwargs = {}
-        file_widget_kwargs = {
-            "glob": "vapout.h5" if use_vaspout else "vasprun.xml",
-            **file_widget_kwargs,
-        }
-        self._interact = FilesWidget(**file_widget_kwargs).interactive(
+        
+        Files(files)._attributed_interactive(self,
             self._load_data,
             other_widgets=[self._fig],
             other_controls=[
@@ -686,8 +610,7 @@ class BandsWidget(VBox):
             ],
             height=height,
         )
-        self.files_widget = self._interact.files_widget
-        self.children = self._interact.children
+       
         self._tsd.observe(self._change_theme, "value")
         self._click.observe(self._click_save_data, "value")
         self._ktcicks.observe(self._warn_update, "value")
@@ -696,13 +619,18 @@ class BandsWidget(VBox):
     @property
     def path(self):
         "Returns currently selected path."
-        return self.files_widget.path
+        return self._interact._dd.value
+    
+    @property
+    def files(self):
+        "Use slef.files.update(...) to keep state of widget preserved."
+        return self._files
 
     def _load_data(self, path):  # Automatically redirectes to output widget
         self._interact.output_widget.clear_output(wait=True)  # Why need again?
         with self._interact.output_widget:
             self._bands = (
-                vp.Vaspout(path) if self._use_vaspout else vp.Vasprun(path)
+                vp.Vasprun(path) if path.parts[-1].endswith('xml') else vp.Vaspout(path)
             ).bands
             self._ppicks.update(self.bands.source.summary)
             self._ktcicks.value = ", ".join(
@@ -714,7 +642,7 @@ class BandsWidget(VBox):
             else:
                 self._click.options = ["None", "VBM", "CBM"]
 
-            if (file := self.files_widget.selected.parent / "result.json").is_file():
+            if (file := path.parent / "result.json").is_file():
                 self._result = serializer.load(str(file.absolute()))  # Old data loaded
 
             pdata = self.bands.source.poscar.data
@@ -811,7 +739,7 @@ class BandsWidget(VBox):
             serializer.dump(
                 data_dict,
                 format="json",
-                outfile=self.files_widget.selected.parent / "result.json",
+                outfile=self.path.parent / "result.json",
             )
 
         if (
@@ -854,8 +782,8 @@ class BandsWidget(VBox):
 
     @property
     def results(self):
-        "Generate a data frame form result.json file in each folder."
-        return load_results(self.files_widget.paths)
+        "Generate a dataframe form result.json file in each folder."
+        return load_results(self._interact._dd.options)
 
 
 @fix_signature
@@ -870,9 +798,11 @@ class KpathWidget(VBox):
     - To update point(s), select point(s) from the select box and click on a scatter point in figure or use KPOINT input to update it manually, e.g. if a point is not available on plot.
     - Add labels to the points by typing in the "Labels" box such as "Γ,X" or "Γ 5,X" that will add 5 points in interval.
     - To break the path between two points "Γ" and "X" type "Γ 0,X" in the "Labels" box, zero means no points in interval.
+
+    You can use `self.files.update` method to change source files without effecting state of widget.
     """
 
-    def __init__(self, height="400px", **files_widget_kwargs):
+    def __init__(self, files, height="400px"):
         super().__init__(_dom_classes=["KpathWidget"])
         self._fig = go.FigureWidget()
         self._sm = SelectMultiple(options=[], layout=Layout(width="auto"))
@@ -894,13 +824,11 @@ class KpathWidget(VBox):
             self._lab,
             self._kpt,
         ]
-        files_widget_kwargs = {"glob": "POSCAR", **files_widget_kwargs}
-        self._interact = FilesWidget(**files_widget_kwargs).interactive(
+        
+        Files(files)._attributed_interactive(self,
             self._update_fig, [self._fig], other_controls, height=height
         )
-        self.files_widget = self._interact.files_widget  # sometimes useful
-        self.children = self._interact.children
-
+        
         self._tsb.on_click(self._update_theme)
         self._add.on_click(self._toggle_lock)
         self._del.on_click(self._del_point)
@@ -910,7 +838,12 @@ class KpathWidget(VBox):
     @property
     def path(self):
         "Returns currently selected path."
-        return self._interact.files_widget.path
+        return self._interact._dd.value # itself a Path object
+    
+    @property
+    def files(self):
+        "Use slef.files.update(...) to keep state of widget preserved."
+        return self._files
 
     @property
     def poscar(self):

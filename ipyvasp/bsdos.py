@@ -578,13 +578,7 @@ class Bands(_BandsDosBase):
 
     def view_bands(self, height="450px"):
         "Initialize and return `ipyvasp.widgets.BandsWidget` to view bandstructure interactively."
-        use_vaspout = True if isinstance(self.source, vp.Vaspout) else False
-        return wdg.BandsWidget(
-            use_vaspout=use_vaspout,
-            path=str(self.source.path.parent),
-            glob=self.source.path.name,
-            height=height,
-        )
+        return wdg.BandsWidget([self.source.path,],height=height)
 
 
 _multiply_doc = """multiply : float

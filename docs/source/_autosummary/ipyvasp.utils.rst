@@ -16,7 +16,6 @@
       create_colormap
       get_file_size
       interpolate_data
-      list_files
       prevent_overwrite
       rolling_mean
       set_dir

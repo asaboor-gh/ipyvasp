@@ -3,7 +3,6 @@ __all__ = [
     "set_dir",
     "interpolate_data",
     "rolling_mean",
-    "list_files",
     "color",
     "transform_color",
     "create_colormap",
@@ -256,37 +255,6 @@ def rolling_mean(
             p_l, p_r = p_l / 2, p_r / 2
 
     return mean_all
-
-
-def list_files(path=".", glob="*", exclude=None, files_only=False, dirs_only=False):
-    """
-    Returns a tuple of files in a directory recursively based on glob pattern.
-
-    Parameters
-    ----------
-    path : str, current directory by default
-    glob : str, glob pattern, '*' by default
-    exclude : str, regular expression pattern to exclude files
-    files_only : bool, if True, returns only files
-    dirs_only : bool, if True, returns only directories
-
-    Returns
-    -------
-    tuple of pathlib.Path objects
-    """
-    if files_only and dirs_only:
-        raise ValueError("files_only and dirs_only cannot be both True")
-
-    path = Path(path)
-    files = [p for p in path.glob(glob)]
-    if exclude:
-        files = [p for p in files if not re.search(exclude, str(p))]
-    if files_only:
-        files = [p for p in files if p.is_file()]
-    if dirs_only:
-        files = [p for p in files if p.is_dir()]
-    return tuple(sorted(files)) # sorting is important here
-
 
 @contextmanager
 def prevent_overwrite(path) -> Path:
