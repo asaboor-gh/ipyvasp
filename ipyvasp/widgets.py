@@ -106,12 +106,14 @@ class Files:
     Parameters
     ----------
     path_or_files : str, current directory by default or list of files or an instance of Files.
-    glob : str, glob pattern, '*' by default. Not used if files supplied above.
+    glob : str, glob pattern, '*' by default. '**' is used for recursive glob. Not used if files supplied above.
     exclude : str, regular expression pattern to exclude files.
     files_only : bool, if True, returns only files.
     dirs_only : bool, if True, returns only directories.
 
     Use methods on return such as `summarize`, `with_name`, `filtered`, `interact` and others.
+
+    >>> Files(root_1, glob_1,...).add(root_2, glob_2,...) # Fully flexible to chain
     """
     def __init__(self, path_or_files = '.', glob = '*', exclude = None,files_only = False, dirs_only=False):
         if isinstance(path_or_files, Files):
@@ -123,8 +125,7 @@ class Files:
 
         files = []
         if isinstance(path_or_files,(str, Path)):
-            path = Path(path_or_files)
-            files = [p for p in path.glob(glob)]
+            files = Path(path_or_files).glob(glob)
         else:
             others = []
             for item in path_or_files:
@@ -142,22 +143,29 @@ class Files:
                 print(f"Skipping paths that do not exist: {list(set(others))}")
                 
         if exclude:
-            files = [p for p in files if not re.search(exclude, str(p))]
+            files = (p for p in files if not re.search(exclude, str(p)))
         if files_only:
-            files = [p for p in files if p.is_file()]
+            files = (p for p in files if p.is_file())
         if dirs_only:
-            files = [p for p in files if p.is_dir()]
+            files = (p for p in files if p.is_dir())
             
         self._files =  tuple(sorted(files))
 
+    def __str__(self):
+        return '\n'.join(str(f) for f in self._files)
+
     def __repr__(self):
         if not self: return "Files()"
-        return "Files(\n" + ',\n'.join(f'  {f!r}' for f in self._files) + "\n)"
+        show = ',\n'.join(f'  {f!r}' for f in self._files)
+        return f"Files(\n{show}\n) {len(self._files)} items"
 
     def __getitem__(self, index): return self._files[index]
     def __iter__(self): return self._files.__iter__()
     def __len__(self): return len(self._files)
     def __bool__(self): return bool(self._files)
+
+    def __add__(self, other):
+        raise NotImplementedError("Use self.add method instead!")
 
     def map(self,func):
         "Map files to a function!"
@@ -199,14 +207,29 @@ class Files:
         
         return self.with_name('POSCAR').summarize(info, tags=tags)
 
-    def update(self, path_or_files, glob = '*',**kwargs):
-        "Update files inplace with similar parameters as initialization. Useful for widgets such as BandsWidget to preserve their state while files swapping."
-        self._files = self.__class__(path_or_files, glob = glob, **kwargs)
+    def update(self, path_or_files, glob = '*', cleanup = True, exclude=None,**kwargs):
+        """Update files inplace with similar parameters as initialization. If `cleanup=False`, older files are kept too.
+        Useful for widgets such as BandsWidget to preserve their state while using `widget.files.update`."""
+        old = () if cleanup else self._files
+        self._files = self._unique(old, self.__class__(path_or_files, glob = glob, exclude=exclude,**kwargs)._files)
+        
         if (dd := getattr(self, '_dd', None)): # update dropdown
             old = dd.value
             dd.options = self._files
             if old in dd.options:
                 dd.value = old
+    
+    def add(self, path_or_files, glob = '*', exclude=None, **kwargs):
+        """Add more files or with a diffrent glob on top of exitsing files. Returns same instance.
+        Useful to add multiple globbed files into a single chained call.
+
+        >>> Files(root_1, glob_1,...).add(root_2, glob_2,...) # Fully flexible 
+        """
+        self._files = self._unique(self._files, self.__class__(path_or_files, glob = glob, exclude=exclude,**kwargs)._files)
+        return self
+    
+    def _unique(self, *files_tuples):
+        return tuple(np.unique(np.hstack(files_tuples)))
     
     def interactive(self, func, *args,
         free_widgets=None,
@@ -320,16 +343,10 @@ class Files:
         ]  # add hr to separate other controls
 
         out.children = [
-            HBox(
-                [  # reset children to include new widgets
-                    VBox(
-                        children=[dd, VBox(others)]
-                    ),  # other widgets in box to make scrollable independent file selection
-                    VBox(
-                        children=[output, *args, info]
-                    ),  # output in box to make scrollable,
-                ],
-                layout=Layout(height=height, max_height=height),
+            HBox([  # reset children to include new widgets
+                VBox([dd, VBox(others)]),  # other widgets in box to make scrollable independent file selection
+                VBox([Box([output]), *args, info]),  # output in box to make scrollable,
+                ],layout=Layout(height=height, max_height=height),
             ).add_class("files-interact")
         ]  # important for every widget separately
         return out
