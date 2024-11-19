@@ -329,6 +329,22 @@ class PoscarData(Dict2Data):
         "Returns the symbols of the atoms in the poscar data without numbers"
         return np.array([lab.split()[0] for lab in self.labels])
     
+    @property
+    def G(self):
+        """Return metric tensor to be used with fractional coordinates.
+        
+        >>> D2 = points @ self.G @ points.T # assuming points is Nx3 numpy array, D2 is NxN matrix whose elements are dot product of coordinates in 3D space.
+        >>> assert (self.metric(points) == np.sqrt(np.diag(D2))).all()
+
+        Note: You can use `self.metric(points)` instead of doing a long operation like `np.sqrt(np.diag(points @ self.G @ points.T))`.
+        """
+        return self.basis @ self.basis.T  # becuase our vectors are row, transpose comes later
+    
+    def metric(self, points):
+        """Shortcut for `np.linalg.norm(self.to_cartesian(points),axis=<1 or 0>)`. `points` are assumed as fractional coordinates in `self.basis`.
+        """
+        return np.linalg.norm(self.to_cartesian(points),axis=1 if np.ndim(points) == 2 else 0)
+    
     def get_sites(self, type_or_indices, as_coords=False):
         "Shortcut method for `POSCAR.data.positions[POSCAR.data.types['name']]` or with regular indexing."
         points = self.coords if as_coords else self.positions
