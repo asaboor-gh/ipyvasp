@@ -204,7 +204,10 @@ class Vasprun(DataSource):
             else False
         )
         info_dict["EFERMI"] = float(
-            ET.fromstring(next(self.read("<i.*efermi", "</i>"))).text
+            ET.fromstring(next(chain(
+                self.read("<i.*efermi", "</i>"), # not always there but this is correct one
+                self.read("<i.*EFERMI", "</i>") # zero, always there in start
+            ))).text 
         )
         info_dict["NEDOS"] = int(
             ET.fromstring(next(self.read("<i.*NEDOS", "</i>"))).text
