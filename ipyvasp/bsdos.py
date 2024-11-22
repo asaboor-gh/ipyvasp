@@ -35,7 +35,8 @@ from ._enplots import (
 def _format_input(projections, sys_info):
     """
     Format input spins, atoms, orbs and labels according to selected `projections`.
-    For example: {'Ga-s':(0,[1]),'Ga-p':(0,[1,2,3]),'Ga-d':(0,[4,5,6,7,8])} #for Ga in GaAs, to pick Ga-1, use [0] instead of 0 at first place
+    For example: {'Ga-s':(0,[0]),'Ga-px+py':(0,[2,3]),'Ga-all':(0,'all')} #for Ga in GaAs, to pick Ga-1, use [0] instead of 0 at first place
+    or {'Ga-s':('Ga','s'),'Ga-px+py':(0,'px+py'),'all-d':('all','d')}
     In case of 3 items in tuple, the first item is spin index, the second is atoms, the third is orbs.
     """
     if not isinstance(projections, dict):
@@ -52,6 +53,11 @@ def _format_input(projections, sys_info):
         [t for tt in types for t in tt]
     )  # will be error if two ranges there to compare for max
     norbs = len(sys_info.orbs)
+
+    orbs_map = {} # total if components given
+    if 'px' in sys_info.orbs: orbs_map['p'] = range(1,4)
+    if 'dxy' in sys_info.orbs: orbs_map['d'] = range(4,9)
+    if 'f0' in sys_info.orbs: orbs_map['f'] = range(9,16)
 
     # Set default values for different situations
     spins, atoms, orbs, labels = [], [], [], []
@@ -78,6 +84,24 @@ def _format_input(projections, sys_info):
                 )
 
             spins.append(S)  # Only add spins if given
+        
+        if isinstance(A,str):
+            if A.lower() == 'all':
+                A = range(max_ind + 1)
+            else:
+                if not A in sys_info.types.keys():
+                    raise KeyError(f"type {A!r} not found. Available are {list(sys_info.types.keys())}, 'all', or indexing with integeres/list of intergers.")
+                A = sys_info.types[A]
+        
+        if isinstance(B,str):
+            if B.lower() == 'all':
+                B = range(norbs)
+            else:
+                B = {b:[sys_info.orbs.index(b)] if b in sys_info.orbs else orbs_map.get(b,[]) for b in (a.strip() for a in B.split('+'))}
+                for key, value in B.items():
+                    if not value:
+                        raise KeyError(f"orbital {key!r} not found. Available are {sys_info.orbs}, 'all' or indexing with integers/list of intergers")
+                B = list(sorted(set([i for b in B.values() for i in b]))) # flatten
 
         if not isinstance(A, (int, np.integer, list, tuple, range)):
             raise TypeError(f"{A!r} is not an integer or list/tuple/range of integers.")
@@ -129,7 +153,7 @@ def _format_input(projections, sys_info):
 
     if spins and len(atoms) != len(spins):
         raise ValueError(
-            "You should provide spin for each projection or none at all. If not provided, spin is picked from corresponding eigenvalues (up/down) for all projections."
+            "You should provide spin for each projection or none at all. If not provided, spin is picked from corresponding eigenvalues (up/down) for all projections using 'spin' parameter explicity."
         )
 
     uatoms = np.unique(
@@ -139,7 +163,7 @@ def _format_input(projections, sys_info):
     uorbs = tuple(uorbs) if len(uorbs) < norbs else -1  # -1 means all orbitals
     uatoms = tuple(uatoms) if len(uatoms) == (max_ind + 1) else -1  # -1 means all atoms
     uspins = tuple(spins)
-
+    
     return (spins, uspins), (atoms, uatoms), (orbs, uorbs), labels
 
 
@@ -154,8 +178,8 @@ bands : list/tuple
     List of indices of bands. If given, this ovverides elim."""
 _proj_doc = """projections : dict
     Mapping from str -> [atoms, orbs]. Use dict to select specific projections, 
-    e.g. {'Ga-s': (0,[0]), 'Ga1-p': ([0],[1,2,3])} in case of GaAs. If values of the dict 
-    are callable, they must accept two arguments evals/tdos, occs/idos of from data and 
+    e.g. {'Ga-s':(0,[0]),'Ga-px+py':(0,[2,3]),'Ga-all':(0,'all')} or {'Ga-s':('Ga','s'),'Ga-px+py':(0,'px+py'),'all-d':('all','d')}. 
+    If values of the dict are callable, they must accept two arguments evals/tdos, occs/idos of from data and 
     should return array of shape[1:] (all but spin dimension)."""
 
 

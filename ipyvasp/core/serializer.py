@@ -342,6 +342,7 @@ class PoscarData(Dict2Data):
     
     def metric(self, points):
         """Shortcut for `np.linalg.norm(self.to_cartesian(points),axis=<1 or 0>)`. `points` are assumed as fractional coordinates in `self.basis`.
+        You can compute metric from any point other than origin by just subtracting that point, e.g. `points - 0.5` will get metric from center of cell (1/2,1/2,1/2).
         """
         return np.linalg.norm(self.to_cartesian(points),axis=1 if np.ndim(points) == 2 else 0)
     
