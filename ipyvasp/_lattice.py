@@ -1572,6 +1572,7 @@ def _get_bond_length(poscar_data, bond_length=None):
 class _Atom(NamedTuple):
     "Object passed to POSCAR operations `func` where atomic sites are modified. Additinal property p -> array([x,y,z])."
     symbol : str
+    number : int
     index : int
     x : float
     y : float
@@ -1590,14 +1591,14 @@ class _AtomLabel(str):
 
 def _validate_func(func):
     if not callable(func):
-        raise ValueError("`func` must be a callable function with single parameter `Atom(symbol,index,x,y,z)`.")
+        raise ValueError("`func` must be a callable function with single parameter `Atom(symbol,number, index,x,y,z)`.")
     
     if len(inspect.signature(func).parameters) != 1:
         raise ValueError(
-            "`func` takes exactly 1 argument: `Atom(symbol,index,x,y,z)` in fractional coordinates"
+            "`func` takes exactly 1 argument: `Atom(symbol, number, index,x,y,z)` in fractional coordinates"
         )
     
-    ret = func(_Atom('',0,0,0,0))
+    ret = func(_Atom('',0,0,0,0,0))
     if not isinstance(ret, (bool, np.bool_)):
         raise ValueError(
             f"`func` must be a function that returns a bool, got {type(ret)}."
@@ -1611,7 +1612,7 @@ def _masked_data(poscar_data, func):
     pick = []
     for i, pos in enumerate(poscar_data.positions):
         idx = eqv_inds[i] if eqv_inds else i  # map to original index
-        if func(_Atom(poscar_data.symbols[i], idx, *pos)): # symbols based on i, not eqv_idx
+        if func(_Atom(*poscar_data._sn[i], idx, *pos)): # labels based on i, not eqv_idx
             pick.append(i)
     return pick  # could be duplicate indices
 
@@ -1633,9 +1634,12 @@ def _filter_pairs(labels, pairs, dist, bond_length):
     return pairs  # None -> auto calculate bond_length, number -> use that number
 
 def filter_atoms(poscar_data, func, tol = 0.01):
-    """Filter atomic sites based on a function that acts on an atom such as `lambda a: (a.p < 1/2).all()`. `p` is additional property to get array([x,y,z]) togther.
+    """Filter atomic sites based on a function that acts on an atom such as `lambda a: (a.p < 1/2).all()`. 
+    `atom` passed to function is a namedtuple like `Atom(symbol,number,index,x,y,z)` which has extra attribute `p = array([x,y,z])`.
     This may include equivalent sites, so it should be used for plotting purpose only, e.g. showing atoms on a plane.
     An attribute `source_indices` is added to metadata which is useful to pick other things such as `OUTCAR.ion_pot[POSCAR.filter(...).data.metadata.source_indices]`. 
+
+    >>> filter_atoms(..., lambda a: a.symbol=='Ga' or a.number in range(2)) # picks all Ga atoms and first two atoms of every other types.
 
     Note: If you are filtering a plane with more than one non-zero hkl like 110, you may first need to translate or set boundary on POSCAR to bring desired plane in full view to include all atoms.
     """
@@ -1931,7 +1935,8 @@ def splot_lattice(
     bond_kws : dict
         Keyword arguments to pass to `LineCollection`/`Line3DCollection` for plotting bonds.
     fmt_label : callable
-        If given, each site label is passed to it as a subclass of str 'Ga 1' with extra attributes `symbol` and `number` and a method `to_latex`, e.g. `lambda lab: lab.to_latex()`.
+        If given, each site label is passed to it as a subclass of str 'Ga 1' with extra attributes `symbol` and `number` and a method `to_latex`.
+        You can show specific labels based on condition, e.g. `lambda lab: lab.to_latex() if lab.number in [1,5] else ''` will show 1st and 5th atom of each types.
         It must return a string or a list/tuple of length 2 with first item as label and second item as dictionary of keywords to pass to `plt.text`.
     plot_cell : bool
         Default is True, plot unit cell with default settings.
@@ -2583,8 +2588,11 @@ def sort_poscar(poscar_data, new_order):
     return serializer.PoscarData(data)
 
 def remove_atoms(poscar_data, func, fillby=None):
-    """Remove atoms that satisfy `func(atom) -> bool` on their fractional coordinates like `lambda a: all(a.p < 1/2)`. `p` is additional property to get array([x,y,z]) togther.
+    """Remove atoms that satisfy `func(atom) -> bool` on their fractional coordinates like `lambda a: all(a.p < 1/2)`.
+    `atom` passed to function is a namedtuple like `Atom(symbol,number,index,x,y,z)` which has extra attribute `p = array([x,y,z])`.
     If `fillby` is given, it will fill the removed atoms with atoms from fillby POSCAR.
+
+    >>> remove_atoms(..., lambda a: sum((a.p - 0.5)**2) <= 0.25**2) # remove atoms in center of cell inside radius of 0.25
 
     .. note::
         The coordinates of fillby POSCAR are transformed to basis of given POSCAR, before filling.
@@ -2612,7 +2620,7 @@ def remove_atoms(poscar_data, func, fillby=None):
 
         def keep_pos(i, x, y, z):  # keep positions in basis of given data
             u, v, w = to_basis(poscar_data.basis, to_R3(fillby.basis, [[x, y, z]]))[0]
-            return bool(func(_Atom('', 0, u, v, w)))
+            return bool(func(_Atom('', 0, 0, u, v, w)))
 
         mask = _masked_data(fillby, keep_pos)
         N_prev = len(data["positions"])  # before filling

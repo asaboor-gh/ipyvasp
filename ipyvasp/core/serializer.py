@@ -330,6 +330,10 @@ class PoscarData(Dict2Data):
         return np.array([lab.split()[0] for lab in self.labels])
     
     @property
+    def _sn(self): # symbol and number 
+        return np.array([[f(v) for f,v in zip((str,int),lab.split())] for lab in self.labels],dtype=object)
+    
+    @property
     def sites(self):
         "Returns data with types mapped to their positions."
         return Dict2Data({k: self.positions[v] for k,v in self.types.items()})
@@ -493,7 +497,8 @@ class PoscarData(Dict2Data):
         """
         Returns a dictionary of {'Ga 1': 'T T T', 'As 1': 'T F F',...} for each atom in the poscar data.
 
-        `func` should be a callable like `func(Atom(symbol,index,x,y,z)) -> (bool, bool, bool)` which turns on/off selective dynamics for each atom based in each dimension.
+        `func` should be a callable like `func(atom) -> (bool, bool, bool)` which turns on/off selective dynamics for each atom based in each dimension.
+        `atom` passed to function is a namedtuple like `Atom(symbol,number,index,x,y,z)` which has extra attribute `p = array([x,y,z])`.
 
         You can visualize selective dynamics sites by their labels as follows:
 
@@ -504,17 +509,17 @@ class PoscarData(Dict2Data):
         """
         if not callable(func):
             raise TypeError(
-                "`func` should be a callable with one paramter `Atom(symbol,index, x,y,z)`"
+                "`func` should be a callable with one paramter `Atom(symbol,number, index, x,y,z)`"
             )
 
         if len(inspect.signature(func).parameters) != 1:
             raise ValueError(
-                "`func` should be a callable function with one paramter `Atom(symbol,index, x,y,z)` in fractional coordinates."
+                "`func` should be a callable function with one paramter `Atom(symbol,number, index, x,y,z)` in fractional coordinates."
             )
         
         from .._lattice import _Atom # avoids circular import
 
-        test_output = func(_Atom('',0, 0, 0, 0))
+        test_output = func(_Atom('',0, 0, 0, 0, 0))
         if (
             not isinstance(test_output, (list, tuple, np.ndarray))
             or len(test_output) != 3
@@ -530,7 +535,7 @@ class PoscarData(Dict2Data):
                 )
 
         sd_list = [
-            "  ".join("T" if s else "F" for s in func(_Atom(self.symbols[i],i, *p)))
+            "  ".join("T" if s else "F" for s in func(_Atom(*self._sn[i],i, *p)))
             for i, p in enumerate(self.positions)
         ]
         labels = np.array(

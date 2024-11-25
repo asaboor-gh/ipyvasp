@@ -313,13 +313,13 @@ class POSCAR:
 
         Prefrence order: data > content > path
 
-        Note: During chained operations where functions are acting on index of sites, use `self.last` instead of `self` to point to latest POSCAR in chain.
+        Note: POSCAR operations that need a `func` accept basis, atom tuple, label etc. Read their documentation.
         
         ```python
         pc = POSCAR()
-        pc.filter_atoms(lambda a: a.index in pc.data.types.Ga) # FINE
-        pc.set_boundary([-2,2]).filter_atoms(lambda a: a.index in pc.data.types.Ga) # INCORRECT sites picked
-        pc.set_boundary([-2,2]).filter_atoms(lambda a: a.index in pc.last.data.types.Ga) # PERFECT, pc.last is output of set_boundary
+        pc.filter_atoms(lambda a: a.symbol == 'Ga') # a is namedtuple `Atom(symbol,number,index,x,y,z)` which has extra attribute `p = array([x,y,z])`.
+        pc.transform(lambda a,b,c: (a+b,a-b,c)) # basis or transform matrix
+        pc.splot_lattice(lambda lab: lab.to_latex()) # lab is str subclass like `AtomLabel('Ga 1')` with extra attributes `symbol,number, to_latex()` that can be used to show specific sites labels only.
         ```
 
         Tip: You can use `self.auto_renderer.on()` to keep doing opertions and visualize while last line of any cell is a POSCAR object.
@@ -354,11 +354,11 @@ class POSCAR:
     
     @property
     def last(self):
-        """Points to last created POSCAR instance during chained operations!
+        """Points to last created POSCAR instance during chained operations! You don't need to store results.
         
         ```python
         pc = POSCAR()
-        pc.filter_atoms(lambda a: a.index in pc.data.types.Ga) # FINE
+        pc.filter_atoms(lambda a: a.index in pc.data.types.Ga) # FINE, can use a.symbol == 'Ga' too, but we need to show a point below
         pc.set_boundary([-2,2]).filter_atoms(lambda a: a.index in pc.data.types.Ga) # INCORRECT sites picked
         pc.set_boundary([-2,2]).filter_atoms(lambda a: a.index in pc.last.data.types.Ga) # PERFECT, pc.last is output of set_boundary
         ```
