@@ -330,6 +330,11 @@ class PoscarData(Dict2Data):
         return np.array([lab.split()[0] for lab in self.labels])
     
     @property
+    def sites(self):
+        "Returns data with types mapped to their positions."
+        return Dict2Data({k: self.positions[v] for k,v in self.types.items()})
+
+    @property
     def G(self):
         """Return metric tensor to be used with fractional coordinates.
         
@@ -488,26 +493,28 @@ class PoscarData(Dict2Data):
         """
         Returns a dictionary of {'Ga 1': 'T T T', 'As 1': 'T F F',...} for each atom in the poscar data.
 
-        `func` should be a callable like `f(index,x,y,z) -> (bool, bool, bool)` which turns on/off selective dynamics for each atom based in each dimension.
+        `func` should be a callable like `func(Atom(symbol,index,x,y,z)) -> (bool, bool, bool)` which turns on/off selective dynamics for each atom based in each dimension.
 
         You can visualize selective dynamics sites by their labels as follows:
 
 
         >>> poscar = POSCAR.from_file('POSCAR')
-        >>> sd = poscar.data.get_selective_dynamics(lambda i,x,y,z: (True, False, True) if i % 2 == 0 else (False, True, False)) # Just an example
+        >>> sd = poscar.data.get_selective_dynamics(lambda a: (True, False, True) if a.index % 2 == 0 else (False, True, False)) # Just an example
         >>> poscar.splot_lattice(..., fmt_label = lambda lab: sd[lab]) # This will label sites as T T T, F F F, ... and so so on
         """
         if not callable(func):
             raise TypeError(
-                "`func` should be a callable function(index, [point in fractional coordinates])!"
+                "`func` should be a callable with one paramter `Atom(symbol,index, x,y,z)`"
             )
 
-        if len(inspect.signature(func).parameters) != 4:
+        if len(inspect.signature(func).parameters) != 1:
             raise ValueError(
-                "`func` should be a callable function with four paramters (index, x,y,z) in fractional coordinates."
+                "`func` should be a callable function with one paramter `Atom(symbol,index, x,y,z)` in fractional coordinates."
             )
+        
+        from .._lattice import _Atom # avoids circular import
 
-        test_output = func(0, 0, 0, 0)
+        test_output = func(_Atom('',0, 0, 0, 0))
         if (
             not isinstance(test_output, (list, tuple, np.ndarray))
             or len(test_output) != 3
@@ -517,13 +524,13 @@ class PoscarData(Dict2Data):
             )
 
         for out in test_output:
-            if not isinstance(out, bool):
+            if not isinstance(out, (bool,np.bool_)):
                 raise ValueError(
                     "`func` should return boolean values in list/tuple/array like (True, False, True)"
                 )
 
         sd_list = [
-            "  ".join("T" if s else "F" for s in func(i, *p))
+            "  ".join("T" if s else "F" for s in func(_Atom(self.symbols[i],i, *p)))
             for i, p in enumerate(self.positions)
         ]
         labels = np.array(

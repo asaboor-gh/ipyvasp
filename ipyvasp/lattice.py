@@ -317,9 +317,9 @@ class POSCAR:
         
         ```python
         pc = POSCAR()
-        pc.filter_sites(lambda i,x,y,z: i in pc.data.types.Ga) # FINE
-        pc.set_boundary([-2,2]).filter_sites(lambda i,x,y,z: i in pc.data.types.Ga) # INCORRECT sites may be picked
-        pc.set_boundary([-2,2]).filter_sites(lambda i,x,y,z: i in pc.last.data.types.Ga) # PERFECT, pc.last is output of set_boundary
+        pc.filter_atoms(lambda a: a.index in pc.data.types.Ga) # FINE
+        pc.set_boundary([-2,2]).filter_atoms(lambda a: a.index in pc.data.types.Ga) # INCORRECT sites picked
+        pc.set_boundary([-2,2]).filter_atoms(lambda a: a.index in pc.last.data.types.Ga) # PERFECT, pc.last is output of set_boundary
         ```
 
         Tip: You can use `self.auto_renderer.on()` to keep doing opertions and visualize while last line of any cell is a POSCAR object.
@@ -358,9 +358,9 @@ class POSCAR:
         
         ```python
         pc = POSCAR()
-        pc.filter_sites(lambda i,x,y,z: i in pc.data.types.Ga) # FINE
-        pc.set_boundary([-2,2]).filter_sites(lambda i,x,y,z: i in pc.data.types.Ga) # INCORRECT sites may be picked
-        pc.set_boundary([-2,2]).filter_sites(lambda i,x,y,z: i in pc.last.data.types.Ga) # PERFECT, pc.last is output set_boundary
+        pc.filter_atoms(lambda a: a.index in pc.data.types.Ga) # FINE
+        pc.set_boundary([-2,2]).filter_atoms(lambda a: a.index in pc.data.types.Ga) # INCORRECT sites picked
+        pc.set_boundary([-2,2]).filter_atoms(lambda a: a.index in pc.last.data.types.Ga) # PERFECT, pc.last is output of set_boundary
         ```
         """
         return self._last
@@ -699,10 +699,10 @@ class POSCAR:
     def set_boundary(self, a = [0,1], b=[0,1],c=[0,1]):
         return self.__class__(data = plat.set_boundary(self.data, a=a,b=b,c=c))
     
-    @_sub_doc(plat.filter_sites)
-    @_sig_kwargs(plat.filter_sites,("poscar_data",))
-    def filter_sites(self, func, tol=0.01):
-        return self.__class__(data = plat.filter_sites(self.data, func,tol=tol))
+    @_sub_doc(plat.filter_atoms)
+    @_sig_kwargs(plat.filter_atoms,("poscar_data",))
+    def filter_atoms(self, func, tol=0.01):
+        return self.__class__(data = plat.filter_atoms(self.data, func,tol=tol))
 
     @_sub_doc(plat.rotate_poscar)
     def rotate(self, angle_deg, axis_vec):

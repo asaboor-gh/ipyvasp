@@ -6,6 +6,7 @@ import requests as req
 import inspect
 from itertools import combinations, product
 from functools import lru_cache
+from typing import NamedTuple
 
 from scipy.spatial import ConvexHull, KDTree
 import plotly.graph_objects as go
@@ -238,7 +239,7 @@ def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=F
     ----------
     outfile : PathLike
     selective_dynamics : callable
-        If given, should be a function like `f(index,x,y,z) -> (bool, bool, bool)`
+        If given, should be a function like `f(a) -> (a.p < 1/4)` or `f(a) -> (a.x < 1/4, a.y < 1/4, a.z < 1/4)` 
         which turns on/off selective dynamics for each atom based in each dimension.
         See `ipyvasp.POSCAR.data.get_selective_dynamics` for more info.
     overwrite: bool
@@ -1192,8 +1193,11 @@ def splot_kpath(
         labels = [
             "[{0:5.2f}, {1:5.2f}, {2:5.2f}]".format(x, y, z) for x, y, z in kpoints
         ]
+    
+    if fmt_label is None:
+        fmt_label = lambda x: (x, {"color": "blue"})
 
-    _validate_label_func(fmt_label, labels[0])
+    _validate_label_func(fmt_label,labels[0])
 
     coords = bz_data.to_cartesian(kpoints)
     if _zoffset and plane:
@@ -1565,25 +1569,49 @@ def _get_bond_length(poscar_data, bond_length=None):
         )  # Add 5% margin over mean distance, this covers same species too, and in multiple species, this will stop bonding between same species.
 
 
-def _masked_data(poscar_data, func):
-    "Returns indices of sites which satisfy the func."
-    if not callable(func):
-        raise TypeError("`func` should be a callable function.")
+class _Atom(NamedTuple):
+    "Object passed to POSCAR operations `func` where atomic sites are modified. Additinal property p -> array([x,y,z])."
+    symbol : str
+    index : int
+    x : float
+    y : float
+    z : float
 
-    if len(inspect.signature(func).parameters) != 4:
+    @property
+    def p(self): return np.array([self.x,self.y,self.z]) # for robust operations
+
+class _AtomLabel(str):
+    "Object passed to `fmt_label` in plotting. `number` and `symbol` are additional attributes and `to_latex` is a method."
+    @property
+    def number(self): return int(self.split()[1])
+    @property
+    def symbol(self): return self.split()[0]
+    def to_latex(self): return "{}$_{{{}}}$".format(*self.split())
+
+def _validate_func(func):
+    if not callable(func):
+        raise ValueError("`func` must be a callable function with single parameter `Atom(symbol,index,x,y,z)`.")
+    
+    if len(inspect.signature(func).parameters) != 1:
         raise ValueError(
-            "`func` takes exactly 4 arguments: (index,x,y,z) in fractional coordinates"
+            "`func` takes exactly 1 argument: `Atom(symbol,index,x,y,z)` in fractional coordinates"
+        )
+    
+    ret = func(_Atom('',0,0,0,0))
+    if not isinstance(ret, (bool, np.bool_)):
+        raise ValueError(
+            f"`func` must be a function that returns a bool, got {type(ret)}."
         )
 
-    if not isinstance(func(0, 0, 0, 0), bool):
-        raise TypeError("`func` should return a boolean value.")
-
+def _masked_data(poscar_data, func):
+    "Returns indices of sites which satisfy the func."
+    _validate_func(func)
     eqv_inds  = tuple(getattr(poscar_data.metadata, "eqv_indices",[]))
 
     pick = []
     for i, pos in enumerate(poscar_data.positions):
         idx = eqv_inds[i] if eqv_inds else i  # map to original index
-        if func(idx, *pos):
+        if func(_Atom(poscar_data.symbols[i], idx, *pos)): # symbols based on i, not eqv_idx
             pick.append(i)
     return pick  # could be duplicate indices
 
@@ -1604,8 +1632,8 @@ def _filter_pairs(labels, pairs, dist, bond_length):
     # Return all pairs otherwise
     return pairs  # None -> auto calculate bond_length, number -> use that number
 
-def filter_sites(poscar_data, func, tol = 0.01):
-    """Filter sites based on a function that acts on index and fractional positions such as `lambda i,x,y,z: condition`. 
+def filter_atoms(poscar_data, func, tol = 0.01):
+    """Filter atomic sites based on a function that acts on an atom such as `lambda a: (a.p < 1/2).all()`. `p` is additional property to get array([x,y,z]) togther.
     This may include equivalent sites, so it should be used for plotting purpose only, e.g. showing atoms on a plane.
     An attribute `source_indices` is added to metadata which is useful to pick other things such as `OUTCAR.ion_pot[POSCAR.filter(...).data.metadata.source_indices]`. 
 
@@ -1804,13 +1832,13 @@ def iplot_lattice(
     return fig
 
 
-def _validate_label_func(fmt_label, parameter):
+def _validate_label_func(fmt_label,label):
     if not callable(fmt_label):
         raise ValueError("fmt_label must be a callable function.")
     if len(inspect.signature(fmt_label).parameters.values()) != 1:
-        raise ValueError("fmt_label must have only one argument.")
+        raise ValueError("fmt_label must have only one argument that accepts a str like 'Ga 1'.")
 
-    test_out = fmt_label(parameter)
+    test_out = fmt_label(_AtomLabel(label))
     if isinstance(test_out, (list, tuple)):
         if len(test_out) != 2:
             raise ValueError(
@@ -1903,7 +1931,7 @@ def splot_lattice(
     bond_kws : dict
         Keyword arguments to pass to `LineCollection`/`Line3DCollection` for plotting bonds.
     fmt_label : callable
-        If given, each site label is passed to it like fmt_label('Ga 1').
+        If given, each site label is passed to it as a subclass of str 'Ga 1' with extra attributes `symbol` and `number` and a method `to_latex`, e.g. `lambda lab: lab.to_latex()`.
         It must return a string or a list/tuple of length 2 with first item as label and second item as dictionary of keywords to pass to `plt.text`.
     plot_cell : bool
         Default is True, plot unit cell with default settings.
@@ -1935,7 +1963,7 @@ def splot_lattice(
     pairs = _filter_pairs(labels, pairs, dist, bond_length)
 
     if fmt_label is not None:
-        _validate_label_func(fmt_label, labels[0])
+        _validate_label_func(fmt_label,labels[0])
 
     if plot_cell:
         bz_data = serializer.CellData(
@@ -2002,7 +2030,7 @@ def splot_lattice(
         )
         if fmt_label:
             for i, coord in enumerate(coords):
-                lab, textkws = fmt_label(labels[i]), {}
+                lab, textkws = fmt_label(_AtomLabel(labels[i])), {}
                 if isinstance(lab, (list, tuple)):
                     lab, textkws = lab
                 ax.text(*coord, lab, **textkws)
@@ -2027,7 +2055,7 @@ def splot_lattice(
         if fmt_label:
             labels = [labels[i] for i in zorder]  # Reorder labels
             for i, coord in enumerate(coords[zorder]):
-                lab, textkws = fmt_label(labels[i]), {}
+                lab, textkws = fmt_label(_AtomLabel(labels[i])), {}
                 if isinstance(lab, (list, tuple)):
                     lab, textkws = lab
                 ax.text(*coord[[ix, iy]], lab, **textkws)
@@ -2512,24 +2540,8 @@ def add_atoms(poscar_data, name, positions):
     return serializer.PoscarData(data)  # Return new POSCAR
 
 
-def _validate_func(func, nargs, return_type):
-    if not callable(func):
-        raise ValueError("`func` must be a callable function.")
-
-    if len(inspect.signature(func).parameters) != nargs:
-        raise ValueError(
-            f"`func` must be a function with {nargs} arguments, got {len(inspect.signature(func).parameters)}."
-        )
-    ret = func(*range(nargs))
-    if not isinstance(ret, return_type):
-        raise ValueError(
-            f"`func` must be a function that returns {return_type}, got {type(ret)}."
-        )
-
-
 def replace_atoms(poscar_data, func, name):
-    """Replace atoms satisfying a `func(i,x,y,z) -> bool` with a new `name`"""
-    _validate_func(func, 4, bool)
+    """Replace atoms satisfying a `func(atom) -> bool` with a new `name`. Like `lambda a: a.symbol == 'Ga'`"""
     data = poscar_data.to_dict()  # Copy data to avoid modifying original
     mask = _masked_data(poscar_data, func)
     new_types = {**{k: [] for k in poscar_data.types.keys()}, name: []}
@@ -2570,19 +2582,18 @@ def sort_poscar(poscar_data, new_order):
 
     return serializer.PoscarData(data)
 
-
 def remove_atoms(poscar_data, func, fillby=None):
-    """Remove atoms that satisfy `func(x,y,z) -> bool` on their fractional coordinates x,y,z.
+    """Remove atoms that satisfy `func(atom) -> bool` on their fractional coordinates like `lambda a: all(a.p < 1/2)`. `p` is additional property to get array([x,y,z]) togther.
     If `fillby` is given, it will fill the removed atoms with atoms from fillby POSCAR.
 
     .. note::
         The coordinates of fillby POSCAR are transformed to basis of given POSCAR, before filling.
         So a good filling is only guaranteed if both POSCARs have smaller lattice mismatch.
     """
-    _validate_func(func, 3, bool)
+    _validate_func(func) # need to validate for fillbay
     data = poscar_data.to_dict()  # Copy data to avoid modifying original
     positions = data["positions"]
-    mask = _masked_data(poscar_data, lambda i, x, y, z: not func(x, y, z))
+    mask = _masked_data(poscar_data, lambda s: not func(s))
 
     new_types = {k: [] for k in poscar_data.types.keys()}
     for k, vs in data["types"].items():
@@ -2601,7 +2612,7 @@ def remove_atoms(poscar_data, func, fillby=None):
 
         def keep_pos(i, x, y, z):  # keep positions in basis of given data
             u, v, w = to_basis(poscar_data.basis, to_R3(fillby.basis, [[x, y, z]]))[0]
-            return bool(func(u, v, w))
+            return bool(func(_Atom('', 0, u, v, w)))
 
         mask = _masked_data(fillby, keep_pos)
         N_prev = len(data["positions"])  # before filling

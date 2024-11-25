@@ -181,7 +181,7 @@ class Files:
         return self.__class__(files, exclude=exclude,dirs_only=dirs_only,files_only=files_only)
 
     def summarize(self, func, **kwargs):
-        "Apply a func(apth) -> dict and create a dataframe."
+        "Apply a func(path) -> dict and create a dataframe."
         return summarize(self._files,func, **kwargs)
     
     def load_results(self):
