@@ -18,11 +18,13 @@ from contextlib import suppress
 import numpy as np
 from pandas.io.clipboard import clipboard_get, clipboard_set
 import matplotlib.colors as mcolors
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+import plotly.graph_objects as go 
 
 
 from .core import serializer
 from .core import spatial_toolkit as stk
-from .core.plot_toolkit import iplot2widget
+from .core.plot_toolkit import get_axes, iplot2widget
 from .utils import _sig_kwargs, _sub_doc
 from . import _lattice as plat
 from ._lattice import (
@@ -626,6 +628,57 @@ class POSCAR:
         if not hasattr(self, "_cell"):
             self._cell = self.get_cell()
         return self._cell
+    
+    def get_plane(self, hkl, d=1/2,tol=1e-2):
+        """Returns Nx3 vertices of a plane bound inside cell. .
+        hkl should be list of three miller indices. d is fractional distance in range 0,1 in direction of hkl. 
+        e.g. if there are 8 planes of atoms in a cubic cell, d = 0, 1/8,...7/8, 1 match position of those planes.
+        """
+        from sympy import Point3D, Line3D, Plane
+        V = self.data.rec_basis.dot(hkl)
+        normal = V/np.linalg.norm(V)
+        point = d*normal*np.linalg.norm(self.data.basis.dot(hkl)) # to make d 0-1
+        P = Plane(Point3D(*point),normal_vector=normal)
+
+        pts = []
+        for e in self.cell.vertices[self.cell.edges]:
+            L = Line3D(Point3D(*e[0]),Point3D(*e[1]))
+            if (isc := P.intersection(L)) and isinstance(isc[0],Point3D):
+                pts.append(isc[0])
+
+        pts = np.unique(np.array(pts,dtype=float),axis=0)
+        pts = pts[stk.order(pts,)]
+        qts = self.cell.to_fractional(pts)
+        qts = qts[(qts >= -tol).all(axis=1) & (qts <= 1 + tol).all(axis=1)]
+        pts = self.cell.to_cartesian(qts)
+        return pts
+    
+    def splot_plane(self, hkl, d=1/2,tol=1e-2,ax=None, **kwargs):
+        """Provide hkl and a 3D axes to plot plane. kwargs are passed to `mpl_toolkits.mplot3d.art3d.Poly3DCollection`
+        Note: You may get wrong plane if your basis are not aligned to axes. So you can use `transpose` or `set_zdir` methods before plottling cell.
+        """
+        P = self.get_plane(hkl,d=d,tol=tol)
+        if ax is None:
+            ax = get_axes(axes_3d=True)
+            ax.set( # it does not show otherwise
+                xlim=[P[:,0].min(),P[:,0].max()],
+                ylim=[P[:,1].min(),P[:,1].max()],
+                zlim=[P[:,2].min(),P[:,2].max()]
+            )
+        kwargs = {'alpha':0.5,'color':'#898','shade': False, 'label':str(hkl), **kwargs}
+        ax.add_collection(Poly3DCollection([P],**kwargs))
+        ax.autoscale_view()
+        return ax
+
+    def iplot_plane(self, hkl, d = 1/2, tol=1e-3, fig=None,**kwargs):
+        "Plot plane on a plotly Figure. kwargs are passed to `plotly.graph_objects.Mesh3d`."
+        if fig is None:
+            fig = go.Figure()
+
+        P = self.get_plane(hkl,d=d,tol=tol)
+        kwargs = {**dict(color='#8a8',opacity=0.7,alphahull=0, showlegend=True,name=str(hkl)),**kwargs}
+        fig.add_trace(go.Mesh3d({k:v for v,k in zip(P.T, 'xyz')},**kwargs))
+        return fig
 
     @_sub_doc(stk.get_bz, {"basis :.*loop :": "loop :"})
     @_sig_kwargs(stk.get_bz, ("basis",))

@@ -315,6 +315,9 @@ def get_bz(basis, loop=True, primitive=False):
         "vertices": verts,
         "faces": idx_faces,
         "primitive": primitive,
+        "edges": np.unique(
+            np.sort([[i,j] for f in idx_faces for i,j in zip(f[:-1],f[1:])], axis=1),
+            axis=0)
     }
     from .serializer import BrZoneData  # to avoid circular import
 
