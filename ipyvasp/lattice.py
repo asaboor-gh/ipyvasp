@@ -676,6 +676,7 @@ class POSCAR:
             fig = go.Figure()
 
         P = self.get_plane(hkl,d=d,tol=tol)
+        kwargs['delaunayaxis'] = ('xyz')[np.eye(3).dot(hkl).argmax()] # with alphahull=-1, delaunayaxis to be set properly
         kwargs = {**dict(color='#8a8',opacity=0.7,alphahull=-1, showlegend=True,name=str(hkl)),**kwargs}
         fig.add_trace(go.Mesh3d({k:v for v,k in zip(P.T, 'xyz')},**kwargs))
         return fig
