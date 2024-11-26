@@ -1377,7 +1377,7 @@ def iplot_bz(
                 z=xc[:, 2],
                 color=color,
                 opacity=alpha,
-                alphahull=0,
+                alphahull=-1,
                 lighting=dict(diffuse=0.5),
                 legendgroup=zone_name,
                 name=zone_name,

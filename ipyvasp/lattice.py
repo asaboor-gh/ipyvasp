@@ -676,7 +676,7 @@ class POSCAR:
             fig = go.Figure()
 
         P = self.get_plane(hkl,d=d,tol=tol)
-        kwargs = {**dict(color='#8a8',opacity=0.7,alphahull=0, showlegend=True,name=str(hkl)),**kwargs}
+        kwargs = {**dict(color='#8a8',opacity=0.7,alphahull=-1, showlegend=True,name=str(hkl)),**kwargs}
         fig.add_trace(go.Mesh3d({k:v for v,k in zip(P.T, 'xyz')},**kwargs))
         return fig
 
