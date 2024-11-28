@@ -267,7 +267,7 @@ def prevent_overwrite(path) -> Path:
     if out_path.exists():
         # Check existing files
         i = 0
-        name = out_path.stem + "-{}" + out_path.suffix
+        name = (out_path.parent / out_path.stem) + "-{}" + out_path.suffix
         while Path(name.format(i)).is_file():
             i += 1
         out_path = Path(name.format(i))

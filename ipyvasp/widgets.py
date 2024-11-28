@@ -13,6 +13,7 @@ from time import time
 from pathlib import Path
 from collections.abc import Iterable
 from functools import partial
+from pprint import pformat
 
 # Widgets Imports
 from IPython.display import display
@@ -262,10 +263,10 @@ class Files:
             If you don't need to interpret the result of the function call, you can use the @self.interact decorator instead.
         """
         info = ipw.HTML().add_class("fprogess")
-        dd = Dropdown(description='File', options=self._files)
+        dd = Dropdown(description='File', options=['Select a File',*self._files]) # allows single file workable
 
         def interact_func(fname, **kws):
-            if fname:  # This would be None if no file is selected
+            if fname and str(fname) != 'Select a File':  # This would be None if no file is selected
                 info.value = _progress_svg
                 try:
                     start = time()
@@ -627,7 +628,7 @@ class BandsWidget(VBox):
         self._tsd = Dropdown(
             description="Style", options=["plotly_white", "plotly_dark"]
         )
-        self._click = Dropdown(description="Click", options=["None", "VBM", "CBM"])
+        self._click = Dropdown(description="Click", options=["None", "vbm", "cbm"])
         self._ktcicks = Text(description="kticks")
         self._brange = ipw.IntRangeSlider(description="bands",min=1, max=1) # number, not index
         self._ppicks = PropsPicker(
@@ -680,9 +681,9 @@ class BandsWidget(VBox):
             )
             self._brange.max = self.bands.source.summary.NBANDS
             if self.bands.source.summary.LSORBIT:
-                self._click.options = ["None", "VBM", "CBM", "so_max", "so_min"]
+                self._click.options = ["None", "vbm", "cbm", "so_max", "so_min"]
             else:
-                self._click.options = ["None", "VBM", "CBM"]
+                self._click.options = ["None", "vbm", "cbm"]
 
             if (file := path.parent / "result.json").is_file():
                 self._result = serializer.load(str(file.absolute()))  # Old data loaded
@@ -692,7 +693,7 @@ class BandsWidget(VBox):
                 {
                     "v": round(pdata.volume, 4),
                     **{k: round(v, 4) for k, v in zip("abc", pdata.norms)},
-                    **{k: round(v, 4) for k, v in zip("αβγ", pdata.angles)},
+                    **{k: round(v, 4) for k, v in zip(["alpha","beta","gamma"], pdata.angles)},
                 }
             )
             self._click_save_data(None)  # Load into view
@@ -771,13 +772,10 @@ class BandsWidget(VBox):
         def _show_and_save(data_dict):
             self._interact.output_widget.clear_output(wait=True)  # Why need again?
             with self._interact.output_widget:
-                print(
-                    ", ".join(
-                        f"{key} = {value}"
+                print(pformat({key: value
                         for key, value in data_dict.items()
                         if key not in ("so_max", "so_min")
-                    )
-                )
+                    }))
 
             serializer.dump(
                 data_dict,
@@ -785,11 +783,9 @@ class BandsWidget(VBox):
                 outfile=self.path.parent / "result.json",
             )
 
-        if (
-            change is None
-        ):  # called from other functions but not from store_clicked_data
+        if change is None:  # called from other functions but not from store_clicked_data
             return _show_and_save(self._result)
-        # Should be after checking chnage
+        # Should be after checking change
         if self._click.value and self._click.value == "None":
             return  # No need to act on None
 
@@ -806,11 +802,11 @@ class BandsWidget(VBox):
                         x, 6
                     )  # Save x to test direct/indirect
 
-            if data_dict.get("VBM", None) and data_dict.get("CBM", None):
-                data_dict["E_gap"] = np.round(data_dict["CBM"] - data_dict["VBM"], 6)
+            if data_dict.get("vbm", None) and data_dict.get("cbm", None):
+                data_dict["gap"] = np.round(data_dict["cbm"] - data_dict["vbm"], 6)
 
             if data_dict.get("so_max", None) and data_dict.get("so_min", None):
-                data_dict["Δ_SO"] = np.round(
+                data_dict["soc"] = np.round(
                     data_dict["so_max"] - data_dict["so_min"], 6
                 )
 

@@ -14,6 +14,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 from itertools import permutations
 from contextlib import suppress
+from collections import namedtuple
 
 import numpy as np
 from pandas.io.clipboard import clipboard_get, clipboard_set
@@ -630,7 +631,7 @@ class POSCAR:
         return self._cell
     
     def get_plane(self, hkl, d=1/2,tol=1e-2):
-        """Returns Nx3 vertices of a plane bound inside cell. .
+        """Returns tuple `Plane(point, normal, vertices)` of a plane bound inside cell. .
         hkl should be list of three miller indices. d is fractional distance in range 0,1 in direction of hkl. 
         e.g. if there are 8 planes of atoms in a cubic cell, d = 0, 1/8,...7/8, 1 match position of those planes.
         """
@@ -651,13 +652,13 @@ class POSCAR:
         qts = self.cell.to_fractional(pts)
         qts = qts[(qts >= -tol).all(axis=1) & (qts <= 1 + tol).all(axis=1)]
         pts = self.cell.to_cartesian(qts)
-        return pts
+        return namedtuple("Plane","point normal vertices")(point, normal, pts)
     
     def splot_plane(self, hkl, d=1/2,tol=1e-2,ax=None, **kwargs):
         """Provide hkl and a 3D axes to plot plane. kwargs are passed to `mpl_toolkits.mplot3d.art3d.Poly3DCollection`
         Note: You may get wrong plane if your basis are not aligned to axes. So you can use `transpose` or `set_zdir` methods before plottling cell.
         """
-        P = self.get_plane(hkl,d=d,tol=tol)
+        P = self.get_plane(hkl,d=d,tol=tol).vertices
         if ax is None:
             ax = get_axes(axes_3d=True)
             ax.set( # it does not show otherwise
@@ -676,9 +677,9 @@ class POSCAR:
             fig = go.Figure()
 
         P = self.get_plane(hkl,d=d,tol=tol)
-        kwargs['delaunayaxis'] = ('xyz')[np.eye(3).dot(hkl).argmax()] # with alphahull=-1, delaunayaxis to be set properly
+        kwargs['delaunayaxis'] = ('xyz')[np.abs(np.eye(3).dot(P.normal)).argmax()] # with alphahull=-1, delaunayaxis to be set properly
         kwargs = {**dict(color='#8a8',opacity=0.7,alphahull=-1, showlegend=True,name=str(hkl)),**kwargs}
-        fig.add_trace(go.Mesh3d({k:v for v,k in zip(P.T, 'xyz')},**kwargs))
+        fig.add_trace(go.Mesh3d({k:v for v,k in zip(P.vertices.T, 'xyz')},**kwargs))
         return fig
 
     @_sub_doc(stk.get_bz, {"basis :.*loop :": "loop :"})

@@ -917,13 +917,13 @@ def dump(data, format: str = "pickle", outfile: str = None, indent: int = 1) -> 
     if format == "pickle":
         if outfile == None:
             return pickle.dumps(dict_obj)
-        outfile = Path(outfile).stem + ".pickle"
+        outfile = Path(outfile).with_suffix(".pickle")
         with open(outfile, "wb") as f:
             pickle.dump(dict_obj, f)
     if format == "json":
         if outfile == None:
             return json.dumps(dict_obj, cls=EncodeFromNumpy, indent=indent)
-        outfile = Path(outfile).stem + ".json"
+        outfile = Path(outfile).with_suffix(".json")
         with open(outfile, "w") as f:
             json.dump(dict_obj, f, cls=EncodeFromNumpy, indent=indent)
     return None

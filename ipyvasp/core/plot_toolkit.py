@@ -1009,7 +1009,10 @@ def iplot2html(fig, outfile=None, modebar=True):
 
 
 def iplot2widget(fig, fig_widget=None, template=None):
-    "Converts plotly's figure to FigureWidget by copying attributes and data. If fig_widget is provided, it will update it. Adds template if provided."
+    "Converts plotly's figure to FigureWidget by copying attributes and data. If fig_widget is provided, it will update it. Adds template if provided. If fig is FigureWidget, it is just returned"
+    if isinstance(fig, go.FigureWidget):
+        return fig
+    
     if not isinstance(fig, go.Figure):
         raise ValueError("fig must be instance of plotly.graph_objects.Figure")
 
