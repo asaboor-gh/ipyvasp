@@ -1,4 +1,4 @@
-__all__ = ["Vasprun", "Vaspout", "minify_vasprun", "xml2dict"]
+__all__ = ["Vasprun", "Vaspout", "minify_vasprun", "xml2dict","read"]
 
 import re
 from io import StringIO
@@ -114,6 +114,35 @@ class Vaspout(DataSource):
     def __init__(self, path):
         raise NotImplementedError("Vaspout is not implemented yet.")
 
+def read(file, start_match, stop_match=r'\n', nth_match=1, skip_last=False,apply=None):
+    """Reads a part of the file between start_match and stop_match and returns a generator. It is lazy and fast.
+    `start_match` and `stop_match`(default is end of same line) are regular expressions. `nth_match` is the number of occurence of start_match to start reading.
+    `skip_last` is used to determine whether to keep or skip last line.
+    `apply` should be None or `func` to transform each captured line.
+    """
+    if "|" in start_match:
+        raise ValueError(
+            "start_match should be a single match, so '|' character is not allowed."
+        )
+    with Path(file).open("r") as f:
+        lines = islice(f, None)  # this is fast
+        matched = False
+        n_start = 1
+        for line in lines:
+            if re.search(start_match, line, flags=re.DOTALL):
+                if nth_match != n_start:
+                    n_start += 1
+                else:
+                    matched = True
+            if matched and re.search(
+                stop_match, line, flags=re.DOTALL
+            ):  # avoid stop before start
+                matched = False
+                if not skip_last:
+                    yield apply(line) if callable(apply) else line
+                break  # stop reading
+            if matched:  # should be after break to handle last line above
+                yield apply(line) if callable(apply) else line
 
 class Vasprun(DataSource):
     "Reads vasprun.xml file lazily. It reads only the required data from the file when a plot or data access is requested."
@@ -129,36 +158,14 @@ class Vasprun(DataSource):
             skipk if isinstance(skipk, (int, np.integer)) else self.get_skipk()
         )
 
-    def read(self, start_match, stop_match, nth_match=1, skip_last=False):
+    def read(self, start_match, stop_match=r'\n', nth_match=1, skip_last=False,apply=None):
         """Reads a part of the file between start_match and stop_match and returns a generator. It is lazy and fast.
-        `start_match` and `stop_match` are regular expressions. `nth_match` is the number of occurence of start_match to start reading.
+        `start_match` and `stop_match`(default is end of same line) are regular expressions. `nth_match` is the number of occurence of start_match to start reading.
         `skip_last` is used to determine whether to keep or skip last line.
+        `apply` should be None or `func` to transform each captured line.
         """
-        if "|" in start_match:
-            raise ValueError(
-                "start_match should be a single match, so '|' character is not allowed."
-            )
-
-        with self.path.open("r") as f:
-            lines = islice(f, None)  # this is fast
-            matched = False
-            n_start = 1
-            for line in lines:
-                if re.search(start_match, line, flags=re.DOTALL):
-                    if nth_match != n_start:
-                        n_start += 1
-                    else:
-                        matched = True
-                if matched and re.search(
-                    stop_match, line, flags=re.DOTALL
-                ):  # avoid stop before start
-                    matched = False
-                    if not skip_last:
-                        yield line
-
-                    break  # stop reading
-                if matched:  # should be after break to handle last line above
-                    yield line
+        kws = {k:v for k,v in locals().items() if k !='self'}
+        return read(self.path,**kws)
 
     def get_skipk(self):
         "Returns the number of k-points to skip in band structure plot in case of HSE calculation."

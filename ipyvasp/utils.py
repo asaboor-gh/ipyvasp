@@ -26,8 +26,8 @@ import matplotlib.pyplot as plt
 def get_file_size(path: str):
     """Return file size"""
     if (p := Path(path)).is_file():
-        size = p.stat.st_size
-        for unit in ["Bytes", "KB", "MB", "GB", "TB"]:
+        size = p.stat().st_size
+        for unit in ["B", "KB", "MB", "GB", "TB"]:
             if size < 1024.0:
                 return "%3.2f %s" % (size, unit)
             size /= 1024.0

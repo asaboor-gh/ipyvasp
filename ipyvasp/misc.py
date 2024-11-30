@@ -70,10 +70,8 @@ class OUTCAR:
     def path(self):
         return self._path
 
-    @_sub_doc(vp.Vasprun.read)
-    @_sig_kwargs(vp.Vasprun.read, ("self",))
-    def read(self, start_match, stop_match, **kwargs):
-        return vp.Vasprun.read(
-            self, start_match, stop_match, **kwargs
-        )  # Pass all the arguments to the function
+    @_sub_doc(vp.read)
+    def read(self, start_match, stop_match=r'\n', nth_match=1, skip_last=False,apply=None):
+        kws = {k:v for k,v in locals().items() if k !='self'}
+        return vp.read(self.path, **kws)  # Pass all the arguments to the function
         

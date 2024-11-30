@@ -40,7 +40,7 @@ import plotly.graph_objects as go
 from . import utils as gu
 from . import lattice as lat
 from .core import serializer, parser as vp, plot_toolkit as ptk
-from .utils import _sig_kwargs, _sub_doc
+from .utils import _sig_kwargs, _sub_doc, get_file_size
 from ._enplots import _fmt_labels
 
 
@@ -68,7 +68,7 @@ def summarize(files, func, **kwargs):
     for name, path in files.items():
         output = func(path, **kwargs)
         if not isinstance(output, dict):
-            raise TypeError("Function must return a dictionary.")
+            raise TypeError("Function must return a dictionary to create DataFrame.")
 
         if "FILE" in output:
             raise KeyError(
@@ -115,6 +115,8 @@ class Files:
     Use methods on return such as `summarize`, `with_name`, `filtered`, `interact` and others.
 
     >>> Files(root_1, glob_1,...).add(root_2, glob_2,...) # Fully flexible to chain
+
+    WARNING: Don't use write operations on paths in files in batch mode, it can cause unrecoverable data loss.
     """
     def __init__(self, path_or_files = '.', glob = '*', exclude = None,files_only = False, dirs_only=False):
         if isinstance(path_or_files, Files):
@@ -167,10 +169,6 @@ class Files:
 
     def __add__(self, other):
         raise NotImplementedError("Use self.add method instead!")
-
-    def map(self,func):
-        "Map files to a function!"
-        return map(func, self._files)
 
     def with_name(self, name):
         "Change name of all files. Only keeps existing files."
@@ -420,6 +418,52 @@ class Files:
     def bands_widget(self, height='450px'):
         "Get BandsWidget instance with these files."
         return BandsWidget(files=self._files, height=height)
+    
+    def map(self,func, to_df=False):
+        """Map files to a function that takes path as argument. 
+        If `to_df=True`, func may return a dict to create named columns, or just two columns will be created.
+        Otherwise returns generator of elemnets `(path, func(path))`.
+        If you need to operate on opened file pointer, use `.mapf` instead.
+        
+        >>> import ipyvasp as ipv
+        >>> files = ipv.Files(...)
+        >>> files.map(lambda path: ipv.read(path, '<pattern>',apply = lambda line: float(line.split()[0])))
+        >>> files.map(lambda path: ipv.load(path), to_df=True) 
+        """
+        if to_df:
+            return self._try_return_df(func)
+        return ((path, func(path)) for path in self._files) # generator must
+    
+    def _try_return_df(self, func):
+        try: return summarize(self._files,func)
+        except: return pd.DataFrame(((path, func(path)) for path in self._files))
+    
+    def mapf(self, func, to_df=False,mode='r', encoding=None):
+        """Map files to a function that takes opened file pointer as argument. Opened files are automatically closed and should be in readonly mode.
+        Load files content into a generator sequence of  tuples like `(path, func(open(path)))` or DataFrame if `to_df=True`.
+        If `to_df=True`, func may return a dict to create named columns, or just two columns will be created.
+        If you need to operate on just path, use `.map` instead.
+        
+        >>> import json
+        >>> import ipyvasp as ipv
+        >>> files = ipv.Files(...)
+        >>> files.mapf(lambda fp: json.load(fp),to_df=True) 
+        >>> files.mapf(lambda fp: [fp.readline() for _ in range(5)]) # read first five lines
+        """
+        if not mode in 'rb':
+            raise ValueError("Only 'r'/'rb' mode is allowed in this context!")
+        
+        def loader(path):
+            with open(path, mode=mode,encoding=encoding) as f:
+                return func(f)
+
+        if to_df:
+            return self._try_return_df(loader)
+        return ((path, loader(path)) for path in self._files) # generator must
+        
+    def stat(self):
+        "Get files stat as DataFrame. Currently only size is supported."
+        return self.summarize(lambda path: {"size": get_file_size(path)})
 
 
 @fix_signature
