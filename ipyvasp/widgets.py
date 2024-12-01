@@ -447,8 +447,10 @@ class Files:
         >>> import json
         >>> import ipyvasp as ipv
         >>> files = ipv.Files(...)
-        >>> files.mapf(lambda fp: json.load(fp),to_df=True) 
-        >>> files.mapf(lambda fp: [fp.readline() for _ in range(5)]) # read first five lines
+        >>> files.mapf(lambda fp: json.load(fp,cls=ipv.DecodeToNumpy),to_df=True) # or use ipv.load(path) in map
+        >>> files.mapf(lambda fp: ipv.get_lines(fp, range(5)) # read first five lines
+        >>> files.mapf(lambda fp: ipv.get_lines(fp, range(-5,0)) # read last five lines
+        >>> files.mapf(lambda fp: ipv.get_lines(fp, -1) # read last line
         """
         if not mode in 'rb':
             raise ValueError("Only 'r'/'rb' mode is allowed in this context!")

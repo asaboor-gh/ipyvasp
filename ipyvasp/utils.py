@@ -1,5 +1,6 @@
 __all__ = [
     "get_file_size",
+    "get_lines",
     "set_dir",
     "interpolate_data",
     "rolling_mean",
@@ -10,6 +11,7 @@ __all__ = [
 
 import re
 import os
+import io
 from contextlib import contextmanager
 from pathlib import Path
 from inspect import signature, getdoc
@@ -33,6 +35,38 @@ def get_file_size(path: str):
             size /= 1024.0
     else:
         return ""
+    
+def get_lines(f, indices):
+    """Read lines by indexing from an opened file pointer `f`. Negative indexing is supported to read lines from end.
+    Returns a single str of line if one integer given, otherwise a list of lines.
+    This consumes a lot less memory then indexing over `f.readlines()[index]`.
+
+    >>> with open('some_file','r') as f:
+    >>>     get_lines(f, -1) # last line
+    >>>     get_lines(f, range(5)) # first 5 lines
+    >>>     get_lines(f, range(-5,0)) # last 5 lines
+    """
+    if not isinstance(f, io.TextIOWrapper):
+        raise TypeError(f"f should be file-like object. got {type(f)}")
+    
+    return_line = False
+    if isinstance(indices, int):
+        indices = [indices]
+        return_line = True
+
+    if not isinstance(indices, (tuple,list, range)):
+        raise TypeError(f"indices should int/list/tuple/range, got {type(indices)}")
+    
+    f.seek(0)
+    if min(indices) < 0:
+        if not hasattr(f, '_nlines'): # do this once, assuming file is not changed while reading
+            f._nlines = sum(1 for _ in enumerate(f))
+            f.seek(0)
+
+        indices = [i + (f._nlines if i < 0 else 0) for i in indices] # make all positive
+    
+    lines = [l for i, l in enumerate(f) if i in indices]
+    return lines[0] if return_line else lines
 
 
 def _sig_kwargs(from_func, skip_params=()):
