@@ -1,6 +1,6 @@
 __all__ = [
     "get_file_size",
-    "get_lines",
+    "take",
     "set_dir",
     "interpolate_data",
     "rolling_mean",
@@ -36,36 +36,58 @@ def get_file_size(path: str):
     else:
         return ""
     
-def get_lines(f, indices):
-    """Read lines by indexing from an opened file pointer `f`. Negative indexing is supported to read lines from end.
-    Returns a single str of line if one integer given, otherwise a list of lines.
-    This consumes a lot less memory then indexing over `f.readlines()[index]`.
+def take(f, rows, cols=None, dtype=str, sep=None):
+    """Read data from an opened file pointer `f` by indexing. Negative indexing is supported to read lines from end.
+    Negative indexing is not supported in cols because of variable length of each line.
+    If `cols=None`, returns a single str of line if one integer given, otherwise a list of lines.
+    If `cols` is int ot sequence of int, each line is splitted by `sep` (default all whitespaces) and `dtype` is applied over resulting fields.
 
+    `take(f, -1, 1, float) == float(f.readlines()[-1].split()[1])` with advantage for consuming almost no memory as compared to `f.readlines()` on a huge file.
+
+    Note: For more robust reading of structured files like `PROCAR` use `ipyvasp.parse_text` function.
+    
+    Tip: If your output is matrix-like, you can cast it to numpy array like `take(...)*np.array(1)`.
+   
     >>> with open('some_file','r') as f:
-    >>>     get_lines(f, -1) # last line
-    >>>     get_lines(f, range(5)) # first 5 lines
-    >>>     get_lines(f, range(-5,0)) # last 5 lines
+    >>>     take(f, -1, 1, float) # read last line, second column as float
+    >>>     take(f, range(5)) # first 5 lines
+    >>>     take(f, range(-5,0)) # last 5 lines
     """
     if not isinstance(f, io.TextIOWrapper):
         raise TypeError(f"f should be file-like object. got {type(f)}")
     
     return_line = False
-    if isinstance(indices, int):
-        indices = [indices]
+    if isinstance(rows, int):
+        rows = [rows]
         return_line = True
 
-    if not isinstance(indices, (tuple,list, range)):
-        raise TypeError(f"indices should int/list/tuple/range, got {type(indices)}")
+    if not isinstance(rows, (tuple,list, range)):
+        raise TypeError(f"rows should int/list/tuple/range, got {type(rows)}")
     
     f.seek(0)
-    if min(indices) < 0:
+    if min(rows) < 0:
         if not hasattr(f, '_nlines'): # do this once, assuming file is not changed while reading
             f._nlines = sum(1 for _ in enumerate(f))
             f.seek(0)
 
-        indices = [i + (f._nlines if i < 0 else 0) for i in indices] # make all positive
+        rows = [i + (f._nlines if i < 0 else 0) for i in rows] # make all positive
     
-    lines = [l for i, l in enumerate(f) if i in indices]
+    lines = [l for i, l in enumerate(f) if i in rows]
+    
+    if cols:
+        return_col = False
+        if isinstance(cols, int):
+            cols = [cols]
+            return_col = True 
+
+        if not isinstance(cols, (list,tuple, range)):
+            raise TypeError(f"cols should be a sequce of integers or single int, got {type(cols)}")
+        
+        lines = [[dtype(v) for i, v in enumerate(l.split(sep)) if i in cols] for l in lines]
+        
+        if return_col:
+            lines = [line[0] for line in lines]
+
     return lines[0] if return_line else lines
 
 

@@ -18,7 +18,7 @@ __all__ = [  # For documentation purpose
     "webshow",
     "load_results",
     "parse_text",
-    "get_lines",
+    "index",
     "summarize",
 ]
 
