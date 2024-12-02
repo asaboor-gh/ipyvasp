@@ -15,6 +15,7 @@ import io
 from contextlib import contextmanager
 from pathlib import Path
 from inspect import signature, getdoc
+from itertools import islice
 
 
 import numpy as np
@@ -36,17 +37,22 @@ def get_file_size(path: str):
     else:
         return ""
     
-def take(f, rows, cols=None, dtype=str, sep=None):
-    """Read data from an opened file pointer `f` by indexing. Negative indexing is supported to read lines from end.
+def take(f, rows, cols=None, dtype=None, exclude=None,sep=None):
+    """Read data from an opened file pointer `f` by indexing. `rows=None` picks all lines. Negative indexing is supported to read lines from end.
     Negative indexing is not supported in cols because of variable length of each line.
     If `cols=None`, returns a single str of line if one integer given, otherwise a list of lines.
     If `cols` is int ot sequence of int, each line is splitted by `sep` (default all whitespaces) and `dtype` is applied over resulting fields.
+    `exclude` should be regex. It removes lines after selection by `rows`.
+
+    Returns list (nested or plain) or single value or None based on `rows` and `cols` selection.
 
     `take(f, -1, 1, float) == float(f.readlines()[-1].split()[1])` with advantage for consuming almost no memory as compared to `f.readlines()` on a huge file.
 
-    Note: For more robust reading of structured files like `PROCAR` use `ipyvasp.parse_text` function.
+    .. note::
+        For more robust reading of structured files like `PROCAR` use `ipyvasp.parse_text` function.
     
-    Tip: If your output is matrix-like, you can cast it to numpy array like `take(...)*np.array(1)`.
+    .. tip::
+        If your output is matrix-like, you can cast it to numpy array like `take(...)*np.array(1)`.
    
     >>> with open('some_file','r') as f:
     >>>     take(f, -1, 1, float) # read last line, second column as float
@@ -61,20 +67,27 @@ def take(f, rows, cols=None, dtype=str, sep=None):
         rows = [rows]
         return_line = True
 
-    if not isinstance(rows, (tuple,list, range)):
+    if rows and not isinstance(rows, (tuple,list, range)):
         raise TypeError(f"rows should int/list/tuple/range, got {type(rows)}")
     
     f.seek(0)
-    if min(rows) < 0:
+    if rows and min(rows) < 0:
         if not hasattr(f, '_nlines'): # do this once, assuming file is not changed while reading
             f._nlines = sum(1 for _ in enumerate(f))
             f.seek(0)
 
         rows = [i + (f._nlines if i < 0 else 0) for i in rows] # make all positive
     
-    lines = [l for i, l in enumerate(f) if i in rows]
+    if rows is None:
+        lines = islice(f, None)
+    else:
+        lines = (l for i, l in enumerate(f) if i in rows)
+    
+    if exclude:
+        lines = (l for l in lines if not re.search(exclude,l))
     
     if cols:
+        conv = dtype if callable(dtype) else (lambda v: v)
         return_col = False
         if isinstance(cols, int):
             cols = [cols]
@@ -83,12 +96,15 @@ def take(f, rows, cols=None, dtype=str, sep=None):
         if not isinstance(cols, (list,tuple, range)):
             raise TypeError(f"cols should be a sequce of integers or single int, got {type(cols)}")
         
-        lines = [[dtype(v) for i, v in enumerate(l.split(sep)) if i in cols] for l in lines]
+        lines = ([conv(v) for i, v in enumerate(l.split(sep)) if i in cols] for l in lines)
         
         if return_col:
-            lines = [line[0] for line in lines]
+            lines = (line[0] if line else None for line in lines)
+    else:
+        return ''.join(lines) or None # just raw format as it is
 
-    return lines[0] if return_line else lines
+    # Try to return None where there is nothing
+    return next(lines,None) if return_line else (list(lines) or None)
 
 
 def _sig_kwargs(from_func, skip_params=()):

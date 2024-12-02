@@ -261,10 +261,10 @@ class Files:
             If you don't need to interpret the result of the function call, you can use the @self.interact decorator instead.
         """
         info = ipw.HTML().add_class("fprogess")
-        dd = Dropdown(description='File', options=['Select a File',*self._files]) # allows single file workable
+        dd = Dropdown(description='File', options=['',*self._files]) # allows single file workable
 
         def interact_func(fname, **kws):
-            if fname and str(fname) != 'Select a File':  # This would be None if no file is selected
+            if fname and str(fname) != '':  # This would be None if no file is selected
                 info.value = _progress_svg
                 try:
                     start = time()

@@ -3,6 +3,7 @@ __all__ = ["parse_text", "get_bib", "get_E0", "OUTCAR"]
 import requests
 from pathlib import Path
 from itertools import islice
+import numpy as np
 
 from .core import parser as vp
 from .utils import _sig_kwargs, _sub_doc
@@ -35,8 +36,8 @@ def get_bib(DOI):
     
     return response.status_code
 
-def get_E0(path: Path = 'OSZICAR'):
-    "Get the E0 from the last line of OSZICAR."
+def get_E0(path: Path = 'OSZICAR',nsteps=0):
+    "Get the E0 from the last line of OSZICAR. If `nsteps > 0`, returns as many available last steps ."
     fh = Path(path)
     if fh.is_file():
         lines = fh.read_text().splitlines()
@@ -51,6 +52,10 @@ def get_E0(path: Path = 'OSZICAR'):
     
     if not line.lstrip().startswith('1'):
         print(f"Calculation may not be converged for {path!r}\n{line}")
+    
+    if nsteps > 0: # not allow negative ones
+        lines = [float(line.split()[2]) for line in lines if (not 'dE' in line) and (not 'F=' in line)]
+        return np.array(lines[-nsteps:]) # as many last steps
         
     return float(line.split('=')[1].split()[0])
 
