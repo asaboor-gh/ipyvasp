@@ -42,7 +42,7 @@ def take(f, rows, cols=None, dtype=None, exclude=None,sep=None):
     Negative indexing is not supported in cols because of variable length of each line.
     If `cols=None`, returns a single str of line if one integer given, otherwise a list of lines.
     If `cols` is int ot sequence of int, each line is splitted by `sep` (default all whitespaces) and `dtype` is applied over resulting fields.
-    `exclude` should be regex. It removes lines after selection by `rows`.
+    `exclude` should be regex. It removes matching lines after selection by `rows`. Empty lines are also discarded if `cols` is given.
 
     Returns list (nested or plain) or single value or None based on `rows` and `cols` selection.
 
@@ -86,7 +86,7 @@ def take(f, rows, cols=None, dtype=None, exclude=None,sep=None):
     if exclude:
         lines = (l for l in lines if not re.search(exclude,l))
     
-    if cols:
+    if cols is not None:
         conv = dtype if callable(dtype) else (lambda v: v)
         return_col = False
         if isinstance(cols, int):
@@ -96,6 +96,7 @@ def take(f, rows, cols=None, dtype=None, exclude=None,sep=None):
         if not isinstance(cols, (list,tuple, range)):
             raise TypeError(f"cols should be a sequce of integers or single int, got {type(cols)}")
         
+        lines = (l for l in lines if l.strip()) # remove empty lines after indexing and only if cols are given
         lines = ([conv(v) for i, v in enumerate(l.split(sep)) if i in cols] for l in lines)
         
         if return_col:
