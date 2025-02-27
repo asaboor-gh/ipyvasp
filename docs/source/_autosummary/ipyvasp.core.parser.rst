@@ -17,6 +17,7 @@
       export_outcar
       gen2numpy
       minify_vasprun
+      read
       xml2dict
    
    

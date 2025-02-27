@@ -19,6 +19,7 @@
       prevent_overwrite
       rolling_mean
       set_dir
+      take
       transform_color
    
    
