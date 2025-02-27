@@ -200,6 +200,14 @@ class _BandsDosBase:
     def data(self):
         "Returns a dictionary of information about the picked data after a plotting function called."
         return self._data
+    
+    def get_skipk(self):
+        "Returns number of first few skipped kpoints in bandstructure plot in case of HSE calculations."
+        return self.source.get_skipk()
+    
+    def set_skipk(self, skipk):
+        "Set/reset to skip first kpoints in bandstructure plot in case of HSE calculations."
+        self.source.set_skipk(skipk)
 
     def _fix_projections(self, projections):
         labels, spins, atoms, orbs, uspins, uatoms, uorbs = (

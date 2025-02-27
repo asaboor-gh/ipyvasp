@@ -66,7 +66,7 @@ class EvalsDataFrame(pd.DataFrame):
     source : DataSource
         Data source to collect data from. Could be ``ipyvasp.Vasprun`` or ``ipyvasp.Vaspout``.  Alternatively you can use ``DataSource.get_dataframe`` method to get dataframe directly.
     spins : list
-
+        of spin indices [zero based here], In output data frame you will see corresponding spin number based on full data.
     bands : list
         of band indices [zero based here], In output data frame you will see corresponding band number based on full data.
     atoms : list

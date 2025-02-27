@@ -16,8 +16,11 @@ class DataSource:
     """Base class for all data sources. It provides a common interface to access data from different sources.
     Subclass it to get data from a source and implement the abstract methods."""
 
-    def __init__(self, path):
+    def __init__(self, path, skipk=None):
         self._path = Path(path).absolute()
+        self._skipk = (
+            skipk if isinstance(skipk, (int, np.integer)) else self._read_skipk()
+        )
         if not self._path.is_file():
             raise FileNotFoundError("File: '{}'' does not exist!".format(path))
         self._summary = self.get_summary()  # summary data is read only once
@@ -76,7 +79,23 @@ class DataSource:
         raise NotImplementedError(
             "`get_structure` should be implemented in a subclass. See Vasprun.get_structure as example."
         )
-
+    
+    def _read_skipk(self):
+        raise NotImplementedError(
+            "`_read_skipk` should be implemented in a subclass. See Vasprun._read_skipk as example."
+        )
+    
+    def get_skipk(self):
+        "Returns the number of first few k-points to skip in band structure plot in case of HSE calculation."
+        return self._skipk
+    
+    def set_skipk(self, skipk):
+        "Set the number of first few k-points to skip in band structure plot in case of HSE calculation."
+        if isinstance(skipk, (int, np.integer)):
+            self._skipk = skipk
+        else:
+            raise TypeError("skipk should be an integer to skip first few random kpoints.")
+        
     def get_kpoints(self):
         raise NotImplementedError(
             "`get_kpoints` should be implemented in a subclass. See Vasprun.get_kpoints as example."
@@ -111,7 +130,8 @@ class Vaspout(DataSource):
     dos = DataSource.dos
     bands = DataSource.bands
 
-    def __init__(self, path):
+    def __init__(self, path, skipk=None):
+        # super().__init__(path, skipk)
         raise NotImplementedError("Vaspout is not implemented yet.")
 
 def read(file, start_match, stop_match=r'\n', nth_match=1, skip_last=False,apply=None):
@@ -153,10 +173,7 @@ class Vasprun(DataSource):
     bands = DataSource.bands
 
     def __init__(self, path="./vasprun.xml", skipk=None):
-        super().__init__(path)
-        self._skipk = (
-            skipk if isinstance(skipk, (int, np.integer)) else self.get_skipk()
-        )
+        super().__init__(path, skipk)
 
     def read(self, start_match, stop_match=r'\n', nth_match=1, skip_last=False,apply=None):
         """Reads a part of the file between start_match and stop_match and returns a generator. It is lazy and fast.
@@ -167,7 +184,7 @@ class Vasprun(DataSource):
         kws = {k:v for k,v in locals().items() if k !='self'}
         return read(self.path,**kws)
 
-    def get_skipk(self):
+    def _read_skipk(self):
         "Returns the number of k-points to skip in band structure plot in case of HSE calculation."
         weights = np.fromiter(
             (
@@ -199,8 +216,9 @@ class Vasprun(DataSource):
                 ).iter("v")
             ]
         )
-        info_dict["NBANDS"] = int( # Bad initializations, read last one
-            ET.fromstring(list(self.read("<i.*NBANDS", "</i>"))[-1]).text 
+        _nbands = [*self.read("<i.*NBANDS[\"\']", "</i>"),*self.read("<i.*NBANDS[\"\']", "</i>",nth_match=2)]
+        info_dict["NBANDS"] = int( # Bad initializations of NBANDS, read last one
+            ET.fromstring(_nbands[-1]).text 
         )
         info_dict["NELECTS"] = int(
             float(ET.fromstring(next(self.read("<i.*NELECT", "</i>"))).text)
