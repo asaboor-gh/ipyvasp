@@ -100,6 +100,7 @@ def fix_signature(cls):
     cls.__signature__ = inspect.signature(cls.__init__)
     return cls
 
+@fix_signature
 class Files:
     """Creates a Batch of files in a directory recursively based on glob pattern or given list of files.
     This is a boilerplate abstraction to do analysis in multiple calculations simultaneously.
