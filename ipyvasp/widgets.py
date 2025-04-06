@@ -676,8 +676,9 @@ class BandsWidget(VBox):
             description="Style", options=["plotly_white", "plotly_dark"]
         )
         self._click = Dropdown(description="Click", options=["None", "vbm", "cbm"])
-        self._ktcicks = Text(description="kticks")
+        self._ktcicks = Text(description="kticks", tooltip="0 index maps to minimum value of kpoints slider.")
         self._brange = ipw.IntRangeSlider(description="bands",min=1, max=1) # number, not index
+        self._krange = ipw.IntRangeSlider(description="kpoints",min=0, max=1,value=[0,1], tooltip="Includes non-zero weight kpoints") 
         self._ppicks = PropsPicker(
             on_button_click=self._update_graph, on_selection_changed=self._warn_update
         )
@@ -691,6 +692,7 @@ class BandsWidget(VBox):
             free_widgets=[
                 self._tsd,
                 self._brange,
+                self._krange,
                 self._ktcicks,
                 ipw.HTML("<hr/>"),
                 self._ppicks,
@@ -703,6 +705,7 @@ class BandsWidget(VBox):
         self._tsd.observe(self._change_theme, "value")
         self._click.observe(self._click_save_data, "value")
         self._ktcicks.observe(self._warn_update, "value")
+        self._krange.observe(self._set_krange, "value")
         self._brange.observe(self._warn_update, "value")
 
     @property
@@ -723,9 +726,17 @@ class BandsWidget(VBox):
                 vp.Vasprun(path) if path.parts[-1].endswith('xml') else vp.Vaspout(path)
             ).bands
             self._ppicks.update(self.bands.source.summary)
-            self._ktcicks.value = ", ".join(
+
+            self._krange.max = self.bands.source.summary.NKPTS - 1
+            self._krange.tooltip = f"Includes {self.bands.source.get_skipk()} non-zero weight kpoints"
+            self.bands.source.set_skipk(0) # full range to view for slider flexibility after fix above
+
+            self._kwargs['kpairs'] = [self._krange.value,]
+            if (ticks := ", ".join(
                 f"{k}:{v}" for k, v in self.bands.get_kticks()
-            )
+            )): # Do not overwrite if empty
+                self._ktcicks.value = ticks
+            
             self._brange.max = self.bands.source.summary.NBANDS
             if self.bands.source.summary.LSORBIT:
                 self._click.options = ["None", "vbm", "cbm", "so_max", "so_min"]
@@ -782,7 +793,7 @@ class BandsWidget(VBox):
                 for vs in self._ktcicks.value.split(",")
             ]
             kticks = [(int(vs[0]), vs[1]) for vs in hsk if len(vs) == 2] or None
-            self._kwargs = {"kticks": kticks, # below numbers instead of index and full shown range
+            self._kwargs = {**self._kwargs, "kticks": kticks, # below numbers instead of index and full shown range
                 "bands": range(self._brange.value[0] - 1, self._brange.value[1]) if self._brange.value else None}
 
             if self._ppicks.projections:
@@ -814,6 +825,10 @@ class BandsWidget(VBox):
 
     def _change_theme(self, change):
         self._fig.layout.template = self._tsd.value
+
+    def _set_krange(self, change):
+        self._kwargs["kpairs"] = [self._krange.value,]
+        self._warn_update(None)  # Update warning
 
     def _click_save_data(self, change=None):
         def _show_and_save(data_dict):
