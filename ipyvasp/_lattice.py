@@ -232,7 +232,7 @@ def periodic_table(selection=None):
     return ax
 
 
-def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=False, comment=""):
+def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=False, comment="", scale=None):
     """Writes POSCAR data to a file or returns string
 
     Parameters
@@ -246,6 +246,8 @@ def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=F
         If file already exists, overwrite=True changes it.
     comment: str
         Add comment, previous comment will be there too.
+    scale: float
+        Scale factor for the basis vectors. Default is provided by loaded data.
 
 
     .. note::
@@ -253,7 +255,14 @@ def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=F
     """
     _comment = poscar_data.metadata.comment + comment
     out_str = f"{poscar_data.SYSTEM}  # " + (_comment or "Created by ipyvasp")
-    scale = poscar_data.metadata.scale
+
+    if scale is None:
+        scale = poscar_data.metadata.scale
+    elif not isinstance(scale, (int, float)):
+        raise TypeError("scale must be a number or None.")
+    elif scale == 0:
+        raise ValueError("scale can not be zero.")
+    
     out_str += "\n  {:<20.14f}\n".format(scale)
     out_str += "\n".join(
         ["{:>22.16f}{:>22.16f}{:>22.16f}".format(*a) for a in poscar_data.basis / scale]
@@ -550,9 +559,9 @@ class InvokeMaterialsProject:
                 else:
                     print(self._cif)
 
-            def write_poscar(self, outfile=None, overwrite=False, comment=""):
+            def write_poscar(self, outfile=None, overwrite=False, comment="",scale=None):
                 "Use `ipyvasp.lattice.POSCAR.write` if you need extra options."
-                write_poscar(self.export_poscar(), outfile=outfile, overwrite=overwrite, comment=comment)
+                write_poscar(self.export_poscar(), outfile=outfile, overwrite=overwrite, comment=comment, scale=scale)
 
             def export_poscar(self):
                 "Export poscar data form cif content."
