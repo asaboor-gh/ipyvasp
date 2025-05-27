@@ -28,7 +28,7 @@
    
       BandsWidget
       Files
-      KpathWidget
+      KPathWidget
       PropsPicker
    
    

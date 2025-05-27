@@ -436,10 +436,10 @@ class POSCAR:
         return weas_viewer(self, **kwargs)
 
     def view_kpath(self, height='400px'):
-        "Initialize a KpathWidget instance to view kpath for current POSCAR, and you can select others too."
-        from .widgets import KpathWidget
+        "Initialize a KPathWidget instance to view kpath for current POSCAR, and you can select others too."
+        from .widgets import KPathWidget
 
-        return KpathWidget([self.path,],height=height)
+        return KPathWidget([self.path,],height=height)
 
     @_sub_doc(plat.iplot_lattice)
     @_sig_kwargs(plat.iplot_lattice, ("poscar_data",))

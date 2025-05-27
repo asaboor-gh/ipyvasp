@@ -20,6 +20,7 @@ import PIL  # For text image.
 
 import plotly.graph_objects as go
 from plotly.io._base_renderers import open_html_in_browser
+from einteract import patched_plotly
 
 from .spatial_toolkit import to_R3, rotation
 from ..utils import _sig_kwargs
@@ -1011,7 +1012,7 @@ def iplot2html(fig, outfile=None, modebar=True):
 def iplot2widget(fig, fig_widget=None, template=None):
     "Converts plotly's figure to FigureWidget by copying attributes and data. If fig_widget is provided, it will update it. Adds template if provided. If fig is FigureWidget, it is just returned"
     if isinstance(fig, go.FigureWidget):
-        return fig
+        return patched_plotly(fig) # add attributes selected and clicked
     
     if not isinstance(fig, go.Figure):
         raise ValueError("fig must be instance of plotly.graph_objects.Figure")
@@ -1035,7 +1036,7 @@ def iplot2widget(fig, fig_widget=None, template=None):
         for data in fig.data:
             fig_widget.add_trace(data)
 
-    return fig_widget
+    return patched_plotly(fig_widget) # add attributes selected and clicked
 
 @_sig_kwargs(plt.imshow, ('ax','X'))
 def image2plt(image_or_fname, ax = None, crop = None, **kwargs):

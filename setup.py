@@ -28,6 +28,7 @@ REQUIRED = [
     "plotly==6.0.1",
     "requests==2.28.1",
     "typer==0.9.0",
+    "einteract", # Any last version of einteract
 ]
 
 # What packages are optional?

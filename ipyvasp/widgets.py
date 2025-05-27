@@ -4,7 +4,7 @@ __all__ = [
     "Files",
     "PropsPicker",
     "BandsWidget",
-    "KpathWidget",
+    "KPathWidget",
 ]
 
 
@@ -17,7 +17,6 @@ from pprint import pformat
 
 # Widgets Imports
 from IPython.display import display
-import ipywidgets as ipw
 from ipywidgets import (
     Layout,
     Button,
@@ -34,7 +33,10 @@ from ipywidgets import (
 # More imports
 import numpy as np
 import pandas as pd
+import ipywidgets as ipw
+import traitlets
 import plotly.graph_objects as go
+from einteract import InteractBase, callback, patched_plotly
 
 # Internal imports
 from . import utils as gu
@@ -413,8 +415,8 @@ class Files:
         return inner
     
     def kpath_widget(self, height='400px'):
-        "Get KpathWidget instance with these files."
-        return KpathWidget(files = self.with_name('POSCAR'), height = height)
+        "Get KPathWidget instance with these files."
+        return KPathWidget(files = self.with_name('POSCAR'), height = height)
 
     def bands_widget(self, height='450px'):
         "Get BandsWidget instance with these files."
@@ -886,9 +888,34 @@ class BandsWidget(VBox):
         "Generate a dataframe form result.json file in each folder."
         return load_results(self._interact._dd.options)
 
+def _get_css(mode):
+    return {
+        '--jp-widgets-color':                 'white' if mode == 'dark' else 'black',
+        '--jp-widgets-label-color':           'white' if mode == 'dark' else 'black',
+        '--jp-widgets-readout-color':         'white' if mode == 'dark' else 'black',
+        '--jp-widgets-input-color':           'white' if mode == 'dark' else 'black',
+        '--jp-widgets-input-background-color': '#222' if mode == 'dark' else '#f7f7f7',
+        '--jp-widgets-input-border-color':    '#8988' if mode == 'dark' else '#ccc',
+        '--jp-layout-color2':                  '#555' if mode == 'dark' else '#ddd', # buttons
+        '--jp-ui-font-color1':           'whitesmoke' if mode == 'dark' else 'black', # buttons
+        '--jp-content-font-color1':           'white' if mode == 'dark' else 'black', # main text
+        '--jp-layout-color1':                  '#111' if mode == 'dark' else '#fff', # background
+        ':fullscreen': {'min-height':'100vh'},
+        'background': 'var(--jp-widgets-input-background-color)', 'border-radius': '4px', 'padding':'4px 4px 0 4px',
+        '> *': {
+            'box-sizing': 'border-box',
+            'background': 'var(--jp-layout-color1)',
+            'border-radius': '4px', 'grid-gap': '8px', 'padding': '8px',
+        },
+        '.left-sidebar .sm': {
+            'flex-grow': 1,
+            'select': {'height': '100%',},
+        },
+        '.footer': {'overflow': 'hidden','padding':0},
+    }
 
 @fix_signature
-class KpathWidget(VBox):
+class KPathWidget(InteractBase):
     """
     Interactively bulid a kpath for bandstructure calculation.
 
@@ -900,46 +927,10 @@ class KpathWidget(VBox):
     - Add labels to the points by typing in the "Labels" box such as "Γ,X" or "Γ 5,X" that will add 5 points in interval.
     - To break the path between two points "Γ" and "X" type "Γ 0,X" in the "Labels" box, zero means no points in interval.
 
-    You can use `self.files.update` method to change source files without effecting state of widget.
+    - You can use `self.files.update` method to change source files without effecting state of widget.
+    - You can observe `self.file` trait to get current file selected and plot something, e.g. lattice structure.
     """
-
-    def __init__(self, files, height="400px"):
-        super().__init__(_dom_classes=["KpathWidget"])
-        self._fig = go.FigureWidget()
-        self._sm = SelectMultiple(options=[], layout=Layout(width="auto"))
-        self._lab = Text(description="Labels", continuous_update=True)
-        self._kpt = Text(description="KPOINT", continuous_update=False)
-        self._add = Button(description="Lock", tooltip="Lock/Unlock adding more points")
-        self._del = Button(description="❌ Point", tooltip="Delete Selected Points")
-        self._tsb = Button(description="Dark Plot", tooltip="Toggle Plot Theme")
-        self._poscar = None
-        self._clicktime = None
-        self._kpoints = {}
-
-        free_widgets = [
-            HBox([self._add, self._del, self._tsb], layout=Layout(min_height="24px")),
-            ipw.HTML(
-                "<style>.KpathWidget .widget-select-multiple { min-height: 180px; }\n .widget-select-multiple > select {height: 100%;}</style>"
-            ),
-            self._sm,
-            self._lab,
-            self._kpt,
-        ]
-        
-        Files(files)._attributed_interactive(self,
-            self._update_fig, self._fig, free_widgets=free_widgets, height=height
-        )
-        
-        self._tsb.on_click(self._update_theme)
-        self._add.on_click(self._toggle_lock)
-        self._del.on_click(self._del_point)
-        self._kpt.observe(self._take_kpt, "value")
-        self._lab.observe(self._add_label)
-
-    @property
-    def path(self):
-        "Returns currently selected path."
-        return self._interact._dd.value # itself a Path object
+    file = traitlets.Any(None, allow_none=True)
     
     @property
     def files(self):
@@ -950,109 +941,156 @@ class KpathWidget(VBox):
     def poscar(self):
         "POSCAR class associated to current selection."
         return self._poscar
+        
+    def __init__(self, files, height="450px"):
+        self.add_class("KPathWidget")
+        self._poscar = None
+        self._oldclick = None
+        self._kpoints = {}
+        self._files = Files(files)
+        super().__init__()
+        btns = [HBox(layout=Layout(min_height="24px")),('lock','delp', 'theme')]
+        self.relayout(
+            left_sidebar=['head','file',btns, 'info', 'sm','out-kpt','kpt', 'out-lab', 'lab'],
+            center=['fig'],  footer = [c for c in self.groups.outputs if not c in ('out-lab','out-kpt')],
+            pane_widths=['25em',1,0], pane_heights=[0,1,0], # footer only has uselessoutputs
+            height=height
+        )
+        self._update_theme(self.params.fig,self.params.theme) # fix theme in starts
 
-    def _update_fig(self, path, fig):
-        if not hasattr(self, '_interact'): return  # First time not available
-        from .lattice import POSCAR  # to avoid circular import
+    def _show_info(self, text, color='skyblue'):
+        self.params.info.value = f'<span style="color:{color}">{text}</span>'
 
-        with self._interact.output_widget:
-            template = (
-                "plotly_dark" if "Light" in self._tsb.description else "plotly_white"
-            )
-            self._poscar = POSCAR(path)
-            ptk.iplot2widget(
-                self._poscar.iplot_bz(fill=False, color="red"), fig, template
-            )
-            with fig.batch_animate():
-                fig.add_trace(
-                    go.Scatter3d(
-                        x=[],
-                        y=[],
-                        z=[],
-                        mode="lines+text",
-                        name="path",
-                        text=[],
-                        hoverinfo="none",  # dont let it block other points
-                        textfont_size=18,
-                    )
-                )  # add path that will be updated later
-            self._click()  # handle events
-            print("Click points on plot to store for kpath.")
+    def _interactive_params(self):
+        return dict(
+            head = ipw.HTML("<b>K-Path Builder</b>"),
+            fig = patched_plotly(go.FigureWidget()),
+            file = Dropdown(description="File", options=self._files),
+            sm  = SelectMultiple(description="KPOINTS", options=[], layout=Layout(width="auto")),
+            lab = Text(description="Labels", continuous_update=True),
+            kpt = Text(description="KPOINT", continuous_update=False),
+            theme = Button(icon='sun', description=' ', tooltip="Toggle Theme"),
+            delp = Button(description=" ", icon='trash', tooltip="Delete Selected Points"),
+            click = {'fig': 'clicked'},
+            lock = Button(description=" ", icon='unlock', tooltip="Lock/Unlock adding more points"),
+            info = ipw.HTML(), # consise information in one place
+        )
 
-    def _click(self):
-        def handle_click(trace, points, state):
-            if self._clicktime and (time() - self._clicktime < 1):
-                return  # Avoid double clicks
+    @callback('out-fig')
+    def _update_fig(self, file, fig):
+        self.file = file # update trait value
+        from ipyvasp.lattice import POSCAR  # to avoid circular import
+        self._poscar = POSCAR(file)
+        ptk.iplot2widget(
+            self._poscar.iplot_bz(fill=False, color="red"), fig, self.params.fig.layout.template
+        )
+        fig.layout.autosize = True # must
+            
+        with fig.batch_animate():
+            fig.add_trace(
+                go.Scatter3d(x=[], y=[], z=[],
+                    mode="lines+text",
+                    name="path",
+                    text=[],
+                    hoverinfo="none",  # dont let it block other points
+                    textfont_size=18,
+                )
+            )  # add path that will be updated later
+        self._show_info("Click points on plot to store for kpath.")
 
-            self._clicktime = time()  # register this click's time
-
-            if points.ys != []:
-                index = points.point_inds[0]
-                kp = trace.hovertext[index]
-                kp = [float(k) for k in kp.split("[")[1].split("]")[0].split()]
-
-                if self._sm.value:
-                    self._take_kpt(kp)  # this updates plot back as well
-                elif self._add.description == "Lock":  # only add when open
+    @callback('out-click')
+    def _click(self, click):
+        # I have no idea even clcik trait does not chnage on same point, still it goes infinte if unchecked
+        if click != self._oldclick and (tidx := click.get('trace_indexes',[])):
+            self._oldclick = click # for next time
+            data = self.params.fig.data # click depends on fig, so accessing here
+            if not [data[i] for i in tidx if 'HSK' in data[i].name]: return
+            
+            if cp := [*click.get('xs', []),*click.get('ys', []),*click.get('zs', [])]:
+                kp = self._poscar.bz.to_fractional(cp) # reciprocal space
+                
+                if self.params.sm.value:
+                    self._set_kpt(kp)  # this updates plot back as well
+                elif self.params.lock.icon == "unlock":  # only add when open
                     self._add_point(kp)
+                    
+    @callback('out-kpt')
+    def _take_kpt(self, kpt):
+        print("Add kpoint e.g. 0,1,3 at selection(s)")
+        self._set_kpt(kpt)
 
-        for trace in self._fig.data:
-            if "HSK" in trace.name:
-                trace.on_click(handle_click)
+    @callback('out-lab')
+    def _set_lab(self, lab):
+        print("Add label[:number] e.g. X:5,Y,L:9")
+        self._add_label(lab)
 
-    def _update_selection(self):
-        with self._interact.output_widget:
-            coords, labels = self.get_coords_labels()
-            with self._fig.batch_animate():
-                for trace in self._fig.data:
-                    if "path" in trace.name and coords.any():
-                        trace.x = coords[:, 0]
-                        trace.y = coords[:, 1]
-                        trace.z = coords[:, 2]
-                        trace.text = _fmt_labels(
-                            labels
-                        )  # convert latex to html equivalent
+    @callback
+    def _update_theme(self, fig, theme):
+        require_dark = (self.params.theme.icon == 'sun')
+        self.params.theme.icon = 'moon' if require_dark else 'sun' # we are not observing icon, so we can do this
+        fig.layout.template = "plotly_dark" if require_dark else "plotly_white"
+        self.set_css(_get_css('dark' if require_dark else 'light'))
+        fig.layout.autosize = True # must
 
-    def get_coords_labels(self):
-        "Returns tuple of (coordinates, labels) to directly plot."
-        with self._interact.output_widget:
-            points = self.get_kpoints()
+    @callback
+    def _toggle_lock(self, lock):
+        self.params.lock.icon = 'lock' if self.params.lock.icon == 'unlock' else 'unlock'
+        self._show_info(f"{self.params.lock.icon}ed adding/deleting kpoints!")
 
-            coords = (
-                self.poscar.bz.to_cartesian([p[:3] for p in points]).tolist()
-                if points
-                else []
-            )
-            labels = [
-                p[3] if (len(p) >= 4 and isinstance(p[3], str)) else "" for p in points
-            ]
-            numbers = [
-                p[4]
-                if len(p) == 5
-                else p[3]
-                if (len(p) == 4 and isinstance(p[3], int))
-                else ""
-                for p in points
-            ]
+    @callback
+    def _del_point(self, delp):
+        if self.params.lock.icon == 'unlock': # Do not delete locked
+            sm = self.params.sm
+            for v in sm.value:  # for loop here is important to update selection properly
+                sm.options = [opt for opt in sm.options if opt[1] != v]
+                self._update_selection()  # update plot as well
+            else:
+                self._show_info("Select point(s) to delete")
+        else:
+            self._show_info("cannot delete point when locked!", 'red')
+    
+    def _add_point(self, kpt):
+        sm = self.params.sm
+        sm.options = [*sm.options, ("⋮", len(sm.options))]
+        sm.value = (sm.options[-1][1],) # select to receive point as well
+        self._set_kpt(kpt)  # add point, label and plot back
 
-            j = 0
-            for i, n in enumerate(numbers, start=1):
-                if isinstance(n, int) and n == 0:
-                    labels.insert(i + j, "")
-                    coords.insert(i + j, [np.nan, np.nan, np.nan])
-                    j += 1
+    def _set_kpt(self,kpt):
+        point = kpt
+        if isinstance(kpt, str) and kpt:
+            if len(kpt.split(",")) != 3: return # Enter at incomplete input
+            point = [float(v) for v in kpt.split(",")] # kpt is value widget
 
-            return np.array(coords), labels
+        if not isinstance(point,(list, tuple,np.ndarray)): return # None etc
+        
+        if len(point) != 3:
+            raise ValueError("Expects KPOINT of 3 floats")
+        self._kpoints.update({v: point for v in self.params.sm.value})
+        label = "{:>8.4f} {:>8.4f} {:>8.4f}".format(*point)
+        self.params.sm.options = [
+            (label, value) if value in self.params.sm.value else (lab, value)
+            for (lab, value) in self.params.sm.options
+        ]
+        self._add_label(self.params.lab.value)  # Re-adjust labels and update plot as well
+        
+    def _add_label(self, lab):
+        labs = [" ⋮ " for _ in self.params.sm.options]  # as much as options
+        for idx, (_, lb) in enumerate(zip(self.params.sm.options, (lab or "").split(","))):
+            labs[idx] = labs[idx] + lb  # don't leave empty anyhow
+        
+        self.params.sm.options = [
+            (v.split("⋮")[0].strip() + lb, idx)
+            for (v, idx), lb in zip(self.params.sm.options, labs)
+        ]
+        self._update_selection()  # Update plot in both cases, by click or manual input
 
     def get_kpoints(self):
         "Returns kpoints list including labels and numbers in intervals if given."
-        keys = [
-            idx for (_, idx) in self._sm.options if idx in self._kpoints
-        ]  # order and existence is important
+        keys = [idx for (_, idx) in self.params.sm.options if idx in self._kpoints]  # order and existence is important
         kpts = [self._kpoints[k] for k in keys]
         LN = [
             lab.split("⋮")[1].strip().split()
-            for (lab, idx) in self._sm.options
+            for (lab, idx) in self.params.sm.options
             if idx in keys
         ]
 
@@ -1072,75 +1110,42 @@ class KpathWidget(VBox):
                 )
         return kpts
 
-    def _update_theme(self, btn):
-        if "Dark" in btn.description:
-            self._fig.layout.template = "plotly_dark"
-            btn.description = "Light Plot"
-        else:
-            self._fig.layout.template = "plotly_white"
-            btn.description = "Dark Plot"
+    def get_coords_labels(self):
+        "Returns tuple of (coordinates, labels) to directly plot."
+        points = self.get_kpoints()
+        coords = self.poscar.bz.to_cartesian([p[:3] for p in points]).tolist() if points else []
+        labels = [p[3] if (len(p) >= 4 and isinstance(p[3], str)) else "" for p in points]
+        numbers = [
+            p[4] if len(p) == 5
+            else p[3] if (len(p) == 4 and isinstance(p[3], int))
+            else "" for p in points]
 
-    def _add_point(self, kpt):
-        with self._interact.output_widget:
-            self._sm.options = [*self._sm.options, ("⋮", len(self._sm.options))]
-            self._sm.value = (
-                self._sm.options[-1][1],
-            )  # select to receive point as well
-            self._take_kpt(kpt)  # add point, label and plot back
+        j = 0
+        for i, n in enumerate(numbers, start=1):
+            if isinstance(n, int) and n == 0:
+                labels.insert(i + j, "")
+                coords.insert(i + j, [np.nan, np.nan, np.nan])
+                j += 1
+        return np.array(coords), labels
 
-    def _toggle_lock(self, btn):
-        if self._add.description == "Lock":
-            self._add.description = "Unlock"
-        else:
-            self._add.description = "Lock"
-
-    def _del_point(self, btn):
-        with self._interact.output_widget:
-            for (
-                v
-            ) in (
-                self._sm.value
-            ):  # for loop here is important to update selection properly
-                self._sm.options = [opt for opt in self._sm.options if opt[1] != v]
-                self._update_selection()  # update plot as well
-
-    def _take_kpt(self, change_or_kpt):
-        with self._interact.output_widget:
-            if isinstance(change_or_kpt, (list, tuple)):
-                point = change_or_kpt
-            else:
-                point = [float(v) for v in self._kpt.value.split(",")]
-
-            if len(point) != 3:
-                raise ValueError("Expects KPOINT of 3 floats")
-
-            self._kpoints.update({v: point for v in self._sm.value})
-            label = "{:>8.4f} {:>8.4f} {:>8.4f}".format(*point)
-            self._sm.options = [
-                (label, value) if value in self._sm.value else (lab, value)
-                for (lab, value) in self._sm.options
-            ]
-            self._add_label(None)  # Re-adjust labels and update plot as well
-
-    def _add_label(self, change):
-        with self._interact.output_widget:
-            labs = [" ⋮ " for _ in self._sm.options]  # as much as options
-            for idx, (_, lab) in enumerate(
-                zip(self._sm.options, self._lab.value.split(","))
-            ):
-                labs[idx] = labs[idx] + lab  # don't leave empty anyhow
-
-            self._sm.options = [
-                (v.split("⋮")[0].strip() + lab, idx)
-                for (v, idx), lab in zip(self._sm.options, labs)
-            ]
-
-            self._update_selection()  # Update plot in both cases, by click or manual input
+    def _update_selection(self):
+        coords, labels = self.get_coords_labels()
+        with self.params.fig.batch_animate():
+            for trace in self.params.fig.data:
+                if "path" in trace.name and coords.any():
+                    trace.x = coords[:, 0]
+                    trace.y = coords[:, 1]
+                    trace.z = coords[:, 2]
+                    trace.text = _fmt_labels(labels)  # convert latex to html equivalent
 
     @_sub_doc(lat.get_kpath, {"kpoints :.*n :": "n :", "rec_basis :.*\n\n": "\n\n"})
     @_sig_kwargs(lat.get_kpath, ("kpoints", "rec_basis"))
     def get_kpath(self, n=5, **kwargs):
         return self.poscar.get_kpath(self.get_kpoints(), n=n, **kwargs)
+
+    def iplot(self):
+        "Returns disconnected current plotly figure"
+        return go.Figure(data=self.params.fig.data, layout=self.params.fig.layout)
 
     def splot(self, plane=None, fmt_label=lambda x: x, plot_kws={}, **kwargs):
         """
@@ -1164,11 +1169,6 @@ class KpathWidget(VBox):
             kpoints, labels=labels, fmt_label=fmt_label, **plot_kws
         )  # plots on ax automatically
         return ax
-
-    def iplot(self):
-        "Returns disconnected current plotly figure"
-        return go.Figure(data=self._fig.data, layout=self._fig.layout)
-
 
 # Should be at end
 del fix_signature  # no more need
