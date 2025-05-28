@@ -5,17 +5,13 @@
 
    
    
-   
 
-   
    
    .. rubric:: Functions
 
    .. autosummary::
    
       load_results
-      store_clicked_data
-      store_selected_data
       summarize
    
    
@@ -26,16 +22,8 @@
 
    .. autosummary::
    
-      BandsWidget
       Files
-      KPathWidget
       PropsPicker
-   
-   
-
-   
-   
-   
-
-
+      BandsWidget
+      KPathWidget
 

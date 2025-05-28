@@ -9,7 +9,6 @@ __all__ = [
 
 
 import inspect, re
-from time import time
 from pathlib import Path
 from collections.abc import Iterable
 from functools import partial
@@ -20,12 +19,10 @@ from IPython.display import display
 from ipywidgets import (
     Layout,
     Button,
-    Box,
     HBox,
     VBox,
     Dropdown,
     Text,
-    Checkbox,
     Stack,
     SelectMultiple,
 )
@@ -36,7 +33,7 @@ import pandas as pd
 import ipywidgets as ipw
 import traitlets
 import plotly.graph_objects as go
-from einteract import InteractBase, callback, patched_plotly
+import einteract as ei 
 
 # Internal imports
 from . import utils as gu
@@ -221,6 +218,18 @@ class Files:
             if old in dd.options:
                 dd.value = old
     
+    def to_dropdown(self,description='File'):
+        """
+        Convert this instance to Dropdown. If there is only one file, adds an 
+        empty option to make that file switchable. 
+        Options of this dropdown are update on calling `Files.update` method."""
+        if hasattr(self,'_dd'): 
+            return self._dd # already created
+        
+        options = self._files if len(self._files) != 1 else ['', *self._files] # make single file work
+        self._dd = Dropdown(description=description, options=options)
+        return self._dd
+    
     def add(self, path_or_files, glob = '*', exclude=None, **kwargs):
         """Add more files or with a diffrent glob on top of exitsing files. Returns same instance.
         Useful to add multiple globbed files into a single chained call.
@@ -233,182 +242,31 @@ class Files:
     def _unique(self, *files_tuples):
         return tuple(np.unique(np.hstack(files_tuples)))
     
-    def interactive(self, func, *args,
-        free_widgets=None,
-        options={"manual": False},
-        height="400px",
-        panel_size = 25,
-        **kwargs):
-        """
-        Interact with `func(path, *args, <free_widgets,optional>, **kwargs)` that takes selected Path as first argument. Returns a widget that saves attributes of the function call such as .f, .args, .kwargs.
-        `args` are widgets to be modified by func, such as plotly's FigureWidget.
-        Note that `free_widgets` can also be passed to function but does not run function when changed.
-
-        See docs of self.interact for more details on the parameters. kwargs are passed to ipywidgets.interactive to create controls.
-
-        >>> import plotly.graph_objects as go
-        >>> import ipyvasp as ipv
-        >>> fs = ipv.Files('.','**/POSCAR')
-        >>> def plot(path, fig, bl,plot_cell,eqv_sites):
-        >>>     ipv.iplot2widget(ipv.POSCAR(path).iplot_lattice(
-        >>>         bond_length=bl,plot_cell=plot_cell,eqv_sites=eqv_sites
-        >>>      ),fig_widget=fig) # it keeps updating same view
-        >>> out = fs.interactive(plot, go.FigureWidget(),bl=(0,6,2),plot_cell=True, eqv_sites=True)
-
-        >>> out.f # function
-        >>> out.args # arguments
-        >>> out.kwargs # keyword arguments
-        >>> out.result # result of function call which is same as out.f(*out.args, **out.kwargs)
-
-        .. note::
-            If you don't need to interpret the result of the function call, you can use the @self.interact decorator instead.
-        """
-        info = ipw.HTML().add_class("fprogess")
-        dd = Dropdown(description='File', options=['',*self._files]) # allows single file workable
-
-        def interact_func(fname, **kws):
-            if fname and str(fname) != '':  # This would be None if no file is selected
-                info.value = _progress_svg
-                try:
-                    start = time()
-                    if 'free_widgets' in func.__code__.co_varnames:
-                        kws['free_widgets'] = free_widgets # user allowed to pass this
-                    names = ', '.join(func.__code__.co_varnames)
-                    print(f"Running {func.__name__}({names})")  
-                    func(Path(fname).absolute(), *args, **kws)  # Have Path object absolue if user changes directory
-                    print(f"Finished in {time() - start:.3f} seconds.")
-                finally:
-                    info.value = ""
-
-        out = ipw.interactive(interact_func, options, fname=dd, **kwargs)
-        out._dd = dd  # save reference to dropdown
-        out.output_widget = out.children[-1]  # save reference to output widget for other widgets to use
-
-        if options.get("manual", False):
-            out.interact_button = out.children[-2]  # save reference to interact button for other widgets to use
-
-        output = out.children[-1]  # get output widget
-        output.clear_output(wait=True)  # clear output by waiting to avoid flickering, this is important
-        output.layout = Layout(
-            overflow="auto", max_height="100%", width="100%"
-        )  # make output scrollable and avoid overflow
-
-        others = out.children[1:-1]  # exclude files_dd and Output widget
-        if not isinstance(panel_size,int):
-            raise TypeError('panel_size should be integer in units of em')
+    @_sub_doc(ei.interactive)
+    def interactive(self, *funcs, auto_update=True, app_layout=None, grid_css={},**kwargs):
+        if 'file' in kwargs:
+            raise KeyError("file is a reserved keyword argument to select path to file!")
         
-        _style = f"""<style>
-        .files-interact {{
-            --jp-widgets-inline-label-width: 4em;
-            --jp-widgets-inline-width: {panel_size-2}em;
-            --jp-widgets-inline-width-short: 9em;
-        }}
-        .files-interact {{max-height:{height};width:100%;}}
-        .files-interact > div {{overflow:auto;max-height:100%;padding:8px;}}
-        .files-interact > div:first-child {{width:{panel_size}em}}
-        .files-interact > div:last-child {{width:calc(100% - {panel_size}em)}}
-        .files-interact .fprogess {{position:absolute !important; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1}}
-        </style>"""
-        if others:
-            others = [ipw.HTML(f"<hr/>{_style}"), *others]
-        else:
-            others = [ipw.HTML(_style)]
-
-        if free_widgets and not isinstance(free_widgets, (list, tuple)):
-            raise TypeError("free_widgets must be a list or tuple of widgets.")
+        has_file_param = False
+        for func in funcs:
+            if not callable(func):
+                raise TypeError(f"Each item in *funcs should be callable, got {type(func)}")
+            params = [k for k,v in inspect.signature(func).parameters.items()]
+            for key in params:
+                if key == 'file':
+                    has_file_param = True 
+                    break
         
-        for w in args:
-            if not isinstance(w,ipw.DOMWidget):
-                raise TypeError(f'args can only contain a DOMWidget instance, got {type(w)}')
+        if funcs and not has_file_param: # may be no func yet, that is test below
+            raise KeyError("At least one of funcs should take 'file' as parameter, none got it!")
         
-        if args:
-            output.layout.max_height = "200px"
-            output.layout.min_height = "8em" # fisrt fix
-            out_collapser = Checkbox(description="Hide output widget", value=False)
-
-            def toggle_output(change):
-                if out_collapser.value:
-                    output.layout.height = "0px"  # dont use display = 'none' as it will clear widgets and wont show again
-                    output.layout.min_height = "0px"
-                else:
-                    output.layout.height = "auto"
-                    output.layout.min_height = "8em"
-
-            out_collapser.observe(toggle_output, "value")
-            others.append(out_collapser)
-
-        # This should be below output collapser
-        others = [
-            *others,
-            ipw.HTML(f"<hr/>"),
-            *(free_widgets or []),
-        ]  # add hr to separate other controls
-
-        out.children = [
-            HBox([  # reset children to include new widgets
-                VBox([dd, VBox(others)]),  # other widgets in box to make scrollable independent file selection
-                VBox([Box([output]), *args, info]),  # output in box to make scrollable,
-                ],layout=Layout(height=height, max_height=height),
-            ).add_class("files-interact")
-        ]  # important for every widget separately
-        return out
+        return ei.interactive(*funcs,auto_update=auto_update, app_layout = app_layout, grid_css=grid_css, file = self.to_dropdown(), **kwargs)
     
-    def _attributed_interactive(self, box, func, *args, **kwargs):
-        box._files = self
-        box._interact = self.interactive(func, *args, **kwargs)
-        box.children = box._interact.children
-        box._files._dd = box._interact._dd
-    
-    def interact(self, *args,
-        free_widgets=None,
-        options={"manual": False},
-        height="400px",
-        panel_size=25,
-        **kwargs,
-    ):
-        """Interact with a `func(path, *args, <free_widgets,optional>, **kwargs)`. `path` is passed from selected File.
-        A CSS class 'files-interact' is added to the final widget to let you style it.
-
-        Parameters
-        ----------
-        args : 
-            Any displayable widget can be passed. These are placed below the output widget of interact.
-            For example you can add plotly's FigureWidget that updates based on the selection, these are passed to function after path.
-        free_widgets : list/tuple
-            Default is None. If not None, these are assumed to be ipywidgets and are placed below the widgets created by kwargs. 
-            These can be passed to the decorated function if added as arguemnt there like `func(..., free_widgets)`, but don't trigger execution.
-        options : dict
-            Default is {'manual':False}. If True, the decorated function is not called automatically, and you have to call it manually on button press. You can pass button name as 'manual_name' in options.
-        height : str
-            Default is '90vh'. height of the final widget. This is important to avoid very long widgets.
-        panel_size: int
-            Side panel size in units of em.
-
-        kwargs are passed to ipywidgets.interactive and decorated function. Resulting widgets are placed below the file selection widget.
-        Widgets in `args` can be controlled by `free_widgets` externally if defined gloablly or inside function if you pass `free_widgets` as argument like `func(..., free_widgets)`.
-
-        The decorated function can be called later separately as well, and has .args and .kwargs attributes to access the latest arguments
-        and .result method to access latest. For a function `f`, `f.result` is same as `f(*f.args, **f.kwargs)`.
-
-        >>> import plotly.graph_objects as go
-        >>> import ipyvasp as ipv
-        >>> fs = ipv.Files('.','**/POSCAR')
-        >>> @fs.interact(go.FigureWidget(),bl=(0,6,2),plot_cell=True, eqv_sites=True)
-        >>> def plot(path, fig, bl,plot_cell,eqv_sites):
-        >>>     ipv.iplot2widget(ipv.POSCAR(path).iplot_lattice(
-        >>>         bond_length=bl,plot_cell=plot_cell,eqv_sites=eqv_sites
-        >>>      ),fig_widget=fig) # it keeps updating same view
-
-        .. note::
-            Use self.interactive to get a widget that stores the argements and can be called later in a notebook cell.
-        """
-
+    @_sub_doc(ei.interact)
+    def interact(self, *funcs, auto_update=True, app_layout=None, grid_css={},**kwargs):
         def inner(func):
-            display(self.interactive(func, *args,
-                free_widgets=free_widgets,
-                options=options,
-                height=height,
-                panel_size=panel_size,
+            display(self.interactive(func, *funcs,
+                auto_update=auto_update, app_layout = app_layout, grid_css=grid_css,
                 **kwargs)
             )
             return func
@@ -471,86 +329,101 @@ class Files:
         return self.summarize(lambda path: {"size": get_file_size(path)})
 
 
+
 @fix_signature
 class _PropPicker(VBox):
+    """Single projection picker with atoms and orbitals selection"""
+    props = traitlets.Dict({})
+    
     def __init__(self, system_summary=None):
         super().__init__()
-        self._widgets = {
-            "atoms": Dropdown(description="Atoms"),
-            "orbs": Dropdown(description="Orbs"),
-        }
-        self._html = ipw.HTML()  # to observe
-
-        def observe_change(change):
-            self._html.value = change.new  # is a string
-
-        self._widgets["atoms"].observe(observe_change, "value")
-        self._widgets["orbs"].observe(observe_change, "value")
-
-        self._atoms = {}
-        self._orbs = {}
+        self._atoms = Dropdown(description="Atoms")
+        self._orbs = Dropdown(description="Orbs")
+        self.children = [self._atoms, self._orbs]
+        self._atoms_map = {}
+        self._orbs_map = {}
+        
+        # Link changes
+        self._atoms.observe(self._update_props, 'value')
+        self._orbs.observe(self._update_props, 'value')
         self._process(system_summary)
 
+    def _update_props(self, change):
+        """Update props trait when selections change"""
+        atoms = self._atoms_map.get(self._atoms.value, [])
+        orbs = self._orbs_map.get(self._orbs.value, [])
+        
+        if atoms and orbs:
+            self.props = {
+                'atoms': atoms, 'orbs': orbs,
+                'label': f"{self._atoms.value or ''}-{self._orbs.value or ''}"
+            }
+        else:
+            self.props = {}
+
     def _process(self, system_summary):
-        if not hasattr(system_summary, "orbs"):
-            self.children = [
-                ipw.HTML(f"❌ No projection data found from given summary!")
-            ]
-            return None
+        """Process system data and setup widget options"""
+        if system_summary is None or not hasattr(system_summary, "orbs"):
+            self.children = [ipw.HTML("❌ No projection data found!")]
+            return
 
-        self.children = [self._widgets["atoms"], self._widgets["orbs"]]
         sorbs = system_summary.orbs
+        self._orbs_map = {"-": [], "All": range(len(sorbs)), "s": [0]}
 
-        orbs = {"-": [], "All": range(len(sorbs)), "s": [0]}
+        # p-orbitals
         if set(["px", "py", "pz"]).issubset(sorbs):
-            orbs["p"] = range(1, 4)
-            orbs["px+py"] = [
-                idx for idx, key in enumerate(sorbs) if key in ("px", "py")
-            ]
-            orbs.update({k: [v] for k, v in zip(sorbs[1:], range(1, 4))})
+            self._orbs_map.update({
+                "p": range(1, 4),
+                "px+py": [idx for idx, key in enumerate(sorbs) if key in ("px", "py")],
+                **{k: [v] for k, v in zip(sorbs[1:4], range(1, 4))}
+            })
+
+        # d-orbitals    
         if set(["dxy", "dyz"]).issubset(sorbs):
-            orbs["d"] = range(4, 9)
-            orbs.update({k: [v] for k, v in zip(sorbs[4:], range(4, 9))})
+            self._orbs_map.update({
+                "d": range(4, 9),
+                **{k: [v] for k, v in zip(sorbs[4:9], range(4, 9))}
+            })
+
+        # f-orbitals
         if len(sorbs) == 16:
-            orbs["f"] = range(9, 16)
-            orbs.update({k: [v] for k, v in zip(sorbs[9:], range(9, 16))})
-        if len(sorbs) > 16:  # What the hell here
-            orbs.update({k: [idx] for idx, k in enumerate(sorbs[16:], start=16)})
+            self._orbs_map.update({
+                "f": range(9, 16),
+                **{k: [v] for k, v in zip(sorbs[9:16], range(9, 16))}
+            })
 
-        self._orbs = orbs
-        old_orb = self._widgets["orbs"].value
-        self._widgets["orbs"].options = list(orbs.keys())
-        if old_orb in self._widgets["orbs"].options:
-            self._widgets["orbs"].value = old_orb
+        # Extra orbitals beyond f
+        if len(sorbs) > 16:
+            self._orbs_map.update({
+                k: [idx] for idx, k in enumerate(sorbs[16:], start=16)
+            })
 
-        atoms = {"-": [], "All": range(system_summary.NIONS)}
-        for key, tp in system_summary.types.to_dict().items():
-            atoms[key] = tp
-            for n, v in enumerate(tp, start=1):
-                atoms[f"{key}{n}"] = [v]
-
-        self._atoms = atoms
-        old_atom = self._widgets["atoms"].value
-        self._widgets["atoms"].options = list(atoms.keys())
-        if old_atom in self._widgets["atoms"].options:
-            self._widgets["atoms"].value = old_atom
+        self._orbs.options = list(self._orbs_map.keys())
+        
+        # Process atoms
+        self._atoms_map = {
+            "-": [], 
+            "All": range(system_summary.NIONS),
+            **{k: v for k,v in system_summary.types.to_dict().items()},
+            **{f"{k}{n}": [v] for k,tp in system_summary.types.to_dict().items() 
+               for n,v in enumerate(tp, 1)}
+        }
+        self._atoms.options = list(self._atoms_map.keys())
 
     def update(self, system_summary):
-        return self._process(system_summary)
-
-    @property
-    def props(self):
-        items = {k: w.value for k, w in self._widgets.items()}
-        items["atoms"] = self._atoms.get(items["atoms"], [])
-        items["orbs"] = self._orbs.get(items["orbs"], [])
-        items[
-            "label"
-        ] = f"{self._widgets['atoms'].value or ''}-{self._widgets['orbs'].value or ''}"
-        return items
-
+        """Update widget with new system data while preserving selections"""
+        old_atoms = self._atoms.value
+        old_orbs = self._orbs.value
+        self._process(system_summary)
+        
+        # Restore previous selections if still valid
+        if old_atoms in self._atoms.options:
+            self._atoms.value = old_atoms
+        if old_orbs in self._orbs.options:
+            self._orbs.value = old_orbs
 
 @fix_signature
-class PropsPicker(VBox):
+class PropsPicker(VBox): # NOTE: remove New Later
     """
     A widget to pick atoms and orbitals for plotting.
 
@@ -558,88 +431,48 @@ class PropsPicker(VBox):
     ----------
     system_summary : (Vasprun,Vaspout).summary
     N : int, default is 3, number of projections to pick.
-    on_button_click : callable, takes button as arguemnet. Default is None, a function to call when button is clicked.
-    on_selection_changed : callable, takes change as argument. Default is None, a function to call when selection is changed.
+    
+    You can observe `projections` trait.
     """
-
-    def __init__(
-        self, system_summary=None, N=3, on_button_click=None, on_selection_changed=None
-    ):
+    projections = traitlets.Dict({})
+    
+    def __init__(self, system_summary=None, N=3):
         super().__init__()
-        self._linked = Dropdown(
-            options=[str(i + 1) for i in range(N)]
-            if N != 3
-            else ("Red", "Green", "Blue"),
-            description="Projection" if N != 3 else "Color",
+        self._N = N
+        self._pickers = [_PropPicker(system_summary) for _ in range(N)]
+        self.add_class("props-picker")
+        
+        # Create widgets with consistent width
+        self._picker = Dropdown(
+            description="Color" if N == 3 else "Projection",
+            options=["Red", "Green", "Blue"] if N == 3 else [str(i+1) for i in range(N)],
         )
-        self._stacked = Stack(
-            children=tuple(_PropPicker(system_summary) for _ in range(N)),
-            selected_index=0,
-        )
-        self._button = Button(description="Run Function")
-
-        if callable(on_button_click):
-            self._button.on_click(on_button_click)
-
-        for w in [self._button, self._linked]:
-            w.layout.width = "max-content"
-
-        ipw.link((self._linked, "index"), (self._stacked, "selected_index"))
-        self.children = [HBox([self._linked, self._button]), self._stacked]
-
-        if callable(on_selection_changed):
-            for child in self._stacked.children:
-                child._html.observe(on_selection_changed, names="value")
-
+        self._stack = Stack(children=self._pickers, selected_index=0)
+        # Link picker dropdown to stack
+        ipw.link((self._picker, 'index'), (self._stack, 'selected_index'))
+        
+        # Setup layout
+        self.children = [self._picker, self._stack]
+        
+        # Observe pickers for props changes and button click
+        for picker in self._pickers:
+            picker.observe(self._update_projections, names=['props'])
+            
+    def _update_projections(self, change):
+        """Update combined projections when any picker changes"""
+        projs = {}
+        for picker in self._pickers:
+            if picker.props:  # Only add non-empty selections
+                projs[picker.props['label']] = (
+                    picker.props['atoms'],
+                    picker.props['orbs']
+                )
+        self.projections = projs
+            
     def update(self, system_summary):
-        for child in self._stacked.children:
-            child.update(system_summary)
-
-    @property
-    def button(self):
-        return self._button
-
-    @property
-    def projections(self):
-        out = {}
-        for child in self._stacked.children:
-            props = child.props
-            if props["atoms"] and props["orbs"]:  # discard empty
-                out[props["label"]] = (props["atoms"], props["orbs"])
-
-        return out
-
-
-def __store_figclick_data(fig, store_dict, callback=None, selection=False):
-    "Store clicked data in a dict. callback takes trace as argument and is called after storing data."
-    if not isinstance(fig, go.FigureWidget):
-        raise TypeError("fig must be a FigureWidget")
-    if not isinstance(store_dict, dict):
-        raise TypeError("store_dict must be a dict")
-    if callback and not callable(callback):
-        raise TypeError("callback must be callable if given")
-
-    def handle_click(trace, points, state):
-        store_dict["data"] = points
-        if callback:
-            callback(trace)
-
-    for trace in fig.data:
-        if selection:
-            trace.on_selection(handle_click)
-        else:
-            trace.on_click(handle_click)
-
-
-def store_clicked_data(fig, store_dict, callback=None):
-    "Store clicked point data to a store_dict. callback takes trace being clicked as argument."
-    return __store_figclick_data(fig, store_dict, callback, selection=False)
-
-
-def store_selected_data(fig, store_dict, callback=None):
-    "Store multipoints selected data to a store_dict. callback takes trace being clicked as argument."
-    return __store_figclick_data(fig, store_dict, callback, selection=True)
-
+        """Update all pickers with new system data"""
+        for picker in self._pickers:
+            picker.update(system_summary)
 
 def load_results(paths_list):
     "Loads result.json from paths_list and returns a dataframe."
@@ -659,234 +492,6 @@ def load_results(paths_list):
             return {}  # If not found, return empty dictionary
 
     return summarize(result_paths, load_data)
-
-
-@fix_signature
-class BandsWidget(VBox):
-    """Visualize band structure from VASP calculation. You can click on the graph to get the data such as VBM, CBM, etc.
-    Two attributes are important:
-    self.clicked_data returns the last clicked point, that can also be stored as VBM, CBM etc, using Click dropdown.
-    self.selected_data returns the last selection of points within a box or lasso. You can plot that output separately as plt.plot(data.xs, data.ys) after a selection.
-    You can use `self.files.update` method to change source files without effecting state of widget.
-    """
-
-    def __init__(self, files, height="450px"):
-        super().__init__(_dom_classes=["BandsWidget"])
-        self._bands = None
-        self._fig = go.FigureWidget()
-        self._tsd = Dropdown(
-            description="Style", options=["plotly_white", "plotly_dark"]
-        )
-        self._click = Dropdown(description="Click", options=["None", "vbm", "cbm"])
-        self._ktcicks = Text(description="kticks", tooltip="0 index maps to minimum value of kpoints slider.")
-        self._brange = ipw.IntRangeSlider(description="bands",min=1, max=1) # number, not index
-        self._krange = ipw.IntRangeSlider(description="kpoints",min=0, max=1,value=[0,1], tooltip="Includes non-zero weight kpoints") 
-        self._ppicks = PropsPicker(
-            on_button_click=self._update_graph, on_selection_changed=self._warn_update
-        )
-        self._ppicks.button.description = "Update Graph"
-        self._result = {}  # store and save output results
-        self._click_dict = {}  # store clicked data
-        self._select_dict = {}  # store selection data
-        self._kwargs = {}
-        
-        Files(files)._attributed_interactive(self, self._load_data, self._fig,
-            free_widgets=[
-                self._tsd,
-                self._brange,
-                self._krange,
-                self._ktcicks,
-                ipw.HTML("<hr/>"),
-                self._ppicks,
-                ipw.HTML("<hr/>Click on graph to read selected option."),
-                self._click,
-            ],
-            height=height,
-        )
-       
-        self._tsd.observe(self._change_theme, "value")
-        self._click.observe(self._click_save_data, "value")
-        self._ktcicks.observe(self._warn_update, "value")
-        self._krange.observe(self._set_krange, "value")
-        self._brange.observe(self._warn_update, "value")
-
-    @property
-    def path(self):
-        "Returns currently selected path."
-        return self._interact._dd.value
-    
-    @property
-    def files(self):
-        "Use slef.files.update(...) to keep state of widget preserved."
-        return self._files
-
-    def _load_data(self, path, fig):  # Automatically redirectes to output widget
-        if not hasattr(self, '_interact'): return  # First time not availablebu 
-        self._interact.output_widget.clear_output(wait=True)  # Why need again?
-        with self._interact.output_widget:
-            self._bands = (
-                vp.Vasprun(path) if path.parts[-1].endswith('xml') else vp.Vaspout(path)
-            ).bands
-            self._ppicks.update(self.bands.source.summary)
-
-            self._krange.max = self.bands.source.summary.NKPTS - 1
-            self._krange.tooltip = f"Includes {self.bands.source.get_skipk()} non-zero weight kpoints"
-            self.bands.source.set_skipk(0) # full range to view for slider flexibility after fix above
-
-            self._kwargs['kpairs'] = [self._krange.value,]
-            if (ticks := ", ".join(
-                f"{k}:{v}" for k, v in self.bands.get_kticks()
-            )): # Do not overwrite if empty
-                self._ktcicks.value = ticks
-            
-            self._brange.max = self.bands.source.summary.NBANDS
-            if self.bands.source.summary.LSORBIT:
-                self._click.options = ["None", "vbm", "cbm", "so_max", "so_min"]
-            else:
-                self._click.options = ["None", "vbm", "cbm"]
-
-            if (file := path.parent / "result.json").is_file():
-                self._result = serializer.load(str(file.absolute()))  # Old data loaded
-
-            pdata = self.bands.source.poscar.data
-            self._result.update(
-                {
-                    "v": round(pdata.volume, 4),
-                    **{k: round(v, 4) for k, v in zip("abc", pdata.norms)},
-                    **{k: round(v, 4) for k, v in zip(["alpha","beta","gamma"], pdata.angles)},
-                }
-            )
-            self._click_save_data(None)  # Load into view
-            self._warn_update(None)
-    
-    @property
-    def source(self):
-        "Returns data source object such as Vasprun or Vaspout."
-        return self.bands.source
-
-    @property
-    def bands(self):
-        "Bands class initialized"
-        if not self._bands:
-            raise ValueError("No data loaded by BandsWidget yet!")
-        return self._bands
-
-    @property
-    def kwargs(self):
-        "Selected kwargs from GUI"
-        return self._kwargs
-
-    @property
-    def clicked_data(self):
-        "Clicked data from graph"
-        return self._click_dict.get("data", None)
-
-    @property
-    def selected_data(self):
-        "Data selected by box or lasso selection from graph"
-        return self._select_dict.get("data", None)
-
-    def _update_graph(self, btn):
-        if not hasattr(self, '_interact'): return  # First time not available
-        self._interact.output_widget.clear_output(wait=True)  # Why need again?
-        with self._interact.output_widget:
-            hsk = [
-                [v.strip() for v in vs.split(":")]
-                for vs in self._ktcicks.value.split(",")
-            ]
-            kticks = [(int(vs[0]), vs[1]) for vs in hsk if len(vs) == 2] or None
-            self._kwargs = {**self._kwargs, "kticks": kticks, # below numbers instead of index and full shown range
-                "bands": range(self._brange.value[0] - 1, self._brange.value[1]) if self._brange.value else None}
-
-            if self._ppicks.projections:
-                self._kwargs = {"projections": self._ppicks.projections, **self._kwargs}
-                fig = self.bands.iplot_rgb_lines(**self._kwargs, name="Up")
-                if self.bands.source.summary.ISPIN == 2:
-                    self.bands.iplot_rgb_lines(**self._kwargs, spin=1, name="Down", fig=fig)
-
-                self.iplot = partial(self.bands.iplot_rgb_lines, **self._kwargs)
-                self.splot = partial(self.bands.splot_rgb_lines, **self._kwargs)
-            else:
-                fig = self.bands.iplot_bands(**self._kwargs, name="Up")
-                if self.bands.source.summary.ISPIN == 2:
-                    self.bands.iplot_bands(**self._kwargs, spin=1, name="Down", fig=fig)
-
-                self.iplot = partial(self.bands.iplot_bands, **self._kwargs)
-                self.splot = partial(self.bands.splot_bands, **self._kwargs)
-
-            ptk.iplot2widget(fig, self._fig, template=self._tsd.value)
-            self._click_dict.clear()  # avoid data from previous figure
-            self._select_dict.clear()  # avoid data from previous figure
-            store_clicked_data(
-                self._fig,
-                self._click_dict,
-                callback=lambda trace: self._click_save_data("CLICK"),
-            )  # 'CLICK' is needed to inntercept in a function
-            store_selected_data(self._fig, self._select_dict, callback=None)
-            self._ppicks.button.description = "Update Graph"
-
-    def _change_theme(self, change):
-        self._fig.layout.template = self._tsd.value
-
-    def _set_krange(self, change):
-        self._kwargs["kpairs"] = [self._krange.value,]
-        self._warn_update(None)  # Update warning
-
-    def _click_save_data(self, change=None):
-        def _show_and_save(data_dict):
-            self._interact.output_widget.clear_output(wait=True)  # Why need again?
-            with self._interact.output_widget:
-                print(pformat({key: value
-                        for key, value in data_dict.items()
-                        if key not in ("so_max", "so_min")
-                    }))
-
-            serializer.dump(
-                data_dict,
-                format="json",
-                outfile=self.path.parent / "result.json",
-            )
-
-        if change is None:  # called from other functions but not from store_clicked_data
-            return _show_and_save(self._result)
-        # Should be after checking change
-        if self._click.value and self._click.value == "None":
-            return  # No need to act on None
-
-        data_dict = self._result.copy()  # Copy old data
-
-        if data := self.clicked_data:  # No need to make empty dict
-            x = round(data.xs[0], 6)
-            y = round(float(data.ys[0]) + self.bands.data.ezero, 6)  # Add ezero
-
-            if key := self._click.value:
-                data_dict[key] = y  # Assign value back
-                if not key.startswith("so"):
-                    data_dict[key + "_k"] = round(
-                        x, 6
-                    )  # Save x to test direct/indirect
-
-            if data_dict.get("vbm", None) and data_dict.get("cbm", None):
-                data_dict["gap"] = np.round(data_dict["cbm"] - data_dict["vbm"], 6)
-
-            if data_dict.get("so_max", None) and data_dict.get("so_min", None):
-                data_dict["soc"] = np.round(
-                    data_dict["so_max"] - data_dict["so_min"], 6
-                )
-
-            self._result.update(data_dict)  # store new data
-            _show_and_save(self._result)
-
-        if change == "CLICK":  # Called from store_clicked_data
-            self._click.value = "None"  # Reset to None to avoid accidental click
-
-    def _warn_update(self, change):
-        self._ppicks.button.description = "🔴 Update Graph"
-
-    @property
-    def results(self):
-        "Generate a dataframe form result.json file in each folder."
-        return load_results(self._interact._dd.options)
 
 def _get_css(mode):
     return {
@@ -914,8 +519,259 @@ def _get_css(mode):
         '.footer': {'overflow': 'hidden','padding':0},
     }
 
+class _ThemedFigureInteract(ei.InteractBase):
+    "Keeps self._fig anf self._theme button attributes for subclasses to use."
+    def __init__(self, *args, **kwargs):
+        self._fig = ei.patched_plotly(go.FigureWidget())
+        self._theme = Button(icon='sun', description=' ', tooltip="Toggle Theme")
+        super().__init__(*args, **kwargs)
+        
+        if not all([hasattr(self.params, 'fig'), hasattr(self.params, 'theme')]):
+            raise AttributeError("subclass must include already initialized "
+                "{'fig': self._fig,'theme':self._theme} in returned dict of _interactive_params() method.")
+        self._update_theme(self._fig,self._theme) # fix theme in starts
+    
+    def _interactive_params(self): return {} 
+
+    def __init_subclass__(cls):
+        if (not '_update_theme' in cls.__dict__) or (not hasattr(cls._update_theme,'_is_interactive_callback')):
+            raise AttributeError("implement _update_theme(self, fig, theme) decorated by @callback in subclass, "
+                "which should only call super()._update_theme(fig, theme) in its body.")
+        super().__init_subclass__()
+    
+    @ei.callback
+    def _update_theme(self, fig, theme):
+        require_dark = (theme.icon == 'sun')
+        theme.icon = 'moon' if require_dark else 'sun' # we are not observing icon, so we can do this
+        fig.layout.template = "plotly_dark" if require_dark else "plotly_white"
+        self.set_css() # automatically sets dark/light, ensure after icon set
+        fig.layout.autosize = True # must
+    
+    @_sub_doc(ei.InteractBase.set_css) # overriding to alway be able to set_css
+    def set_css(self, main=None, center=None):
+        # This is after setting icon above, so logic is fliipped
+        style = _get_css("light" if self._theme.icon == 'sun' else 'dark') # infer from icon to match
+        if isinstance(main, dict):
+            style = {**style, **main} # main should allow override
+        elif main is not None:
+            raise TypeError("main must be a dict or None, got: {}".format(type(main)))
+        super().set_css(style, center)
+    
+    @property
+    def files(self): 
+        "Use self.files.update(...) to keep state of widget preserved with new files."
+        if not hasattr(self, '_files'): # subclasses must set this, although no check unless user dots it
+            raise AttributeError("self._files = Files(...) was never set!")
+        return self._files
+
+
 @fix_signature
-class KPathWidget(InteractBase):
+class BandsWidget(_ThemedFigureInteract):
+    """Visualize band structure from VASP calculation. You can click on the graph to get the data such as VBM, CBM, etc.
+    
+    You can observe three traits:
+
+    - file: Currently selected file
+    - clicked_data:  Last clicked point data, that is also stored as VBM, CBM etc, using Click dropdown.
+    - selected_data: Last selection of points within a box or lasso. You can plot that output separately as plt.plot(data['xs'], data['ys']) after a selection.
+    
+    - You can use `self.files.update` method to change source files without effecting state of widget.
+    - You can also use `self.iplot`, `self.splot` with `self.kws` to get static plts of current state.
+    """
+    file = traitlets.Any(allow_none=True)
+    clicked_data = traitlets.Dict(allow_none=True)
+    selected_data = traitlets.Dict(allow_none=True)
+
+    def __init__(self, files, height="450px"):
+        self.add_class("BandsWidget")
+        self._files = Files(files)
+        self._bands = None
+        self._kws = {}
+        self._result = {}
+        super().__init__()
+
+        traitlets.dlink((self.params.file,'value'),(self, 'file'))
+        traitlets.dlink((self.params.fig,'clicked'),(self, 'clicked_data'))
+        traitlets.dlink((self.params.fig,'selected'),(self, 'selected_data'))
+        
+        req_outs = ('out-data','out-graph','out-click')
+        self.relayout(
+            left_sidebar=[
+                'head','file','krange','kticks','brange', 'ppicks',
+                [HBox(),('theme','button')], 'cpoint',*req_outs
+            ],
+            center=['fig'],  footer = [c for c in self.groups.outputs if not c in req_outs],
+            pane_widths=['25em',1,0], pane_heights=[0,1,0], # footer only has uselessoutputs
+            height=height
+        )
+
+    @ei.callback
+    def _update_theme(self, fig, theme):
+        return super()._update_theme(fig, theme)
+    
+    def _interactive_params(self):
+        return dict(
+            fig    = self._fig, theme = self._theme,  # include theme and fig
+            head   = ipw.HTML("<b>Band Structure Visualizer</b>"),
+            file   = self.files.to_dropdown(),
+            ppicks = PropsPicker(),
+            button = Button(description="Update Graph", icon= 'update'),
+            krange = ipw.IntRangeSlider(description="kpoints",min=0, max=1,value=[0,1], tooltip="Includes non-zero weight kpoints"),
+            kticks = Text(description="kticks", tooltip="0 index maps to minimum value of kpoints slider."),
+            brange = ipw.IntRangeSlider(description="bands",min=1, max=1), # number, not index
+            cpoint = Dropdown(description="Click →", options=["None", "vbm", "cbm"]), # the point where clicked
+            cdata  = {'fig':'clicked'},
+            projs  = {'ppicks': 'projections'} # for visual feedback on button
+        )
+    @ei.callback('out-data')
+    def _load_data(self, file):
+        if not file: return  # First time not available
+        self._bands = (
+            vp.Vasprun(file) if file.parts[-1].endswith('xml') else vp.Vaspout(file)
+        ).bands
+        self.params.ppicks.update(self.bands.source.summary)
+        self.params.krange.max = self.bands.source.summary.NKPTS - 1
+        self.params.krange.tooltip = f"Includes {self.bands.source.get_skipk()} non-zero weight kpoints"
+        self.bands.source.set_skipk(0) # full range to view for slider flexibility after fix above
+        self._kws['kpairs'] = [self.params.krange.value,]
+        if (ticks := ", ".join(
+            f"{k}:{v}" for k, v in self.bands.get_kticks()
+        )): # Do not overwrite if empty
+            self.params.kticks.value = ticks
+        
+        self.params.brange.max = self.bands.source.summary.NBANDS
+        if self.bands.source.summary.LSORBIT:
+            self.params.cpoint.options = ["None", "vbm", "cbm", "so_max", "so_min"]
+        else:
+            self.params.cpoint.options = ["None", "vbm", "cbm"]
+        if (path := file.parent / "result.json").is_file():
+            self._result = serializer.load(str(path.absolute()))  # Old data loaded
+        pdata = self.bands.source.poscar.data
+        self._result.update(
+            {
+                "v": round(pdata.volume, 4),
+                **{k: round(v, 4) for k, v in zip("abc", pdata.norms)},
+                **{k: round(v, 4) for k, v in zip(["alpha","beta","gamma"], pdata.angles)},
+            }
+        )
+        self._click_save_data(self.params.cpoint.value, self.params.fig.clicked)  # Load into view
+    
+    @ei.callback
+    def _set_krange(self, krange):
+        self._kws["kpairs"] = [krange,]
+
+    @ei.callback
+    def _warn_update(self, file=None, kticks=None, brange=None, krange=None,projs=None):
+        self.params.button.description = "🔴 Update Graph"
+
+    @ei.callback('out-graph')
+    def _update_graph(self, fig, button):
+        if not self.bands: return  # First time not available
+        fig.layout.autosize = True # must
+        hsk = [
+            [v.strip() for v in vs.split(":")]
+            for vs in self.params.kticks.value.split(",")
+        ]
+        kticks = [(int(vs[0]), vs[1]) for vs in hsk if len(vs) == 2] or None
+        
+        _bands = None
+        if self.params.brange.value:
+            l, h = self.params.brange.value
+            _bands = range(l-1, h) # from number to index
+
+        self._kws = {**self._kws, "kticks": kticks, "bands": _bands}
+
+        if self.params.ppicks.projections:
+            self._kws = {"projections": self.params.ppicks.projections, **self._kws}
+            _fig = self.bands.iplot_rgb_lines(**self._kws, name="Up")
+            if self.bands.source.summary.ISPIN == 2:
+                self.bands.iplot_rgb_lines(**self._kws, spin=1, name="Down", fig=fig)
+
+            self.iplot = partial(self.bands.iplot_rgb_lines, **self._kws)
+            self.splot = partial(self.bands.splot_rgb_lines, **self._kws)
+        else:
+            _fig = self.bands.iplot_bands(**self._kws, name="Up")
+            if self.bands.source.summary.ISPIN == 2:
+                self.bands.iplot_bands(**self._kws, spin=1, name="Down", fig=fig)
+
+            self.iplot = partial(self.bands.iplot_bands, **self._kws)
+            self.splot = partial(self.bands.splot_bands, **self._kws)
+
+        ptk.iplot2widget(_fig, fig, template=fig.layout.template)
+        fig.clicked = {}  # avoid data from previous figure
+        fig.selected = {}  # avoid data from previous figure
+        button.description = "Update Graph" # clear trigger
+
+    @ei.callback('out-click')
+    def _click_save_data(self, cpoint, cdata):
+        if cpoint is None:  # called from other functions but not from store_clicked_data
+            return self._show_and_save(self._result)
+        # Should be after checking change
+        if cpoint and cpoint == "None":
+            return  # No need to act on None
+
+        data_dict = self._result.copy()  # Copy old data
+
+        if cdata:  # No need to make empty dict
+            x = round(*cdata['xs'], 6) # unpack single point
+            y = round(float(*cdata['ys']) + self.bands.data.ezero, 6)  # Add ezero
+
+            if key := cpoint:
+                data_dict[key] = y  # Assign value back
+                if not key.startswith("so"): # NOTE: fix it, why not so
+                    data_dict[key + "_k"] = round(
+                        x, 6
+                    )  # Save x to test direct/indirect
+
+            if data_dict.get("vbm", None) and data_dict.get("cbm", None):
+                data_dict["gap"] = np.round(data_dict["cbm"] - data_dict["vbm"], 6)
+
+            if data_dict.get("so_max", None) and data_dict.get("so_min", None):
+                data_dict["soc"] = np.round(
+                    data_dict["so_max"] - data_dict["so_min"], 6
+                )
+
+            self._result.update(data_dict)  # store new data
+            self._show_and_save(self._result)
+        self.params.cpoint.value = "None"  # Reset to None to avoid accidental click at end
+
+    def _show_and_save(self, data_dict):
+        print(pformat({key: value
+        for key, value in data_dict.items()
+            if key not in ("so_max", "so_min")
+        }))
+        serializer.dump(
+            data_dict,
+            format="json",
+            outfile=self.file.parent / "result.json",
+        )
+    
+    @property
+    def results(self):
+        "Generate a dataframe form result.json file in each folder."
+        return load_results(self.params.file.options)
+    
+    @property
+    def source(self):
+        "Returns data source object such as Vasprun or Vaspout."
+        return self.bands.source
+
+    @property
+    def bands(self):
+        "Bands class initialized"
+        if not self._bands:
+            raise ValueError("No data loaded by BandsWidget yet!")
+        return self._bands
+
+    @property
+    def kws(self):
+        "Selected keyword arguments from GUI"
+        return self._kws
+
+
+
+@fix_signature
+class KPathWidget(_ThemedFigureInteract):
     """
     Interactively bulid a kpath for bandstructure calculation.
 
@@ -931,24 +787,19 @@ class KPathWidget(InteractBase):
     - You can observe `self.file` trait to get current file selected and plot something, e.g. lattice structure.
     """
     file = traitlets.Any(None, allow_none=True)
-    
-    @property
-    def files(self):
-        "Use slef.files.update(...) to keep state of widget preserved."
-        return self._files
 
     @property
-    def poscar(self):
-        "POSCAR class associated to current selection."
-        return self._poscar
+    def poscar(self): return self._poscar
         
     def __init__(self, files, height="450px"):
         self.add_class("KPathWidget")
         self._poscar = None
         self._oldclick = None
         self._kpoints = {}
-        self._files = Files(files)
+        self._files = Files(files) # set name _files to ensure access to files
         super().__init__()
+        traitlets.dlink((self.params.file,'value'),(self, 'file')) # update file trait
+
         btns = [HBox(layout=Layout(min_height="24px")),('lock','delp', 'theme')]
         self.relayout(
             left_sidebar=['head','file',btns, 'info', 'sm','out-kpt','kpt', 'out-lab', 'lab'],
@@ -956,29 +807,28 @@ class KPathWidget(InteractBase):
             pane_widths=['25em',1,0], pane_heights=[0,1,0], # footer only has uselessoutputs
             height=height
         )
-        self._update_theme(self.params.fig,self.params.theme) # fix theme in starts
 
     def _show_info(self, text, color='skyblue'):
         self.params.info.value = f'<span style="color:{color}">{text}</span>'
 
     def _interactive_params(self):
         return dict(
+            fig = self._fig, theme = self._theme,  # include theme and fig
             head = ipw.HTML("<b>K-Path Builder</b>"),
-            fig = patched_plotly(go.FigureWidget()),
-            file = Dropdown(description="File", options=self._files),
+            file = self.files.to_dropdown(), # auto updatable on files.update
             sm  = SelectMultiple(description="KPOINTS", options=[], layout=Layout(width="auto")),
             lab = Text(description="Labels", continuous_update=True),
             kpt = Text(description="KPOINT", continuous_update=False),
-            theme = Button(icon='sun', description=' ', tooltip="Toggle Theme"),
             delp = Button(description=" ", icon='trash', tooltip="Delete Selected Points"),
             click = {'fig': 'clicked'},
             lock = Button(description=" ", icon='unlock', tooltip="Lock/Unlock adding more points"),
             info = ipw.HTML(), # consise information in one place
         )
 
-    @callback('out-fig')
+    @ei.callback('out-fig')
     def _update_fig(self, file, fig):
-        self.file = file # update trait value
+        if not file: return # empty one
+
         from ipyvasp.lattice import POSCAR  # to avoid circular import
         self._poscar = POSCAR(file)
         ptk.iplot2widget(
@@ -998,9 +848,10 @@ class KPathWidget(InteractBase):
             )  # add path that will be updated later
         self._show_info("Click points on plot to store for kpath.")
 
-    @callback('out-click')
+    @ei.callback('out-click')
     def _click(self, click):
-        # I have no idea even clcik trait does not chnage on same point, still it goes infinte if unchecked
+        # We are setting value on select multiple to get it done in one click conveniently
+        # But that triggers infinite loop, so we need to check if click is different next time
         if click != self._oldclick and (tidx := click.get('trace_indexes',[])):
             self._oldclick = click # for next time
             data = self.params.fig.data # click depends on fig, so accessing here
@@ -1014,30 +865,26 @@ class KPathWidget(InteractBase):
                 elif self.params.lock.icon == "unlock":  # only add when open
                     self._add_point(kp)
                     
-    @callback('out-kpt')
+    @ei.callback('out-kpt')
     def _take_kpt(self, kpt):
         print("Add kpoint e.g. 0,1,3 at selection(s)")
         self._set_kpt(kpt)
 
-    @callback('out-lab')
+    @ei.callback('out-lab')
     def _set_lab(self, lab):
         print("Add label[:number] e.g. X:5,Y,L:9")
         self._add_label(lab)
 
-    @callback
+    @ei.callback
     def _update_theme(self, fig, theme):
-        require_dark = (self.params.theme.icon == 'sun')
-        self.params.theme.icon = 'moon' if require_dark else 'sun' # we are not observing icon, so we can do this
-        fig.layout.template = "plotly_dark" if require_dark else "plotly_white"
-        self.set_css(_get_css('dark' if require_dark else 'light'))
-        fig.layout.autosize = True # must
+        super()._update_theme(fig, theme)  # call parent method, but important
 
-    @callback
+    @ei.callback
     def _toggle_lock(self, lock):
         self.params.lock.icon = 'lock' if self.params.lock.icon == 'unlock' else 'unlock'
         self._show_info(f"{self.params.lock.icon}ed adding/deleting kpoints!")
 
-    @callback
+    @ei.callback
     def _del_point(self, delp):
         if self.params.lock.icon == 'unlock': # Do not delete locked
             sm = self.params.sm
@@ -1052,7 +899,9 @@ class KPathWidget(InteractBase):
     def _add_point(self, kpt):
         sm = self.params.sm
         sm.options = [*sm.options, ("⋮", len(sm.options))]
-        sm.value = (sm.options[-1][1],) # select to receive point as well
+        # select to receive point as well, this somehow makes infinit loop issues, 
+        # but need to work, so self._oldclick is used to check in _click callback
+        sm.value = (sm.options[-1][1],) 
         self._set_kpt(kpt)  # add point, label and plot back
 
     def _set_kpt(self,kpt):
