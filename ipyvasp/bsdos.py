@@ -605,6 +605,7 @@ class Bands(_BandsDosBase):
         return iplot_bands(
             {"K": data.kpath, "indices": data.bands},
             data.evals[spin] - data.ezero,
+            occs = data.occs[spin],
             **kwargs,
         )
 

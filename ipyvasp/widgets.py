@@ -12,7 +12,6 @@ import inspect, re
 from pathlib import Path
 from collections.abc import Iterable
 from functools import partial
-from pprint import pformat
 
 # Widgets Imports
 from IPython.display import display
@@ -201,7 +200,7 @@ class Files:
                 lines = [(k,v) for k,v in lines if k in tags]
             d = {k:v for k,v in lines if not k.startswith('#')}
             d.update({k:len(v) for k,v in p.types.items()})
-            d.update(zip('abcvαβγ', [*p.norms,p.volume,*p.angles]))
+            d.update(zip(['a','b','c','v','alpha','beta','gamma'], [*p.norms,p.volume,*p.angles]))
             return d
         
         return self.with_name('POSCAR').summarize(info, tags=tags)
@@ -409,6 +408,8 @@ class _PropPicker(VBox):
                for n,v in enumerate(tp, 1)}
         }
         self._atoms.options = list(self._atoms_map.keys())
+        self.children = [self._atoms, self._orbs]
+        self._update_props(None) # then props trigger top projections
 
     def update(self, system_summary):
         """Update widget with new system data while preserving selections"""
@@ -516,7 +517,8 @@ def _get_css(mode):
             'flex-grow': 1,
             'select': {'height': '100%',},
         },
-        '.footer': {'overflow': 'hidden','padding':0},
+        '.footer': {'overflow': 'auto','padding':0},
+        '.widget-vslider, .jupyter-widget-vslider': {'width': 'auto'}, # otherwise it spans too much area
     }
 
 class _ThemedFigureInteract(ei.InteractBase):
@@ -564,6 +566,13 @@ class _ThemedFigureInteract(ei.InteractBase):
             raise AttributeError("self._files = Files(...) was never set!")
         return self._files
 
+# NOTE: This to impelemet as selection
+# import pandas as pd 
+
+# data = {k:v for k,v in kw.selected_data.items() if k != 'customdata' and 'indexes' not in k}
+# data.update(pd.DataFrame(kw.selected_data.get('customdata',{})).to_dict(orient='list'))
+
+# df = pd.DataFrame(data)
 
 @fix_signature
 class BandsWidget(_ThemedFigureInteract):
@@ -594,14 +603,14 @@ class BandsWidget(_ThemedFigureInteract):
         traitlets.dlink((self.params.fig,'clicked'),(self, 'clicked_data'))
         traitlets.dlink((self.params.fig,'selected'),(self, 'selected_data'))
         
-        req_outs = ('out-data','out-graph','out-click')
         self.relayout(
             left_sidebar=[
                 'head','file','krange','kticks','brange', 'ppicks',
-                [HBox(),('theme','button')], 'cpoint',*req_outs
+                [HBox(),('theme','button')],
             ],
-            center=['fig'],  footer = [c for c in self.groups.outputs if not c in req_outs],
-            pane_widths=['25em',1,0], pane_heights=[0,1,0], # footer only has uselessoutputs
+            center=['hdata','fig','cpoint'],  footer = self.groups.outputs,
+            right_sidebar = ['showft'],
+            pane_widths=['25em',1,'2em'], pane_heights=[0,1,0], # footer only has uselessoutputs
             height=height
         )
 
@@ -619,10 +628,14 @@ class BandsWidget(_ThemedFigureInteract):
             krange = ipw.IntRangeSlider(description="kpoints",min=0, max=1,value=[0,1], tooltip="Includes non-zero weight kpoints"),
             kticks = Text(description="kticks", tooltip="0 index maps to minimum value of kpoints slider."),
             brange = ipw.IntRangeSlider(description="bands",min=1, max=1), # number, not index
-            cpoint = Dropdown(description="Click →", options=["None", "vbm", "cbm"]), # the point where clicked
+            cpoint = ipw.ToggleButtons(description="Select from options and click on figure to store data points", 
+                        value=None, options=["vbm", "cbm"]), # the point where clicked
+            showft = ipw.IntSlider(description = 'h', orientation='vertical',min=0,max=50, value=0),
             cdata  = {'fig':'clicked'},
-            projs  = {'ppicks': 'projections'} # for visual feedback on button
+            projs  = {'ppicks': 'projections'}, # for visual feedback on button
+            hdata  = ipw.HTML(), # to show data in one place
         )
+    
     @ei.callback('out-data')
     def _load_data(self, file):
         if not file: return  # First time not available
@@ -641,20 +654,57 @@ class BandsWidget(_ThemedFigureInteract):
         
         self.params.brange.max = self.bands.source.summary.NBANDS
         if self.bands.source.summary.LSORBIT:
-            self.params.cpoint.options = ["None", "vbm", "cbm", "so_max", "so_min"]
+            self.params.cpoint.options = ["vbm", "cbm", "so_max", "so_min"]
         else:
-            self.params.cpoint.options = ["None", "vbm", "cbm"]
+            self.params.cpoint.options = ["vbm", "cbm"]
         if (path := file.parent / "result.json").is_file():
-            self._result = serializer.load(str(path.absolute()))  # Old data loaded
+            self._result = self._clean_legacy_data(path)
+
         pdata = self.bands.source.poscar.data
         self._result.update(
             {
-                "v": round(pdata.volume, 4),
+                "sys": pdata.SYSTEM, "v": round(pdata.volume, 4),
                 **{k: round(v, 4) for k, v in zip("abc", pdata.norms)},
                 **{k: round(v, 4) for k, v in zip(["alpha","beta","gamma"], pdata.angles)},
             }
         )
-        self._click_save_data(self.params.cpoint.value, self.params.fig.clicked)  # Load into view
+        self._show_data(self._result)  # Load into view
+
+    def _clean_legacy_data(self, path):
+        "clean old style keys like VBM to vbm"
+        data = serializer.load(str(path.absolute()))  # Old data loaded
+
+        if not any(key in data for key in ['VBM', 'α','vbm_k']):
+            return data # already clean
+        
+        keys_map = {
+            "SYSTEM": "sys",
+            "VBM": "vbm",      # Old: New
+            "CBM": "cbm", 
+            "VBM_k": "kvbm",
+            "CBM_k": "kcbm",
+            "E_gap": "gap", 
+            "\u0394_SO": "soc", "so_max":"so_max","so_min":"so_min", # need to include keys
+            "V": "v", 
+            "α": "alpha", 
+            "β": "beta", 
+            "γ": "gamma",
+        }
+
+        new_data = {}
+        for old, new in keys_map.items():
+            if old in data:
+                new_data[new] = data[old]  # Transfer value from old key to new key
+            elif new in data:
+                new_data[new] = data[new]  # Keep existing new style keys
+            
+        # save cleaned data
+        serializer.dump(new_data,format="json",outfile=path)
+        return new_data
+    
+    @ei.callback
+    def _toggle_footer(self, showft):
+        self._app.pane_heights = [0,100 - showft, showft]
     
     @ei.callback
     def _set_krange(self, krange):
@@ -672,7 +722,11 @@ class BandsWidget(_ThemedFigureInteract):
             [v.strip() for v in vs.split(":")]
             for vs in self.params.kticks.value.split(",")
         ]
-        kticks = [(int(vs[0]), vs[1]) for vs in hsk if len(vs) == 2] or None
+        kmin, kmax = self.params.krange.value or [0,0]
+        kticks = [(int(vs[0]), vs[1]) 
+            for vs in hsk  # We are going to pick kticks silently in given range
+            if len(vs) == 2 and abs(int(vs[0])) < (kmax - kmin) # handle negative indices too
+        ] or None
         
         _bands = None
         if self.params.brange.value:
@@ -682,7 +736,7 @@ class BandsWidget(_ThemedFigureInteract):
         self._kws = {**self._kws, "kticks": kticks, "bands": _bands}
 
         if self.params.ppicks.projections:
-            self._kws = {"projections": self.params.ppicks.projections, **self._kws}
+            self._kws = {**self._kws, "projections": self.params.ppicks.projections}
             _fig = self.bands.iplot_rgb_lines(**self._kws, name="Up")
             if self.bands.source.summary.ISPIN == 2:
                 self.bands.iplot_rgb_lines(**self._kws, spin=1, name="Down", fig=fig)
@@ -703,12 +757,9 @@ class BandsWidget(_ThemedFigureInteract):
         button.description = "Update Graph" # clear trigger
 
     @ei.callback('out-click')
-    def _click_save_data(self, cpoint, cdata):
-        if cpoint is None:  # called from other functions but not from store_clicked_data
+    def _click_save_data(self, cdata):
+        if self.params.cpoint.value is None:
             return self._show_and_save(self._result)
-        # Should be after checking change
-        if cpoint and cpoint == "None":
-            return  # No need to act on None
 
         data_dict = self._result.copy()  # Copy old data
 
@@ -716,12 +767,12 @@ class BandsWidget(_ThemedFigureInteract):
             x = round(*cdata['xs'], 6) # unpack single point
             y = round(float(*cdata['ys']) + self.bands.data.ezero, 6)  # Add ezero
 
-            if key := cpoint:
+            if key := self.params.cpoint.value:
                 data_dict[key] = y  # Assign value back
-                if not key.startswith("so"): # NOTE: fix it, why not so
-                    data_dict[key + "_k"] = round(
-                        x, 6
-                    )  # Save x to test direct/indirect
+                if not key.startswith("so_"): # not spin-orbit points
+                    cst, = cdata.get('customdata',[{}]) # single item
+                    kp = [cst.get(f"k{n}", None) for n in 'xyz']
+                    data_dict[f"k{key}"] = tuple([round(k,6) if k else k for k in kp])  # Save x to test direct/indirect
 
             if data_dict.get("vbm", None) and data_dict.get("cbm", None):
                 data_dict["gap"] = np.round(data_dict["cbm"] - data_dict["vbm"], 6)
@@ -733,18 +784,23 @@ class BandsWidget(_ThemedFigureInteract):
 
             self._result.update(data_dict)  # store new data
             self._show_and_save(self._result)
-        self.params.cpoint.value = "None"  # Reset to None to avoid accidental click at end
+        self.params.cpoint.value = None  # Reset to None to avoid accidental click at end
 
+    def _show_data(self, data):
+        "Show data in html widget, no matter where it was called."
+        data = data.copy() # no modify
+        kv, kc = data.pop('kvbm',[None]*3), data.pop('kcbm',[None]*3)
+        data['direct'] = (kv == kc) if None not in kv else False
+        headers = "".join(f"<th>{key}</th>" for key in data.keys())
+        values = "".join(f"<td>{format(value, '.4f') if isinstance(value, float) else value}</td>" for value in data.values())
+        self.params.hdata.value = f"""<table border='1' style='width:100%;max-width:100% !important;border-collapse:collapse;'>
+            <tr>{headers}</tr>\n<tr>{values}</tr></table>"""
+    
     def _show_and_save(self, data_dict):
-        print(pformat({key: value
-        for key, value in data_dict.items()
-            if key not in ("so_max", "so_min")
-        }))
-        serializer.dump(
-            data_dict,
-            format="json",
-            outfile=self.file.parent / "result.json",
-        )
+        self._show_data(data_dict)
+        if self.file:
+            serializer.dump(data_dict,format="json",
+            outfile=self.file.parent / "result.json")
     
     @property
     def results(self):

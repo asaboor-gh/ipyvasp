@@ -342,7 +342,7 @@ class POSCAR:
             [
                 f"{k}={v}"
                 for k, v in zip(
-                    "abcαβγ", (*self.data.norms.round(3), *self.data.angles.round(3))
+                    ['a','b','c','alpha','beta','gamma'], (*self.data.norms.round(3), *self.data.angles.round(3))
                 )
             ]
         )

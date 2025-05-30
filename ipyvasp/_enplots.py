@@ -774,7 +774,7 @@ def _format_rgb_data(
 
     # Now process data to make single data for faster plotting.
     txt = "Projection: [{}]</br>Value:".format(", ".join(labels))
-    K, E, C, S, PT, OT, KT, ET = [], [], [], [], [], [], [], []
+    K, E, C, S, PT, OT, KT, ET, jKbop = [], [], [], [], [], [], [], [], []
     for i, b in enumerate(indices):
         K = [*K, *data["kpath"], np.nan]
         E = [*E, *data["evals"][:, i], np.nan]
@@ -800,6 +800,19 @@ def _format_rgb_data(
             "",
         ]  # Add bands subscripts to labels.
 
+        jKbop = [*jKbop, *[
+            {
+                "nk":j+1,
+                **{f"k{u}":v for u,v in zip("xyz",xyz)},
+                "nb":b+1,
+                "occ":occ,
+                **{c:v for c,v in zip("rgb",rgb)}
+            } 
+            for (j, xyz), occ,rgb  in zip(
+                enumerate(data["kpoints"]), data["occs"][:, i],data["norms"][:, i]
+            )
+        ], {k:np.nan for k in ("nk","kx","ky","kz","nb","occ","r","g","b")}]
+
     T = [
         f"</br>{p} </br></br>Band: {e}  {o}</br>{k}"
         for (p, e, o, k) in zip(PT, ET, OT, KT)
@@ -810,6 +823,7 @@ def _format_rgb_data(
         "C": C,
         "S": S,
         "T": T,
+        "jKbop": jKbop,
         "labels": labels,
     }  # K, energy, marker color, marker size, text, labels that get changed
 
@@ -833,7 +847,7 @@ def _fmt_labels(ticklabels):
 
 @gu._fmt_doc(_docs)
 def iplot_bands(
-    K, E, fig=None, elim=None, kticks=None, interp=None, title=None, **kwargs
+    K, E, occs = None, fig=None, elim=None, kticks=None, interp=None, title=None, **kwargs
 ):
     """Plot band structure using plotly.
     {params}\n    {K}\n    {E}
@@ -854,10 +868,10 @@ def iplot_bands(
     data = _format_rgb_data(
         K,
         E,
-        [E],
+        [E], # don't let it fail if no projections
         ["X"],
         interp,
-        E,
+        E if occs is None else occs,
         np.array([K, K, K]).reshape((-1, 3)),
         maxwidth=1,
         indices=indices,
@@ -873,6 +887,7 @@ def iplot_bands(
     kwargs = {
         "mode": "markers + lines",
         "marker": dict(size=0.1),
+        "customdata": [{k:v for k,v in d.items() if not k in 'rgb'} for d in data["jKbop"]], # useless rgb data to skip
         **kwargs,
     }  # marker so that it is selectable by box, otherwise it does not
     fig.add_trace(go.Scatter(x=K, y=E, hovertext=T, **kwargs))
@@ -955,6 +970,7 @@ def iplot_rgb_lines(
                 "color": C,
                 "size": S,
             },
+            "customdata": data["jKbop"], # need for selection and hover template
         }
     )  # marker edge should be free
 
