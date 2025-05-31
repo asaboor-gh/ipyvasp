@@ -716,8 +716,9 @@ def splot_dos_lines(
             **legend_kws,
         }
         add_legend(ax, **kwargs)  # Labels are picked from plot
-
-    kws = dict(ylim=elim or []) if vertical else dict(xlim=elim or [])
+    
+    elim = elim if elim is not None else []
+    kws = dict(ylim=elim) if vertical else dict(xlim=elim)
     xlabel, ylabel = "Energy (eV)", "DOS"
     if vertical:
         xlabel, ylabel = ylabel, xlabel
@@ -754,7 +755,7 @@ def _format_rgb_data(
     if data["pros"].shape[2] == 2:
         data["norms"][:, :, 2] = np.nan  # Avoid wrong info here
     elif data["pros"].shape[2] == 1:
-        data["pros"][:, :, 1:] = np.nan
+        data["norms"][:, :, 1:] = np.nan
 
     lws = np.sum(rgb, axis=2)  # Sum of all colors
     lws = maxwidth * lws / (float(np.max(lws)) or 1)  # Normalize to maxwidth
@@ -773,8 +774,7 @@ def _format_rgb_data(
         indices = range(np.shape(data["evals"])[1])
 
     # Now process data to make single data for faster plotting.
-    txt = "Projection: [{}]</br>Value:".format(", ".join(labels))
-    K, E, C, S, PT, OT, KT, ET, jKbop = [], [], [], [], [], [], [], [], []
+    K, E, C, S, CDATA = [], [], [], [], []
     for i, b in enumerate(indices):
         K = [*K, *data["kpath"], np.nan]
         E = [*E, *data["evals"][:, i], np.nan]
@@ -784,46 +784,26 @@ def _format_rgb_data(
             "rgb(0,0,0)",
         ]
         S = [*S, *data["widths"][:, i], data["widths"][-1, i]]
-        PT = [*PT, *[f"{txt} [{s}, {p}, {d}]" for (s, p, d) in data["norms"][:, i]], ""]
-        OT = [*OT, *[f"Occ: {t:>7.4f}" for t in data["occs"][:, i]], ""]
-        KT = [
-            *KT,
-            *[
-                f"K<sub>{j+1}</sub>: {x:>7.3f}{y:>7.3f}{z:>7.3f}"
-                for j, (x, y, z) in enumerate(data["kpoints"])
-            ],
-            "",
-        ]
-        ET = [
-            *ET,
-            *["{}".format(b + 1) for _ in data["kpath"]],
-            "",
-        ]  # Add bands subscripts to labels.
 
-        jKbop = [*jKbop, *[
+        CDATA  = [*CDATA , *[
             {
                 "nk":j+1,
                 **{f"k{u}":v for u,v in zip("xyz",xyz)},
                 "nb":b+1,
                 "occ":occ,
-                **{c:v for c,v in zip("rgb",rgb)}
+                **{c:"" if np.isnan(v) else v for c,v in zip("rgb",rgb)}
             } 
-            for (j, xyz), occ,rgb  in zip(
+            for (j, xyz), occ, rgb  in zip(
                 enumerate(data["kpoints"]), data["occs"][:, i],data["norms"][:, i]
             )
         ], {k:np.nan for k in ("nk","kx","ky","kz","nb","occ","r","g","b")}]
 
-    T = [
-        f"</br>{p} </br></br>Band: {e}  {o}</br>{k}"
-        for (p, e, o, k) in zip(PT, ET, OT, KT)
-    ]
     return {
         "K": K,
         "E": E,
         "C": C,
         "S": S,
-        "T": T,
-        "jKbop": jKbop,
+        "CDATA": CDATA,
         "labels": labels,
     }  # K, energy, marker color, marker size, text, labels that get changed
 
@@ -844,6 +824,11 @@ def _fmt_labels(ticklabels):
         ]
     return ticklabels
 
+_hover_temp = { # keep order same
+    "xy":"(%{x}, %{y})",
+    "k": "<br>K<sub>%{customdata.nk}</sub>: %{customdata.kx:.3f} %{customdata.ky:.3f} %{customdata.kz:.3f}",
+    "b":"Band: %{customdata.nb}, Occ: %{customdata.occ:.4f}"
+}
 
 @gu._fmt_doc(_docs)
 def iplot_bands(
@@ -876,10 +861,7 @@ def iplot_bands(
         maxwidth=1,
         indices=indices,
     )  # moking other arrays, we need only
-    K, E, T = data["K"], data["E"], data["T"]  # Fixed K and E as single line data
-    T = [
-        "Band" + t.split("Band")[1].split("Occ")[0] for t in T
-    ]  # Just Band number here
+    K, E = data["K"], data["E"]
 
     if fig is None:
         fig = go.Figure()
@@ -887,11 +869,12 @@ def iplot_bands(
     kwargs = {
         "mode": "markers + lines",
         "marker": dict(size=0.1),
-        "customdata": [{k:v for k,v in d.items() if not k in 'rgb'} for d in data["jKbop"]], # useless rgb data to skip
+        "hovertemplate": "<br>".join(_hover_temp.values()),
+        "customdata": [{k:v for k,v in d.items() if not k in 'rgb'} for d in data["CDATA"]], # useless rgb data to skip
         **kwargs,
     }  # marker so that it is selectable by box, otherwise it does not
-    fig.add_trace(go.Scatter(x=K, y=E, hovertext=T, **kwargs))
-
+    fig.add_trace(go.Scatter(x=K, y=E, **kwargs))
+    
     fig.update_layout(
         template="plotly_white",
         title=(
@@ -947,14 +930,7 @@ def iplot_rgb_lines(
     data = _format_rgb_data(
         K, E, pros, labels, interp, occs, kpoints, maxwidth=maxwidth, indices=indices
     )
-    K, E, C, S, T, labels = (
-        data["K"],
-        data["E"],
-        data["C"],
-        data["S"],
-        data["T"],
-        data["labels"],
-    )
+    K, E, C, S, labels = [data[key] for key in "K E C S labels".split()]
 
     if fig is None:
         fig = go.Figure()
@@ -963,14 +939,18 @@ def iplot_rgb_lines(
     kwargs.pop("marker_size", None)  # Provided by S
     kwargs.update(
         {
-            "hovertext": T,
             "marker": {
                 "line_color": "rgba(0,0,0,0)",
                 **kwargs.get("marker", {}),
                 "color": C,
                 "size": S,
             },
-            "customdata": data["jKbop"], # need for selection and hover template
+            "hovertemplate": "<br>".join([_hover_temp["xy"],
+                "<br>Projection: [{}, {}, {}]".format(*labels), # clean labels instead of ''
+                "Value: [%{customdata.r}, %{customdata.g}, %{customdata.b}]",
+                _hover_temp["k"], _hover_temp["b"],
+            ]),
+            "customdata": data["CDATA"], # need for selection and hover template
         }
     )  # marker edge should be free
 
@@ -983,7 +963,7 @@ def iplot_rgb_lines(
         + ", ".join(labels)
         + "]",  # Do not set autosize = False, need to be responsive in widgets boxes
         margin=go.layout.Margin(l=60, r=50, b=40, t=75, pad=0),
-        yaxis=go.layout.YAxis(title_text="Energy (eV)", range=elim or [min(E), max(E)]),
+        yaxis=go.layout.YAxis(title_text="Energy (eV)",range=elim or [min(E), max(E)]),
         xaxis=go.layout.XAxis(
             ticktext=_fmt_labels(xticklabels),
             tickvals=xticks,

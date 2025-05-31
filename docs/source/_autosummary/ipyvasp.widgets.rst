@@ -5,7 +5,9 @@
 
    
    
+   
 
+   
    
    .. rubric:: Functions
 
@@ -22,8 +24,16 @@
 
    .. autosummary::
    
-      Files
-      PropsPicker
       BandsWidget
+      Files
       KPathWidget
+      PropsPicker
+   
+   
+
+   
+   
+   
+
+
 

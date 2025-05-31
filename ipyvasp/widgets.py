@@ -24,6 +24,7 @@ from ipywidgets import (
     Text,
     Stack,
     SelectMultiple,
+    TagsInput,
 )
 
 # More imports
@@ -182,9 +183,9 @@ class Files:
         "Apply a func(path) -> dict and create a dataframe."
         return summarize(self._files,func, **kwargs)
     
-    def load_results(self):
-        "Load result.json files from these paths into a dataframe."
-        return load_results(self._files)
+    def load_results(self,exclude_keys=None):
+        "Load result.json files from these paths into a dataframe, with optionally excluding keys."
+        return load_results(self._files,exclude_keys=exclude_keys)
     
     def input_info(self, *tags):
         "Grab input information into a dataframe from POSCAR and INCAR. Provide INCAR tags (case-insinsitive) to select only few of them."
@@ -328,7 +329,6 @@ class Files:
         return self.summarize(lambda path: {"size": get_file_size(path)})
 
 
-
 @fix_signature
 class _PropPicker(VBox):
     """Single projection picker with atoms and orbitals selection"""
@@ -336,9 +336,12 @@ class _PropPicker(VBox):
     
     def __init__(self, system_summary=None):
         super().__init__()
-        self._atoms = Dropdown(description="Atoms")
-        self._orbs = Dropdown(description="Orbs")
+        self._atoms = TagsInput(description="Atoms", allowed_tags=[], 
+            placeholder="Select atoms", allow_duplicates = False).add_class('props-tags')
+        self._orbs = TagsInput(description="Orbs", allowed_tags=[], 
+            placeholder="Select orbitals", allow_duplicates = False).add_class('props-tags')
         self.children = [self._atoms, self._orbs]
+        self.layout.width = '100%' # avoid horizontal collapse
         self._atoms_map = {}
         self._orbs_map = {}
         
@@ -349,13 +352,24 @@ class _PropPicker(VBox):
 
     def _update_props(self, change):
         """Update props trait when selections change"""
-        atoms = self._atoms_map.get(self._atoms.value, [])
-        orbs = self._orbs_map.get(self._orbs.value, [])
+        _atoms = [self._atoms_map.get(tag, None) for tag in self._atoms.value]
+        _orbs = [self._orbs_map.get(tag, None) for tag in self._orbs.value]
         
+        # Filter out None values, and flatten
+        # Flatten and filter atoms
+        atoms = []
+        for ats in _atoms:
+            atoms.extend(ats if ats is not None else [])
+
+        # Flatten and filter orbitals
+        orbs = []
+        for ors in _orbs:
+            orbs.extend(ors if ors is not None else [])
+
         if atoms and orbs:
-            self.props = {
-                'atoms': atoms, 'orbs': orbs,
-                'label': f"{self._atoms.value or ''}-{self._orbs.value or ''}"
+            self.props = { 
+                'atoms': atoms, 'orbs': orbs, 
+                'label': f"{'+'.join(self._atoms.value)} | {'+'.join(self._orbs.value)}"
             }
         else:
             self.props = {}
@@ -363,11 +377,10 @@ class _PropPicker(VBox):
     def _process(self, system_summary):
         """Process system data and setup widget options"""
         if system_summary is None or not hasattr(system_summary, "orbs"):
-            self.children = [ipw.HTML("❌ No projection data found!")]
-            return
+            return 
 
         sorbs = system_summary.orbs
-        self._orbs_map = {"-": [], "All": range(len(sorbs)), "s": [0]}
+        self._orbs_map = {"All": range(len(sorbs)), "s": [0]}
 
         # p-orbitals
         if set(["px", "py", "pz"]).issubset(sorbs):
@@ -397,19 +410,17 @@ class _PropPicker(VBox):
                 k: [idx] for idx, k in enumerate(sorbs[16:], start=16)
             })
 
-        self._orbs.options = list(self._orbs_map.keys())
+        self._orbs.allowed_tags = list(self._orbs_map.keys())
         
         # Process atoms
         self._atoms_map = {
-            "-": [], 
             "All": range(system_summary.NIONS),
             **{k: v for k,v in system_summary.types.to_dict().items()},
             **{f"{k}{n}": [v] for k,tp in system_summary.types.to_dict().items() 
                for n,v in enumerate(tp, 1)}
         }
-        self._atoms.options = list(self._atoms_map.keys())
-        self.children = [self._atoms, self._orbs]
-        self._update_props(None) # then props trigger top projections
+        self._atoms.allowed_tags = list(self._atoms_map.keys())
+        self._update_props(None)  # Trigger props update
 
     def update(self, system_summary):
         """Update widget with new system data while preserving selections"""
@@ -418,10 +429,8 @@ class _PropPicker(VBox):
         self._process(system_summary)
         
         # Restore previous selections if still valid
-        if old_atoms in self._atoms.options:
-            self._atoms.value = old_atoms
-        if old_orbs in self._orbs.options:
-            self._orbs.value = old_orbs
+        self._atoms.value = [tag for tag in old_atoms if tag in self._atoms.allowed_tags]
+        self._orbs.value = [tag for tag in old_orbs if tag in self._orbs.allowed_tags]
 
 @fix_signature
 class PropsPicker(VBox): # NOTE: remove New Later
@@ -475,8 +484,44 @@ class PropsPicker(VBox): # NOTE: remove New Later
         for picker in self._pickers:
             picker.update(system_summary)
 
-def load_results(paths_list):
-    "Loads result.json from paths_list and returns a dataframe."
+def _clean_legacy_data(path):
+    "clean old style keys like VBM to vbm"
+    data = serializer.load(path.absolute())  # Old data loaded
+    if not any(key in data for key in ['VBM', 'α','vbm_k']):
+        return data # already clean
+    
+    keys_map = {
+        "SYSTEM": "sys",
+        "VBM": "vbm",      # Old: New
+        "CBM": "cbm", 
+        "VBM_k": "kvbm", "vbm_k": "kvbm",
+        "CBM_k": "kcbm", "cbm_k": "kcbm",
+        "E_gap": "gap", 
+        "\u0394_SO": "soc", 
+        "α": "alpha", 
+        "β": "beta", 
+        "γ": "gamma",
+    }
+    new_data = {k:v for k,v in data.items() if k not in (*keys_map.keys(),*keys_map.values())} # keep other data
+    for old, new in keys_map.items():
+        if old in data:
+            new_data[new] = data[old]  # Transfer value from old key to new key
+        elif new in data:
+            new_data[new] = data[new]  # Keep existing new style keys
+        
+    # save cleaned data
+    serializer.dump(new_data,format="json",outfile=path)
+    return new_data
+
+
+def load_results(paths_list, exclude_keys=None):
+    "Loads result.json from paths_list and returns a dataframe. Use exclude_keys to get subset of data."
+    if exclude_keys is not None:
+        if not isinstance(exclude_keys, (list,tuple)):
+            raise TypeError(f"exclude_keys should be list of keys, got {type(exclude_keys)}")
+        if not all([isinstance(key,str) for key in exclude_keys]):
+            raise TypeError(f"all keys in exclude_keys should be str!")
+    
     paths_list = [Path(p) for p in paths_list]
     result_paths = []
     if paths_list:
@@ -488,7 +533,8 @@ def load_results(paths_list):
 
     def load_data(path):
         try:
-            return serializer.load(str(path.absolute()))
+            data = _clean_legacy_data(path)
+            return {k:v for k,v in data.items() if k not in (exclude_keys or [])}
         except:
             return {}  # If not found, return empty dictionary
 
@@ -519,6 +565,23 @@ def _get_css(mode):
         },
         '.footer': {'overflow': 'auto','padding':0},
         '.widget-vslider, .jupyter-widget-vslider': {'width': 'auto'}, # otherwise it spans too much area
+        'table': { # dataframe display sucks
+            'color':'var(--jp-content-font-color1)',
+            'background':'var(--jp-layout-color1)',
+            'tr': {
+                    '^:nth-child(odd)': {'background':'var(--jp-widgets-input-background-color)',},
+                    '^:nth-child(even)': {'background':'var(--jp-layout-color1)',},
+                },
+        },
+        '.props-picker': {
+            'background': 'var(--jp-widgets-input-background-color)', # make feels like single widget
+            'overflow-x': 'hidden', 'border-radius': '4px', 'padding': '4px',
+        },
+        '.props-tags': { 
+            'background':'var(--jp-layout-color1)', 'border-radius': '4px', 'padding': '4px',
+            '> input': {'width': '100%'},
+            '> input::placeholder': {'color': 'var(--jp-ui-font-color1)'},
+        },
     }
 
 class _ThemedFigureInteract(ei.InteractBase):
@@ -566,13 +629,6 @@ class _ThemedFigureInteract(ei.InteractBase):
             raise AttributeError("self._files = Files(...) was never set!")
         return self._files
 
-# NOTE: This to impelemet as selection
-# import pandas as pd 
-
-# data = {k:v for k,v in kw.selected_data.items() if k != 'customdata' and 'indexes' not in k}
-# data.update(pd.DataFrame(kw.selected_data.get('customdata',{})).to_dict(orient='list'))
-
-# df = pd.DataFrame(data)
 
 @fix_signature
 class BandsWidget(_ThemedFigureInteract):
@@ -581,23 +637,44 @@ class BandsWidget(_ThemedFigureInteract):
     You can observe three traits:
 
     - file: Currently selected file
-    - clicked_data:  Last clicked point data, that is also stored as VBM, CBM etc, using Click dropdown.
-    - selected_data: Last selection of points within a box or lasso. You can plot that output separately as plt.plot(data['xs'], data['ys']) after a selection.
+    - clicked_data:  Last clicked point data, which can be directly passed to a dataframe.
+    - selected_data: Last selection of points within a box or lasso, which can be directly passed to a dataframe and plotted accordingly.
     
     - You can use `self.files.update` method to change source files without effecting state of widget.
-    - You can also use `self.iplot`, `self.splot` with `self.kws` to get static plts of current state.
+    - You can also use `self.iplot`, `self.splot` with `self.kws` to get static plts of current state, and self.results to get a dataframe.
+    - You can use store_clicks to provide extra names of points you want to click and save data, besides default ones.
     """
     file = traitlets.Any(allow_none=True)
     clicked_data = traitlets.Dict(allow_none=True)
     selected_data = traitlets.Dict(allow_none=True)
 
-    def __init__(self, files, height="450px"):
+    def __init__(self, files, height="600px", store_clicks=None):
         self.add_class("BandsWidget")
+        self._kb_fig = go.FigureWidget() # for extra stuff
+        self._kb_fig.update_layout(margin=dict(l=40, r=0, b=40, t=40, pad=0)) # show compact
         self._files = Files(files)
         self._bands = None
         self._kws = {}
         self._result = {}
-        super().__init__()
+        self._extra_clicks = ()
+
+        if store_clicks is not None:
+            if not isinstance(store_clicks, (list,tuple)):
+                raise TypeError("store_clicks should be list of names " 
+                    f"of point to be stored from click on figure, got {type(store_clicks)}")
+        
+            for name in store_clicks:
+                if not isinstance(name, str) or not name.isidentifier():
+                    raise ValueError(f"items in store_clicks should be a valid python variable name, got {name!r}")
+                if name in ["vbm", "cbm", "so_max", "so_min"]:
+                    raise ValueError(f"{name!r} already exists in default click points!")
+                reserved = "gap soc v a b c alpha beta gamma direct".split()
+                if name in reserved:
+                    raise ValueError(f"{name!r} conflicts with reserved keys {reserved}")
+
+            self._extra_clicks += tuple(store_clicks)
+        
+        super().__init__() # after extra clicks
 
         traitlets.dlink((self.params.file,'value'),(self, 'file'))
         traitlets.dlink((self.params.fig,'clicked'),(self, 'clicked_data'))
@@ -606,7 +683,7 @@ class BandsWidget(_ThemedFigureInteract):
         self.relayout(
             left_sidebar=[
                 'head','file','krange','kticks','brange', 'ppicks',
-                [HBox(),('theme','button')],
+                [HBox(),('theme','button')], 'kb_fig',
             ],
             center=['hdata','fig','cpoint'],  footer = self.groups.outputs,
             right_sidebar = ['showft'],
@@ -614,13 +691,29 @@ class BandsWidget(_ThemedFigureInteract):
             height=height
         )
 
+    @traitlets.validate('selected_data','clicked_data')
+    def _flatten_dict(self, proposal):
+        data = proposal['value']
+        if data is None: return None # allow None stuff
+    
+        if not isinstance(data, dict):
+            raise traitlets.TraitError(f"Expected a dict for selected_data, got {type(data)}")
+        
+        _data = {k:v for k,v in data.items() if k != 'customdata' and 'indexes' not in k}
+        _data.update(pd.DataFrame(data.get('customdata',{})).to_dict(orient='list'))
+        return _data # since we know customdata, we can flatten dict
+
+
     @ei.callback
     def _update_theme(self, fig, theme):
-        return super()._update_theme(fig, theme)
+        super()._update_theme(fig, theme)
+        self._kb_fig.layout.template = fig.layout.template
+        self._kb_fig.layout.autosize = True
     
     def _interactive_params(self):
         return dict(
             fig    = self._fig, theme = self._theme,  # include theme and fig
+            kb_fig = self._kb_fig, # show selected data
             head   = ipw.HTML("<b>Band Structure Visualizer</b>"),
             file   = self.files.to_dropdown(),
             ppicks = PropsPicker(),
@@ -629,11 +722,37 @@ class BandsWidget(_ThemedFigureInteract):
             kticks = Text(description="kticks", tooltip="0 index maps to minimum value of kpoints slider."),
             brange = ipw.IntRangeSlider(description="bands",min=1, max=1), # number, not index
             cpoint = ipw.ToggleButtons(description="Select from options and click on figure to store data points", 
-                        value=None, options=["vbm", "cbm"]), # the point where clicked
-            showft = ipw.IntSlider(description = 'h', orientation='vertical',min=0,max=50, value=0),
-            cdata  = {'fig':'clicked'},
-            projs  = {'ppicks': 'projections'}, # for visual feedback on button
+                        value=None, options=["vbm", "cbm", *self._extra_clicks]).add_class('content-width-button'), # the point where clicked
+            showft = ipw.IntSlider(description = 'h', orientation='vertical',min=0,max=50, value=0,tooltip="outputs area's height ratio"),
+            cdata  = 'fig.clicked', 
+            projs  = 'ppicks.projections', # for visual feedback on button
+            sdata  = '.selected_data',
             hdata  = ipw.HTML(), # to show data in one place
+        )
+    
+    @ei.callback('out-selected')
+    def _plot_data(self, kb_fig, sdata):
+        kb_fig.data = [] # clear in any case to avoid confusion
+        if not sdata: return # no change
+
+        df = pd.DataFrame(sdata)
+        if 'r' in sdata:
+            arr = df[['r','g','b']].to_numpy()
+            arr[arr == ''] = 0
+            arr, fmt = arr / (arr.max() or 1), lambda v : int(v*255) # color norms
+            df['color'] = [f"rgb({fmt(r)},{fmt(g)},{fmt(b)})" for r,g,b in arr]
+        else:
+            df['color'] = sdata['occ']
+
+        df['msize'] = df['occ']*7 + 10
+        cdata = (df[["ys","occ","r","g","b"]] if 'r' in sdata else df[['ys','occ']]).to_numpy()
+        rgb_temp = '<br>orbs: (%{customdata[2]},%{customdata[3]},%{customdata[4]})' if 'r' in sdata else ''
+
+        kb_fig.add_trace(go.Scatter(x=df.nk, y = df.nb, mode = 'markers', marker = dict(size=df.msize,color=df.color), customdata=cdata))
+        kb_fig.update_traces(hovertemplate=f"nk: %{{x}}, nb: %{{y}})<br>en: %{{customdata[0]:.4f}}<br>occ: %{{customdata[1]:.4f}}{rgb_temp}<extra></extra>")
+        kb_fig.update_layout(template = self._fig.layout.template, autosize=True,
+            title = "Selected Data", showlegend=False,coloraxis_showscale=False,
+            margin=dict(l=40, r=0, b=40, t=40, pad=0),font=dict(family="stix, serif", size=14)
         )
     
     @ei.callback('out-data')
@@ -654,11 +773,11 @@ class BandsWidget(_ThemedFigureInteract):
         
         self.params.brange.max = self.bands.source.summary.NBANDS
         if self.bands.source.summary.LSORBIT:
-            self.params.cpoint.options = ["vbm", "cbm", "so_max", "so_min"]
+            self.params.cpoint.options = ["vbm", "cbm", "so_max", "so_min", *self._extra_clicks]
         else:
-            self.params.cpoint.options = ["vbm", "cbm"]
+            self.params.cpoint.options = ["vbm", "cbm",*self._extra_clicks]
         if (path := file.parent / "result.json").is_file():
-            self._result = self._clean_legacy_data(path)
+            self._result = _clean_legacy_data(path)
 
         pdata = self.bands.source.poscar.data
         self._result.update(
@@ -669,38 +788,6 @@ class BandsWidget(_ThemedFigureInteract):
             }
         )
         self._show_data(self._result)  # Load into view
-
-    def _clean_legacy_data(self, path):
-        "clean old style keys like VBM to vbm"
-        data = serializer.load(str(path.absolute()))  # Old data loaded
-
-        if not any(key in data for key in ['VBM', 'α','vbm_k']):
-            return data # already clean
-        
-        keys_map = {
-            "SYSTEM": "sys",
-            "VBM": "vbm",      # Old: New
-            "CBM": "cbm", 
-            "VBM_k": "kvbm",
-            "CBM_k": "kcbm",
-            "E_gap": "gap", 
-            "\u0394_SO": "soc", "so_max":"so_max","so_min":"so_min", # need to include keys
-            "V": "v", 
-            "α": "alpha", 
-            "β": "beta", 
-            "γ": "gamma",
-        }
-
-        new_data = {}
-        for old, new in keys_map.items():
-            if old in data:
-                new_data[new] = data[old]  # Transfer value from old key to new key
-            elif new in data:
-                new_data[new] = data[new]  # Keep existing new style keys
-            
-        # save cleaned data
-        serializer.dump(new_data,format="json",outfile=path)
-        return new_data
     
     @ei.callback
     def _toggle_footer(self, showft):
@@ -711,7 +798,7 @@ class BandsWidget(_ThemedFigureInteract):
         self._kws["kpairs"] = [krange,]
 
     @ei.callback
-    def _warn_update(self, file=None, kticks=None, brange=None, krange=None,projs=None):
+    def _warn_update(self, file, kticks, brange, krange, projs):
         self.params.button.description = "🔴 Update Graph"
 
     @ei.callback('out-graph')
@@ -734,17 +821,18 @@ class BandsWidget(_ThemedFigureInteract):
             _bands = range(l-1, h) # from number to index
 
         self._kws = {**self._kws, "kticks": kticks, "bands": _bands}
-
+        ISPIN = self.bands.source.summary.ISPIN
         if self.params.ppicks.projections:
-            self._kws = {**self._kws, "projections": self.params.ppicks.projections}
-            _fig = self.bands.iplot_rgb_lines(**self._kws, name="Up")
-            if self.bands.source.summary.ISPIN == 2:
+            self._kws["projections"] = self.params.ppicks.projections
+            _fig = self.bands.iplot_rgb_lines(**self._kws, name="Up" if ISPIN == 2 else "")
+            if ISPIN == 2:
                 self.bands.iplot_rgb_lines(**self._kws, spin=1, name="Down", fig=fig)
 
             self.iplot = partial(self.bands.iplot_rgb_lines, **self._kws)
             self.splot = partial(self.bands.splot_rgb_lines, **self._kws)
         else:
-            _fig = self.bands.iplot_bands(**self._kws, name="Up")
+            self._kws.pop("projections",None) # may be previous one
+            _fig = self.bands.iplot_bands(**self._kws, name="Up" if ISPIN == 2 else "")
             if self.bands.source.summary.ISPIN == 2:
                 self.bands.iplot_bands(**self._kws, spin=1, name="Down", fig=fig)
 
@@ -758,21 +846,26 @@ class BandsWidget(_ThemedFigureInteract):
 
     @ei.callback('out-click')
     def _click_save_data(self, cdata):
-        if self.params.cpoint.value is None:
-            return self._show_and_save(self._result)
-
+        if self.params.cpoint.value is None: return # at reset-
         data_dict = self._result.copy()  # Copy old data
 
         if cdata:  # No need to make empty dict
-            x = round(*cdata['xs'], 6) # unpack single point
-            y = round(float(*cdata['ys']) + self.bands.data.ezero, 6)  # Add ezero
-
-            if key := self.params.cpoint.value:
-                data_dict[key] = y  # Assign value back
+            key = self.params.cpoint.value
+            if key:
+                y = round(float(*cdata['ys']) + self.bands.data.ezero, 6)  # Add ezero
+                if not key in self._extra_clicks:
+                    data_dict[key] = y  # Assign value back
+                
                 if not key.startswith("so_"): # not spin-orbit points
                     cst, = cdata.get('customdata',[{}]) # single item
                     kp = [cst.get(f"k{n}", None) for n in 'xyz']
-                    data_dict[f"k{key}"] = tuple([round(k,6) if k else k for k in kp])  # Save x to test direct/indirect
+                    kp = tuple([round(k,6) if k else k for k in kp])
+                    
+                    if key in ("vbm","cbm"):
+                        data_dict[f"k{key}"] =  kp 
+                    else: # user points, stor both for reference
+                        data_dict[key] = {"k":kp,"e":y}   
+
 
             if data_dict.get("vbm", None) and data_dict.get("cbm", None):
                 data_dict["gap"] = np.round(data_dict["cbm"] - data_dict["vbm"], 6)
@@ -783,29 +876,33 @@ class BandsWidget(_ThemedFigureInteract):
                 )
 
             self._result.update(data_dict)  # store new data
-            self._show_and_save(self._result)
+            self._show_and_save(self._result, f"{key} = {data_dict[key]}")
         self.params.cpoint.value = None  # Reset to None to avoid accidental click at end
 
-    def _show_data(self, data):
+    def _show_data(self, data, last_click=None):
         "Show data in html widget, no matter where it was called."
-        data = data.copy() # no modify
-        kv, kc = data.pop('kvbm',[None]*3), data.pop('kcbm',[None]*3)
+        keys = "sys vbm cbm gap direct soc v a b c alpha beta gamma".split()
+        data = {key:data[key] for key in keys if key in data} # show only standard data
+        kv, kc = [self._result.get(k,[None]*3) for k in ('kvbm','kcbm')]
         data['direct'] = (kv == kc) if None not in kv else False
+
+        # Add a caption to the table
+        caption = f"<caption style='caption-side:bottom; opacity:0.7;'><code>{last_click or 'clicked data is shown here'}</code></caption>"
+    
         headers = "".join(f"<th>{key}</th>" for key in data.keys())
         values = "".join(f"<td>{format(value, '.4f') if isinstance(value, float) else value}</td>" for value in data.values())
         self.params.hdata.value = f"""<table border='1' style='width:100%;max-width:100% !important;border-collapse:collapse;'>
-            <tr>{headers}</tr>\n<tr>{values}</tr></table>"""
+            {caption}<tr>{headers}</tr>\n<tr>{values}</tr></table>"""
     
-    def _show_and_save(self, data_dict):
-        self._show_data(data_dict)
+    def _show_and_save(self, data_dict, last_click=None):
+        self._show_data(data_dict,last_click=last_click)
         if self.file:
             serializer.dump(data_dict,format="json",
             outfile=self.file.parent / "result.json")
     
-    @property
-    def results(self):
-        "Generate a dataframe form result.json file in each folder."
-        return load_results(self.params.file.options)
+    def results(self, exclude_keys=None):
+        "Generate a dataframe form result.json file in each folder, with optionally excluding keys."
+        return load_results(self.params.file.options, exclude_keys=exclude_keys)
     
     @property
     def source(self):
@@ -876,7 +973,7 @@ class KPathWidget(_ThemedFigureInteract):
             lab = Text(description="Labels", continuous_update=True),
             kpt = Text(description="KPOINT", continuous_update=False),
             delp = Button(description=" ", icon='trash', tooltip="Delete Selected Points"),
-            click = {'fig': 'clicked'},
+            click = 'fig.clicked',
             lock = Button(description=" ", icon='unlock', tooltip="Lock/Unlock adding more points"),
             info = ipw.HTML(), # consise information in one place
         )
@@ -934,6 +1031,7 @@ class KPathWidget(_ThemedFigureInteract):
     @ei.callback
     def _update_theme(self, fig, theme):
         super()._update_theme(fig, theme)  # call parent method, but important
+
 
     @ei.callback
     def _toggle_lock(self, lock):
