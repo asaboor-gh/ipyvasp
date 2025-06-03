@@ -595,6 +595,14 @@ class _ThemedFigureInteract(ei.InteractBase):
             raise AttributeError("subclass must include already initialized "
                 "{'fig': self._fig,'theme':self._theme} in returned dict of _interactive_params() method.")
         self._update_theme(self._fig,self._theme) # fix theme in starts
+        self.observe(self._autosize_figs, names = 'isfullscreen') # fix figurewidget problem
+
+    def _autosize_figs(self, change):
+        for w in self._all_widgets.values():
+            # don't know yet about these without importing
+            if re.search('plotly.*FigureWidget', str(type(w).__mro__)):
+                w.layout.autosize = False # Double trigger is important
+                w.layout.autosize = True
     
     def _interactive_params(self): return {} 
 

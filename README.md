@@ -43,5 +43,5 @@ Apply operations on POSCAR and simultaneously view using plotly's `FigureWidget`
 
 ![snip](op.png)
 
-
+![BandsWidget](Bands.jpg)
 More coming soon!
