@@ -35,7 +35,7 @@ jobs:
       - name: Build HTML
         run: |
           cd docs
-          sphinx-build -b html docs/source docs/build/html
+          sphinx-build -b html source build/html
           touch build/html/.nojekyll
 
       - name: Deploy to GitHub Pages
