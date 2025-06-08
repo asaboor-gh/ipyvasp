@@ -28,14 +28,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -U pip
+          python -m pip install --upgrade pip setuptools wheel
           pip install sphinx
           pip install -r docs/requirements.txt || true
 
       - name: Build HTML
         run: |
           cd docs
-          make html
+          sphinx-build -b html docs/source docs/build/html
           touch build/html/.nojekyll
 
       - name: Deploy to GitHub Pages
