@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 7.1.2 and Furo 2024.08.06 -->
-        <title>ipyvasp._lattice - ipyvasp 0.9.90 documentation</title>
+        <title>ipyvasp._lattice - ipyvasp 0.9.95 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
@@ -165,7 +165,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">ipyvasp 0.9.90 documentation</div></a>
+      <a href="../../index.html"><div class="brand">ipyvasp 0.9.95 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">ipyvasp 0.9.90 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 0.9.95 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -502,7 +502,7 @@
     <span class="k">return</span> <span class="n">ax</span></div>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">write_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selective_dynamics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selective_dynamics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Writes POSCAR data to a file or returns string</span>
 
 <span class="sd">    Parameters</span>
@@ -516,6 +516,8 @@
 <span class="sd">        If file already exists, overwrite=True changes it.</span>
 <span class="sd">    comment: str</span>
 <span class="sd">        Add comment, previous comment will be there too.</span>
+<span class="sd">    scale: float</span>
+<span class="sd">        Scale factor for the basis vectors. Default is provided by loaded data.</span>
 
 
 <span class="sd">    .. note::</span>
@@ -523,7 +525,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_comment</span> <span class="o">=</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">comment</span>
     <span class="n">out_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">poscar_data</span><span class="o">.</span><span class="n">SYSTEM</span><span class="si">}</span><span class="s2">  # &quot;</span> <span class="o">+</span> <span class="p">(</span><span class="n">_comment</span> <span class="ow">or</span> <span class="s2">&quot;Created by ipyvasp&quot;</span><span class="p">)</span>
-    <span class="n">scale</span> <span class="o">=</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">scale</span>
+
+    <span class="k">if</span> <span class="n">scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">scale</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;scale must be a number or None.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">scale</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;scale can not be zero.&quot;</span><span class="p">)</span>
+    
     <span class="n">out_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  </span><span class="si">{:&lt;20.14f}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
     <span class="n">out_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
         <span class="p">[</span><span class="s2">&quot;</span><span class="si">{:&gt;22.16f}{:&gt;22.16f}{:&gt;22.16f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">basis</span> <span class="o">/</span> <span class="n">scale</span><span class="p">]</span>
@@ -820,9 +829,9 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cif</span><span class="p">)</span>
 
-            <span class="k">def</span><span class="w"> </span><span class="nf">write_poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">write_poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
                 <span class="s2">&quot;Use `ipyvasp.lattice.POSCAR.write` if you need extra options.&quot;</span>
-                <span class="n">write_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">export_poscar</span><span class="p">(),</span> <span class="n">outfile</span><span class="o">=</span><span class="n">outfile</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+                <span class="n">write_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">export_poscar</span><span class="p">(),</span> <span class="n">outfile</span><span class="o">=</span><span class="n">outfile</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
 
             <span class="k">def</span><span class="w"> </span><span class="nf">export_poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                 <span class="s2">&quot;Export poscar data form cif content.&quot;</span>
@@ -2997,7 +3006,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=c4720336"></script>
+</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=9c7b9d88"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

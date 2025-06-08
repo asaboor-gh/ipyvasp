@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 7.1.2 and Furo 2024.08.06 -->
-        <title>ipyvasp._enplots - ipyvasp 0.9.90 documentation</title>
+        <title>ipyvasp._enplots - ipyvasp 0.9.95 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
@@ -165,7 +165,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">ipyvasp 0.9.90 documentation</div></a>
+      <a href="../../index.html"><div class="brand">ipyvasp 0.9.95 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">ipyvasp 0.9.90 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 0.9.95 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -986,8 +986,9 @@
             <span class="o">**</span><span class="n">legend_kws</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="n">add_legend</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># Labels are picked from plot</span>
-
-    <span class="n">kws</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="n">elim</span> <span class="ow">or</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">vertical</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">elim</span> <span class="ow">or</span> <span class="p">[])</span>
+    
+    <span class="n">elim</span> <span class="o">=</span> <span class="n">elim</span> <span class="k">if</span> <span class="n">elim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="n">kws</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="n">elim</span><span class="p">)</span> <span class="k">if</span> <span class="n">vertical</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">elim</span><span class="p">)</span>
     <span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="s2">&quot;Energy (eV)&quot;</span><span class="p">,</span> <span class="s2">&quot;DOS&quot;</span>
     <span class="k">if</span> <span class="n">vertical</span><span class="p">:</span>
         <span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="n">ylabel</span><span class="p">,</span> <span class="n">xlabel</span>
@@ -1024,7 +1025,7 @@
     <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">data</span><span class="p">[</span><span class="s2">&quot;norms&quot;</span><span class="p">][:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># Avoid wrong info here</span>
     <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pros&quot;</span><span class="p">][:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;norms&quot;</span><span class="p">][:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
     <span class="n">lws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rgb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># Sum of all colors</span>
     <span class="n">lws</span> <span class="o">=</span> <span class="n">maxwidth</span> <span class="o">*</span> <span class="n">lws</span> <span class="o">/</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">lws</span><span class="p">))</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Normalize to maxwidth</span>
@@ -1043,8 +1044,7 @@
         <span class="n">indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;evals&quot;</span><span class="p">])[</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="c1"># Now process data to make single data for faster plotting.</span>
-    <span class="n">txt</span> <span class="o">=</span> <span class="s2">&quot;Projection: [</span><span class="si">{}</span><span class="s2">]&lt;/br&gt;Value:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span>
-    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">PT</span><span class="p">,</span> <span class="n">OT</span><span class="p">,</span> <span class="n">KT</span><span class="p">,</span> <span class="n">ET</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">CDATA</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">indices</span><span class="p">):</span>
         <span class="n">K</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">K</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;kpath&quot;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
         <span class="n">E</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">E</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;evals&quot;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
@@ -1054,32 +1054,26 @@
             <span class="s2">&quot;rgb(0,0,0)&quot;</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="n">S</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">S</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;widths&quot;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;widths&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]]</span>
-        <span class="n">PT</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">PT</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">txt</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">]&quot;</span> <span class="k">for</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;norms&quot;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">]],</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
-        <span class="n">OT</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">OT</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Occ: </span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s2">&gt;7.4f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;occs&quot;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">]],</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
-        <span class="n">KT</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="o">*</span><span class="n">KT</span><span class="p">,</span>
-            <span class="o">*</span><span class="p">[</span>
-                <span class="sa">f</span><span class="s2">&quot;K&lt;sub&gt;</span><span class="si">{</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&lt;/sub&gt;: </span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}{</span><span class="n">y</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}{</span><span class="n">z</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;kpoints&quot;</span><span class="p">])</span>
-            <span class="p">],</span>
-            <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="p">]</span>
-        <span class="n">ET</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="o">*</span><span class="n">ET</span><span class="p">,</span>
-            <span class="o">*</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;kpath&quot;</span><span class="p">]],</span>
-            <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="p">]</span>  <span class="c1"># Add bands subscripts to labels.</span>
 
-    <span class="n">T</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="sa">f</span><span class="s2">&quot;&lt;/br&gt;</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2"> &lt;/br&gt;&lt;/br&gt;Band: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">o</span><span class="si">}</span><span class="s2">&lt;/br&gt;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">PT</span><span class="p">,</span> <span class="n">ET</span><span class="p">,</span> <span class="n">OT</span><span class="p">,</span> <span class="n">KT</span><span class="p">)</span>
-    <span class="p">]</span>
+        <span class="n">CDATA</span>  <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">CDATA</span> <span class="p">,</span> <span class="o">*</span><span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;nk&quot;</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+                <span class="o">**</span><span class="p">{</span><span class="sa">f</span><span class="s2">&quot;k</span><span class="si">{</span><span class="n">u</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span><span class="n">xyz</span><span class="p">)},</span>
+                <span class="s2">&quot;nb&quot;</span><span class="p">:</span><span class="n">b</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;occ&quot;</span><span class="p">:</span><span class="n">occ</span><span class="p">,</span>
+                <span class="o">**</span><span class="p">{</span><span class="n">c</span><span class="p">:</span><span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="s2">&quot;rgb&quot;</span><span class="p">,</span><span class="n">rgb</span><span class="p">)}</span>
+            <span class="p">}</span> 
+            <span class="k">for</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">xyz</span><span class="p">),</span> <span class="n">occ</span><span class="p">,</span> <span class="n">rgb</span>  <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;kpoints&quot;</span><span class="p">]),</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;occs&quot;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">],</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;norms&quot;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">],</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;nk&quot;</span><span class="p">,</span><span class="s2">&quot;kx&quot;</span><span class="p">,</span><span class="s2">&quot;ky&quot;</span><span class="p">,</span><span class="s2">&quot;kz&quot;</span><span class="p">,</span><span class="s2">&quot;nb&quot;</span><span class="p">,</span><span class="s2">&quot;occ&quot;</span><span class="p">,</span><span class="s2">&quot;r&quot;</span><span class="p">,</span><span class="s2">&quot;g&quot;</span><span class="p">,</span><span class="s2">&quot;b&quot;</span><span class="p">)}]</span>
+
     <span class="k">return</span> <span class="p">{</span>
         <span class="s2">&quot;K&quot;</span><span class="p">:</span> <span class="n">K</span><span class="p">,</span>
         <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="n">E</span><span class="p">,</span>
         <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="n">C</span><span class="p">,</span>
         <span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="n">S</span><span class="p">,</span>
-        <span class="s2">&quot;T&quot;</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span>
+        <span class="s2">&quot;CDATA&quot;</span><span class="p">:</span> <span class="n">CDATA</span><span class="p">,</span>
         <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="n">labels</span><span class="p">,</span>
     <span class="p">}</span>  <span class="c1"># K, energy, marker color, marker size, text, labels that get changed</span>
 
@@ -1100,10 +1094,15 @@
         <span class="p">]</span>
     <span class="k">return</span> <span class="n">ticklabels</span>
 
+<span class="n">_hover_temp</span> <span class="o">=</span> <span class="p">{</span> <span class="c1"># keep order same</span>
+    <span class="s2">&quot;xy&quot;</span><span class="p">:</span><span class="s2">&quot;(%</span><span class="si">{x}</span><span class="s2">, %</span><span class="si">{y}</span><span class="s2">)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;br&gt;K&lt;sub&gt;%</span><span class="si">{customdata.nk}</span><span class="s2">&lt;/sub&gt;: %</span><span class="si">{customdata.kx:.3f}</span><span class="s2"> %</span><span class="si">{customdata.ky:.3f}</span><span class="s2"> %</span><span class="si">{customdata.kz:.3f}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;b&quot;</span><span class="p">:</span><span class="s2">&quot;Band: %</span><span class="si">{customdata.nb}</span><span class="s2">, Occ: %</span><span class="si">{customdata.occ:.4f}</span><span class="s2">&quot;</span>
+<span class="p">}</span>
 
 <div class="viewcode-block" id="iplot_bands"><a class="viewcode-back" href="../../modules.html#ipyvasp.bsdos.iplot_bands">[docs]</a><span class="nd">@gu</span><span class="o">.</span><span class="n">_fmt_doc</span><span class="p">(</span><span class="n">_docs</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">iplot_bands</span><span class="p">(</span>
-    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">occs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot band structure using plotly.</span>
 <span class="sd">    {params}\n    {K}\n    {E}</span>
@@ -1124,18 +1123,15 @@
     <span class="n">data</span> <span class="o">=</span> <span class="n">_format_rgb_data</span><span class="p">(</span>
         <span class="n">K</span><span class="p">,</span>
         <span class="n">E</span><span class="p">,</span>
-        <span class="p">[</span><span class="n">E</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">E</span><span class="p">],</span> <span class="c1"># don&#39;t let it fail if no projections</span>
         <span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">],</span>
         <span class="n">interp</span><span class="p">,</span>
-        <span class="n">E</span><span class="p">,</span>
+        <span class="n">E</span> <span class="k">if</span> <span class="n">occs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">occs</span><span class="p">,</span>
         <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">K</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">K</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
         <span class="n">maxwidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">indices</span><span class="o">=</span><span class="n">indices</span><span class="p">,</span>
     <span class="p">)</span>  <span class="c1"># moking other arrays, we need only</span>
-    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;K&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">]</span>  <span class="c1"># Fixed K and E as single line data</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;Band&quot;</span> <span class="o">+</span> <span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;Band&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;Occ&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">T</span>
-    <span class="p">]</span>  <span class="c1"># Just Band number here</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;K&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
@@ -1143,10 +1139,12 @@
     <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;markers + lines&quot;</span><span class="p">,</span>
         <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
+        <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;br&gt;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_hover_temp</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+        <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span> <span class="ow">in</span> <span class="s1">&#39;rgb&#39;</span><span class="p">}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;CDATA&quot;</span><span class="p">]],</span> <span class="c1"># useless rgb data to skip</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">}</span>  <span class="c1"># marker so that it is selectable by box, otherwise it does not</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">K</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">E</span><span class="p">,</span> <span class="n">hovertext</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
-
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">K</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">E</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+    
     <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
         <span class="n">template</span><span class="o">=</span><span class="s2">&quot;plotly_white&quot;</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="p">(</span>
@@ -1202,14 +1200,7 @@
     <span class="n">data</span> <span class="o">=</span> <span class="n">_format_rgb_data</span><span class="p">(</span>
         <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">pros</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">interp</span><span class="p">,</span> <span class="n">occs</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">maxwidth</span><span class="o">=</span><span class="n">maxwidth</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="n">indices</span>
     <span class="p">)</span>
-    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;K&quot;</span><span class="p">],</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">],</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">],</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">],</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">],</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">],</span>
-    <span class="p">)</span>
+    <span class="n">K</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="s2">&quot;K E C S labels&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
 
     <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
@@ -1218,13 +1209,18 @@
     <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;marker_size&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># Provided by S</span>
     <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
         <span class="p">{</span>
-            <span class="s2">&quot;hovertext&quot;</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span>
             <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;line_color&quot;</span><span class="p">:</span> <span class="s2">&quot;rgba(0,0,0,0)&quot;</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;marker&quot;</span><span class="p">,</span> <span class="p">{}),</span>
                 <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">C</span><span class="p">,</span>
                 <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">S</span><span class="p">,</span>
             <span class="p">},</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;br&gt;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">_hover_temp</span><span class="p">[</span><span class="s2">&quot;xy&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;&lt;br&gt;Projection: [</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">labels</span><span class="p">),</span> <span class="c1"># clean labels instead of &#39;&#39;</span>
+                <span class="s2">&quot;Value: [%</span><span class="si">{customdata.r}</span><span class="s2">, %</span><span class="si">{customdata.g}</span><span class="s2">, %</span><span class="si">{customdata.b}</span><span class="s2">]&quot;</span><span class="p">,</span>
+                <span class="n">_hover_temp</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">],</span> <span class="n">_hover_temp</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">],</span>
+            <span class="p">]),</span>
+            <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;CDATA&quot;</span><span class="p">],</span> <span class="c1"># need for selection and hover template</span>
         <span class="p">}</span>
     <span class="p">)</span>  <span class="c1"># marker edge should be free</span>
 
@@ -1237,7 +1233,7 @@
         <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
         <span class="o">+</span> <span class="s2">&quot;]&quot;</span><span class="p">,</span>  <span class="c1"># Do not set autosize = False, need to be responsive in widgets boxes</span>
         <span class="n">margin</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">Margin</span><span class="p">(</span><span class="n">l</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
-        <span class="n">yaxis</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">YAxis</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;Energy (eV)&quot;</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">elim</span> <span class="ow">or</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">E</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">E</span><span class="p">)]),</span>
+        <span class="n">yaxis</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">YAxis</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;Energy (eV)&quot;</span><span class="p">,</span><span class="nb">range</span><span class="o">=</span><span class="n">elim</span> <span class="ow">or</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">E</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">E</span><span class="p">)]),</span>
         <span class="n">xaxis</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">XAxis</span><span class="p">(</span>
             <span class="n">ticktext</span><span class="o">=</span><span class="n">_fmt_labels</span><span class="p">(</span><span class="n">xticklabels</span><span class="p">),</span>
             <span class="n">tickvals</span><span class="o">=</span><span class="n">xticks</span><span class="p">,</span>
@@ -1377,7 +1373,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=c4720336"></script>
+</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=9c7b9d88"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

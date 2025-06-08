@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <!-- Generated with Sphinx 7.1.2 and Furo 2024.08.06 -->
-        <title>ipyvasp.core.plot_toolkit - ipyvasp 0.9.90 documentation</title>
+        <title>ipyvasp.core.plot_toolkit - ipyvasp 0.9.95 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=302659d7" />
@@ -165,7 +165,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">ipyvasp 0.9.90 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">ipyvasp 0.9.95 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
   
-  <span class="sidebar-brand-text">ipyvasp 0.9.90 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 0.9.95 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -290,6 +290,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">plotly.io._base_renderers</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_html_in_browser</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">einteract</span><span class="w"> </span><span class="kn">import</span> <span class="n">patched_plotly</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.spatial_toolkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_R3</span><span class="p">,</span> <span class="n">rotation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_sig_kwargs</span>
@@ -1281,7 +1282,7 @@
 <div class="viewcode-block" id="iplot2widget"><a class="viewcode-back" href="../../../modules.html#ipyvasp.iplot2widget">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">iplot2widget</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">fig_widget</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="s2">&quot;Converts plotly&#39;s figure to FigureWidget by copying attributes and data. If fig_widget is provided, it will update it. Adds template if provided. If fig is FigureWidget, it is just returned&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">go</span><span class="o">.</span><span class="n">FigureWidget</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">fig</span>
+        <span class="k">return</span> <span class="n">patched_plotly</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span> <span class="c1"># add attributes selected and clicked</span>
     
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;fig must be instance of plotly.graph_objects.Figure&quot;</span><span class="p">)</span>
@@ -1305,7 +1306,7 @@
         <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
             <span class="n">fig_widget</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">fig_widget</span></div>
+    <span class="k">return</span> <span class="n">patched_plotly</span><span class="p">(</span><span class="n">fig_widget</span><span class="p">)</span> <span class="c1"># add attributes selected and clicked</span></div>
 
 <div class="viewcode-block" id="image2plt"><a class="viewcode-back" href="../../../modules.html#ipyvasp.image2plt">[docs]</a><span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;ax&#39;</span><span class="p">,</span><span class="s1">&#39;X&#39;</span><span class="p">))</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">image2plt</span><span class="p">(</span><span class="n">image_or_fname</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">crop</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -1370,7 +1371,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c4720336"></script>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=9c7b9d88"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

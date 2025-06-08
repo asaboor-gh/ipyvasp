@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="ipyvasp.misc" href="ipyvasp.misc.html" /><link rel="prev" title="ipyvasp.potential" href="ipyvasp.potential.html" />
 
     <!-- Generated with Sphinx 7.1.2 and Furo 2024.08.06 -->
-        <title>ipyvasp.widgets - ipyvasp 0.9.90 documentation</title>
+        <title>ipyvasp.widgets - ipyvasp 0.9.95 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">ipyvasp 0.9.90 documentation</div></a>
+      <a href="../index.html"><div class="brand">ipyvasp 0.9.95 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   
-  <span class="sidebar-brand-text">ipyvasp 0.9.90 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 0.9.95 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -280,14 +280,8 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../modules.html#ipyvasp.widgets.load_results" title="ipyvasp.widgets.load_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_results</span></code></a>(paths_list)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../modules.html#ipyvasp.widgets.load_results" title="ipyvasp.widgets.load_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_results</span></code></a>(paths_list[, exclude_keys])</p></td>
 <td><p>Loads result.json from paths_list and returns a dataframe.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">store_clicked_data</span></code>(fig, store_dict[, callback])</p></td>
-<td><p>Store clicked point data to a store_dict.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">store_selected_data</span></code>(fig, store_dict[, callback])</p></td>
-<td><p>Store multipoints selected data to a store_dict.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../modules.html#ipyvasp.widgets.summarize" title="ipyvasp.widgets.summarize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">summarize</span></code></a>(files, func, **kwargs)</p></td>
 <td><p>Apply given func to each file in files and return a dataframe of the results.</p></td>
@@ -299,16 +293,16 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../modules.html#ipyvasp.widgets.BandsWidget" title="ipyvasp.widgets.BandsWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BandsWidget</span></code></a>(self, files[, height])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../modules.html#ipyvasp.widgets.BandsWidget" title="ipyvasp.widgets.BandsWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BandsWidget</span></code></a>(self, files[, height, store_clicks])</p></td>
 <td><p>Visualize band structure from VASP calculation.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../modules.html#ipyvasp.widgets.Files" title="ipyvasp.widgets.Files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Files</span></code></a>([path_or_files, glob, exclude, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../modules.html#ipyvasp.widgets.Files" title="ipyvasp.widgets.Files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Files</span></code></a>(self[, path_or_files, glob, exclude, ...])</p></td>
 <td><p>Creates a Batch of files in a directory recursively based on glob pattern or given list of files.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../modules.html#ipyvasp.widgets.KpathWidget" title="ipyvasp.widgets.KpathWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KpathWidget</span></code></a>(self, files[, height])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../modules.html#ipyvasp.widgets.KPathWidget" title="ipyvasp.widgets.KPathWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KPathWidget</span></code></a>(self, files[, height])</p></td>
 <td><p>Interactively bulid a kpath for bandstructure calculation.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../modules.html#ipyvasp.widgets.PropsPicker" title="ipyvasp.widgets.PropsPicker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PropsPicker</span></code></a>(self[, system_summary, N, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../modules.html#ipyvasp.widgets.PropsPicker" title="ipyvasp.widgets.PropsPicker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PropsPicker</span></code></a>(self[, system_summary, N])</p></td>
 <td><p>A widget to pick atoms and orbitals for plotting.</p></td>
 </tr>
 </tbody>
@@ -365,7 +359,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=c4720336"></script>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=9c7b9d88"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="API" href="apidoc.html" />
 
     <!-- Generated with Sphinx 7.1.2 and Furo 2024.08.06 -->
-        <title>IPyVASP - ipyvasp 0.9.90 documentation</title>
+        <title>IPyVASP - ipyvasp 0.9.95 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">ipyvasp 0.9.90 documentation</div></a>
+      <a href="index.html"><div class="brand">ipyvasp 0.9.95 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">ipyvasp 0.9.90 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 0.9.95 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -286,7 +286,7 @@ are also available at top level but documented in their respective modules.</p>
 widgets for interactive visualization and bulk analysis.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="ipyvasp.Files">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.</span></span><span class="sig-name descname"><span class="pre">Files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirs_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.</span></span><span class="sig-name descname"><span class="pre">Files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_or_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirs_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Creates a Batch of files in a directory recursively based on glob pattern or given list of files.
 This is a boilerplate abstraction to do analysis in multiple calculations simultaneously.</p>
@@ -331,8 +331,8 @@ This is a boilerplate abstraction to do analysis in multiple calculations simult
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.Files.load_results">
-<span class="sig-name descname"><span class="pre">load_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.load_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.load_results" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load result.json files from these paths into a dataframe.</p>
+<span class="sig-name descname"><span class="pre">load_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exclude_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.load_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.load_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load result.json files from these paths into a dataframe, with optionally excluding keys.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -349,6 +349,14 @@ Useful for widgets such as BandsWidget to preserve their state while using <cite
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.Files.to_dropdown">
+<span class="sig-name descname"><span class="pre">to_dropdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'File'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.to_dropdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.to_dropdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert this instance to Dropdown. If there is only one file, adds an
+empty option to make that file switchable.
+Options of this dropdown are update on calling <cite>Files.update</cite> method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.Files.add">
 <span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add more files or with a diffrent glob on top of exitsing files. Returns same instance.
@@ -360,87 +368,221 @@ Useful to add multiple globbed files into a single chained call.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.Files.interactive">
-<span class="sig-name descname"><span class="pre">interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free_widgets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'manual':</span> <span class="pre">False}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.interactive" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interact with <cite>func(path, *args, &lt;free_widgets,optional&gt;, **kwargs)</cite> that takes selected Path as first argument. Returns a widget that saves attributes of the function call such as .f, .args, .kwargs.
-<cite>args</cite> are widgets to be modified by func, such as plotly’s FigureWidget.
-Note that <cite>free_widgets</cite> can also be passed to function but does not run function when changed.</p>
-<p>See docs of self.interact for more details on the parameters. kwargs are passed to ipywidgets.interactive to create controls.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">ipyvasp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ipv</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fs</span> <span class="o">=</span> <span class="n">ipv</span><span class="o">.</span><span class="n">Files</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span><span class="s1">&#39;**/POSCAR&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">bl</span><span class="p">,</span><span class="n">plot_cell</span><span class="p">,</span><span class="n">eqv_sites</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">ipv</span><span class="o">.</span><span class="n">iplot2widget</span><span class="p">(</span><span class="n">ipv</span><span class="o">.</span><span class="n">POSCAR</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">iplot_lattice</span><span class="p">(</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="n">bond_length</span><span class="o">=</span><span class="n">bl</span><span class="p">,</span><span class="n">plot_cell</span><span class="o">=</span><span class="n">plot_cell</span><span class="p">,</span><span class="n">eqv_sites</span><span class="o">=</span><span class="n">eqv_sites</span>
-<span class="gp">&gt;&gt;&gt; </span>     <span class="p">),</span><span class="n">fig_widget</span><span class="o">=</span><span class="n">fig</span><span class="p">)</span> <span class="c1"># it keeps updating same view</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">interactive</span><span class="p">(</span><span class="n">plot</span><span class="p">,</span> <span class="n">go</span><span class="o">.</span><span class="n">FigureWidget</span><span class="p">(),</span><span class="n">bl</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">plot_cell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eqv_sites</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">f</span> <span class="c1"># function</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">args</span> <span class="c1"># arguments</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">kwargs</span> <span class="c1"># keyword arguments</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">result</span> <span class="c1"># result of function call which is same as out.f(*out.args, **out.kwargs)</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you don’t need to interpret the result of the function call, you can use the &#64;self.interact decorator instead.</p>
-</div>
+<span class="sig-name descname"><span class="pre">interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_css</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.interactive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enhanced interactive widget with multiple callbacks, grid layout and fullscreen support.</p>
+<p>This function is used for quick dashboards. Subclass <cite>InteractBase</cite> for complex applications.</p>
+<p><strong>Features</strong>:</p>
+<ul class="simple">
+<li><p>Multiple function support with selective updates</p></li>
+<li><p>CSS Grid layout system</p></li>
+<li><p>Extended widget trait observation</p></li>
+<li><p>Dynamic widget property updates</p></li>
+<li><p>Built-in fullscreen support</p></li>
+</ul>
+<p><strong>Basic Usage</strong>:</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
+from ipyslides.interaction import interactive, classed, monitor
+import ipywidgets as ipw
+import plotly.graph_objects as go</p>
+<p>fig = go.FigureWidget()</p>
+<p>&#64;monitor  # check execution time
+def update_plot(x, y, fig):</p>
+<blockquote>
+<div><p>fig.data = []
+fig.add_scatter(x=[0, x], y=[0, y])</p>
+</div></blockquote>
+<dl class="simple">
+<dt>def resize_fig(fig, fs):</dt><dd><p>fig.layout.autosize = True # plotly’s figurewidget always make trouble with sizing</p>
+</dd>
+<dt>dashboard = interactive(</dt><dd><p>classed(update_plot, ‘out-plot’),  # Assign CSS class to output, otherwise it will be captured by main output
+resize_fig, # responds to fullscreen change
+x = ipw.IntSlider(0, 0, 100),
+y = ipw.FloatSlider(0, 1),
+fig = ipw.fixed(fig),
+fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
+</dd>
+</dl>
+<section id="id5">
+<h2>)<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<p><strong>Parameters</strong>:</p>
+<ul class="simple">
+<li><p><cite>*funcs</cite>: One or more callback functions</p></li>
+<li><p>auto_update: Update automatically on widget changes</p></li>
+<li><p>app_layout: Initial layout configuration, see <cite>relayout()</cite> method for details</p></li>
+<li><dl class="simple">
+<dt>grid_css: CSS Grid properties for layout</dt><dd><ul>
+<li><p>Use <cite>:fullscreen</cite> at root level of dict to apply styles in fullscreen mode</p></li>
+<li><p>Use <cite>[Button, ToggleButton, ToggleButtons].add_class(‘content-width-button’)</cite> to fix button widths easily.</p></li>
+<li><p>See [CSS Grid Layout Guide](<a class="reference external" href="https://css-tricks.com/snippets/css/complete-guide-grid/">https://css-tricks.com/snippets/css/complete-guide-grid/</a>).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><cite>**kwargs</cite>: Widget parameters</p></li>
+</ul>
+<p><strong>Widget Parameters</strong>:</p>
+<ul class="simple">
+<li><p>Regular ipywidgets</p></li>
+<li><p>Fixed widgets via ipw.fixed()</p></li>
+<li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or ‘.trait’ to observe traits on this instance.</p></li>
+<li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
+<li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
+<li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
+<li><p><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</p></li>
+</ul>
+<p><strong>Widget Updates</strong>:</p>
+<ul class="simple">
+<li><p>Functions can modify widget traits (e.g. options, min/max)</p></li>
+<li><p>Order matters for dependent updates</p></li>
+<li><p>Parameter-less functions run with any interaction</p></li>
+<li><p>Animation widgets work even with manual updates</p></li>
+<li><dl class="simple">
+<dt><strong>Output Widget Behavior</strong>:</dt><dd><ul>
+<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite> or <cite>classed</cite>.</p></li>
+<li><p>If no CSS class is provided, the callback will use the main output widget labeled as ‘out-main’.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>CSS Classes</strong>:</p>
+<ul class="simple">
+<li><p>Parameter names from kwargs</p></li>
+<li><p>Custom ‘out-<a href="#id6"><span class="problematic" id="id7">*</span></a>’ classes from classed(), and ‘out-main’ class.</p></li>
+<li><p>‘btn-main’ for manual update button</p></li>
+</ul>
+<p><strong>Notes</strong>:</p>
+<ul class="simple">
+<li><p>Avoid modifying global slide state</p></li>
+<li><p>Use widget descriptions to prevent name clashes</p></li>
+<li><p>See set_css() method for styling options</p></li>
+<li><p>interactive(no_args_func_which_may_fetch_data_on_click,) is perfectly valid and run on button click.</p></li>
+</ul>
+<p><strong>Python dictionary to CSS</strong></p>
+<p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.
+There are few special rules in <cite>props</cite>:</p>
+<ul class="simple">
+<li><p>All nested selectors are joined with space, so hl`’.A’: {‘.B’: … }` becomes hl[‘css’]`.A .B {…}` in CSS.</p></li>
+<li><p>A ‘^’ in start of a selector joins to parent selector without space, so hl`’.A’: {‘^:hover’: …}` becomes hl[‘css’]`.A:hover {…}` in CSS. You can also use hl`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
+<li><p>A list/tuple of values for a key in dict generates CSS fallback, so hl`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes hl[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
+</ul>
+<p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
+</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.Files.interact">
-<span class="sig-name descname"><span class="pre">interact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free_widgets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'manual':</span> <span class="pre">False}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.interact" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interact with a <cite>func(path, *args, &lt;free_widgets,optional&gt;, **kwargs)</cite>. <cite>path</cite> is passed from selected File.
-A CSS class ‘files-interact’ is added to the final widget to let you style it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> – Any displayable widget can be passed. These are placed below the output widget of interact.
-For example you can add plotly’s FigureWidget that updates based on the selection, these are passed to function after path.</p></li>
-<li><p><strong>free_widgets</strong> (<em>list/tuple</em>) – Default is None. If not None, these are assumed to be ipywidgets and are placed below the widgets created by kwargs.
-These can be passed to the decorated function if added as arguemnt there like <cite>func(…, free_widgets)</cite>, but don’t trigger execution.</p></li>
-<li><p><strong>options</strong> (<em>dict</em>) – Default is {‘manual’:False}. If True, the decorated function is not called automatically, and you have to call it manually on button press. You can pass button name as ‘manual_name’ in options.</p></li>
-<li><p><strong>height</strong> (<em>str</em>) – Default is ‘90vh’. height of the final widget. This is important to avoid very long widgets.</p></li>
-<li><p><strong>panel_size</strong> (<em>int</em>) – Side panel size in units of em.</p></li>
-<li><p><strong>widget.</strong> (<em>kwargs are passed to ipywidgets.interactive and decorated function. Resulting widgets are placed below the file selection</em>) – </p></li>
-<li><p><strong>`func</strong><strong>(</strong><strong>...</strong> (<em>Widgets in args can be controlled by free_widgets externally if defined gloablly</em><em> or </em><em>inside function if you pass free_widgets as argument like</em>) – </p></li>
-<li><p><strong>free_widgets</strong><strong>)</strong><strong>`.</strong> – </p></li>
-<li><p><strong>well</strong> (<em>The decorated function can be called later separately as</em>) – </p></li>
-<li><p><strong>arguments</strong> (<em>and has .args and .kwargs attributes to access the latest</em>) – </p></li>
-<li><p><strong>f</strong> (<em>and .result method to access latest. For a function</em>) – </p></li>
-<li><p><strong>`f</strong><strong>(</strong><strong>*f.args</strong> (<em>f.result is same as</em>) – </p></li>
-<li><p><strong>**f.kwargs</strong><strong>)</strong><strong>`.</strong> – </p></li>
-<li><p><strong>go</strong> (<em>&gt;&gt;&gt; import plotly.graph_objects as</em>) – </p></li>
-<li><p><strong>ipv</strong> (<em>&gt;&gt;&gt; import ipyvasp as</em>) – </p></li>
-<li><p><strong>ipv.Files</strong><strong>(</strong><strong>'.'</strong> (<em>&gt;&gt;&gt; fs =</em>) – </p></li>
-<li><p><strong>'**/POSCAR'</strong><strong>)</strong> – </p></li>
-<li><p><strong>&#64;fs.interact</strong><strong>(</strong><strong>go.FigureWidget</strong><strong>(</strong><strong>)</strong> (<em>&gt;&gt;&gt;</em>) – </p></li>
-<li><p><strong>bl=</strong><strong>(</strong><strong>0</strong> – </p></li>
-<li><p><strong>6</strong> – </p></li>
-<li><p><strong>2</strong><strong>)</strong> – </p></li>
-<li><p><strong>plot_cell=True</strong> – </p></li>
-<li><p><strong>eqv_sites=True</strong><strong>)</strong> – </p></li>
-<li><p><strong>plot</strong><strong>(</strong><strong>path</strong> (<em>&gt;&gt;&gt; def</em>) – </p></li>
-<li><p><strong>fig</strong> – </p></li>
-<li><p><strong>bl</strong> – </p></li>
-<li><p><strong>plot_cell</strong> – </p></li>
-<li><p><strong>eqv_sites</strong><strong>)</strong> – </p></li>
-<li><p><strong>ipv.iplot2widget</strong><strong>(</strong><strong>ipv.POSCAR</strong><strong>(</strong><strong>path</strong><strong>)</strong><strong>.iplot_lattice</strong><strong>(</strong> (<em>&gt;&gt;&gt;</em>) – </p></li>
-<li><p><strong>bond_length=bl</strong> (<em>&gt;&gt;&gt;</em>) – </p></li>
-<li><p><strong>plot_cell=plot_cell</strong> – </p></li>
-<li><p><strong>eqv_sites=eqv_sites</strong> – </p></li>
-<li><p><strong>)</strong> (<em>&gt;&gt;&gt;</em>) – </p></li>
-<li><p><strong>view</strong> (<em>fig_widget=fig</em><em>) </em><em># it keeps updating same</em>) – </p></li>
-<li><p><strong>note::</strong> (<em>..</em>) – Use self.interactive to get a widget that stores the argements and can be called later in a notebook cell.</p></li>
+<span class="sig-name descname"><span class="pre">interact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_css</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.interact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enhanced interactive widget with multiple callbacks, grid layout and fullscreen support.</p>
+<p>This function is used for quick dashboards. Subclass <cite>InteractBase</cite> for complex applications.</p>
+<p><strong>Features</strong>:</p>
+<ul class="simple">
+<li><p>Multiple function support with selective updates</p></li>
+<li><p>CSS Grid layout system</p></li>
+<li><p>Extended widget trait observation</p></li>
+<li><p>Dynamic widget property updates</p></li>
+<li><p>Built-in fullscreen support</p></li>
+</ul>
+<p><strong>Basic Usage</strong>:</p>
+<p><a href="#id8"><span class="problematic" id="id9">``</span></a><a href="#id10"><span class="problematic" id="id11">`</span></a>python
+from ipyslides.interaction import interactive, classed, monitor
+import ipywidgets as ipw
+import plotly.graph_objects as go</p>
+<p>fig = go.FigureWidget()</p>
+<p>&#64;monitor  # check execution time
+def update_plot(x, y, fig):</p>
+<blockquote>
+<div><p>fig.data = []
+fig.add_scatter(x=[0, x], y=[0, y])</p>
+</div></blockquote>
+<dl class="simple">
+<dt>def resize_fig(fig, fs):</dt><dd><p>fig.layout.autosize = True # plotly’s figurewidget always make trouble with sizing</p>
+</dd>
+<dt>dashboard = interactive(</dt><dd><p>classed(update_plot, ‘out-plot’),  # Assign CSS class to output, otherwise it will be captured by main output
+resize_fig, # responds to fullscreen change
+x = ipw.IntSlider(0, 0, 100),
+y = ipw.FloatSlider(0, 1),
+fig = ipw.fixed(fig),
+fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
+</dd>
+</dl>
+<section id="id12">
+<h2>)<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h2>
+<p><strong>Parameters</strong>:</p>
+<ul class="simple">
+<li><p><cite>*funcs</cite>: One or more callback functions</p></li>
+<li><p>auto_update: Update automatically on widget changes</p></li>
+<li><p>app_layout: Initial layout configuration, see <cite>relayout()</cite> method for details</p></li>
+<li><dl class="simple">
+<dt>grid_css: CSS Grid properties for layout</dt><dd><ul>
+<li><p>Use <cite>:fullscreen</cite> at root level of dict to apply styles in fullscreen mode</p></li>
+<li><p>Use <cite>[Button, ToggleButton, ToggleButtons].add_class(‘content-width-button’)</cite> to fix button widths easily.</p></li>
+<li><p>See [CSS Grid Layout Guide](<a class="reference external" href="https://css-tricks.com/snippets/css/complete-guide-grid/">https://css-tricks.com/snippets/css/complete-guide-grid/</a>).</p></li>
 </ul>
 </dd>
 </dl>
+</li>
+<li><p><cite>**kwargs</cite>: Widget parameters</p></li>
+</ul>
+<p><strong>Widget Parameters</strong>:</p>
+<ul class="simple">
+<li><p>Regular ipywidgets</p></li>
+<li><p>Fixed widgets via ipw.fixed()</p></li>
+<li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or ‘.trait’ to observe traits on this instance.</p></li>
+<li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
+<li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
+<li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
+<li><p><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</p></li>
+</ul>
+<p><strong>Widget Updates</strong>:</p>
+<ul class="simple">
+<li><p>Functions can modify widget traits (e.g. options, min/max)</p></li>
+<li><p>Order matters for dependent updates</p></li>
+<li><p>Parameter-less functions run with any interaction</p></li>
+<li><p>Animation widgets work even with manual updates</p></li>
+<li><dl class="simple">
+<dt><strong>Output Widget Behavior</strong>:</dt><dd><ul>
+<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite> or <cite>classed</cite>.</p></li>
+<li><p>If no CSS class is provided, the callback will use the main output widget labeled as ‘out-main’.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>CSS Classes</strong>:</p>
+<ul class="simple">
+<li><p>Parameter names from kwargs</p></li>
+<li><p>Custom ‘out-<a href="#id13"><span class="problematic" id="id14">*</span></a>’ classes from classed(), and ‘out-main’ class.</p></li>
+<li><p>‘btn-main’ for manual update button</p></li>
+</ul>
+<p><strong>Notes</strong>:</p>
+<ul class="simple">
+<li><p>Avoid modifying global slide state</p></li>
+<li><p>Use widget descriptions to prevent name clashes</p></li>
+<li><p>See set_css() method for styling options</p></li>
+<li><p>interactive(no_args_func_which_may_fetch_data_on_click,) is perfectly valid and run on button click.</p></li>
+</ul>
+<p><strong>Python dictionary to CSS</strong></p>
+<p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.
+There are few special rules in <cite>props</cite>:</p>
+<ul class="simple">
+<li><p>All nested selectors are joined with space, so hl`’.A’: {‘.B’: … }` becomes hl[‘css’]`.A .B {…}` in CSS.</p></li>
+<li><p>A ‘^’ in start of a selector joins to parent selector without space, so hl`’.A’: {‘^:hover’: …}` becomes hl[‘css’]`.A:hover {…}` in CSS. You can also use hl`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
+<li><p>A list/tuple of values for a key in dict generates CSS fallback, so hl`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes hl[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
+</ul>
+<p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
+<p><strong>Tips</strong>:</p>
+<ul class="simple">
+<li><p>You can use this inside columns using delayed display trick, like hl`write(‘First column’, C2)` where hl`C2 = Slides.hold(Slides.ei.interact, f, x = 5) or Slides.ei.interactive(f, x = 5)`.</p></li>
+<li><p>You can also use this under <cite>Slides.capture_content</cite> to display later in a specific place.</p></li>
+</ul>
+</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.Files.kpath_widget">
 <span class="sig-name descname"><span class="pre">kpath_widget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.kpath_widget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.kpath_widget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get KpathWidget instance with these files.</p>
+<dd><p>Get KPathWidget instance with these files.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -623,8 +765,8 @@ kwargs are passed to plt.imshow.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ipyvasp.load_results">
-<span class="sig-prename descclassname"><span class="pre">ipyvasp.</span></span><span class="sig-name descname"><span class="pre">load_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#load_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.load_results" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads result.json from paths_list and returns a dataframe.</p>
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.</span></span><span class="sig-name descname"><span class="pre">load_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#load_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.load_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads result.json from paths_list and returns a dataframe. Use exclude_keys to get subset of data.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -2185,7 +2327,7 @@ will join 40 back to 39. You can also use shortcut like zip([0,10,20],’GMK’)
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ipyvasp.bsdos.iplot_bands">
-<span class="sig-prename descclassname"><span class="pre">ipyvasp.bsdos.</span></span><span class="sig-name descname"><span class="pre">iplot_bands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/_enplots.html#iplot_bands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.bsdos.iplot_bands" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.bsdos.</span></span><span class="sig-name descname"><span class="pre">iplot_bands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">occs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/_enplots.html#iplot_bands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.bsdos.iplot_bands" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot band structure using plotly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2569,7 +2711,7 @@ plotting other with same parameters will use the same data.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.bsdos.Bands.iplot_bands">
-<span class="sig-name descname"><span class="pre">iplot_bands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ezero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/bsdos.html#Bands.iplot_bands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.bsdos.Bands.iplot_bands" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">iplot_bands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ezero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">occs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/bsdos.html#Bands.iplot_bands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.bsdos.Bands.iplot_bands" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot band structure using plotly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2815,7 +2957,7 @@ Read what you can do more with <cite>WeasWidget</cite> [here](<a class="referenc
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.lattice.POSCAR.view_kpath">
 <span class="sig-name descname"><span class="pre">view_kpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/lattice.html#POSCAR.view_kpath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.lattice.POSCAR.view_kpath" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize a KpathWidget instance to view kpath for current POSCAR, and you can select others too.</p>
+<dd><p>Initialize a KPathWidget instance to view kpath for current POSCAR, and you can select others too.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3153,7 +3295,7 @@ If you want to customize, use <cite>POSCAR.iplot_cell(fig = &lt;return of iplot_
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.lattice.POSCAR.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selective_dynamics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/lattice.html#POSCAR.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.lattice.POSCAR.write" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selective_dynamics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/lattice.html#POSCAR.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.lattice.POSCAR.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes POSCAR data to a file or returns string</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3164,6 +3306,7 @@ which turns on/off selective dynamics for each atom based in each dimension.
 See <cite>ipyvasp.POSCAR.data.get_selective_dynamics</cite> for more info.</p></li>
 <li><p><strong>overwrite</strong> (<em>bool</em>) – If file already exists, overwrite=True changes it.</p></li>
 <li><p><strong>comment</strong> (<em>str</em>) – Add comment, previous comment will be there too.</p></li>
+<li><p><strong>scale</strong> (<em>float</em>) – Scale factor for the basis vectors. Default is provided by loaded data.</p></li>
 </ul>
 </dd>
 </dl>
@@ -3622,8 +3765,8 @@ You can use <cite>nglview.color.COLOR_SCHEME</cite> to see available color schem
 <span id="widgets"></span><h1>Widgets<a class="headerlink" href="#module-ipyvasp.widgets" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="ipyvasp.widgets.load_results">
-<span class="sig-prename descclassname"><span class="pre">ipyvasp.widgets.</span></span><span class="sig-name descname"><span class="pre">load_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#load_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.load_results" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads result.json from paths_list and returns a dataframe.</p>
+<span class="sig-prename descclassname"><span class="pre">ipyvasp.widgets.</span></span><span class="sig-name descname"><span class="pre">load_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#load_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.load_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads result.json from paths_list and returns a dataframe. Use exclude_keys to get subset of data.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -3643,7 +3786,7 @@ You can use <cite>nglview.color.COLOR_SCHEME</cite> to see available color schem
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ipyvasp.widgets.Files">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.widgets.</span></span><span class="sig-name descname"><span class="pre">Files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirs_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.widgets.</span></span><span class="sig-name descname"><span class="pre">Files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_or_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirs_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Creates a Batch of files in a directory recursively based on glob pattern or given list of files.
 This is a boilerplate abstraction to do analysis in multiple calculations simultaneously.</p>
@@ -3688,8 +3831,8 @@ This is a boilerplate abstraction to do analysis in multiple calculations simult
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.widgets.Files.load_results">
-<span class="sig-name descname"><span class="pre">load_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.load_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.load_results" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load result.json files from these paths into a dataframe.</p>
+<span class="sig-name descname"><span class="pre">load_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exclude_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.load_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.load_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load result.json files from these paths into a dataframe, with optionally excluding keys.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3706,6 +3849,14 @@ Useful for widgets such as BandsWidget to preserve their state while using <cite
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.widgets.Files.to_dropdown">
+<span class="sig-name descname"><span class="pre">to_dropdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'File'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.to_dropdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.to_dropdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert this instance to Dropdown. If there is only one file, adds an
+empty option to make that file switchable.
+Options of this dropdown are update on calling <cite>Files.update</cite> method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.widgets.Files.add">
 <span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add more files or with a diffrent glob on top of exitsing files. Returns same instance.
@@ -3717,87 +3868,221 @@ Useful to add multiple globbed files into a single chained call.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.widgets.Files.interactive">
-<span class="sig-name descname"><span class="pre">interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free_widgets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'manual':</span> <span class="pre">False}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.interactive" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interact with <cite>func(path, *args, &lt;free_widgets,optional&gt;, **kwargs)</cite> that takes selected Path as first argument. Returns a widget that saves attributes of the function call such as .f, .args, .kwargs.
-<cite>args</cite> are widgets to be modified by func, such as plotly’s FigureWidget.
-Note that <cite>free_widgets</cite> can also be passed to function but does not run function when changed.</p>
-<p>See docs of self.interact for more details on the parameters. kwargs are passed to ipywidgets.interactive to create controls.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">ipyvasp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ipv</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fs</span> <span class="o">=</span> <span class="n">ipv</span><span class="o">.</span><span class="n">Files</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span><span class="s1">&#39;**/POSCAR&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">bl</span><span class="p">,</span><span class="n">plot_cell</span><span class="p">,</span><span class="n">eqv_sites</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">ipv</span><span class="o">.</span><span class="n">iplot2widget</span><span class="p">(</span><span class="n">ipv</span><span class="o">.</span><span class="n">POSCAR</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">iplot_lattice</span><span class="p">(</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="n">bond_length</span><span class="o">=</span><span class="n">bl</span><span class="p">,</span><span class="n">plot_cell</span><span class="o">=</span><span class="n">plot_cell</span><span class="p">,</span><span class="n">eqv_sites</span><span class="o">=</span><span class="n">eqv_sites</span>
-<span class="gp">&gt;&gt;&gt; </span>     <span class="p">),</span><span class="n">fig_widget</span><span class="o">=</span><span class="n">fig</span><span class="p">)</span> <span class="c1"># it keeps updating same view</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">interactive</span><span class="p">(</span><span class="n">plot</span><span class="p">,</span> <span class="n">go</span><span class="o">.</span><span class="n">FigureWidget</span><span class="p">(),</span><span class="n">bl</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">plot_cell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eqv_sites</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">f</span> <span class="c1"># function</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">args</span> <span class="c1"># arguments</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">kwargs</span> <span class="c1"># keyword arguments</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">result</span> <span class="c1"># result of function call which is same as out.f(*out.args, **out.kwargs)</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you don’t need to interpret the result of the function call, you can use the &#64;self.interact decorator instead.</p>
-</div>
+<span class="sig-name descname"><span class="pre">interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_css</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.interactive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enhanced interactive widget with multiple callbacks, grid layout and fullscreen support.</p>
+<p>This function is used for quick dashboards. Subclass <cite>InteractBase</cite> for complex applications.</p>
+<p><strong>Features</strong>:</p>
+<ul class="simple">
+<li><p>Multiple function support with selective updates</p></li>
+<li><p>CSS Grid layout system</p></li>
+<li><p>Extended widget trait observation</p></li>
+<li><p>Dynamic widget property updates</p></li>
+<li><p>Built-in fullscreen support</p></li>
+</ul>
+<p><strong>Basic Usage</strong>:</p>
+<p><a href="#id16"><span class="problematic" id="id17">``</span></a><a href="#id18"><span class="problematic" id="id19">`</span></a>python
+from ipyslides.interaction import interactive, classed, monitor
+import ipywidgets as ipw
+import plotly.graph_objects as go</p>
+<p>fig = go.FigureWidget()</p>
+<p>&#64;monitor  # check execution time
+def update_plot(x, y, fig):</p>
+<blockquote>
+<div><p>fig.data = []
+fig.add_scatter(x=[0, x], y=[0, y])</p>
+</div></blockquote>
+<dl class="simple">
+<dt>def resize_fig(fig, fs):</dt><dd><p>fig.layout.autosize = True # plotly’s figurewidget always make trouble with sizing</p>
+</dd>
+<dt>dashboard = interactive(</dt><dd><p>classed(update_plot, ‘out-plot’),  # Assign CSS class to output, otherwise it will be captured by main output
+resize_fig, # responds to fullscreen change
+x = ipw.IntSlider(0, 0, 100),
+y = ipw.FloatSlider(0, 1),
+fig = ipw.fixed(fig),
+fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
+</dd>
+</dl>
+<section id="id20">
+<h2>)<a class="headerlink" href="#id20" title="Permalink to this heading">¶</a></h2>
+<p><strong>Parameters</strong>:</p>
+<ul class="simple">
+<li><p><cite>*funcs</cite>: One or more callback functions</p></li>
+<li><p>auto_update: Update automatically on widget changes</p></li>
+<li><p>app_layout: Initial layout configuration, see <cite>relayout()</cite> method for details</p></li>
+<li><dl class="simple">
+<dt>grid_css: CSS Grid properties for layout</dt><dd><ul>
+<li><p>Use <cite>:fullscreen</cite> at root level of dict to apply styles in fullscreen mode</p></li>
+<li><p>Use <cite>[Button, ToggleButton, ToggleButtons].add_class(‘content-width-button’)</cite> to fix button widths easily.</p></li>
+<li><p>See [CSS Grid Layout Guide](<a class="reference external" href="https://css-tricks.com/snippets/css/complete-guide-grid/">https://css-tricks.com/snippets/css/complete-guide-grid/</a>).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><cite>**kwargs</cite>: Widget parameters</p></li>
+</ul>
+<p><strong>Widget Parameters</strong>:</p>
+<ul class="simple">
+<li><p>Regular ipywidgets</p></li>
+<li><p>Fixed widgets via ipw.fixed()</p></li>
+<li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or ‘.trait’ to observe traits on this instance.</p></li>
+<li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
+<li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
+<li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
+<li><p><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</p></li>
+</ul>
+<p><strong>Widget Updates</strong>:</p>
+<ul class="simple">
+<li><p>Functions can modify widget traits (e.g. options, min/max)</p></li>
+<li><p>Order matters for dependent updates</p></li>
+<li><p>Parameter-less functions run with any interaction</p></li>
+<li><p>Animation widgets work even with manual updates</p></li>
+<li><dl class="simple">
+<dt><strong>Output Widget Behavior</strong>:</dt><dd><ul>
+<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite> or <cite>classed</cite>.</p></li>
+<li><p>If no CSS class is provided, the callback will use the main output widget labeled as ‘out-main’.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>CSS Classes</strong>:</p>
+<ul class="simple">
+<li><p>Parameter names from kwargs</p></li>
+<li><p>Custom ‘out-<a href="#id21"><span class="problematic" id="id22">*</span></a>’ classes from classed(), and ‘out-main’ class.</p></li>
+<li><p>‘btn-main’ for manual update button</p></li>
+</ul>
+<p><strong>Notes</strong>:</p>
+<ul class="simple">
+<li><p>Avoid modifying global slide state</p></li>
+<li><p>Use widget descriptions to prevent name clashes</p></li>
+<li><p>See set_css() method for styling options</p></li>
+<li><p>interactive(no_args_func_which_may_fetch_data_on_click,) is perfectly valid and run on button click.</p></li>
+</ul>
+<p><strong>Python dictionary to CSS</strong></p>
+<p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.
+There are few special rules in <cite>props</cite>:</p>
+<ul class="simple">
+<li><p>All nested selectors are joined with space, so hl`’.A’: {‘.B’: … }` becomes hl[‘css’]`.A .B {…}` in CSS.</p></li>
+<li><p>A ‘^’ in start of a selector joins to parent selector without space, so hl`’.A’: {‘^:hover’: …}` becomes hl[‘css’]`.A:hover {…}` in CSS. You can also use hl`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
+<li><p>A list/tuple of values for a key in dict generates CSS fallback, so hl`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes hl[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
+</ul>
+<p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
+</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.widgets.Files.interact">
-<span class="sig-name descname"><span class="pre">interact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free_widgets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'manual':</span> <span class="pre">False}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.interact" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interact with a <cite>func(path, *args, &lt;free_widgets,optional&gt;, **kwargs)</cite>. <cite>path</cite> is passed from selected File.
-A CSS class ‘files-interact’ is added to the final widget to let you style it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> – Any displayable widget can be passed. These are placed below the output widget of interact.
-For example you can add plotly’s FigureWidget that updates based on the selection, these are passed to function after path.</p></li>
-<li><p><strong>free_widgets</strong> (<em>list/tuple</em>) – Default is None. If not None, these are assumed to be ipywidgets and are placed below the widgets created by kwargs.
-These can be passed to the decorated function if added as arguemnt there like <cite>func(…, free_widgets)</cite>, but don’t trigger execution.</p></li>
-<li><p><strong>options</strong> (<em>dict</em>) – Default is {‘manual’:False}. If True, the decorated function is not called automatically, and you have to call it manually on button press. You can pass button name as ‘manual_name’ in options.</p></li>
-<li><p><strong>height</strong> (<em>str</em>) – Default is ‘90vh’. height of the final widget. This is important to avoid very long widgets.</p></li>
-<li><p><strong>panel_size</strong> (<em>int</em>) – Side panel size in units of em.</p></li>
-<li><p><strong>widget.</strong> (<em>kwargs are passed to ipywidgets.interactive and decorated function. Resulting widgets are placed below the file selection</em>) – </p></li>
-<li><p><strong>`func</strong><strong>(</strong><strong>...</strong> (<em>Widgets in args can be controlled by free_widgets externally if defined gloablly</em><em> or </em><em>inside function if you pass free_widgets as argument like</em>) – </p></li>
-<li><p><strong>free_widgets</strong><strong>)</strong><strong>`.</strong> – </p></li>
-<li><p><strong>well</strong> (<em>The decorated function can be called later separately as</em>) – </p></li>
-<li><p><strong>arguments</strong> (<em>and has .args and .kwargs attributes to access the latest</em>) – </p></li>
-<li><p><strong>f</strong> (<em>and .result method to access latest. For a function</em>) – </p></li>
-<li><p><strong>`f</strong><strong>(</strong><strong>*f.args</strong> (<em>f.result is same as</em>) – </p></li>
-<li><p><strong>**f.kwargs</strong><strong>)</strong><strong>`.</strong> – </p></li>
-<li><p><strong>go</strong> (<em>&gt;&gt;&gt; import plotly.graph_objects as</em>) – </p></li>
-<li><p><strong>ipv</strong> (<em>&gt;&gt;&gt; import ipyvasp as</em>) – </p></li>
-<li><p><strong>ipv.Files</strong><strong>(</strong><strong>'.'</strong> (<em>&gt;&gt;&gt; fs =</em>) – </p></li>
-<li><p><strong>'**/POSCAR'</strong><strong>)</strong> – </p></li>
-<li><p><strong>&#64;fs.interact</strong><strong>(</strong><strong>go.FigureWidget</strong><strong>(</strong><strong>)</strong> (<em>&gt;&gt;&gt;</em>) – </p></li>
-<li><p><strong>bl=</strong><strong>(</strong><strong>0</strong> – </p></li>
-<li><p><strong>6</strong> – </p></li>
-<li><p><strong>2</strong><strong>)</strong> – </p></li>
-<li><p><strong>plot_cell=True</strong> – </p></li>
-<li><p><strong>eqv_sites=True</strong><strong>)</strong> – </p></li>
-<li><p><strong>plot</strong><strong>(</strong><strong>path</strong> (<em>&gt;&gt;&gt; def</em>) – </p></li>
-<li><p><strong>fig</strong> – </p></li>
-<li><p><strong>bl</strong> – </p></li>
-<li><p><strong>plot_cell</strong> – </p></li>
-<li><p><strong>eqv_sites</strong><strong>)</strong> – </p></li>
-<li><p><strong>ipv.iplot2widget</strong><strong>(</strong><strong>ipv.POSCAR</strong><strong>(</strong><strong>path</strong><strong>)</strong><strong>.iplot_lattice</strong><strong>(</strong> (<em>&gt;&gt;&gt;</em>) – </p></li>
-<li><p><strong>bond_length=bl</strong> (<em>&gt;&gt;&gt;</em>) – </p></li>
-<li><p><strong>plot_cell=plot_cell</strong> – </p></li>
-<li><p><strong>eqv_sites=eqv_sites</strong> – </p></li>
-<li><p><strong>)</strong> (<em>&gt;&gt;&gt;</em>) – </p></li>
-<li><p><strong>view</strong> (<em>fig_widget=fig</em><em>) </em><em># it keeps updating same</em>) – </p></li>
-<li><p><strong>note::</strong> (<em>..</em>) – Use self.interactive to get a widget that stores the argements and can be called later in a notebook cell.</p></li>
+<span class="sig-name descname"><span class="pre">interact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_css</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.interact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enhanced interactive widget with multiple callbacks, grid layout and fullscreen support.</p>
+<p>This function is used for quick dashboards. Subclass <cite>InteractBase</cite> for complex applications.</p>
+<p><strong>Features</strong>:</p>
+<ul class="simple">
+<li><p>Multiple function support with selective updates</p></li>
+<li><p>CSS Grid layout system</p></li>
+<li><p>Extended widget trait observation</p></li>
+<li><p>Dynamic widget property updates</p></li>
+<li><p>Built-in fullscreen support</p></li>
+</ul>
+<p><strong>Basic Usage</strong>:</p>
+<p><a href="#id23"><span class="problematic" id="id24">``</span></a><a href="#id25"><span class="problematic" id="id26">`</span></a>python
+from ipyslides.interaction import interactive, classed, monitor
+import ipywidgets as ipw
+import plotly.graph_objects as go</p>
+<p>fig = go.FigureWidget()</p>
+<p>&#64;monitor  # check execution time
+def update_plot(x, y, fig):</p>
+<blockquote>
+<div><p>fig.data = []
+fig.add_scatter(x=[0, x], y=[0, y])</p>
+</div></blockquote>
+<dl class="simple">
+<dt>def resize_fig(fig, fs):</dt><dd><p>fig.layout.autosize = True # plotly’s figurewidget always make trouble with sizing</p>
+</dd>
+<dt>dashboard = interactive(</dt><dd><p>classed(update_plot, ‘out-plot’),  # Assign CSS class to output, otherwise it will be captured by main output
+resize_fig, # responds to fullscreen change
+x = ipw.IntSlider(0, 0, 100),
+y = ipw.FloatSlider(0, 1),
+fig = ipw.fixed(fig),
+fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
+</dd>
+</dl>
+<section id="id27">
+<h2>)<a class="headerlink" href="#id27" title="Permalink to this heading">¶</a></h2>
+<p><strong>Parameters</strong>:</p>
+<ul class="simple">
+<li><p><cite>*funcs</cite>: One or more callback functions</p></li>
+<li><p>auto_update: Update automatically on widget changes</p></li>
+<li><p>app_layout: Initial layout configuration, see <cite>relayout()</cite> method for details</p></li>
+<li><dl class="simple">
+<dt>grid_css: CSS Grid properties for layout</dt><dd><ul>
+<li><p>Use <cite>:fullscreen</cite> at root level of dict to apply styles in fullscreen mode</p></li>
+<li><p>Use <cite>[Button, ToggleButton, ToggleButtons].add_class(‘content-width-button’)</cite> to fix button widths easily.</p></li>
+<li><p>See [CSS Grid Layout Guide](<a class="reference external" href="https://css-tricks.com/snippets/css/complete-guide-grid/">https://css-tricks.com/snippets/css/complete-guide-grid/</a>).</p></li>
 </ul>
 </dd>
 </dl>
+</li>
+<li><p><cite>**kwargs</cite>: Widget parameters</p></li>
+</ul>
+<p><strong>Widget Parameters</strong>:</p>
+<ul class="simple">
+<li><p>Regular ipywidgets</p></li>
+<li><p>Fixed widgets via ipw.fixed()</p></li>
+<li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or ‘.trait’ to observe traits on this instance.</p></li>
+<li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
+<li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
+<li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
+<li><p><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</p></li>
+</ul>
+<p><strong>Widget Updates</strong>:</p>
+<ul class="simple">
+<li><p>Functions can modify widget traits (e.g. options, min/max)</p></li>
+<li><p>Order matters for dependent updates</p></li>
+<li><p>Parameter-less functions run with any interaction</p></li>
+<li><p>Animation widgets work even with manual updates</p></li>
+<li><dl class="simple">
+<dt><strong>Output Widget Behavior</strong>:</dt><dd><ul>
+<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite> or <cite>classed</cite>.</p></li>
+<li><p>If no CSS class is provided, the callback will use the main output widget labeled as ‘out-main’.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>CSS Classes</strong>:</p>
+<ul class="simple">
+<li><p>Parameter names from kwargs</p></li>
+<li><p>Custom ‘out-<a href="#id28"><span class="problematic" id="id29">*</span></a>’ classes from classed(), and ‘out-main’ class.</p></li>
+<li><p>‘btn-main’ for manual update button</p></li>
+</ul>
+<p><strong>Notes</strong>:</p>
+<ul class="simple">
+<li><p>Avoid modifying global slide state</p></li>
+<li><p>Use widget descriptions to prevent name clashes</p></li>
+<li><p>See set_css() method for styling options</p></li>
+<li><p>interactive(no_args_func_which_may_fetch_data_on_click,) is perfectly valid and run on button click.</p></li>
+</ul>
+<p><strong>Python dictionary to CSS</strong></p>
+<p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.
+There are few special rules in <cite>props</cite>:</p>
+<ul class="simple">
+<li><p>All nested selectors are joined with space, so hl`’.A’: {‘.B’: … }` becomes hl[‘css’]`.A .B {…}` in CSS.</p></li>
+<li><p>A ‘^’ in start of a selector joins to parent selector without space, so hl`’.A’: {‘^:hover’: …}` becomes hl[‘css’]`.A:hover {…}` in CSS. You can also use hl`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
+<li><p>A list/tuple of values for a key in dict generates CSS fallback, so hl`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes hl[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
+</ul>
+<p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
+<p><strong>Tips</strong>:</p>
+<ul class="simple">
+<li><p>You can use this inside columns using delayed display trick, like hl`write(‘First column’, C2)` where hl`C2 = Slides.hold(Slides.ei.interact, f, x = 5) or Slides.ei.interactive(f, x = 5)`.</p></li>
+<li><p>You can also use this under <cite>Slides.capture_content</cite> to display later in a specific place.</p></li>
+</ul>
+</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.widgets.Files.kpath_widget">
 <span class="sig-name descname"><span class="pre">kpath_widget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.kpath_widget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.kpath_widget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get KpathWidget instance with these files.</p>
+<dd><p>Get KPathWidget instance with these files.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3849,7 +4134,7 @@ If you need to operate on just path, use <cite>.map</cite> instead.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ipyvasp.widgets.PropsPicker">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.widgets.</span></span><span class="sig-name descname"><span class="pre">PropsPicker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_button_click</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_selection_changed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#PropsPicker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.PropsPicker" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.widgets.</span></span><span class="sig-name descname"><span class="pre">PropsPicker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#PropsPicker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.PropsPicker" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">VBox</span></code></p>
 <p>A widget to pick atoms and orbitals for plotting.</p>
 <dl class="field-list simple">
@@ -3857,47 +4142,90 @@ If you need to operate on just path, use <cite>.map</cite> instead.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>system_summary</strong> (<em>(</em><a class="reference internal" href="#ipyvasp.core.parser.Vasprun" title="ipyvasp.core.parser.Vasprun"><em>Vasprun</em></a><em>,</em><a class="reference internal" href="#ipyvasp.core.parser.Vaspout" title="ipyvasp.core.parser.Vaspout"><em>Vaspout</em></a><em>)</em><em>.summary</em>) – </p></li>
 <li><p><strong>N</strong> (<em>int</em><em>, </em><em>default is 3</em><em>, </em><em>number</em><em> of </em><em>projections to pick.</em>) – </p></li>
-<li><p><strong>on_button_click</strong> (<em>callable</em><em>, </em><em>takes button as arguemnet. Default is None</em><em>, </em><em>a function to call when button is clicked.</em>) – </p></li>
-<li><p><strong>on_selection_changed</strong> (<em>callable</em><em>, </em><em>takes change as argument. Default is None</em><em>, </em><em>a function to call when selection is changed.</em>) – </p></li>
+<li><p><strong>trait.</strong> (<em>You can observe projections</em>) – </p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipyvasp.widgets.PropsPicker.projections">
+<span class="sig-name descname"><span class="pre">projections</span></span><a class="headerlink" href="#ipyvasp.widgets.PropsPicker.projections" title="Permalink to this definition">¶</a></dt>
+<dd><p>An instance of a Python dict.</p>
+<p>One or more traits can be passed to the constructor
+to validate the keys and/or values of the dict.
+If you need more detailed validation,
+you may use a custom validator method.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 5.0: </span>Added key_trait for validating dict keys.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 5.0: </span>Deprecated ambiguous <code class="docutils literal notranslate"><span class="pre">trait</span></code>, <code class="docutils literal notranslate"><span class="pre">traits</span></code> args in favor of <code class="docutils literal notranslate"><span class="pre">value_trait</span></code>, <code class="docutils literal notranslate"><span class="pre">per_key_traits</span></code>.</p>
+</div>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.widgets.PropsPicker.update">
 <span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system_summary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#PropsPicker.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.PropsPicker.update" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.widgets.PropsPicker.button">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">button</span></span><a class="headerlink" href="#ipyvasp.widgets.PropsPicker.button" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.widgets.PropsPicker.projections">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projections</span></span><a class="headerlink" href="#ipyvasp.widgets.PropsPicker.projections" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Update all pickers with new system data</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ipyvasp.widgets.BandsWidget">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.widgets.</span></span><span class="sig-name descname"><span class="pre">BandsWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'450px'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#BandsWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.BandsWidget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">VBox</span></code></p>
-<p>Visualize band structure from VASP calculation. You can click on the graph to get the data such as VBM, CBM, etc.
-Two attributes are important:
-self.clicked_data returns the last clicked point, that can also be stored as VBM, CBM etc, using Click dropdown.
-self.selected_data returns the last selection of points within a box or lasso. You can plot that output separately as plt.plot(data.xs, data.ys) after a selection.
-You can use <cite>self.files.update</cite> method to change source files without effecting state of widget.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.widgets.BandsWidget.path">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#ipyvasp.widgets.BandsWidget.path" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns currently selected path.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.widgets.</span></span><span class="sig-name descname"><span class="pre">BandsWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'600px'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_clicks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#BandsWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.BandsWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_ThemedFigureInteract</span></code></p>
+<p>Visualize band structure from VASP calculation. You can click on the graph to get the data such as VBM, CBM, etc.</p>
+<p>You can observe three traits:</p>
+<ul class="simple">
+<li><p>file: Currently selected file</p></li>
+<li><p>clicked_data:  Last clicked point data, which can be directly passed to a dataframe.</p></li>
+<li><p>selected_data: Last selection of points within a box or lasso, which can be directly passed to a dataframe and plotted accordingly.</p></li>
+<li><p>You can use <cite>self.files.update</cite> method to change source files without effecting state of widget.</p></li>
+<li><p>You can also use <cite>self.iplot</cite>, <cite>self.splot</cite> with <cite>self.kws</cite> to get static plts of current state, and self.results to get a dataframe.</p></li>
+<li><p>You can use store_clicks to provide extra names of points you want to click and save data, besides default ones.</p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipyvasp.widgets.BandsWidget.file">
+<span class="sig-name descname"><span class="pre">file</span></span><a class="headerlink" href="#ipyvasp.widgets.BandsWidget.file" title="Permalink to this definition">¶</a></dt>
+<dd><p>A trait which allows any value.</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.widgets.BandsWidget.files">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">files</span></span><a class="headerlink" href="#ipyvasp.widgets.BandsWidget.files" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use slef.files.update(…) to keep state of widget preserved.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipyvasp.widgets.BandsWidget.clicked_data">
+<span class="sig-name descname"><span class="pre">clicked_data</span></span><a class="headerlink" href="#ipyvasp.widgets.BandsWidget.clicked_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>An instance of a Python dict.</p>
+<p>One or more traits can be passed to the constructor
+to validate the keys and/or values of the dict.
+If you need more detailed validation,
+you may use a custom validator method.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 5.0: </span>Added key_trait for validating dict keys.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 5.0: </span>Deprecated ambiguous <code class="docutils literal notranslate"><span class="pre">trait</span></code>, <code class="docutils literal notranslate"><span class="pre">traits</span></code> args in favor of <code class="docutils literal notranslate"><span class="pre">value_trait</span></code>, <code class="docutils literal notranslate"><span class="pre">per_key_traits</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipyvasp.widgets.BandsWidget.selected_data">
+<span class="sig-name descname"><span class="pre">selected_data</span></span><a class="headerlink" href="#ipyvasp.widgets.BandsWidget.selected_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>An instance of a Python dict.</p>
+<p>One or more traits can be passed to the constructor
+to validate the keys and/or values of the dict.
+If you need more detailed validation,
+you may use a custom validator method.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 5.0: </span>Added key_trait for validating dict keys.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 5.0: </span>Deprecated ambiguous <code class="docutils literal notranslate"><span class="pre">trait</span></code>, <code class="docutils literal notranslate"><span class="pre">traits</span></code> args in favor of <code class="docutils literal notranslate"><span class="pre">value_trait</span></code>, <code class="docutils literal notranslate"><span class="pre">per_key_traits</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.widgets.BandsWidget.results">
+<span class="sig-name descname"><span class="pre">results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exclude_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#BandsWidget.results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.BandsWidget.results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a dataframe form result.json file in each folder, with optionally excluding keys.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -3913,35 +4241,17 @@ You can use <cite>self.files.update</cite> method to change source files without
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.widgets.BandsWidget.kwargs">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kwargs</span></span><a class="headerlink" href="#ipyvasp.widgets.BandsWidget.kwargs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Selected kwargs from GUI</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.widgets.BandsWidget.clicked_data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clicked_data</span></span><a class="headerlink" href="#ipyvasp.widgets.BandsWidget.clicked_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clicked data from graph</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.widgets.BandsWidget.selected_data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selected_data</span></span><a class="headerlink" href="#ipyvasp.widgets.BandsWidget.selected_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Data selected by box or lasso selection from graph</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.widgets.BandsWidget.results">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">results</span></span><a class="headerlink" href="#ipyvasp.widgets.BandsWidget.results" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a dataframe form result.json file in each folder.</p>
+<dt class="sig sig-object py" id="ipyvasp.widgets.BandsWidget.kws">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kws</span></span><a class="headerlink" href="#ipyvasp.widgets.BandsWidget.kws" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selected keyword arguments from GUI</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="ipyvasp.widgets.KpathWidget">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.widgets.</span></span><span class="sig-name descname"><span class="pre">KpathWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'400px'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#KpathWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.KpathWidget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">VBox</span></code></p>
+<dt class="sig sig-object py" id="ipyvasp.widgets.KPathWidget">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ipyvasp.widgets.</span></span><span class="sig-name descname"><span class="pre">KPathWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'450px'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#KPathWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.KPathWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_ThemedFigureInteract</span></code></p>
 <p>Interactively bulid a kpath for bandstructure calculation.</p>
 <p>After initialization and disply:</p>
 <ul class="simple">
@@ -3950,41 +4260,35 @@ You can use <cite>self.files.update</cite> method to change source files without
 <li><p>To update point(s), select point(s) from the select box and click on a scatter point in figure or use KPOINT input to update it manually, e.g. if a point is not available on plot.</p></li>
 <li><p>Add labels to the points by typing in the “Labels” box such as “Γ,X” or “Γ 5,X” that will add 5 points in interval.</p></li>
 <li><p>To break the path between two points “Γ” and “X” type “Γ 0,X” in the “Labels” box, zero means no points in interval.</p></li>
+<li><p>You can use <cite>self.files.update</cite> method to change source files without effecting state of widget.</p></li>
+<li><p>You can observe <cite>self.file</cite> trait to get current file selected and plot something, e.g. lattice structure.</p></li>
 </ul>
-<p>You can use <cite>self.files.update</cite> method to change source files without effecting state of widget.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.widgets.KpathWidget.path">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#ipyvasp.widgets.KpathWidget.path" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns currently selected path.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ipyvasp.widgets.KPathWidget.file">
+<span class="sig-name descname"><span class="pre">file</span></span><a class="headerlink" href="#ipyvasp.widgets.KPathWidget.file" title="Permalink to this definition">¶</a></dt>
+<dd><p>A trait which allows any value.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.widgets.KpathWidget.files">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">files</span></span><a class="headerlink" href="#ipyvasp.widgets.KpathWidget.files" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use slef.files.update(…) to keep state of widget preserved.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="ipyvasp.widgets.KpathWidget.poscar">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">poscar</span></span><a class="headerlink" href="#ipyvasp.widgets.KpathWidget.poscar" title="Permalink to this definition">¶</a></dt>
-<dd><p>POSCAR class associated to current selection.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="ipyvasp.widgets.KPathWidget.poscar">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">poscar</span></span><a class="headerlink" href="#ipyvasp.widgets.KPathWidget.poscar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ipyvasp.widgets.KpathWidget.get_coords_labels">
-<span class="sig-name descname"><span class="pre">get_coords_labels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#KpathWidget.get_coords_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.KpathWidget.get_coords_labels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns tuple of (coordinates, labels) to directly plot.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ipyvasp.widgets.KpathWidget.get_kpoints">
-<span class="sig-name descname"><span class="pre">get_kpoints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#KpathWidget.get_kpoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.KpathWidget.get_kpoints" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="ipyvasp.widgets.KPathWidget.get_kpoints">
+<span class="sig-name descname"><span class="pre">get_kpoints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#KPathWidget.get_kpoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.KPathWidget.get_kpoints" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns kpoints list including labels and numbers in intervals if given.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ipyvasp.widgets.KpathWidget.get_kpath">
-<span class="sig-name descname"><span class="pre">get_kpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ibzkpt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#KpathWidget.get_kpath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.KpathWidget.get_kpath" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="ipyvasp.widgets.KPathWidget.get_coords_labels">
+<span class="sig-name descname"><span class="pre">get_coords_labels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#KPathWidget.get_coords_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.KPathWidget.get_coords_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns tuple of (coordinates, labels) to directly plot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.widgets.KPathWidget.get_kpath">
+<span class="sig-name descname"><span class="pre">get_kpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ibzkpt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#KPathWidget.get_kpath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.KPathWidget.get_kpath" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate list of kpoints along high symmetry path. Options are write to file or return KPOINTS list.
 It generates uniformly spaced point with input <cite>n</cite> as just a scale factor of number of points per average length of <cite>rec_basis</cite>.</p>
 <dl class="field-list simple">
@@ -4003,8 +4307,14 @@ Number of points in each interval is at least 2 even if <cite>n</cite> is less t
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ipyvasp.widgets.KpathWidget.splot">
-<span class="sig-name descname"><span class="pre">splot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt_label=&lt;function</span> <span class="pre">KpathWidget.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_kws={}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#KpathWidget.splot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.KpathWidget.splot" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="ipyvasp.widgets.KPathWidget.iplot">
+<span class="sig-name descname"><span class="pre">iplot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#KPathWidget.iplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.KPathWidget.iplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns disconnected current plotly figure</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ipyvasp.widgets.KPathWidget.splot">
+<span class="sig-name descname"><span class="pre">splot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt_label=&lt;function</span> <span class="pre">KPathWidget.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_kws={}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#KPathWidget.splot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.KPathWidget.splot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Same as <cite>ipyvasp.lattice.POSCAR.splot_bz</cite> except it also plots path on BZ.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -4016,12 +4326,6 @@ Number of points in each interval is at least 2 even if <cite>n</cite> is less t
 </ul>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ipyvasp.widgets.KpathWidget.iplot">
-<span class="sig-name descname"><span class="pre">iplot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#KpathWidget.iplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.KpathWidget.iplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns disconnected current plotly figure</p>
 </dd></dl>
 
 </dd></dl>
@@ -4125,7 +4429,7 @@ Number of points in each interval is at least 2 even if <cite>n</cite> is less t
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You can use return value to retrieve information, like output.f(<a href="#id18"><span class="problematic" id="id19">*</span></a>output.args, <a href="#id20"><span class="problematic" id="id21">**</span></a>output.kwargs) in a cell to plot the current state and save it.</p>
+<p>You can use return value to retrieve information, like output.f(<a href="#id30"><span class="problematic" id="id31">*</span></a>output.args, <a href="#id32"><span class="problematic" id="id33">**</span></a>output.kwargs) in a cell to plot the current state and save it.</p>
 </div>
 </dd></dl>
 
@@ -4336,6 +4640,7 @@ Last item is considered to be columns.</p></li>
 <li><a class="reference internal" href="#ipyvasp.Files.load_results"><code class="docutils literal notranslate"><span class="pre">Files.load_results()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.Files.input_info"><code class="docutils literal notranslate"><span class="pre">Files.input_info()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.Files.update"><code class="docutils literal notranslate"><span class="pre">Files.update()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.Files.to_dropdown"><code class="docutils literal notranslate"><span class="pre">Files.to_dropdown()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.Files.add"><code class="docutils literal notranslate"><span class="pre">Files.add()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.Files.interactive"><code class="docutils literal notranslate"><span class="pre">Files.interactive()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.Files.interact"><code class="docutils literal notranslate"><span class="pre">Files.interact()</span></code></a></li>
@@ -4637,6 +4942,7 @@ Last item is considered to be columns.</p></li>
 <li><a class="reference internal" href="#ipyvasp.widgets.Files.load_results"><code class="docutils literal notranslate"><span class="pre">Files.load_results()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.widgets.Files.input_info"><code class="docutils literal notranslate"><span class="pre">Files.input_info()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.widgets.Files.update"><code class="docutils literal notranslate"><span class="pre">Files.update()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.Files.to_dropdown"><code class="docutils literal notranslate"><span class="pre">Files.to_dropdown()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.widgets.Files.add"><code class="docutils literal notranslate"><span class="pre">Files.add()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.widgets.Files.interactive"><code class="docutils literal notranslate"><span class="pre">Files.interactive()</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.widgets.Files.interact"><code class="docutils literal notranslate"><span class="pre">Files.interact()</span></code></a></li>
@@ -4648,31 +4954,28 @@ Last item is considered to be columns.</p></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#ipyvasp.widgets.PropsPicker"><code class="docutils literal notranslate"><span class="pre">PropsPicker</span></code></a><ul>
-<li><a class="reference internal" href="#ipyvasp.widgets.PropsPicker.update"><code class="docutils literal notranslate"><span class="pre">PropsPicker.update()</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.PropsPicker.button"><code class="docutils literal notranslate"><span class="pre">PropsPicker.button</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.widgets.PropsPicker.projections"><code class="docutils literal notranslate"><span class="pre">PropsPicker.projections</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.PropsPicker.update"><code class="docutils literal notranslate"><span class="pre">PropsPicker.update()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget"><code class="docutils literal notranslate"><span class="pre">BandsWidget</span></code></a><ul>
-<li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.path"><code class="docutils literal notranslate"><span class="pre">BandsWidget.path</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.files"><code class="docutils literal notranslate"><span class="pre">BandsWidget.files</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.source"><code class="docutils literal notranslate"><span class="pre">BandsWidget.source</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.bands"><code class="docutils literal notranslate"><span class="pre">BandsWidget.bands</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.kwargs"><code class="docutils literal notranslate"><span class="pre">BandsWidget.kwargs</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.file"><code class="docutils literal notranslate"><span class="pre">BandsWidget.file</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.clicked_data"><code class="docutils literal notranslate"><span class="pre">BandsWidget.clicked_data</span></code></a></li>
 <li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.selected_data"><code class="docutils literal notranslate"><span class="pre">BandsWidget.selected_data</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.results"><code class="docutils literal notranslate"><span class="pre">BandsWidget.results</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.results"><code class="docutils literal notranslate"><span class="pre">BandsWidget.results()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.source"><code class="docutils literal notranslate"><span class="pre">BandsWidget.source</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.bands"><code class="docutils literal notranslate"><span class="pre">BandsWidget.bands</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.BandsWidget.kws"><code class="docutils literal notranslate"><span class="pre">BandsWidget.kws</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#ipyvasp.widgets.KpathWidget"><code class="docutils literal notranslate"><span class="pre">KpathWidget</span></code></a><ul>
-<li><a class="reference internal" href="#ipyvasp.widgets.KpathWidget.path"><code class="docutils literal notranslate"><span class="pre">KpathWidget.path</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.KpathWidget.files"><code class="docutils literal notranslate"><span class="pre">KpathWidget.files</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.KpathWidget.poscar"><code class="docutils literal notranslate"><span class="pre">KpathWidget.poscar</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.KpathWidget.get_coords_labels"><code class="docutils literal notranslate"><span class="pre">KpathWidget.get_coords_labels()</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.KpathWidget.get_kpoints"><code class="docutils literal notranslate"><span class="pre">KpathWidget.get_kpoints()</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.KpathWidget.get_kpath"><code class="docutils literal notranslate"><span class="pre">KpathWidget.get_kpath()</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.KpathWidget.splot"><code class="docutils literal notranslate"><span class="pre">KpathWidget.splot()</span></code></a></li>
-<li><a class="reference internal" href="#ipyvasp.widgets.KpathWidget.iplot"><code class="docutils literal notranslate"><span class="pre">KpathWidget.iplot()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.KPathWidget"><code class="docutils literal notranslate"><span class="pre">KPathWidget</span></code></a><ul>
+<li><a class="reference internal" href="#ipyvasp.widgets.KPathWidget.file"><code class="docutils literal notranslate"><span class="pre">KPathWidget.file</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.KPathWidget.poscar"><code class="docutils literal notranslate"><span class="pre">KPathWidget.poscar</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.KPathWidget.get_kpoints"><code class="docutils literal notranslate"><span class="pre">KPathWidget.get_kpoints()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.KPathWidget.get_coords_labels"><code class="docutils literal notranslate"><span class="pre">KPathWidget.get_coords_labels()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.KPathWidget.get_kpath"><code class="docutils literal notranslate"><span class="pre">KPathWidget.get_kpath()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.KPathWidget.iplot"><code class="docutils literal notranslate"><span class="pre">KPathWidget.iplot()</span></code></a></li>
+<li><a class="reference internal" href="#ipyvasp.widgets.KPathWidget.splot"><code class="docutils literal notranslate"><span class="pre">KPathWidget.splot()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -4713,7 +5016,7 @@ Last item is considered to be columns.</p></li>
       
     </aside>
   </div>
-</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=c4720336"></script>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=9c7b9d88"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
