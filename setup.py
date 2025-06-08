@@ -94,6 +94,18 @@ class UploadCommand(Command):
 
         sys.exit()
 
+class BuildDocsCommand(UploadCommand):
+    description = "Build docs using sphinx-build."
+    user_options = []
+
+    def run(self):
+        source = os.path.join(here, "docs","source")
+        build = os.path.join(here, "docs","build", "html")
+        os.makedirs(build, exist_ok=True)
+        ret = os.system(f"sphinx-build -b html {source} {build}")
+        if ret != 0:
+            raise RuntimeError("Sphinx docs build failed!")
+        print(f"✅ Documentation successfully built as {build}")
 
 # Where the magic happens:
 setup(
@@ -126,6 +138,7 @@ setup(
     # $ setup.py publish support.
     cmdclass={
         "upload": UploadCommand,
+        "build_docs": BuildDocsCommand,
     },
     # for command line interface
     entry_points={
