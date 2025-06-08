@@ -13,6 +13,10 @@ cd ipyvasp
 pip install -e .
 ```
 
+## Documentataion
+- [Latest at Github Pages](https://asaboor-gh.github.io/ipyvasp/) 
+- [Read the Docs](https://ipyvasp.readthedocs.io/)
+
 ## Showcase Examples
 Plot 2D BZ layer on top of 3D!
 
