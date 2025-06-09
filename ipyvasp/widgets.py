@@ -620,15 +620,14 @@ class _ThemedFigureInteract(ei.InteractBase):
         self.set_css() # automatically sets dark/light, ensure after icon set
         fig.layout.autosize = True # must
     
-    @_sub_doc(ei.InteractBase.set_css) # overriding to alway be able to set_css
-    def set_css(self, main=None, center=None):
+    def _set_css(self, main=None, center=None): # allowed overriding, but not set_css
         # This is after setting icon above, so logic is fliipped
         style = _get_css("light" if self._theme.icon == 'sun' else 'dark') # infer from icon to match
         if isinstance(main, dict):
             style = {**style, **main} # main should allow override
         elif main is not None:
             raise TypeError("main must be a dict or None, got: {}".format(type(main)))
-        super().set_css(style, center)
+        super()._set_css(style, center)
     
     @property
     def files(self): 
@@ -1038,25 +1037,23 @@ class KPathWidget(_ThemedFigureInteract):
 
     @ei.callback
     def _update_theme(self, fig, theme):
-        super()._update_theme(fig, theme)  # call parent method, but important
-
-
-    @ei.callback
-    def _toggle_lock(self, lock):
-        self.params.lock.icon = 'lock' if self.params.lock.icon == 'unlock' else 'unlock'
-        self._show_info(f"{self.params.lock.icon}ed adding/deleting kpoints!")
+        return super()._update_theme(fig, theme)
 
     @ei.callback
-    def _del_point(self, delp):
-        if self.params.lock.icon == 'unlock': # Do not delete locked
-            sm = self.params.sm
-            for v in sm.value:  # for loop here is important to update selection properly
-                sm.options = [opt for opt in sm.options if opt[1] != v]
-                self._update_selection()  # update plot as well
+    def _respond_click(self, lock, delp):
+        if lock.clicked:
+            self.params.lock.icon = 'lock' if self.params.lock.icon == 'unlock' else 'unlock'
+            self._show_info(f"{self.params.lock.icon}ed adding/deleting kpoints!")
+        elif delp.clicked:
+            if self.params.lock.icon == 'unlock': # Do not delete locked
+                sm = self.params.sm
+                for v in sm.value:  # for loop here is important to update selection properly
+                    sm.options = [opt for opt in sm.options if opt[1] != v]
+                    self._update_selection()  # update plot as well
+                else:
+                    self._show_info("Select point(s) to delete")
             else:
-                self._show_info("Select point(s) to delete")
-        else:
-            self._show_info("cannot delete point when locked!", 'red')
+                self._show_info("cannot delete point when locked!", 'red')
     
     def _add_point(self, kpt):
         sm = self.params.sm
