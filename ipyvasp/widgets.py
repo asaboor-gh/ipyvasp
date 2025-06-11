@@ -598,7 +598,7 @@ class _ThemedFigureInteract(ei.InteractBase):
         self.observe(self._autosize_figs, names = 'isfullscreen') # fix figurewidget problem
 
     def _autosize_figs(self, change):
-        for w in self._all_widgets.values():
+        for w in self.params:
             # don't know yet about these without importing
             if re.search('plotly.*FigureWidget', str(type(w).__mro__)):
                 w.layout.autosize = False # Double trigger is important
