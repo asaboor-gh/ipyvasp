@@ -798,7 +798,7 @@ class BandsWidget(_ThemedFigureInteract):
     
     @ei.callback
     def _toggle_footer(self, showft):
-        self._app.pane_heights = [0,100 - showft, showft]
+        self.pane_heights = [0,100 - showft, showft]
     
     @ei.callback
     def _set_krange(self, krange):
