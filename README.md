@@ -1,6 +1,7 @@
 # IPyVASP
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15482350.svg)](https://doi.org/10.5281/zenodo.15482350)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/asaboor-gh/ipyvasp/HEAD?urlpath=%2Fdoc%2Ftree%2Fdocs%2Fsource%2Fnotebooks%2Fquickstart.ipynb)
 [![PyPI Downloads](https://static.pepy.tech/badge/ipyvasp)](https://pepy.tech/projects/ipyvasp)
 
 An VASP-based DFT pre and post processing tool.
@@ -48,4 +49,4 @@ Apply operations on POSCAR and simultaneously view using plotly's `FigureWidget`
 ![snip](op.png)
 
 ![BandsWidget](Bands.jpg)
-More coming soon!
+More coming soon! You can test these examples on [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/asaboor-gh/ipyvasp/HEAD?urlpath=%2Fdoc%2Ftree%2Fdocs%2Fsource%2Fnotebooks%2Fquickstart.ipynb).
