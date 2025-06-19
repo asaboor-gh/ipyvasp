@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="API" href="apidoc.html" />
 
     <!-- Generated with Sphinx 7.1.2 and Furo 2024.08.06 -->
-        <title>IPyVASP - ipyvasp 0.9.95 documentation</title>
+        <title>IPyVASP - ipyvasp 0.9.98 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">ipyvasp 0.9.95 documentation</div></a>
+      <a href="index.html"><div class="brand">ipyvasp 0.9.98 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">ipyvasp 0.9.95 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 0.9.98 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -380,30 +380,43 @@ Useful to add multiple globbed files into a single chained call.</p>
 <li><p>Built-in fullscreen support</p></li>
 </ul>
 <p><strong>Basic Usage</strong>:</p>
-<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
-from ipyslides.interaction import interactive, classed, monitor
-import ipywidgets as ipw
-import plotly.graph_objects as go</p>
-<p>fig = go.FigureWidget()</p>
-<p>&#64;monitor  # check execution time
-def update_plot(x, y, fig):</p>
-<blockquote>
-<div><p>fig.data = []
-fig.add_scatter(x=[0, x], y=[0, y])</p>
-</div></blockquote>
-<dl class="simple">
-<dt>def resize_fig(fig, fs):</dt><dd><p>fig.layout.autosize = True # plotly’s figurewidget always make trouble with sizing</p>
-</dd>
-<dt>dashboard = interactive(</dt><dd><p>classed(update_plot, ‘out-plot’),  # Assign CSS class to output, otherwise it will be captured by main output
-resize_fig, # responds to fullscreen change
-x = ipw.IntSlider(0, 0, 100),
-y = ipw.FloatSlider(0, 1),
-fig = ipw.fixed(fig),
-fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
-</dd>
-</dl>
-<section id="id5">
-<h2>)<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ipyslides.interaction</span><span class="w"> </span><span class="kn">import</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">monitor</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ipw</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">FigureWidget</span><span class="p">()</span>
+
+<span class="nd">@callback</span><span class="p">(</span><span class="s1">&#39;out-plot&#39;</span><span class="p">,</span> <span class="n">timeit</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># check execution time</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">resize_fig</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># double trigger</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># plotly&#39;s figurewidget always make trouble with sizing</span>
+
+<span class="c1"># Above two functions can be merged since we can use changed detection</span>
+<span class="nd">@monitor</span>  <span class="c1"># check execution time</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">respond</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fig</span> <span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">changed</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">&#39;fs&#39;</span> <span class="ow">in</span> <span class="n">changed</span><span class="p">:</span> <span class="c1"># or changed(&#39;fs&#39;)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># double trigger</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+
+<span class="n">dashboard</span> <span class="o">=</span> <span class="n">interactive</span><span class="p">(</span>
+    <span class="n">update_plot</span><span class="p">,</span>
+    <span class="n">resize_fig</span><span class="p">,</span> <span class="c1"># responds to fullscreen change</span>
+    <span class="c1"># respond, instead of two functions</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">FloatSlider</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">fixed</span><span class="p">(</span><span class="n">fig</span><span class="p">),</span>
+    <span class="n">changed</span> <span class="o">=</span> <span class="s1">&#39;.changed&#39;</span><span class="p">,</span> <span class="c1"># detect a change in parameter</span>
+    <span class="n">fs</span> <span class="o">=</span> <span class="s1">&#39;.isfullscreen&#39;</span><span class="p">,</span> <span class="c1"># detect fullscreen change on instance itself</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 <p><strong>Parameters</strong>:</p>
 <ul class="simple">
 <li><p><cite>*funcs</cite>: One or more callback functions</p></li>
@@ -426,9 +439,16 @@ fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
 <li><p>Fixed widgets via ipw.fixed()</p></li>
 <li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or ‘.trait’ to observe traits on this instance.</p></li>
 <li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
+<li><p>You can use <cite>changed = ‘.changed’</cite> to detect which parameters of a callback changed by checking <cite>changed(‘param’) -&gt; Bool</cite> in a callback.</p></li>
 <li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
 <li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
-<li><p><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</p></li>
+<li><dl class="simple">
+<dt><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</dt><dd><ul>
+<li><p>You can have multiple buttons in a single callback and check <cite>btn.clicked</cite> attribute to run code based on which button was clicked.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
 </ul>
 <p><strong>Widget Updates</strong>:</p>
 <ul class="simple">
@@ -438,7 +458,7 @@ fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
 <li><p>Animation widgets work even with manual updates</p></li>
 <li><dl class="simple">
 <dt><strong>Output Widget Behavior</strong>:</dt><dd><ul>
-<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite> or <cite>classed</cite>.</p></li>
+<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite>.</p></li>
 <li><p>If no CSS class is provided, the callback will use the main output widget labeled as ‘out-main’.</p></li>
 </ul>
 </dd>
@@ -448,7 +468,7 @@ fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
 <p><strong>CSS Classes</strong>:</p>
 <ul class="simple">
 <li><p>Parameter names from kwargs</p></li>
-<li><p>Custom ‘out-<a href="#id6"><span class="problematic" id="id7">*</span></a>’ classes from classed(), and ‘out-main’ class.</p></li>
+<li><p>Custom ‘out-<a href="#id1"><span class="problematic" id="id2">*</span></a>’ classes from &#64;callback, and ‘out-main’ class.</p></li>
 <li><p>‘btn-main’ for manual update button</p></li>
 </ul>
 <p><strong>Notes</strong>:</p>
@@ -467,7 +487,6 @@ There are few special rules in <cite>props</cite>:</p>
 <li><p>A list/tuple of values for a key in dict generates CSS fallback, so hl`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes hl[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
 </ul>
 <p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
-</section>
 </dd></dl>
 
 <dl class="py method">
@@ -484,30 +503,43 @@ There are few special rules in <cite>props</cite>:</p>
 <li><p>Built-in fullscreen support</p></li>
 </ul>
 <p><strong>Basic Usage</strong>:</p>
-<p><a href="#id8"><span class="problematic" id="id9">``</span></a><a href="#id10"><span class="problematic" id="id11">`</span></a>python
-from ipyslides.interaction import interactive, classed, monitor
-import ipywidgets as ipw
-import plotly.graph_objects as go</p>
-<p>fig = go.FigureWidget()</p>
-<p>&#64;monitor  # check execution time
-def update_plot(x, y, fig):</p>
-<blockquote>
-<div><p>fig.data = []
-fig.add_scatter(x=[0, x], y=[0, y])</p>
-</div></blockquote>
-<dl class="simple">
-<dt>def resize_fig(fig, fs):</dt><dd><p>fig.layout.autosize = True # plotly’s figurewidget always make trouble with sizing</p>
-</dd>
-<dt>dashboard = interactive(</dt><dd><p>classed(update_plot, ‘out-plot’),  # Assign CSS class to output, otherwise it will be captured by main output
-resize_fig, # responds to fullscreen change
-x = ipw.IntSlider(0, 0, 100),
-y = ipw.FloatSlider(0, 1),
-fig = ipw.fixed(fig),
-fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
-</dd>
-</dl>
-<section id="id12">
-<h2>)<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ipyslides.interaction</span><span class="w"> </span><span class="kn">import</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">monitor</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ipw</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">FigureWidget</span><span class="p">()</span>
+
+<span class="nd">@callback</span><span class="p">(</span><span class="s1">&#39;out-plot&#39;</span><span class="p">,</span> <span class="n">timeit</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># check execution time</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">resize_fig</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># double trigger</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># plotly&#39;s figurewidget always make trouble with sizing</span>
+
+<span class="c1"># Above two functions can be merged since we can use changed detection</span>
+<span class="nd">@monitor</span>  <span class="c1"># check execution time</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">respond</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fig</span> <span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">changed</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">&#39;fs&#39;</span> <span class="ow">in</span> <span class="n">changed</span><span class="p">:</span> <span class="c1"># or changed(&#39;fs&#39;)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># double trigger</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+
+<span class="n">dashboard</span> <span class="o">=</span> <span class="n">interactive</span><span class="p">(</span>
+    <span class="n">update_plot</span><span class="p">,</span>
+    <span class="n">resize_fig</span><span class="p">,</span> <span class="c1"># responds to fullscreen change</span>
+    <span class="c1"># respond, instead of two functions</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">FloatSlider</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">fixed</span><span class="p">(</span><span class="n">fig</span><span class="p">),</span>
+    <span class="n">changed</span> <span class="o">=</span> <span class="s1">&#39;.changed&#39;</span><span class="p">,</span> <span class="c1"># detect a change in parameter</span>
+    <span class="n">fs</span> <span class="o">=</span> <span class="s1">&#39;.isfullscreen&#39;</span><span class="p">,</span> <span class="c1"># detect fullscreen change on instance itself</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 <p><strong>Parameters</strong>:</p>
 <ul class="simple">
 <li><p><cite>*funcs</cite>: One or more callback functions</p></li>
@@ -530,9 +562,16 @@ fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
 <li><p>Fixed widgets via ipw.fixed()</p></li>
 <li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or ‘.trait’ to observe traits on this instance.</p></li>
 <li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
+<li><p>You can use <cite>changed = ‘.changed’</cite> to detect which parameters of a callback changed by checking <cite>changed(‘param’) -&gt; Bool</cite> in a callback.</p></li>
 <li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
 <li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
-<li><p><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</p></li>
+<li><dl class="simple">
+<dt><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</dt><dd><ul>
+<li><p>You can have multiple buttons in a single callback and check <cite>btn.clicked</cite> attribute to run code based on which button was clicked.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
 </ul>
 <p><strong>Widget Updates</strong>:</p>
 <ul class="simple">
@@ -542,7 +581,7 @@ fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
 <li><p>Animation widgets work even with manual updates</p></li>
 <li><dl class="simple">
 <dt><strong>Output Widget Behavior</strong>:</dt><dd><ul>
-<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite> or <cite>classed</cite>.</p></li>
+<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite>.</p></li>
 <li><p>If no CSS class is provided, the callback will use the main output widget labeled as ‘out-main’.</p></li>
 </ul>
 </dd>
@@ -552,7 +591,7 @@ fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
 <p><strong>CSS Classes</strong>:</p>
 <ul class="simple">
 <li><p>Parameter names from kwargs</p></li>
-<li><p>Custom ‘out-<a href="#id13"><span class="problematic" id="id14">*</span></a>’ classes from classed(), and ‘out-main’ class.</p></li>
+<li><p>Custom ‘out-<a href="#id3"><span class="problematic" id="id4">*</span></a>’ classes from &#64;callback, and ‘out-main’ class.</p></li>
 <li><p>‘btn-main’ for manual update button</p></li>
 </ul>
 <p><strong>Notes</strong>:</p>
@@ -576,7 +615,6 @@ There are few special rules in <cite>props</cite>:</p>
 <li><p>You can use this inside columns using delayed display trick, like hl`write(‘First column’, C2)` where hl`C2 = Slides.hold(Slides.ei.interact, f, x = 5) or Slides.ei.interactive(f, x = 5)`.</p></li>
 <li><p>You can also use this under <cite>Slides.capture_content</cite> to display later in a specific place.</p></li>
 </ul>
-</section>
 </dd></dl>
 
 <dl class="py method">
@@ -3880,30 +3918,43 @@ Useful to add multiple globbed files into a single chained call.</p>
 <li><p>Built-in fullscreen support</p></li>
 </ul>
 <p><strong>Basic Usage</strong>:</p>
-<p><a href="#id16"><span class="problematic" id="id17">``</span></a><a href="#id18"><span class="problematic" id="id19">`</span></a>python
-from ipyslides.interaction import interactive, classed, monitor
-import ipywidgets as ipw
-import plotly.graph_objects as go</p>
-<p>fig = go.FigureWidget()</p>
-<p>&#64;monitor  # check execution time
-def update_plot(x, y, fig):</p>
-<blockquote>
-<div><p>fig.data = []
-fig.add_scatter(x=[0, x], y=[0, y])</p>
-</div></blockquote>
-<dl class="simple">
-<dt>def resize_fig(fig, fs):</dt><dd><p>fig.layout.autosize = True # plotly’s figurewidget always make trouble with sizing</p>
-</dd>
-<dt>dashboard = interactive(</dt><dd><p>classed(update_plot, ‘out-plot’),  # Assign CSS class to output, otherwise it will be captured by main output
-resize_fig, # responds to fullscreen change
-x = ipw.IntSlider(0, 0, 100),
-y = ipw.FloatSlider(0, 1),
-fig = ipw.fixed(fig),
-fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
-</dd>
-</dl>
-<section id="id20">
-<h2>)<a class="headerlink" href="#id20" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ipyslides.interaction</span><span class="w"> </span><span class="kn">import</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">monitor</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ipw</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">FigureWidget</span><span class="p">()</span>
+
+<span class="nd">@callback</span><span class="p">(</span><span class="s1">&#39;out-plot&#39;</span><span class="p">,</span> <span class="n">timeit</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># check execution time</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">resize_fig</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># double trigger</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># plotly&#39;s figurewidget always make trouble with sizing</span>
+
+<span class="c1"># Above two functions can be merged since we can use changed detection</span>
+<span class="nd">@monitor</span>  <span class="c1"># check execution time</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">respond</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fig</span> <span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">changed</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">&#39;fs&#39;</span> <span class="ow">in</span> <span class="n">changed</span><span class="p">:</span> <span class="c1"># or changed(&#39;fs&#39;)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># double trigger</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+
+<span class="n">dashboard</span> <span class="o">=</span> <span class="n">interactive</span><span class="p">(</span>
+    <span class="n">update_plot</span><span class="p">,</span>
+    <span class="n">resize_fig</span><span class="p">,</span> <span class="c1"># responds to fullscreen change</span>
+    <span class="c1"># respond, instead of two functions</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">FloatSlider</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">fixed</span><span class="p">(</span><span class="n">fig</span><span class="p">),</span>
+    <span class="n">changed</span> <span class="o">=</span> <span class="s1">&#39;.changed&#39;</span><span class="p">,</span> <span class="c1"># detect a change in parameter</span>
+    <span class="n">fs</span> <span class="o">=</span> <span class="s1">&#39;.isfullscreen&#39;</span><span class="p">,</span> <span class="c1"># detect fullscreen change on instance itself</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 <p><strong>Parameters</strong>:</p>
 <ul class="simple">
 <li><p><cite>*funcs</cite>: One or more callback functions</p></li>
@@ -3926,9 +3977,16 @@ fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
 <li><p>Fixed widgets via ipw.fixed()</p></li>
 <li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or ‘.trait’ to observe traits on this instance.</p></li>
 <li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
+<li><p>You can use <cite>changed = ‘.changed’</cite> to detect which parameters of a callback changed by checking <cite>changed(‘param’) -&gt; Bool</cite> in a callback.</p></li>
 <li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
 <li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
-<li><p><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</p></li>
+<li><dl class="simple">
+<dt><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</dt><dd><ul>
+<li><p>You can have multiple buttons in a single callback and check <cite>btn.clicked</cite> attribute to run code based on which button was clicked.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
 </ul>
 <p><strong>Widget Updates</strong>:</p>
 <ul class="simple">
@@ -3938,7 +3996,7 @@ fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
 <li><p>Animation widgets work even with manual updates</p></li>
 <li><dl class="simple">
 <dt><strong>Output Widget Behavior</strong>:</dt><dd><ul>
-<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite> or <cite>classed</cite>.</p></li>
+<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite>.</p></li>
 <li><p>If no CSS class is provided, the callback will use the main output widget labeled as ‘out-main’.</p></li>
 </ul>
 </dd>
@@ -3948,7 +4006,7 @@ fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
 <p><strong>CSS Classes</strong>:</p>
 <ul class="simple">
 <li><p>Parameter names from kwargs</p></li>
-<li><p>Custom ‘out-<a href="#id21"><span class="problematic" id="id22">*</span></a>’ classes from classed(), and ‘out-main’ class.</p></li>
+<li><p>Custom ‘out-<a href="#id6"><span class="problematic" id="id7">*</span></a>’ classes from &#64;callback, and ‘out-main’ class.</p></li>
 <li><p>‘btn-main’ for manual update button</p></li>
 </ul>
 <p><strong>Notes</strong>:</p>
@@ -3967,7 +4025,6 @@ There are few special rules in <cite>props</cite>:</p>
 <li><p>A list/tuple of values for a key in dict generates CSS fallback, so hl`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes hl[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
 </ul>
 <p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
-</section>
 </dd></dl>
 
 <dl class="py method">
@@ -3984,30 +4041,43 @@ There are few special rules in <cite>props</cite>:</p>
 <li><p>Built-in fullscreen support</p></li>
 </ul>
 <p><strong>Basic Usage</strong>:</p>
-<p><a href="#id23"><span class="problematic" id="id24">``</span></a><a href="#id25"><span class="problematic" id="id26">`</span></a>python
-from ipyslides.interaction import interactive, classed, monitor
-import ipywidgets as ipw
-import plotly.graph_objects as go</p>
-<p>fig = go.FigureWidget()</p>
-<p>&#64;monitor  # check execution time
-def update_plot(x, y, fig):</p>
-<blockquote>
-<div><p>fig.data = []
-fig.add_scatter(x=[0, x], y=[0, y])</p>
-</div></blockquote>
-<dl class="simple">
-<dt>def resize_fig(fig, fs):</dt><dd><p>fig.layout.autosize = True # plotly’s figurewidget always make trouble with sizing</p>
-</dd>
-<dt>dashboard = interactive(</dt><dd><p>classed(update_plot, ‘out-plot’),  # Assign CSS class to output, otherwise it will be captured by main output
-resize_fig, # responds to fullscreen change
-x = ipw.IntSlider(0, 0, 100),
-y = ipw.FloatSlider(0, 1),
-fig = ipw.fixed(fig),
-fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
-</dd>
-</dl>
-<section id="id27">
-<h2>)<a class="headerlink" href="#id27" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ipyslides.interaction</span><span class="w"> </span><span class="kn">import</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">monitor</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ipw</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">FigureWidget</span><span class="p">()</span>
+
+<span class="nd">@callback</span><span class="p">(</span><span class="s1">&#39;out-plot&#39;</span><span class="p">,</span> <span class="n">timeit</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># check execution time</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">resize_fig</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># double trigger</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># plotly&#39;s figurewidget always make trouble with sizing</span>
+
+<span class="c1"># Above two functions can be merged since we can use changed detection</span>
+<span class="nd">@monitor</span>  <span class="c1"># check execution time</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">respond</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fig</span> <span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">changed</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">&#39;fs&#39;</span> <span class="ow">in</span> <span class="n">changed</span><span class="p">:</span> <span class="c1"># or changed(&#39;fs&#39;)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># double trigger</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">autosize</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+
+<span class="n">dashboard</span> <span class="o">=</span> <span class="n">interactive</span><span class="p">(</span>
+    <span class="n">update_plot</span><span class="p">,</span>
+    <span class="n">resize_fig</span><span class="p">,</span> <span class="c1"># responds to fullscreen change</span>
+    <span class="c1"># respond, instead of two functions</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">FloatSlider</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">ipw</span><span class="o">.</span><span class="n">fixed</span><span class="p">(</span><span class="n">fig</span><span class="p">),</span>
+    <span class="n">changed</span> <span class="o">=</span> <span class="s1">&#39;.changed&#39;</span><span class="p">,</span> <span class="c1"># detect a change in parameter</span>
+    <span class="n">fs</span> <span class="o">=</span> <span class="s1">&#39;.isfullscreen&#39;</span><span class="p">,</span> <span class="c1"># detect fullscreen change on instance itself</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 <p><strong>Parameters</strong>:</p>
 <ul class="simple">
 <li><p><cite>*funcs</cite>: One or more callback functions</p></li>
@@ -4030,9 +4100,16 @@ fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
 <li><p>Fixed widgets via ipw.fixed()</p></li>
 <li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or ‘.trait’ to observe traits on this instance.</p></li>
 <li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
+<li><p>You can use <cite>changed = ‘.changed’</cite> to detect which parameters of a callback changed by checking <cite>changed(‘param’) -&gt; Bool</cite> in a callback.</p></li>
 <li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
 <li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
-<li><p><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</p></li>
+<li><dl class="simple">
+<dt><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</dt><dd><ul>
+<li><p>You can have multiple buttons in a single callback and check <cite>btn.clicked</cite> attribute to run code based on which button was clicked.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
 </ul>
 <p><strong>Widget Updates</strong>:</p>
 <ul class="simple">
@@ -4042,7 +4119,7 @@ fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
 <li><p>Animation widgets work even with manual updates</p></li>
 <li><dl class="simple">
 <dt><strong>Output Widget Behavior</strong>:</dt><dd><ul>
-<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite> or <cite>classed</cite>.</p></li>
+<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite>.</p></li>
 <li><p>If no CSS class is provided, the callback will use the main output widget labeled as ‘out-main’.</p></li>
 </ul>
 </dd>
@@ -4052,7 +4129,7 @@ fs = ‘.isfullscreen’, # detect fullscreen change on instance itself</p>
 <p><strong>CSS Classes</strong>:</p>
 <ul class="simple">
 <li><p>Parameter names from kwargs</p></li>
-<li><p>Custom ‘out-<a href="#id28"><span class="problematic" id="id29">*</span></a>’ classes from classed(), and ‘out-main’ class.</p></li>
+<li><p>Custom ‘out-<a href="#id8"><span class="problematic" id="id9">*</span></a>’ classes from &#64;callback, and ‘out-main’ class.</p></li>
 <li><p>‘btn-main’ for manual update button</p></li>
 </ul>
 <p><strong>Notes</strong>:</p>
@@ -4076,7 +4153,6 @@ There are few special rules in <cite>props</cite>:</p>
 <li><p>You can use this inside columns using delayed display trick, like hl`write(‘First column’, C2)` where hl`C2 = Slides.hold(Slides.ei.interact, f, x = 5) or Slides.ei.interactive(f, x = 5)`.</p></li>
 <li><p>You can also use this under <cite>Slides.capture_content</cite> to display later in a specific place.</p></li>
 </ul>
-</section>
 </dd></dl>
 
 <dl class="py method">
@@ -4429,7 +4505,7 @@ Number of points in each interval is at least 2 even if <cite>n</cite> is less t
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You can use return value to retrieve information, like output.f(<a href="#id30"><span class="problematic" id="id31">*</span></a>output.args, <a href="#id32"><span class="problematic" id="id33">**</span></a>output.kwargs) in a cell to plot the current state and save it.</p>
+<p>You can use return value to retrieve information, like output.f(<a href="#id10"><span class="problematic" id="id11">*</span></a>output.args, <a href="#id12"><span class="problematic" id="id13">**</span></a>output.kwargs) in a cell to plot the current state and save it.</p>
 </div>
 </dd></dl>
 
@@ -5016,10 +5092,11 @@ Last item is considered to be columns.</p></li>
       
     </aside>
   </div>
-</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=9c7b9d88"></script>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=e7e13039"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     </body>
 </html>
