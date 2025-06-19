@@ -42,3 +42,4 @@ html_theme_path = furo.__path__  # Unfortunately this is a list itself
 # html_static_path = ['_static']
 
 autodoc_member_order = "bysource"
+nbsphinx_allow_errors = True # on github, packages get confused
