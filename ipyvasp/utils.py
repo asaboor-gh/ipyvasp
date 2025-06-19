@@ -137,6 +137,19 @@ def _sig_kwargs(from_func, skip_params=()):
 
     return wrapper
 
+def _md_code_blocks_to_rst(text):
+    def repl(match):
+        language = match.group(1) or 'python'  # default to 'python' if no language
+        code = match.group(2)
+        return f'.. code-block:: {language}\n\n   ' + '\n   '.join(code.strip().splitlines())
+
+    return re.sub(
+        r'```([a-zA-Z0-9]*)\s*\n(.*?)```',
+        repl,
+        text,
+        flags=re.DOTALL
+    )
+
 
 def _sub_doc(from_func, replace={}):
     """Assing __doc__ from other function. Replace words in docs where need."""
@@ -148,7 +161,7 @@ def _sub_doc(from_func, replace={}):
 
         for k, v in replace.items():
             docs = re.sub(k, v, docs, count=1, flags=re.DOTALL)
-        func.__doc__ = docs
+        func.__doc__ = _md_code_blocks_to_rst(docs)
         return func
 
     return wrapper

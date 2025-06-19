@@ -29,6 +29,7 @@ REQUIRED = [
     "requests==2.28.1",
     "typer==0.9.0",
     "einteract", # any latest version of einteract 
+    "sympy",
 ]
 
 # What packages are optional?
