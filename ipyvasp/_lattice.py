@@ -294,7 +294,7 @@ def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=F
                 f.write(out_str)
         else:
             raise FileExistsError(
-                f"{outfile!r} exists, can not overwrite, \nuse overwrite=True if you want to chnage."
+                f"{outfile!r} exists, can not overwrite, \nuse overwrite=True if you want to change."
             )
     else:
         print(out_str)
