@@ -812,7 +812,7 @@ class BandsWidget(_ThemedFigureInteract):
         kmin, kmax = self.params.krange.value or [0,0]
         kticks = [(int(vs[0]), vs[1]) 
             for vs in hsk  # We are going to pick kticks silently in given range
-            if len(vs) == 2 and abs(int(vs[0])) < (kmax - kmin) # handle negative indices too
+            if len(vs) == 2 and abs(int(vs[0])) <= (kmax - kmin) # handle negative indices too
         ] or None
         
         _bands = None

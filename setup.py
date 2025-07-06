@@ -19,15 +19,15 @@ REQUIRES_PYTHON = ">=3.8"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    "matplotlib==3.7.0",
-    "numpy==1.23.2",
-    "scipy==1.9.1",
+    "matplotlib>=3.7.5",
+    "numpy>=1.23.2",
+    "scipy>=1.9.1",
     "ipywidgets>=8.0.4",
     "pillow>=9.3.0",
-    "pandas==1.4.4",
-    "plotly==6.0.1",
-    "requests==2.28.1",
-    "typer==0.9.0",
+    "pandas>=1.4.4",
+    "plotly>=6.2.0",
+    "requests>=2.28.1",
+    "typer>=0.9.0",
     "einteract", # any latest version of einteract 
     "sympy",
 ]
