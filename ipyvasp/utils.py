@@ -459,8 +459,8 @@ RGB = LinearSegmentedColormap.from_list(
 CMY = LinearSegmentedColormap.from_list(
     "CMY", [(0, 0.9, 0.9), (0, 0, 0.9), (0.9, 0, 0.9), (0.9, 0, 0), (0.9, 0.9, 0)]
 )
-plt.register_cmap("RGB", RGB)
-plt.register_cmap("CMY", CMY)
+plt.colormaps.register(RGB, name="RGB", force=True) 
+plt.colormaps.register(CMY, name="CMY", force=True) 
 
 
 def create_colormap(name="RB", colors=[(0.9, 0, 0), (0, 0, 0.9)]):
@@ -477,5 +477,5 @@ def create_colormap(name="RB", colors=[(0.9, 0, 0), (0, 0, 0.9)]):
     Colormap object which you can use to get colors from. like cm = create_colormap(); cm(0.5) which will return a color at center of map
     """
     RB = LinearSegmentedColormap.from_list(name, colors)
-    plt.register_cmap(name, RB)
+    plt.colormaps.register(RB, name=name, force=True)
     return RB

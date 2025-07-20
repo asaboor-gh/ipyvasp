@@ -105,11 +105,17 @@ class Files:
     files_only : bool, if True, returns only files.
     dirs_only : bool, if True, returns only directories.
 
-    Use methods on return such as `summarize`, `with_name`, `filtered`, `interact` and others.
+    Returns
+    -------
+    Files instance.
+
+    Notes
+    -----
+    Use methods on return such as ``summarize``, ``with_name``, ``filtered``, ``interact`` and others.
 
     >>> Files(root_1, glob_1,...).add(root_2, glob_2,...) # Fully flexible to chain
 
-    WARNING: Don't use write operations on paths in files in batch mode, it can cause unrecoverable data loss.
+    **WARNING**: Don't use write operations on paths in files in batch mode, it can cause unrecoverable data loss.
     """
     def __init__(self, path_or_files = '.', glob = '*', exclude = None,files_only = False, dirs_only=False):
         if isinstance(path_or_files, Files):
@@ -235,7 +241,7 @@ class Files:
     def _unique(self, *files_tuples):
         return tuple(np.unique(np.hstack(files_tuples)))
     
-    @_sub_doc(ei.interactive)
+    @_sub_doc(ei.interactive,{"ipyslides.interaction":"einteract"})
     def interactive(self, *funcs, auto_update=True, app_layout=None, grid_css={},**kwargs):
         if 'file' in kwargs:
             raise KeyError("file is a reserved keyword argument to select path to file!")
@@ -255,7 +261,7 @@ class Files:
         
         return ei.interactive(*funcs,auto_update=auto_update, app_layout = app_layout, grid_css=grid_css, file = self.to_dropdown(), **kwargs)
     
-    @_sub_doc(ei.interact)
+    @_sub_doc(ei.interact,{"ipyslides.interaction":"einteract"})
     def interact(self, *funcs, auto_update=True, app_layout=None, grid_css={},**kwargs):
         def inner(func):
             display(self.interactive(func, *funcs,

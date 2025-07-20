@@ -438,7 +438,7 @@ class PoscarData(Dict2Data):
         return np.min(dists) if dists.size else np.nan
     
     
-    def get_distances(self, type1, type2, min=-np.infty, max=np.infty):
+    def get_distances(self, type1, type2, min=-np.inf, max=np.inf):
         """Get an array of all distnaces in a range set by min and max between type 1 and type2.
         For example `get_distances('Ga','As',2,3)[:,-1].mean()` can be used to get average bond length between Ga and As in GaAs. 
         Returned array is of shape (N,3) where first two entries in columns are indices of pairs between which distance was calculated.

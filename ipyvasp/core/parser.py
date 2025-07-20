@@ -756,7 +756,7 @@ def gen2numpy(
             for sli, N in zip(slices, shape)
         ]
     )
-    count = int(np.product(new_shape))  # include columns here for overall data count.
+    count = int(np.prod(new_shape))  # include columns here for overall data count.
 
     # Process generator
     if include:
@@ -768,7 +768,7 @@ def gen2numpy(
     gen = (l for l in gen if l.strip())  # remove empty lines
 
     gen = islice(
-        gen, 0, int(np.product(shape[:-1]))
+        gen, 0, int(np.prod(shape[:-1]))
     )  # Discard lines after required data
 
     def fold_dim(gen, take, N):
