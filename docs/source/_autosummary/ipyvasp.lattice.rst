@@ -4,11 +4,6 @@
 .. automodule:: ipyvasp.lattice
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -17,21 +12,9 @@
       ngl_viewer
       weas_viewer
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       POSCAR
    
-   
-
-   
-   
-   
-
-
-

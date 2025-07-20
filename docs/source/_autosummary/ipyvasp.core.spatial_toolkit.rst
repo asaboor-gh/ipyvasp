@@ -4,11 +4,6 @@
 .. automodule:: ipyvasp.core.spatial_toolkit
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -29,15 +24,3 @@
       to_basis
       to_plane
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

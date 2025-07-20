@@ -4,11 +4,6 @@
 .. automodule:: ipyvasp.core.parser
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -20,10 +15,6 @@
       read
       xml2dict
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -32,11 +23,3 @@
       Vaspout
       Vasprun
    
-   
-
-   
-   
-   
-
-
-

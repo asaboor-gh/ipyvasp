@@ -4,20 +4,11 @@
 .. automodule:: ipyvasp.potential
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
    
       splot_potential
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -28,11 +19,3 @@
       LOCPOT
       PARCHG
    
-   
-
-   
-   
-   
-
-
-

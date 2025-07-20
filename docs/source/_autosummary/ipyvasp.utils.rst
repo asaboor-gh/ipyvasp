@@ -4,11 +4,6 @@
 .. automodule:: ipyvasp.utils
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -22,21 +17,9 @@
       take
       transform_color
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       color
    
-   
-
-   
-   
-   
-
-
-
