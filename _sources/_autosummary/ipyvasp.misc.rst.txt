@@ -4,11 +4,6 @@
 .. automodule:: ipyvasp.misc
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -17,21 +12,9 @@
       get_bib
       parse_text
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       OUTCAR
    
-   
-
-   
-   
-   
-
-
-

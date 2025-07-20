@@ -1,34 +1,34 @@
 <!doctype html>
-<html class="no-js" lang="en" data-content_root="">
+<html class="no-js" lang="en" data-content_root="../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2024.08.06 -->
-        <title>ipyvasp.widgets - ipyvasp 0.9.99 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
+    <!-- Generated with Sphinx 7.4.7 and Furo 2025.07.19 -->
+        <title>ipyvasp.widgets - ipyvasp 1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
 
 
 <style>
   body {
-    --color-code-background: #f8f8f8;
-  --color-code-foreground: black;
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
   
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   
       }
     }
@@ -165,7 +165,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">ipyvasp 0.9.99 documentation</div></a>
+      <a href="../../index.html"><div class="brand">ipyvasp 1.0.1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,8 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  
-  <span class="sidebar-brand-text">ipyvasp 0.9.99 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 1.0.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -313,7 +312,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">._enplots</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fmt_labels</span>
 
 
-<div class="viewcode-block" id="summarize"><a class="viewcode-back" href="../../modules.html#ipyvasp.summarize">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">summarize</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="summarize">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.summarize">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">summarize</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply given func to each file in files and return a dataframe of the results.</span>
 
@@ -357,12 +358,15 @@
     <span class="p">)</span></div>
 
 
+
 <span class="k">def</span><span class="w"> </span><span class="nf">fix_signature</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
     <span class="c1"># VBox ruins signature of subclass, let&#39;s fix it</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">__signature__</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">cls</span>
 
-<div class="viewcode-block" id="Files"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files">[docs]</a><span class="nd">@fix_signature</span>
+<div class="viewcode-block" id="Files">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files">[docs]</a>
+<span class="nd">@fix_signature</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Files</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a Batch of files in a directory recursively based on glob pattern or given list of files.</span>
 <span class="sd">    This is a boilerplate abstraction to do analysis in multiple calculations simultaneously.</span>
@@ -375,11 +379,17 @@
 <span class="sd">    files_only : bool, if True, returns only files.</span>
 <span class="sd">    dirs_only : bool, if True, returns only directories.</span>
 
-<span class="sd">    Use methods on return such as `summarize`, `with_name`, `filtered`, `interact` and others.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Files instance.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Use methods on return such as ``summarize``, ``with_name``, ``filtered``, ``interact`` and others.</span>
 
 <span class="sd">    &gt;&gt;&gt; Files(root_1, glob_1,...).add(root_2, glob_2,...) # Fully flexible to chain</span>
 
-<span class="sd">    WARNING: Don&#39;t use write operations on paths in files in batch mode, it can cause unrecoverable data loss.</span>
+<span class="sd">    **WARNING**: Don&#39;t use write operations on paths in files in batch mode, it can cause unrecoverable data loss.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_or_files</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">glob</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">exclude</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span><span class="n">files_only</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">dirs_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path_or_files</span><span class="p">,</span> <span class="n">Files</span><span class="p">):</span>
@@ -433,24 +443,38 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Use self.add method instead!&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Files.with_name"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.with_name">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">with_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="Files.with_name">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.with_name">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="s2">&quot;Change name of all files. Only keeps existing files.&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">([</span><span class="n">f</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="Files.filtered"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.filtered">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">filtered</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">files_only</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">dirs_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Files.filtered">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.filtered">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filtered</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">files_only</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">dirs_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="s2">&quot;Filter all files. Only keeps existing file.&quot;</span>
         <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">include</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))]</span> <span class="k">if</span> <span class="n">include</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">,</span><span class="n">dirs_only</span><span class="o">=</span><span class="n">dirs_only</span><span class="p">,</span><span class="n">files_only</span><span class="o">=</span><span class="n">files_only</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Files.summarize"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.summarize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Files.summarize">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.summarize">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="s2">&quot;Apply a func(path) -&gt; dict and create a dataframe.&quot;</span>
         <span class="k">return</span> <span class="n">summarize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">,</span><span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="Files.load_results"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.load_results">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">exclude_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Files.load_results">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.load_results">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">exclude_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="s2">&quot;Load result.json files from these paths into a dataframe, with optionally excluding keys.&quot;</span>
         <span class="k">return</span> <span class="n">load_results</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">,</span><span class="n">exclude_keys</span><span class="o">=</span><span class="n">exclude_keys</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="Files.input_info"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.input_info">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">input_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">tags</span><span class="p">):</span>
+<div class="viewcode-block" id="Files.input_info">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.input_info">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">input_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">tags</span><span class="p">):</span>
         <span class="s2">&quot;Grab input information into a dataframe from POSCAR and INCAR. Provide INCAR tags (case-insinsitive) to select only few of them.&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.lattice</span><span class="w"> </span><span class="kn">import</span> <span class="n">POSCAR</span>
 
@@ -469,7 +493,10 @@
         
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s1">&#39;POSCAR&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">summarize</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Files.update"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.update">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_or_files</span><span class="p">,</span> <span class="n">glob</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">cleanup</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Files.update">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.update">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_or_files</span><span class="p">,</span> <span class="n">glob</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">cleanup</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update files inplace with similar parameters as initialization. If `cleanup=False`, older files are kept too.</span>
 <span class="sd">        Useful for widgets such as BandsWidget to preserve their state while using `widget.files.update`.&quot;&quot;&quot;</span>
         <span class="n">old</span> <span class="o">=</span> <span class="p">()</span> <span class="k">if</span> <span class="n">cleanup</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span>
@@ -480,8 +507,11 @@
             <span class="n">dd</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span>
             <span class="k">if</span> <span class="n">old</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
                 <span class="n">dd</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">old</span></div>
+
     
-<div class="viewcode-block" id="Files.to_dropdown"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.to_dropdown">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;File&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Files.to_dropdown">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.to_dropdown">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;File&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert this instance to Dropdown. If there is only one file, adds an </span>
 <span class="sd">        empty option to make that file switchable. </span>
@@ -492,8 +522,11 @@
         <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="k">else</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">]</span> <span class="c1"># make single file work</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dd</span> <span class="o">=</span> <span class="n">Dropdown</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dd</span></div>
+
     
-<div class="viewcode-block" id="Files.add"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.add">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_or_files</span><span class="p">,</span> <span class="n">glob</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Files.add">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.add">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_or_files</span><span class="p">,</span> <span class="n">glob</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add more files or with a diffrent glob on top of exitsing files. Returns same instance.</span>
 <span class="sd">        Useful to add multiple globbed files into a single chained call.</span>
 
@@ -501,11 +534,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">path_or_files</span><span class="p">,</span> <span class="n">glob</span> <span class="o">=</span> <span class="n">glob</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">_files</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
+
     
     <span class="k">def</span><span class="w"> </span><span class="nf">_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">files_tuples</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">files_tuples</span><span class="p">)))</span>
     
-<div class="viewcode-block" id="Files.interactive"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.interactive">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">ei</span><span class="o">.</span><span class="n">interactive</span><span class="p">)</span>
+<div class="viewcode-block" id="Files.interactive">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.interactive">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">ei</span><span class="o">.</span><span class="n">interactive</span><span class="p">,{</span><span class="s2">&quot;ipyslides.interaction&quot;</span><span class="p">:</span><span class="s2">&quot;einteract&quot;</span><span class="p">})</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">interactive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">funcs</span><span class="p">,</span> <span class="n">auto_update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">app_layout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grid_css</span><span class="o">=</span><span class="p">{},</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="s1">&#39;file&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;file is a reserved keyword argument to select path to file!&quot;</span><span class="p">)</span>
@@ -524,8 +560,11 @@
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;At least one of funcs should take &#39;file&#39; as parameter, none got it!&quot;</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="n">ei</span><span class="o">.</span><span class="n">interactive</span><span class="p">(</span><span class="o">*</span><span class="n">funcs</span><span class="p">,</span><span class="n">auto_update</span><span class="o">=</span><span class="n">auto_update</span><span class="p">,</span> <span class="n">app_layout</span> <span class="o">=</span> <span class="n">app_layout</span><span class="p">,</span> <span class="n">grid_css</span><span class="o">=</span><span class="n">grid_css</span><span class="p">,</span> <span class="n">file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dropdown</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="Files.interact"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.interact">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">ei</span><span class="o">.</span><span class="n">interact</span><span class="p">)</span>
+<div class="viewcode-block" id="Files.interact">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.interact">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">ei</span><span class="o">.</span><span class="n">interact</span><span class="p">,{</span><span class="s2">&quot;ipyslides.interaction&quot;</span><span class="p">:</span><span class="s2">&quot;einteract&quot;</span><span class="p">})</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">interact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">funcs</span><span class="p">,</span> <span class="n">auto_update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">app_layout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grid_css</span><span class="o">=</span><span class="p">{},</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">inner</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
             <span class="n">display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interactive</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">funcs</span><span class="p">,</span>
@@ -534,16 +573,25 @@
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">func</span>
         <span class="k">return</span> <span class="n">inner</span></div>
+
     
-<div class="viewcode-block" id="Files.kpath_widget"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.kpath_widget">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">kpath_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s1">&#39;400px&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Files.kpath_widget">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.kpath_widget">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">kpath_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s1">&#39;400px&#39;</span><span class="p">):</span>
         <span class="s2">&quot;Get KPathWidget instance with these files.&quot;</span>
         <span class="k">return</span> <span class="n">KPathWidget</span><span class="p">(</span><span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s1">&#39;POSCAR&#39;</span><span class="p">),</span> <span class="n">height</span> <span class="o">=</span> <span class="n">height</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Files.bands_widget"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.bands_widget">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">bands_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s1">&#39;450px&#39;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Files.bands_widget">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.bands_widget">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bands_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s1">&#39;450px&#39;</span><span class="p">):</span>
         <span class="s2">&quot;Get BandsWidget instance with these files.&quot;</span>
         <span class="k">return</span> <span class="n">BandsWidget</span><span class="p">(</span><span class="n">files</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="Files.map"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.map">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">func</span><span class="p">,</span> <span class="n">to_df</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Files.map">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.map">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">func</span><span class="p">,</span> <span class="n">to_df</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Map files to a function that takes path as argument. </span>
 <span class="sd">        If `to_df=True`, func may return a dict to create named columns, or just two columns will be created.</span>
 <span class="sd">        Otherwise returns generator of elemnets `(path, func(path))`.</span>
@@ -557,12 +605,15 @@
         <span class="k">if</span> <span class="n">to_df</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_try_return_df</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">((</span><span class="n">path</span><span class="p">,</span> <span class="n">func</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">)</span> <span class="c1"># generator must</span></div>
+
     
     <span class="k">def</span><span class="w"> </span><span class="nf">_try_return_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span> <span class="k">return</span> <span class="n">summarize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">,</span><span class="n">func</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span> <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(((</span><span class="n">path</span><span class="p">,</span> <span class="n">func</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">))</span>
     
-<div class="viewcode-block" id="Files.mapf"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.mapf">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">mapf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">to_df</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Files.mapf">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.mapf">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mapf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">to_df</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Map files to a function that takes opened file pointer as argument. Opened files are automatically closed and should be in readonly mode.</span>
 <span class="sd">        Load files content into a generator sequence of  tuples like `(path, func(open(path)))` or DataFrame if `to_df=True`.</span>
 <span class="sd">        If `to_df=True`, func may return a dict to create named columns, or just two columns will be created.</span>
@@ -586,10 +637,15 @@
         <span class="k">if</span> <span class="n">to_df</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_try_return_df</span><span class="p">(</span><span class="n">loader</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">((</span><span class="n">path</span><span class="p">,</span> <span class="n">loader</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">)</span> <span class="c1"># generator must</span></div>
+
         
-<div class="viewcode-block" id="Files.stat"><a class="viewcode-back" href="../../modules.html#ipyvasp.Files.stat">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">stat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Files.stat">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.Files.stat">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Get files stat as DataFrame. Currently only size is supported.&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">summarize</span><span class="p">(</span><span class="k">lambda</span> <span class="n">path</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">get_file_size</span><span class="p">(</span><span class="n">path</span><span class="p">)})</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">summarize</span><span class="p">(</span><span class="k">lambda</span> <span class="n">path</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">get_file_size</span><span class="p">(</span><span class="n">path</span><span class="p">)})</span></div>
+</div>
+
 
 
 <span class="nd">@fix_signature</span>
@@ -695,7 +751,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">old_atoms</span> <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atoms</span><span class="o">.</span><span class="n">allowed_tags</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_orbs</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">old_orbs</span> <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orbs</span><span class="o">.</span><span class="n">allowed_tags</span><span class="p">]</span>
 
-<div class="viewcode-block" id="PropsPicker"><a class="viewcode-back" href="../../modules.html#ipyvasp.PropsPicker">[docs]</a><span class="nd">@fix_signature</span>
+<div class="viewcode-block" id="PropsPicker">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.PropsPicker">[docs]</a>
+<span class="nd">@fix_signature</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PropsPicker</span><span class="p">(</span><span class="n">VBox</span><span class="p">):</span> <span class="c1"># NOTE: remove New Later</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A widget to pick atoms and orbitals for plotting.</span>
@@ -742,10 +800,14 @@
                 <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">projections</span> <span class="o">=</span> <span class="n">projs</span>
             
-<div class="viewcode-block" id="PropsPicker.update"><a class="viewcode-back" href="../../modules.html#ipyvasp.PropsPicker.update">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_summary</span><span class="p">):</span>
+<div class="viewcode-block" id="PropsPicker.update">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.PropsPicker.update">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">system_summary</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update all pickers with new system data&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">picker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pickers</span><span class="p">:</span>
-            <span class="n">picker</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">system_summary</span><span class="p">)</span></div></div>
+            <span class="n">picker</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">system_summary</span><span class="p">)</span></div>
+</div>
+
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_clean_legacy_data</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
     <span class="s2">&quot;clean old style keys like VBM to vbm&quot;</span>
@@ -777,7 +839,9 @@
     <span class="k">return</span> <span class="n">new_data</span>
 
 
-<div class="viewcode-block" id="load_results"><a class="viewcode-back" href="../../modules.html#ipyvasp.load_results">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">load_results</span><span class="p">(</span><span class="n">paths_list</span><span class="p">,</span> <span class="n">exclude_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="load_results">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.load_results">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_results</span><span class="p">(</span><span class="n">paths_list</span><span class="p">,</span> <span class="n">exclude_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="s2">&quot;Loads result.json from paths_list and returns a dataframe. Use exclude_keys to get subset of data.&quot;</span>
     <span class="k">if</span> <span class="n">exclude_keys</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exclude_keys</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)):</span>
@@ -802,6 +866,7 @@
             <span class="k">return</span> <span class="p">{}</span>  <span class="c1"># If not found, return empty dictionary</span>
 
     <span class="k">return</span> <span class="n">summarize</span><span class="p">(</span><span class="n">result_paths</span><span class="p">,</span> <span class="n">load_data</span><span class="p">)</span></div>
+
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_css</span><span class="p">(</span><span class="n">mode</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">{</span>
@@ -900,7 +965,9 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span>
 
 
-<div class="viewcode-block" id="BandsWidget"><a class="viewcode-back" href="../../modules.html#ipyvasp.BandsWidget">[docs]</a><span class="nd">@fix_signature</span>
+<div class="viewcode-block" id="BandsWidget">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.BandsWidget">[docs]</a>
+<span class="nd">@fix_signature</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BandsWidget</span><span class="p">(</span><span class="n">_ThemedFigureInteract</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Visualize band structure from VASP calculation. You can click on the graph to get the data such as VBM, CBM, etc.</span>
 <span class="sd">    </span>
@@ -1082,7 +1149,7 @@
         <span class="n">kmin</span><span class="p">,</span> <span class="n">kmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">krange</span><span class="o">.</span><span class="n">value</span> <span class="ow">or</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">kticks</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">int</span><span class="p">(</span><span class="n">vs</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">vs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> 
             <span class="k">for</span> <span class="n">vs</span> <span class="ow">in</span> <span class="n">hsk</span>  <span class="c1"># We are going to pick kticks silently in given range</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">vs</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">kmax</span> <span class="o">-</span> <span class="n">kmin</span><span class="p">)</span> <span class="c1"># handle negative indices too</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">vs</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">kmax</span> <span class="o">-</span> <span class="n">kmin</span><span class="p">)</span> <span class="c1"># handle negative indices too</span>
         <span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span>
         
         <span class="n">_bands</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1170,9 +1237,12 @@
             <span class="n">serializer</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
             <span class="n">outfile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;result.json&quot;</span><span class="p">)</span>
     
-<div class="viewcode-block" id="BandsWidget.results"><a class="viewcode-back" href="../../modules.html#ipyvasp.BandsWidget.results">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="BandsWidget.results">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.BandsWidget.results">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="s2">&quot;Generate a dataframe form result.json file in each folder, with optionally excluding keys.&quot;</span>
         <span class="k">return</span> <span class="n">load_results</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="n">exclude_keys</span><span class="o">=</span><span class="n">exclude_keys</span><span class="p">)</span></div>
+
     
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">source</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1193,7 +1263,10 @@
 
 
 
-<div class="viewcode-block" id="KPathWidget"><a class="viewcode-back" href="../../modules.html#ipyvasp.KPathWidget">[docs]</a><span class="nd">@fix_signature</span>
+
+<div class="viewcode-block" id="KPathWidget">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.KPathWidget">[docs]</a>
+<span class="nd">@fix_signature</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">KPathWidget</span><span class="p">(</span><span class="n">_ThemedFigureInteract</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interactively bulid a kpath for bandstructure calculation.</span>
@@ -1355,7 +1428,9 @@
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_selection</span><span class="p">()</span>  <span class="c1"># Update plot in both cases, by click or manual input</span>
 
-<div class="viewcode-block" id="KPathWidget.get_kpoints"><a class="viewcode-back" href="../../modules.html#ipyvasp.KPathWidget.get_kpoints">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="KPathWidget.get_kpoints">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.KPathWidget.get_kpoints">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Returns kpoints list including labels and numbers in intervals if given.&quot;</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">sm</span><span class="o">.</span><span class="n">options</span> <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kpoints</span><span class="p">]</span>  <span class="c1"># order and existence is important</span>
         <span class="n">kpts</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_kpoints</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]</span>
@@ -1381,7 +1456,10 @@
                 <span class="p">)</span>
         <span class="k">return</span> <span class="n">kpts</span></div>
 
-<div class="viewcode-block" id="KPathWidget.get_coords_labels"><a class="viewcode-back" href="../../modules.html#ipyvasp.KPathWidget.get_coords_labels">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_coords_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="KPathWidget.get_coords_labels">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.KPathWidget.get_coords_labels">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_coords_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Returns tuple of (coordinates, labels) to directly plot.&quot;</span>
         <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kpoints</span><span class="p">()</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">bz</span><span class="o">.</span><span class="n">to_cartesian</span><span class="p">([</span><span class="n">p</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="n">points</span> <span class="k">else</span> <span class="p">[]</span>
@@ -1399,6 +1477,7 @@
                 <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coords</span><span class="p">),</span> <span class="n">labels</span></div>
 
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">coords</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coords_labels</span><span class="p">()</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">batch_animate</span><span class="p">():</span>
@@ -1409,16 +1488,24 @@
                     <span class="n">trace</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
                     <span class="n">trace</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">_fmt_labels</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>  <span class="c1"># convert latex to html equivalent</span>
 
-<div class="viewcode-block" id="KPathWidget.get_kpath"><a class="viewcode-back" href="../../modules.html#ipyvasp.KPathWidget.get_kpath">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">get_kpath</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;kpoints :.*n :&quot;</span><span class="p">:</span> <span class="s2">&quot;n :&quot;</span><span class="p">,</span> <span class="s2">&quot;rec_basis :.*</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">})</span>
+<div class="viewcode-block" id="KPathWidget.get_kpath">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.KPathWidget.get_kpath">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">get_kpath</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;kpoints :.*n :&quot;</span><span class="p">:</span> <span class="s2">&quot;n :&quot;</span><span class="p">,</span> <span class="s2">&quot;rec_basis :.*</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">})</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">lat</span><span class="o">.</span><span class="n">get_kpath</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;kpoints&quot;</span><span class="p">,</span> <span class="s2">&quot;rec_basis&quot;</span><span class="p">))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_kpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">get_kpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_kpoints</span><span class="p">(),</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="KPathWidget.iplot"><a class="viewcode-back" href="../../modules.html#ipyvasp.KPathWidget.iplot">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">iplot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="KPathWidget.iplot">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.KPathWidget.iplot">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">iplot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Returns disconnected current plotly figure&quot;</span>
         <span class="k">return</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="KPathWidget.splot"><a class="viewcode-back" href="../../modules.html#ipyvasp.KPathWidget.splot">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">splot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fmt_label</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">plot_kws</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="KPathWidget.splot">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.KPathWidget.splot">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">splot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fmt_label</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">plot_kws</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Same as `ipyvasp.lattice.POSCAR.splot_bz` except it also plots path on BZ.</span>
 
@@ -1439,7 +1526,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">poscar</span><span class="o">.</span><span class="n">splot_kpath</span><span class="p">(</span>
             <span class="n">kpoints</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">fmt_label</span><span class="o">=</span><span class="n">fmt_label</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kws</span>
         <span class="p">)</span>  <span class="c1"># plots on ax automatically</span>
-        <span class="k">return</span> <span class="n">ax</span></div></div>
+        <span class="k">return</span> <span class="n">ax</span></div>
+</div>
+
 
 <span class="c1"># Should be at end</span>
 <span class="k">del</span> <span class="n">fix_signature</span>  <span class="c1"># no more need</span>
@@ -1475,10 +1564,11 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=4399b420"></script>
-    <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
+</div><script src="../../_static/documentation_options.js?v=292eb321"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     </body>
 </html>

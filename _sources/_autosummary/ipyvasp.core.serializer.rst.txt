@@ -4,11 +4,6 @@
 .. automodule:: ipyvasp.core.serializer
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -16,10 +11,6 @@
       dict2tuple
       dump
       load
-   
-   
-
-   
    
    .. rubric:: Classes
 
@@ -36,11 +27,3 @@
       SpecialPoints
       SpinData
    
-   
-
-   
-   
-   
-
-
-

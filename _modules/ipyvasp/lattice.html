@@ -1,34 +1,34 @@
 <!doctype html>
-<html class="no-js" lang="en" data-content_root="">
+<html class="no-js" lang="en" data-content_root="../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2024.08.06 -->
-        <title>ipyvasp.lattice - ipyvasp 0.9.99 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
+    <!-- Generated with Sphinx 7.4.7 and Furo 2025.07.19 -->
+        <title>ipyvasp.lattice - ipyvasp 1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
 
 
 <style>
   body {
-    --color-code-background: #f8f8f8;
-  --color-code-foreground: black;
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
   
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   
       }
     }
@@ -165,7 +165,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">ipyvasp 0.9.99 documentation</div></a>
+      <a href="../../index.html"><div class="brand">ipyvasp 1.0.1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,8 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  
-  <span class="sidebar-brand-text">ipyvasp 0.9.99 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 1.0.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -307,7 +306,9 @@
 <span class="p">)</span>  <span class="c1"># need these as direct access</span>
 
 
-<div class="viewcode-block" id="download_structure"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.download_structure">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">download_structure</span><span class="p">(</span>
+<div class="viewcode-block" id="download_structure">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.download_structure">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_structure</span><span class="p">(</span>
     <span class="n">formula</span><span class="p">,</span> <span class="n">mp_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_sites</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_sites</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_key</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -345,7 +346,10 @@
         <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;Connection was not sccessful. Try again!&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ngl_viewer"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.ngl_viewer">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">ngl_viewer</span><span class="p">(</span>
+
+<div class="viewcode-block" id="ngl_viewer">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.ngl_viewer">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ngl_viewer</span><span class="p">(</span>
     <span class="n">poscar</span><span class="p">,</span>
     <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">sizes</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
@@ -453,6 +457,7 @@
     <span class="k">if</span> <span class="n">dashboard</span><span class="p">:</span>
         <span class="n">view</span><span class="o">.</span><span class="n">gui_style</span> <span class="o">=</span> <span class="s2">&quot;NGL&quot;</span>
     <span class="k">return</span> <span class="n">view</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">weas_viewer</span><span class="p">(</span><span class="n">poscar</span><span class="p">,</span>
@@ -570,7 +575,9 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;AutoRenderer(params = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_kws</span><span class="si">}</span><span class="s2">)&quot;</span>
 
-<div class="viewcode-block" id="POSCAR"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">POSCAR</span><span class="p">:</span>
+<div class="viewcode-block" id="POSCAR">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">POSCAR</span><span class="p">:</span>
     <span class="n">_cb_instance</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Loads last clipboard data if not changed</span>
     <span class="n">_mp_instance</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Loads last mp data if not changed</span>
 
@@ -653,7 +660,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_renderer</span> <span class="o">=</span> <span class="n">_AutoRenderer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span> <span class="c1"># assign to class</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span>
 
-<div class="viewcode-block" id="POSCAR.to_ase"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.to_ase">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_ase</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="POSCAR.to_ase">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.to_ase">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_ase</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to ase.Atoms format. You need to have ase installed.</span>
 <span class="sd">        You can apply all ase methods on this object after conversion.</span>
 
@@ -671,7 +680,10 @@
             <span class="n">symbols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">symbols</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">basis</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.view"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">viewer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="POSCAR.view">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">viewer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;View POSCAR in notebook. If viewer is given it will be passed ase.visualize.view. You need to have ase installed.</span>
 
 <span class="sd">        kwargs are passed to self.splot_lattice if viewer is None, otherwise a  single keyword argument `data` is passed to ase viewer.</span>
@@ -695,33 +707,51 @@
 
             <span class="k">return</span> <span class="n">view</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_ase</span><span class="p">(),</span> <span class="n">viewer</span><span class="o">=</span><span class="n">viewer</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="POSCAR.view_ngl"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view_ngl">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">ngl_viewer</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;poscar :.*colors :&quot;</span><span class="p">:</span> <span class="s2">&quot;colors :&quot;</span><span class="p">})</span>
+
+<div class="viewcode-block" id="POSCAR.view_ngl">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view_ngl">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">ngl_viewer</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;poscar :.*colors :&quot;</span><span class="p">:</span> <span class="s2">&quot;colors :&quot;</span><span class="p">})</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">ngl_viewer</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;poscar&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">view_ngl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">ngl_viewer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="POSCAR.view_weas"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view_weas">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">weas_viewer</span><span class="p">)</span>
+<div class="viewcode-block" id="POSCAR.view_weas">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view_weas">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">weas_viewer</span><span class="p">)</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">weas_viewer</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;poscar&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">view_weas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">weas_viewer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.view_kpath"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view_kpath">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">view_kpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s1">&#39;400px&#39;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="POSCAR.view_kpath">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view_kpath">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">view_kpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s1">&#39;400px&#39;</span><span class="p">):</span>
         <span class="s2">&quot;Initialize a KPathWidget instance to view kpath for current POSCAR, and you can select others too.&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.widgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">KPathWidget</span>
 
         <span class="k">return</span> <span class="n">KPathWidget</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,],</span><span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.view_plotly"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view_plotly">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">iplot_lattice</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.view_plotly">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.view_plotly">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">iplot_lattice</span><span class="p">)</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">iplot_lattice</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;poscar_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">view_plotly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">iplot2widget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iplot_lattice</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="POSCAR.from_file"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.from_file">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="POSCAR.from_file">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.from_file">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="s2">&quot;Load data from POSCAR file&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.from_string"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.from_string">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="POSCAR.from_string">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.from_string">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
         <span class="s2">&quot;content should be a valid POSCAR string&quot;</span>
         <span class="k">try</span><span class="p">:</span>
@@ -729,7 +759,10 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid POSCAR string!!!!!</span><span class="se">\n</span><span class="si">{</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.download"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.download">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="POSCAR.download">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.download">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">download</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">formula</span><span class="p">,</span> <span class="n">mp_id</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_key</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Downloads POSCAR from materials project. `mp_id` should be string associated with a material on their website. `api_key` is optional if not saved.</span>
 <span class="sd">        Get your API key from https://legacy.materialsproject.org/open and save it using `save_key` to avoid entering it everytime.</span>
@@ -756,7 +789,10 @@
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">instance</span></div>
 
-<div class="viewcode-block" id="POSCAR.from_cif"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.from_cif">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="POSCAR.from_cif">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.from_cif">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_cif</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="s2">&quot;Load data from cif file&quot;</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -771,14 +807,20 @@
 
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">poscar_content</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.to_dict"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.to_dict">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="POSCAR.to_dict">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Returns a dictionary that can be modified generally and passed to `POSCAR.new` method.&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># avoid overwriting numpy arrays</span>
         <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;system&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">SYSTEM</span><span class="p">,</span> <span class="s2">&quot;basis&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">basis</span><span class="p">}</span>
         <span class="n">out</span><span class="p">[</span><span class="s2">&quot;sites&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="k">return</span> <span class="n">out</span></div>
 
-<div class="viewcode-block" id="POSCAR.new"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.new">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="POSCAR.new">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.new">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">new</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">sites</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Crate a new POSCAR instance from basis and sites.</span>
@@ -831,7 +873,10 @@
         <span class="p">}</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">out_dict</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.from_clipborad"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.from_clipborad">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="POSCAR.from_clipborad">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.from_clipborad">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_clipborad</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="s2">&quot;Read POSCAR from clipboard (based on clipboard reader impelemented by pandas library) It picks the latest from clipboard.&quot;</span>
         <span class="k">try</span><span class="p">:</span>
@@ -852,9 +897,13 @@
                     <span class="s2">&quot;Clipboard does not contain valid POSCAR string and no previous data is cached.&quot;</span>
                 <span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.to_clipboard"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.to_clipboard">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_clipboard</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="POSCAR.to_clipboard">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.to_clipboard">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_clipboard</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Writes POSCAR to clipboard (as implemented by pandas library) for copy in other programs such as vim.&quot;</span>
         <span class="n">clipboard_set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>  <span class="c1"># write to clipboard</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -866,13 +915,19 @@
         <span class="s2">&quot;Metadata associated with this POSCAR.&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">metadata</span>
 
-<div class="viewcode-block" id="POSCAR.copy"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.copy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="POSCAR.copy">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.copy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Copy POSCAR object. It avoids accidental changes to numpy arrays in original object.&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span></div>
+
     
-<div class="viewcode-block" id="POSCAR.sort"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.sort">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">sort_poscar</span><span class="p">)</span>
+<div class="viewcode-block" id="POSCAR.sort">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.sort">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">sort_poscar</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_order</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">sort_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">new_order</span><span class="p">))</span></div>
+
 
 
     <span class="nd">@property</span>
@@ -900,7 +955,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span>
     
-<div class="viewcode-block" id="POSCAR.get_plane"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_plane">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hkl</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">):</span>
+<div class="viewcode-block" id="POSCAR.get_plane">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_plane">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hkl</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns tuple `Plane(point, normal, vertices)` of a plane bound inside cell. .</span>
 <span class="sd">        hkl should be list of three miller indices. d is fractional distance in range 0,1 in direction of hkl. </span>
 <span class="sd">        e.g. if there are 8 planes of atoms in a cubic cell, d = 0, 1/8,...7/8, 1 match position of those planes.</span>
@@ -923,8 +980,11 @@
         <span class="n">qts</span> <span class="o">=</span> <span class="n">qts</span><span class="p">[(</span><span class="n">qts</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">tol</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">qts</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">tol</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
         <span class="n">pts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">to_cartesian</span><span class="p">(</span><span class="n">qts</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;Plane&quot;</span><span class="p">,</span><span class="s2">&quot;point normal vertices&quot;</span><span class="p">)(</span><span class="n">point</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="n">pts</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="POSCAR.splot_plane"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_plane">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">splot_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hkl</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="POSCAR.splot_plane">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_plane">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">splot_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hkl</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Provide hkl and a 3D axes to plot plane. kwargs are passed to `mpl_toolkits.mplot3d.art3d.Poly3DCollection`</span>
 <span class="sd">        Note: You may get wrong plane if your basis are not aligned to axes. So you can use `transpose` or `set_zdir` methods before plottling cell.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -941,7 +1001,10 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">ax</span></div>
 
-<div class="viewcode-block" id="POSCAR.iplot_plane"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.iplot_plane">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">iplot_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hkl</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="POSCAR.iplot_plane">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.iplot_plane">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">iplot_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hkl</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="s2">&quot;Plot plane on a plotly Figure. kwargs are passed to `plotly.graph_objects.Mesh3d`.&quot;</span>
         <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
@@ -952,12 +1015,18 @@
         <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Mesh3d</span><span class="p">({</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span><span class="n">k</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;xyz&#39;</span><span class="p">)},</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">fig</span></div>
 
-<div class="viewcode-block" id="POSCAR.get_bz"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_bz">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">stk</span><span class="o">.</span><span class="n">get_bz</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;basis :.*loop :&quot;</span><span class="p">:</span> <span class="s2">&quot;loop :&quot;</span><span class="p">})</span>
+
+<div class="viewcode-block" id="POSCAR.get_bz">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_bz">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">stk</span><span class="o">.</span><span class="n">get_bz</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;basis :.*loop :&quot;</span><span class="p">:</span> <span class="s2">&quot;loop :&quot;</span><span class="p">})</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">stk</span><span class="o">.</span><span class="n">get_bz</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;basis&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_bz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">stk</span><span class="o">.</span><span class="n">get_bz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">rec_basis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.get_cell"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_cell">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="POSCAR.get_cell">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_cell">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="s2">&quot;See docs of `get_bz`, same except space is inverted and no factor of 2pi.&quot;</span>
         <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">CellData</span><span class="p">(</span>
             <span class="n">stk</span><span class="o">.</span><span class="n">get_bz</span><span class="p">(</span>  <span class="c1"># data.basis makes prmitive cell in direct space</span>
@@ -965,47 +1034,74 @@
             <span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
         <span class="p">)</span>  <span class="c1"># cell must be primitive</span></div>
 
-<div class="viewcode-block" id="POSCAR.splot_bz"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_bz">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;bz_data :.*plane :&quot;</span><span class="p">:</span> <span class="s2">&quot;plane :&quot;</span><span class="p">})</span>
+
+<div class="viewcode-block" id="POSCAR.splot_bz">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_bz">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;bz_data :.*plane :&quot;</span><span class="p">:</span> <span class="s2">&quot;plane :&quot;</span><span class="p">})</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;bz_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">splot_bz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">plat</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">(</span><span class="n">bz_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bz</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.splot_kpath"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_kpath">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_kpath</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.splot_kpath">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_kpath">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_kpath</span><span class="p">)</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_kpath</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;bz_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">splot_kpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">plat</span><span class="o">.</span><span class="n">splot_kpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bz</span><span class="p">,</span> <span class="n">kpoints</span><span class="o">=</span><span class="n">kpoints</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.splot_cell"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_cell">[docs]</a>    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;bz_data&quot;</span><span class="p">,))</span>
+
+<div class="viewcode-block" id="POSCAR.splot_cell">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_cell">[docs]</a>
+    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;bz_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">splot_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="s2">&quot;See docs of `splot_bz`, everything is same except space is inverted.&quot;</span>
         <span class="k">return</span> <span class="n">plat</span><span class="o">.</span><span class="n">splot_bz</span><span class="p">(</span><span class="n">bz_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.iplot_bz"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.iplot_bz">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">iplot_bz</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;bz_data :.*fill :&quot;</span><span class="p">:</span> <span class="s2">&quot;fill :&quot;</span><span class="p">})</span>
+
+<div class="viewcode-block" id="POSCAR.iplot_bz">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.iplot_bz">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">iplot_bz</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;bz_data :.*fill :&quot;</span><span class="p">:</span> <span class="s2">&quot;fill :&quot;</span><span class="p">})</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">iplot_bz</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;bz_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iplot_bz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">plat</span><span class="o">.</span><span class="n">iplot_bz</span><span class="p">(</span><span class="n">bz_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bz</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.iplot_cell"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.iplot_cell">[docs]</a>    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">iplot_bz</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;bz_data&quot;</span><span class="p">,</span> <span class="s2">&quot;special_kpoints&quot;</span><span class="p">))</span>
+
+<div class="viewcode-block" id="POSCAR.iplot_cell">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.iplot_cell">[docs]</a>
+    <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">iplot_bz</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;bz_data&quot;</span><span class="p">,</span> <span class="s2">&quot;special_kpoints&quot;</span><span class="p">))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iplot_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="s2">&quot;See docs of `iplot_bz`, everything is same except space is iverted.&quot;</span>
         <span class="k">return</span> <span class="n">plat</span><span class="o">.</span><span class="n">iplot_bz</span><span class="p">(</span><span class="n">bz_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="n">special_kpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.splot_lattice"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_lattice">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_lattice</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.splot_lattice">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.splot_lattice">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_lattice</span><span class="p">)</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">splot_lattice</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;poscar_data&quot;</span><span class="p">,</span> <span class="s2">&quot;plane&quot;</span><span class="p">))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">splot_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">plat</span><span class="o">.</span><span class="n">splot_lattice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.iplot_lattice"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.iplot_lattice">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">iplot_lattice</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.iplot_lattice">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.iplot_lattice">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">iplot_lattice</span><span class="p">)</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">iplot_lattice</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;poscar_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iplot_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">plat</span><span class="o">.</span><span class="n">iplot_lattice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.write"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.write">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">write_poscar</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.write">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.write">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">write_poscar</span><span class="p">)</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">write_poscar</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;poscar_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">plat</span><span class="o">.</span><span class="n">write_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="n">outfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.join"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.join">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">join_poscars</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.join">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.join">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">join_poscars</span><span class="p">)</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">join_poscars</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;poscar_data&quot;</span><span class="p">,</span> <span class="s2">&quot;other&quot;</span><span class="p">))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
@@ -1014,60 +1110,96 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.scale"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.scale">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">scale_poscar</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.scale">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.scale">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">scale_poscar</span><span class="p">)</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">scale_poscar</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;poscar_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">scale_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+
     
-<div class="viewcode-block" id="POSCAR.set_boundary"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.set_boundary">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">set_boundary</span><span class="p">)</span>
+<div class="viewcode-block" id="POSCAR.set_boundary">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.set_boundary">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">set_boundary</span><span class="p">)</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">set_boundary</span><span class="p">,(</span><span class="s2">&quot;poscar_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">plat</span><span class="o">.</span><span class="n">set_boundary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">))</span></div>
+
     
-<div class="viewcode-block" id="POSCAR.filter_atoms"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.filter_atoms">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">filter_atoms</span><span class="p">)</span>
+<div class="viewcode-block" id="POSCAR.filter_atoms">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.filter_atoms">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">filter_atoms</span><span class="p">)</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">filter_atoms</span><span class="p">,(</span><span class="s2">&quot;poscar_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">filter_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">plat</span><span class="o">.</span><span class="n">filter_atoms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="POSCAR.rotate"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.rotate">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">rotate_poscar</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.rotate">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.rotate">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">rotate_poscar</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle_deg</span><span class="p">,</span> <span class="n">axis_vec</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">rotate_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">angle_deg</span><span class="o">=</span><span class="n">angle_deg</span><span class="p">,</span> <span class="n">axis_vec</span><span class="o">=</span><span class="n">axis_vec</span><span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.set_zdir"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.set_zdir">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">set_zdir</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.set_zdir">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.set_zdir">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">set_zdir</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_zdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hkl</span><span class="p">,</span> <span class="n">phi</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">set_zdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">hkl</span><span class="p">,</span> <span class="n">phi</span><span class="o">=</span><span class="n">phi</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="POSCAR.translate"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.translate">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">translate_poscar</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.translate">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.translate">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">translate_poscar</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">translate_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="POSCAR.repeat"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.repeat">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">repeat_poscar</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.repeat">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.repeat">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">repeat_poscar</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">repeat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">direction</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">repeat_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.mirror"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.mirror">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">mirror_poscar</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.mirror">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.mirror">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">mirror_poscar</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">mirror</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">mirror_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="POSCAR.get_TM"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_TM">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">stk</span><span class="o">.</span><span class="n">get_TM</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;basis1&quot;</span><span class="p">:</span> <span class="s2">&quot;self.basis&quot;</span><span class="p">})</span>
+
+<div class="viewcode-block" id="POSCAR.get_TM">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_TM">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">stk</span><span class="o">.</span><span class="n">get_TM</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;basis1&quot;</span><span class="p">:</span> <span class="s2">&quot;self.basis&quot;</span><span class="p">})</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_TM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_basis</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">stk</span><span class="o">.</span><span class="n">get_TM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">target_basis</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.transform"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.transform">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">transform_poscar</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.transform">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.transform">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">transform_poscar</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transformation</span><span class="p">,</span> <span class="n">fill_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">transform_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">transformation</span><span class="p">,</span> <span class="n">fill_factor</span><span class="o">=</span><span class="n">fill_factor</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.transpose"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.transpose">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">transpose_poscar</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.transpose">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.transpose">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">transpose_poscar</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">transpose_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="POSCAR.add_vaccum"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.add_vaccum">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">add_vaccum</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.add_vaccum">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.add_vaccum">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">add_vaccum</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_vaccum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">add_vaccum</span><span class="p">(</span>
@@ -1075,13 +1207,19 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.add_atoms"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.add_atoms">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">add_atoms</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.add_atoms">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.add_atoms">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">add_atoms</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">add_atoms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.remove_atoms"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.remove_atoms">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">remove_atoms</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.remove_atoms">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.remove_atoms">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">remove_atoms</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">fillby</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">fillby</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fillby</span><span class="p">,</span> <span class="n">POSCAR</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;fillby should be an instance of POSCAR class.&quot;</span><span class="p">)</span>
@@ -1092,11 +1230,17 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.replace_atoms"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.replace_atoms">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">replace_atoms</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.replace_atoms">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.replace_atoms">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">replace_atoms</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">replace_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">replace_atoms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="POSCAR.convert"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.convert">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">convert_poscar</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.convert">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.convert">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">convert_poscar</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms_mapping</span><span class="p">,</span> <span class="n">basis_factor</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">convert_poscar</span><span class="p">(</span>
@@ -1104,21 +1248,32 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.deform"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.deform">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">deform_poscar</span><span class="p">)</span>
+
+<div class="viewcode-block" id="POSCAR.deform">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.deform">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">plat</span><span class="o">.</span><span class="n">deform_poscar</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">deform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deformation</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">plat</span><span class="o">.</span><span class="n">deform_poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">deformation</span><span class="o">=</span><span class="n">deformation</span><span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.get_kmesh"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_kmesh">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">get_kmesh</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;poscar_data :.*\*args :&quot;</span><span class="p">:</span> <span class="s2">&quot;*args :&quot;</span><span class="p">})</span>
+
+<div class="viewcode-block" id="POSCAR.get_kmesh">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_kmesh">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">get_kmesh</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;poscar_data :.*\*args :&quot;</span><span class="p">:</span> <span class="s2">&quot;*args :&quot;</span><span class="p">})</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">get_kmesh</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;poscar_data&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_kmesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">get_kmesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="POSCAR.get_kpath"><a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_kpath">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">get_kpath</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;rec_basis :.*</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">})</span>
+
+<div class="viewcode-block" id="POSCAR.get_kpath">
+<a class="viewcode-back" href="../../modules.html#ipyvasp.lattice.POSCAR.get_kpath">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">get_kpath</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;rec_basis :.*</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">})</span>
     <span class="nd">@_sig_kwargs</span><span class="p">(</span><span class="n">get_kpath</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;rec_basis&quot;</span><span class="p">,))</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_kpath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">get_kpath</span><span class="p">(</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">rec_basis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">rec_basis</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">get_kpath</span><span class="p">(</span><span class="n">kpoints</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">rec_basis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">rec_basis</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
         </article>
       </div>
@@ -1151,10 +1306,11 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=4399b420"></script>
-    <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
+</div><script src="../../_static/documentation_options.js?v=292eb321"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     </body>
 </html>

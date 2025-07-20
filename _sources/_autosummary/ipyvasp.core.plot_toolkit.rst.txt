@@ -4,11 +4,6 @@
 .. automodule:: ipyvasp.core.plot_toolkit
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -32,15 +27,3 @@
       quiver3d
       webshow
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-

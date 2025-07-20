@@ -1,34 +1,34 @@
 <!doctype html>
-<html class="no-js" lang="en" data-content_root="">
+<html class="no-js" lang="en" data-content_root="../../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2024.08.06 -->
-        <title>ipyvasp.core.spatial_toolkit - ipyvasp 0.9.99 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=302659d7" />
+    <!-- Generated with Sphinx 7.4.7 and Furo 2025.07.19 -->
+        <title>ipyvasp.core.spatial_toolkit - ipyvasp 1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
 
 
 <style>
   body {
-    --color-code-background: #f8f8f8;
-  --color-code-foreground: black;
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
   
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   
       }
     }
@@ -165,7 +165,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">ipyvasp 0.9.99 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">ipyvasp 1.0.1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,8 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
-  
-  <span class="sidebar-brand-text">ipyvasp 0.9.99 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 1.0.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -276,7 +275,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConvexHull</span><span class="p">,</span> <span class="n">Voronoi</span>
 
 
-<div class="viewcode-block" id="tan_inv"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.tan_inv">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">tan_inv</span><span class="p">(</span><span class="n">vy</span><span class="p">,</span> <span class="n">vx</span><span class="p">):</span>
+<div class="viewcode-block" id="tan_inv">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.tan_inv">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tan_inv</span><span class="p">(</span><span class="n">vy</span><span class="p">,</span> <span class="n">vx</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns full angle from x-axis counter clockwise.</span>
 
@@ -309,7 +310,10 @@
     <span class="k">return</span> <span class="n">angle</span></div>
 
 
-<div class="viewcode-block" id="order"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.order">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">order</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="order">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.order">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">order</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns indices of counterclockwise ordered vertices of a plane in 3D.</span>
 
@@ -361,7 +365,10 @@
     <span class="k">return</span> <span class="n">ss</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># Order indices.</span></div>
 
 
-<div class="viewcode-block" id="angle_rad"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.angle_rad">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">angle_rad</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
+
+<div class="viewcode-block" id="angle_rad">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.angle_rad">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">angle_rad</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
     <span class="s2">&quot;Returns interier angle between two vectors in radians.&quot;</span>
     <span class="n">v1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
     <span class="n">v2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span>
@@ -371,12 +378,18 @@
     <span class="k">return</span> <span class="n">angle</span></div>
 
 
-<div class="viewcode-block" id="angle_deg"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.angle_deg">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">angle_deg</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
+
+<div class="viewcode-block" id="angle_deg">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.angle_deg">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">angle_deg</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
     <span class="s2">&quot;Returns interier angle between two vectors in degrees.&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">angle_rad</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="outer_side"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.outer_side">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">outer_side</span><span class="p">(</span><span class="n">test_point</span><span class="p">,</span> <span class="n">plane</span><span class="p">):</span>
+
+<div class="viewcode-block" id="outer_side">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.outer_side">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">outer_side</span><span class="p">(</span><span class="n">test_point</span><span class="p">,</span> <span class="n">plane</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns True if test_point is between plane and origin. Could be used to sample BZ mesh in place of ConvexHull.</span>
 
@@ -395,7 +408,10 @@
     <span class="k">return</span> <span class="n">outside</span></div>
 
 
-<div class="viewcode-block" id="to_plane"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.to_plane">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">to_plane</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+
+<div class="viewcode-block" id="to_plane">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.to_plane">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_plane</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
     <span class="s2">&quot;Project points to a plane defined by `normal`. shape of normal should be (3,) and of points (N,3).&quot;</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Shape of points should be (N,3) and of normal (3,).&quot;</span><span class="p">)</span>
@@ -406,7 +422,10 @@
     <span class="k">return</span> <span class="n">points</span></div>
 
 
-<div class="viewcode-block" id="rotation"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.rotation">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">rotation</span><span class="p">(</span><span class="n">angle_deg</span><span class="p">,</span> <span class="n">axis_vec</span><span class="p">):</span>
+
+<div class="viewcode-block" id="rotation">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.rotation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rotation</span><span class="p">(</span><span class="n">angle_deg</span><span class="p">,</span> <span class="n">axis_vec</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a scipy Rotation object at given `angle_deg` around `axis_vec`.</span>
 
 <span class="sd">    Usage</span>
@@ -420,7 +439,10 @@
     <span class="k">return</span> <span class="n">Rotation</span><span class="o">.</span><span class="n">from_rotvec</span><span class="p">(</span><span class="n">angle_rad</span> <span class="o">*</span> <span class="n">axis_vec</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="coplanar"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.coplanar">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">coplanar</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+
+<div class="viewcode-block" id="coplanar">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.coplanar">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">coplanar</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns true if points are coplanar within `tol` tolerance.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">points</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;points should be a 2D array of shape (N,3).&quot;</span><span class="p">)</span>
@@ -437,7 +459,10 @@
     <span class="k">return</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">have_volume</span><span class="p">)</span>  <span class="c1"># If all are coplanar.</span></div>
 
 
-<div class="viewcode-block" id="inside_convexhull"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.inside_convexhull">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">inside_convexhull</span><span class="p">(</span><span class="n">hull</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+
+<div class="viewcode-block" id="inside_convexhull">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.inside_convexhull">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">inside_convexhull</span><span class="p">(</span><span class="n">hull</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hull</span><span class="p">,</span> <span class="n">ConvexHull</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;hull must be a scipy.spatial.ConvexHull object&quot;</span><span class="p">)</span>
 
@@ -452,7 +477,10 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">A</span> <span class="o">@</span> <span class="n">points</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="n">eps</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="to_R3"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.to_R3">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">to_R3</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+
+<div class="viewcode-block" id="to_R3">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.to_R3">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_R3</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transforms coordinates of points (relative to non-othogonal basis) into orthogonal space.</span>
 
@@ -473,7 +501,10 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">@</span> <span class="n">basis</span></div>
 
 
-<div class="viewcode-block" id="to_basis"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.to_basis">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">to_basis</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+
+<div class="viewcode-block" id="to_basis">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.to_basis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_basis</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transforms coordinates of points (relative to othogonal basis) into basis space.</span>
 
 <span class="sd">    Parameters</span>
@@ -490,7 +521,10 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">basis</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_TM"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.get_TM">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_TM</span><span class="p">(</span><span class="n">basis1</span><span class="p">,</span> <span class="n">basis2</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_TM">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.get_TM">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_TM</span><span class="p">(</span><span class="n">basis1</span><span class="p">,</span> <span class="n">basis2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a transformation matrix that gives `basis2` when applied on `basis1`.</span>
 <span class="sd">    basis are 3x3 matrices with basis vectors as rows like [[b1x, b1y, b1z],[b2x, b2y, b2z],[b3x, b3y, b3z]].</span>
 
@@ -507,7 +541,10 @@
     <span class="p">)</span>  <span class="c1"># basis1 in basis2 is simply the transformation matrix</span></div>
 
 
-<div class="viewcode-block" id="get_bz"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.get_bz">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_bz</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">primitive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_bz">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.get_bz">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_bz</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">primitive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return required data to construct first Brillouin zone.</span>
 
@@ -594,7 +631,10 @@
     <span class="k">return</span> <span class="n">BrZoneData</span><span class="p">(</span><span class="n">out_dict</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="kpoints2bz"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.kpoints2bz">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">kpoints2bz</span><span class="p">(</span><span class="n">bz_data</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keep_geomerty</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="kpoints2bz">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.kpoints2bz">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">kpoints2bz</span><span class="p">(</span><span class="n">bz_data</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keep_geomerty</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Brings KPOINTS inside BZ. Applies `to_R3` only if BZ is primitive.</span>
 
 <span class="sd">    Parameters</span>
@@ -642,7 +682,10 @@
     <span class="k">return</span> <span class="n">out_coords</span>  <span class="c1"># These may have duplicates, apply np.unique(out_coords,axis=0). do this in surface plots</span></div>
 
 
-<div class="viewcode-block" id="simplify_faces"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.simplify_faces">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">simplify_faces</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="simplify_faces">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.spatial_toolkit.simplify_faces">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">simplify_faces</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Simplifies faces by merging adjacent coplanar faces.</span>
 
 <span class="sd">    Parameters</span>
@@ -691,6 +734,7 @@
             <span class="n">unique_faces</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">face</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">_order</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">unique_faces</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -723,10 +767,11 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4399b420"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
+</div><script src="../../../_static/documentation_options.js?v=292eb321"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     </body>
 </html>

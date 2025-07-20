@@ -1,34 +1,34 @@
 <!doctype html>
-<html class="no-js" lang="en" data-content_root="">
+<html class="no-js" lang="en" data-content_root="../../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2024.08.06 -->
-        <title>ipyvasp.core.serializer - ipyvasp 0.9.99 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=302659d7" />
+    <!-- Generated with Sphinx 7.4.7 and Furo 2025.07.19 -->
+        <title>ipyvasp.core.serializer - ipyvasp 1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
 
 
 <style>
   body {
-    --color-code-background: #f8f8f8;
-  --color-code-foreground: black;
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
   
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   
       }
     }
@@ -165,7 +165,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">ipyvasp 0.9.99 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">ipyvasp 1.0.1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,8 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
-  
-  <span class="sidebar-brand-text">ipyvasp 0.9.99 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 1.0.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -304,7 +303,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_sub_doc</span>
 
 
-<div class="viewcode-block" id="dict2tuple"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.dict2tuple">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">dict2tuple</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<div class="viewcode-block" id="dict2tuple">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.dict2tuple">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dict2tuple</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a dictionary (nested as well) to namedtuple, accessible via index and dot notation as well as by unpacking.</span>
 
@@ -318,7 +319,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Dict2Data"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Dict2Data</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Dict2Data">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Dict2Data</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a ``Data`` object with dictionary keys as attributes of Data accessible by dot notation or by key.</span>
 <span class="sd">    Once an attribute is created, it can not be changed from outside.</span>
 
@@ -370,7 +374,9 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">Dict2Data</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">b</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Dict2Data.validated"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.validated">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Dict2Data.validated">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.validated">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">validated</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="s2">&quot;Validate data like it&#39;s own or from json/pickle file/string.&quot;</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">cls</span><span class="p">:</span>  <span class="c1"># if same type, return as is</span>
@@ -392,7 +398,10 @@
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># make of that type at end</span></div>
 
-<div class="viewcode-block" id="Dict2Data.to_dict"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.to_dict">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Dict2Data.to_dict">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts a `Dict2Data` object (root or nested level) to a dictionary.&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -402,13 +411,19 @@
                 <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  <span class="c1"># prevent accidental changes in numpy arrays</span></div>
 
-<div class="viewcode-block" id="Dict2Data.copy"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.copy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Dict2Data.copy">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.copy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Copy of self to avoid changes during inplace operations on numpy arrays.&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
         <span class="p">)</span>  <span class="c1"># make a copy of self through dictionary, otherwise it does not work</span></div>
 
-<div class="viewcode-block" id="Dict2Data.to_json"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.to_json">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Dict2Data.to_json">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.to_json">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dumps a `Dict2Data` object (root or nested level) to json.</span>
 
@@ -419,7 +434,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="n">outfile</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Dict2Data.to_pickle"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.to_pickle">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Dict2Data.to_pickle">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.to_pickle">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dumps a `Dict2Data` or subclass object (root or nested level) to pickle.</span>
 
@@ -429,9 +447,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="n">outfile</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Dict2Data.to_tuple"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.to_tuple">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Dict2Data.to_tuple">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.to_tuple">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a namedtuple.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">dict2tuple</span><span class="p">(</span><span class="s2">&quot;Data&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
@@ -476,14 +498,23 @@
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="c1"># Dictionary-wise access</span>
-<div class="viewcode-block" id="Dict2Data.keys"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.keys">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Dict2Data.keys">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.keys">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Dict2Data.values"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.values">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Dict2Data.values">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.values">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">values</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Dict2Data.items"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.items">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Dict2Data.items">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.Dict2Data.items">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span></div>
+
     
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -496,6 +527,7 @@
     
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span></div>
+
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">SpinData</span><span class="p">(</span><span class="n">Dict2Data</span><span class="p">):</span>
@@ -523,7 +555,9 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evals</span><span class="o">.</span><span class="n">Fermi</span>
 
 
-<div class="viewcode-block" id="PoscarData"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PoscarData</span><span class="p">(</span><span class="n">Dict2Data</span><span class="p">):</span>
+<div class="viewcode-block" id="PoscarData">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PoscarData</span><span class="p">(</span><span class="n">Dict2Data</span><span class="p">):</span>
     <span class="n">_req_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;basis&quot;</span><span class="p">,</span> <span class="s2">&quot;types&quot;</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
@@ -619,13 +653,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># becuase our vectors are row, transpose comes later</span>
     
-<div class="viewcode-block" id="PoscarData.metric"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.metric">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+<div class="viewcode-block" id="PoscarData.metric">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.metric">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shortcut for `np.linalg.norm(self.to_cartesian(points),axis=&lt;1 or 0&gt;)`. `points` are assumed as fractional coordinates in `self.basis`.</span>
 <span class="sd">        You can compute metric from any point other than origin by just subtracting that point, e.g. `points - 0.5` will get metric from center of cell (1/2,1/2,1/2).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_cartesian</span><span class="p">(</span><span class="n">points</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="PoscarData.get_sites"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.get_sites">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_or_indices</span><span class="p">,</span> <span class="n">as_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="PoscarData.get_sites">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.get_sites">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_or_indices</span><span class="p">,</span> <span class="n">as_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="s2">&quot;Shortcut method for `POSCAR.data.positions[POSCAR.data.types[&#39;name&#39;]]` or with regular indexing.&quot;</span>
         <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="k">if</span> <span class="n">as_coords</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">positions</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_or_indices</span><span class="p">,</span><span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">type_or_indices</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">types</span><span class="p">:</span>
@@ -634,7 +673,10 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;type_or_indices should be a species type like &#39;Ga&#39; or list-like of indices to pick positions.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">points</span><span class="p">[</span><span class="n">type_or_indices</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="PoscarData.get_neighbors"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.get_neighbors">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">as_symbols</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PoscarData.get_neighbors">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.get_neighbors">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">as_symbols</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the k nearest neighbors of each atom (including itself) in the lattice.</span>
 <span class="sd">        Returns array (N, k) of indices of atoms. The first index is the atom itself.</span>
 
@@ -660,9 +702,12 @@
         <span class="n">output</span> <span class="o">=</span> <span class="p">(</span><span class="n">inn</span> <span class="o">%</span> <span class="n">N</span><span class="p">)[:</span><span class="n">N</span><span class="p">]</span>  <span class="c1"># to get the index of the atom in the original list</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">output</span><span class="p">]</span> <span class="k">if</span> <span class="n">as_symbols</span> <span class="k">else</span> <span class="n">output</span></div>
 
+
     <span class="n">get_knn</span> <span class="o">=</span> <span class="n">get_neighbors</span>  <span class="c1"># important alias</span>
 
-<div class="viewcode-block" id="PoscarData.get_distance"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.get_distance">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom1</span><span class="p">,</span> <span class="n">atom2</span><span class="p">):</span>
+<div class="viewcode-block" id="PoscarData.get_distance">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.get_distance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom1</span><span class="p">,</span> <span class="n">atom2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the mimimum distance between two atoms taking translations into account.</span>
 <span class="sd">        Provide atom1 and atom2 as strings such as get_distance(&#39;Ga&#39;, &#39;As&#39;) to get a mimimal distance between two types</span>
@@ -706,9 +751,12 @@
         <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
         <span class="n">dists</span> <span class="o">=</span> <span class="n">dists</span><span class="p">[</span><span class="n">dists</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># Remove distance with itself</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span> <span class="k">if</span> <span class="n">dists</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
+
     
     
-<div class="viewcode-block" id="PoscarData.get_distances"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.get_distances">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_distances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type1</span><span class="p">,</span> <span class="n">type2</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">infty</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">infty</span><span class="p">):</span>
+<div class="viewcode-block" id="PoscarData.get_distances">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.get_distances">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_distances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type1</span><span class="p">,</span> <span class="n">type2</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get an array of all distnaces in a range set by min and max between type 1 and type2.</span>
 <span class="sd">        For example `get_distances(&#39;Ga&#39;,&#39;As&#39;,2,3)[:,-1].mean()` can be used to get average bond length between Ga and As in GaAs. </span>
 <span class="sd">        Returned array is of shape (N,3) where first two entries in columns are indices of pairs between which distance was calculated.</span>
@@ -724,9 +772,12 @@
                     <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">d</span><span class="p">])</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="n">out</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()]</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="n">out</span></div>
+
     
 
-<div class="viewcode-block" id="PoscarData.get_bond_data"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.get_bond_data">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_bond_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site_indices</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">5</span><span class="p">):</span>
+<div class="viewcode-block" id="PoscarData.get_bond_data">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.get_bond_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_bond_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site_indices</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">5</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a DataFrame with bonds angle, bond length, vector positions etc. that can be used for plotting.</span>
 <span class="sd">        t_a and t_b are translation vectors to get them near selected sites. You can use `POSCAR.translate` if somehow need nearest coordinates.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -754,16 +805,25 @@
                 
         <span class="n">columns</span> <span class="o">=</span> <span class="s1">&#39;bond a o b angle d_ao d_bo t_a t_b&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span></div>
+
     
-<div class="viewcode-block" id="PoscarData.to_fractional"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.to_fractional">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_fractional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+<div class="viewcode-block" id="PoscarData.to_fractional">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.to_fractional">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_fractional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
         <span class="s2">&quot;Converts cartesian coordinates to fractional coordinates in the basis of cell.&quot;</span>
         <span class="k">return</span> <span class="n">to_basis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">coords</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PoscarData.to_cartesian"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.to_cartesian">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_cartesian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PoscarData.to_cartesian">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.to_cartesian">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_cartesian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
         <span class="s2">&quot;Converts fractional coordinates in the basis of cell to cartesian coordinates.&quot;</span>
         <span class="k">return</span> <span class="n">to_R3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PoscarData.get_selective_dynamics"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.get_selective_dynamics">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_selective_dynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PoscarData.get_selective_dynamics">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.PoscarData.get_selective_dynamics">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_selective_dynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a dictionary of {&#39;Ga 1&#39;: &#39;T T T&#39;, &#39;As 1&#39;: &#39;T F F&#39;,...} for each atom in the poscar data.</span>
 
@@ -813,7 +873,9 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">sd_list</span><span class="p">)</span>
-        <span class="p">}</span>  <span class="c1"># We can&#39;t use self.labels here because it can be for equivalent sites as well</span></div></div>
+        <span class="p">}</span>  <span class="c1"># We can&#39;t use self.labels here because it can be for equivalent sites as well</span></div>
+</div>
+
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">SpecialPoints</span><span class="p">(</span><span class="n">Dict2Data</span><span class="p">):</span>
@@ -856,7 +918,9 @@
     <span class="k">return</span> <span class="n">splot</span><span class="p">,</span> <span class="n">iplot</span>
 
 
-<div class="viewcode-block" id="BrZoneData"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BrZoneData</span><span class="p">(</span><span class="n">Dict2Data</span><span class="p">):</span>
+<div class="viewcode-block" id="BrZoneData">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BrZoneData</span><span class="p">(</span><span class="n">Dict2Data</span><span class="p">):</span>
     <span class="n">splot</span><span class="p">,</span> <span class="n">iplot</span> <span class="o">=</span> <span class="n">_methods_imported</span><span class="p">()</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.._lattice</span><span class="w"> </span><span class="kn">import</span> <span class="n">splot_kpath</span>  <span class="c1"># no change in this</span>
 
@@ -865,7 +929,9 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
-<div class="viewcode-block" id="BrZoneData.get_special_points"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData.get_special_points">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_special_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orderby</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span>
+<div class="viewcode-block" id="BrZoneData.get_special_points">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData.get_special_points">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_special_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orderby</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the special points in the brillouin zone in the order relative</span>
 <span class="sd">        to a given point in cartesian coordinates. Gamma is always first.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primitive</span><span class="p">:</span>
@@ -911,6 +977,7 @@
 
         <span class="k">return</span> <span class="n">SpecialPoints</span><span class="p">({</span><span class="s2">&quot;coords&quot;</span><span class="p">:</span> <span class="n">sp_carts</span><span class="p">,</span> <span class="s2">&quot;kpoints&quot;</span><span class="p">:</span> <span class="n">sp_basis</span><span class="p">})</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">specials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="s2">&quot;Returns the special points in the brillouin zone ordered by point (1,1,1) in cartesian coordinates. Gamma is always first.&quot;</span>
@@ -943,15 +1010,23 @@
             <span class="o">*</span><span class="n">centers</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="o">*</span><span class="n">other_points</span><span class="o">.</span><span class="n">T</span>
         <span class="p">)</span>  <span class="c1"># Keep this as somewhere it will be used _asdict()</span>
 
-<div class="viewcode-block" id="BrZoneData.to_fractional"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData.to_fractional">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_fractional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+<div class="viewcode-block" id="BrZoneData.to_fractional">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData.to_fractional">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_fractional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
         <span class="s2">&quot;Converts cartesian coordinates to fractional coordinates in the basis of the brillouin zone.&quot;</span>
         <span class="k">return</span> <span class="n">to_basis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">coords</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BrZoneData.to_cartesian"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData.to_cartesian">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_cartesian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BrZoneData.to_cartesian">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData.to_cartesian">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_cartesian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
         <span class="s2">&quot;Converts fractional coordinates in the basis of the brillouin zone to cartesian coordinates.&quot;</span>
         <span class="k">return</span> <span class="n">to_R3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BrZoneData.map_kpoints"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData.map_kpoints">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">map_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BrZoneData.map_kpoints">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData.map_kpoints">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">map_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Map kpoints (fractional) from this to other Brillouin zone.</span>
 <span class="sd">        In simple words, how other BZ sees the kpoints of this BZ into their basis.</span>
 <span class="sd">        This operation is useful when you do POSCAR.transform() and want to map kpoints between given and transformed BZ.</span>
@@ -970,11 +1045,17 @@
             <span class="n">pts</span> <span class="o">=</span> <span class="n">pts</span> <span class="o">-</span> <span class="n">pts</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pts</span></div>
 
-<div class="viewcode-block" id="BrZoneData.translate_inside"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData.translate_inside">[docs]</a>    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">kpoints2bz</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;bz_data :.*kpoints :&quot;</span><span class="p">:</span> <span class="s2">&quot;kpoints :&quot;</span><span class="p">})</span>
+
+<div class="viewcode-block" id="BrZoneData.translate_inside">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData.translate_inside">[docs]</a>
+    <span class="nd">@_sub_doc</span><span class="p">(</span><span class="n">kpoints2bz</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;bz_data :.*kpoints :&quot;</span><span class="p">:</span> <span class="s2">&quot;kpoints :&quot;</span><span class="p">})</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">translate_inside</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keep_geometry</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">kpoints2bz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kpoints</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">keep_geomerty</span><span class="o">=</span><span class="n">keep_geometry</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BrZoneData.subzone"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData.subzone">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">subzone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BrZoneData.subzone">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.BrZoneData.subzone">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">subzone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a subzone of the brillouin zone by applying a function on the fractional special points of the zone.</span>
 
 <span class="sd">        .. tip::</span>
@@ -1034,10 +1115,14 @@
 
         <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
         <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;faces&quot;</span><span class="p">:</span> <span class="n">faces</span><span class="p">,</span> <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="n">vertices</span><span class="p">,</span> <span class="s2">&quot;_specials&quot;</span><span class="p">:</span> <span class="n">specials</span><span class="p">})</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CellData"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.CellData">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CellData</span><span class="p">(</span><span class="n">Dict2Data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CellData">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.CellData">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CellData</span><span class="p">(</span><span class="n">Dict2Data</span><span class="p">):</span>
     <span class="n">splot</span><span class="p">,</span> <span class="n">iplot</span> <span class="o">=</span> <span class="n">_methods_imported</span><span class="p">()</span>
     <span class="n">_req_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;basis&quot;</span><span class="p">,</span> <span class="s2">&quot;faces&quot;</span><span class="p">,</span> <span class="s2">&quot;vertices&quot;</span><span class="p">)</span>
 
@@ -1054,13 +1139,20 @@
         <span class="s2">&quot;Get normal vectors to the faces of Cell. Returns a tuple of 6 arrays as (X,Y,Z,U,V,W) where (X,Y,Z) is the center of the faces and (U,V,W) is the normal direction.&quot;</span>
         <span class="k">return</span> <span class="n">BrZoneData</span><span class="o">.</span><span class="n">normals</span><span class="o">.</span><span class="n">fget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CellData.to_fractional"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.CellData.to_fractional">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_fractional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+<div class="viewcode-block" id="CellData.to_fractional">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.CellData.to_fractional">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_fractional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
         <span class="s2">&quot;Converts cartesian coordinates to fractional coordinates in the basis of the cell.&quot;</span>
         <span class="k">return</span> <span class="n">BrZoneData</span><span class="o">.</span><span class="n">to_fractional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CellData.to_cartesian"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.CellData.to_cartesian">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_cartesian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CellData.to_cartesian">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.CellData.to_cartesian">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_cartesian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
         <span class="s2">&quot;Converts fractional coordinates in the basis of the cell to cartesian coordinates.&quot;</span>
-        <span class="k">return</span> <span class="n">BrZoneData</span><span class="o">.</span><span class="n">to_cartesian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">BrZoneData</span><span class="o">.</span><span class="n">to_cartesian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span></div>
+</div>
+
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">GridData</span><span class="p">(</span><span class="n">Dict2Data</span><span class="p">):</span>
@@ -1160,7 +1252,9 @@
         <span class="k">return</span> <span class="n">obj</span>
 
 
-<div class="viewcode-block" id="dump"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.dump">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pickle&quot;</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="dump">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.dump">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pickle&quot;</span><span class="p">,</span> <span class="n">outfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dump ``Dict2Data`` or subclass object or any dictionary to json or pickle string/file.</span>
 
 <span class="sd">    Parameters</span>
@@ -1199,7 +1293,10 @@
     <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.load">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">file_or_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="load">
+<a class="viewcode-back" href="../../../modules.html#ipyvasp.core.serializer.load">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">file_or_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loads a json/pickle dumped file or string by auto detecting it.</span>
 
@@ -1235,6 +1332,7 @@
             <span class="k">return</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">out</span><span class="o">.</span><span class="n">_loader_</span><span class="p">](</span><span class="n">out</span><span class="o">.</span><span class="n">_data_</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">out</span>  <span class="c1"># Retruns usual dictionaries</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -1267,10 +1365,11 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4399b420"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
+</div><script src="../../../_static/documentation_options.js?v=292eb321"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     </body>
 </html>
