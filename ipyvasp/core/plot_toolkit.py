@@ -15,7 +15,7 @@ from matplotlib.patches import FancyArrowPatch
 from cycler import cycler
 
 from IPython import get_ipython
-from IPython.display import HTML, set_matplotlib_formats
+from IPython.display import HTML
 import PIL  # For text image.
 
 import plotly.graph_objects as go
@@ -25,14 +25,15 @@ from einteract import patched_plotly
 from .spatial_toolkit import to_R3, rotation
 from ..utils import _sig_kwargs
 
+try:
+    from IPython.display import set_matplotlib_formats # old style in < py3.9
+except ImportError:
+    from matplotlib_inline.backend_inline import set_matplotlib_formats
 
 def global_matplotlib_settings(rcParams={}, display_format="svg"):
     "Set global matplotlib settings for notebook."
     # show SVG in notebook
-    if shell := get_ipython():
-        shell_name = shell.__class__.__name__
-        if shell_name in ("ZMQInteractiveShell", "Shell"):  # Shell for colab.
-            set_matplotlib_formats(display_format)
+    set_matplotlib_formats(display_format)
 
     # Gloabal settings matplotlib with some defaults
     rcParams = {
