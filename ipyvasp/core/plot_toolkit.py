@@ -32,9 +32,12 @@ except ImportError:
 
 def global_matplotlib_settings(rcParams={}, display_format="svg"):
     "Set global matplotlib settings for notebook."
-    # show SVG in notebook
-    set_matplotlib_formats(display_format)
-
+    # Set display format only if the backend is the default inline backend.
+    # This avoids interfering with other backends like 'ipympl' which are
+    # required for interactive plotting.
+    if get_ipython() and "inline" in mpl.get_backend():
+        set_matplotlib_formats(display_format)
+        
     # Gloabal settings matplotlib with some defaults
     rcParams = {
         "axes.linewidth": 0.4,
@@ -892,7 +895,7 @@ def plt2text(
     if plt_fig == None:
         plt_fig = plt.gcf()
     plot_bytes = BytesIO()
-    plt.savefig(plot_bytes, format="png", dpi=600)
+    plt_fig.savefig(plot_bytes, format="png", dpi=600)
     img = PIL.Image.open(plot_bytes)
     # crop
     if crop:
@@ -953,9 +956,9 @@ def plt2html(plt_fig=None, transparent=True):
     if plt_fig is None:
         plt_fig = plt.gcf()
     plot_bytes = BytesIO()
-    plt.savefig(plot_bytes, format="svg", transparent=transparent)
+    plt_fig.savefig(plot_bytes, format="svg", transparent=transparent)
 
-    _ = plt.clf()  # Clear other display
+    plt.close(plt_fig)  # Close to avoid auto display in notebook
     return HTML("<svg" + plot_bytes.getvalue().decode("utf-8").split("<svg")[1])
 
 

@@ -34,7 +34,7 @@ REQUIRED = [
 
 # What packages are optional?
 EXTRAS = {
-    "extra": ["jupyterlab>=3.5.2", "ipython>=8.7", "ase>=3.22.1", "nglview>=3.0.4"],
+    "extra": ["jupyterlab>=3.5.2", "ipython>=9.0", "ase>=3.22.1", "nglview>=3.0.4"],
 }
 
 KEYWORDS = ["Jupyter", "Widgets", "IPython", "VASP", "DFT"]

@@ -232,7 +232,7 @@ def periodic_table(selection=None):
     return ax
 
 
-def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=False, comment="", scale=None):
+def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=False, comment="", scale=None, system=None):
     """Writes POSCAR data to a file or returns string
 
     Parameters
@@ -248,13 +248,15 @@ def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=F
         Add comment, previous comment will be there too.
     scale: float
         Scale factor for the basis vectors. Default is provided by loaded data.
+    system: str
+        System name to be used in POSCAR file instead of the one in `poscar_data.SYSTEM`.
 
 
     .. note::
         POSCAR is only written in direct format even if it was loaded from cartesian format.
     """
     _comment = poscar_data.metadata.comment + comment
-    out_str = f"{poscar_data.SYSTEM}  # " + (_comment or "Created by ipyvasp")
+    out_str = f"{system or poscar_data.SYSTEM}  # " + (_comment or "Created by ipyvasp")
 
     if scale is None:
         scale = poscar_data.metadata.scale
@@ -2296,10 +2298,6 @@ def set_boundary(poscar_data, a = [0,1], b = [0,1], c = [0,1]):
     del upos
     return serializer.PoscarData(data)
 
-    
-
-
-
 
 def rotate_poscar(poscar_data, angle_deg, axis_vec):
     """Rotate a given POSCAR.
@@ -2412,7 +2410,7 @@ def convert_poscar(poscar_data, atoms_mapping, basis_factor):
                 type(basis_factor)
             )
         )
-
+    poscar_data["SYSTEM"] = "".join(poscar_data["types"].keys())  # Update system name
     return serializer.PoscarData(poscar_data)  # Return new POSCAR
 
 
@@ -2431,7 +2429,7 @@ def transform_poscar(poscar_data, transformation, fill_factor=2, tol=1e-2):
 
 
     .. note::
-        This function keeps underlying lattice same.
+        This function keeps underlying lattice same. To apply strain, use `deform` function instead.
     """
     if callable(transformation):
         new_basis = np.array(transformation(*poscar_data.basis))  # mostly a tuple
@@ -2546,11 +2544,11 @@ def add_atoms(poscar_data, name, positions):
     data = poscar_data.to_dict()  # Copy data to avoid modifying original
     data["types"] = unique  # Update unique dictionary
     data["positions"] = new_pos  # Update positions
-    data["SYSTEM"] = f'{data["SYSTEM"]}+{name}'  # Update SYSTEM
     data["metadata"][
         "comment"
     ] = f'{data["metadata"]["comment"]} + Added {name!r}'  # Update comment
 
+    data["SYSTEM"] = "".join(data["types"].keys())  # Update system name
     return serializer.PoscarData(data)  # Return new POSCAR
 
 
@@ -2593,7 +2591,7 @@ def sort_poscar(poscar_data, new_order):
         for i, k in enumerate(data["types"].keys())
         if len(data["types"][k]) != 0
     }
-
+    data["SYSTEM"] = "".join(data["types"].keys())  # Update system name
     return serializer.PoscarData(data)
 
 def remove_atoms(poscar_data, func, fillby=None):
@@ -2650,7 +2648,7 @@ def remove_atoms(poscar_data, func, fillby=None):
         for i, k in enumerate(new_types.keys())
         if len(new_types[k]) != 0
     }
-
+    data["SYSTEM"] = "".join(data["types"].keys())  # Update system name
     return serializer.PoscarData(data)  # Return new POSCAR
 
 
