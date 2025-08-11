@@ -25,18 +25,11 @@ from einteract import patched_plotly
 from .spatial_toolkit import to_R3, rotation
 from ..utils import _sig_kwargs
 
-try:
-    from IPython.display import set_matplotlib_formats # old style in < py3.9
-except ImportError:
-    from matplotlib_inline.backend_inline import set_matplotlib_formats
 
-def global_matplotlib_settings(rcParams={}, display_format="svg"):
+def global_matplotlib_settings(rcParams={}, display_format="svg"): 
     "Set global matplotlib settings for notebook."
-    # Set display format only if the backend is the default inline backend.
-    # This avoids interfering with other backends like 'ipympl' which are
-    # required for interactive plotting.
-    if get_ipython() and "inline" in mpl.get_backend():
-        set_matplotlib_formats(display_format)
+    if ip := get_ipython():
+        ip.run_line_magic("config", f"InlineBackend.figure_formats = ['{display_format}', 'svg', 'retina','png','jpeg']")
         
     # Gloabal settings matplotlib with some defaults
     rcParams = {
@@ -234,7 +227,6 @@ def get_axes(
         pass
 
     plt.subplots_adjust(**subplots_adjust_kwargs)
-
     return axs
 
 

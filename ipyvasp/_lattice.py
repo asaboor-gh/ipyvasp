@@ -2378,7 +2378,7 @@ def convert_poscar(poscar_data, atoms_mapping, basis_factor):
 
 
     .. note::
-        This can be used to strain basis vectors uniformly only. For non-uniform strain, use :func:`ipyvasp.POSCAR.strain`.
+        This can be used to strain basis vectors uniformly only. For non-uniform strain, use :func:`ipyvasp.POSCAR.deform`.
     """
     poscar_data = poscar_data.to_dict()  # Avoid modifying original
     poscar_data["types"] = {
@@ -2572,6 +2572,7 @@ def replace_atoms(poscar_data, func, name):
         for i, k in enumerate(new_types.keys())
         if len(new_types[k]) != 0
     }
+    data["SYSTEM"] = "".join(data["types"].keys())  # Update system name
     return serializer.PoscarData(data)  # Return new POSCAR
 
 def sort_poscar(poscar_data, new_order):

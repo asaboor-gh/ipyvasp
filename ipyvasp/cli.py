@@ -74,7 +74,7 @@ def get_gap(files: List[Path]):
     from .widgets import summarize
 
     def gap_summary(path):
-        gap = Vasprun(path).bands.gap
+        gap = Vasprun(path, skipk=0).bands.gap # don't skip k-points here
         delattr(gap, "coords")  # remove coords info
         d = gap.to_dict()
         d["kvbm"] = "(" + ",".join(str(round(k, 4)) for k in d["kvbm"]) + ")"
