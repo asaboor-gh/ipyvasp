@@ -242,7 +242,7 @@ class Files:
         return tuple(np.unique(np.hstack(files_tuples)))
     
     @_sub_doc(ei.interactive,{"ipyslides.interaction":"einteract"})
-    def interactive(self, *funcs, auto_update=True, app_layout=None, grid_css={},**kwargs):
+    def interactive(self, *funcs, auto_update=True, post_init:callable=None,**kwargs):
         if 'file' in kwargs:
             raise KeyError("file is a reserved keyword argument to select path to file!")
         
@@ -259,13 +259,13 @@ class Files:
         if funcs and not has_file_param: # may be no func yet, that is test below
             raise KeyError("At least one of funcs should take 'file' as parameter, none got it!")
         
-        return ei.interactive(*funcs,auto_update=auto_update, app_layout = app_layout, grid_css=grid_css, file = self.to_dropdown(), **kwargs)
+        return ei.interactive(*funcs,auto_update=auto_update, post_init=post_init, file = self.to_dropdown(), **kwargs)
     
     @_sub_doc(ei.interact,{"ipyslides.interaction":"einteract"})
-    def interact(self, *funcs, auto_update=True, app_layout=None, grid_css={},**kwargs):
+    def interact(self, *funcs, auto_update=True, post_init:callable=None,**kwargs):
         def inner(func):
             display(self.interactive(func, *funcs,
-                auto_update=auto_update, app_layout = app_layout, grid_css=grid_css,
+                auto_update=auto_update, post_init=post_init, 
                 **kwargs)
             )
             return func
@@ -686,7 +686,7 @@ class BandsWidget(_ThemedFigureInteract):
         traitlets.dlink((self.params.fig,'clicked'),(self, 'clicked_data'))
         traitlets.dlink((self.params.fig,'selected'),(self, 'selected_data'))
         
-        self.relayout(
+        self.set_layout(
             left_sidebar=[
                 'head','file','krange','kticks','brange', 'ppicks',
                 [HBox(),('theme','button')], 'kb_fig',
@@ -960,7 +960,7 @@ class KPathWidget(_ThemedFigureInteract):
         traitlets.dlink((self.params.file,'value'),(self, 'file')) # update file trait
 
         btns = [HBox(layout=Layout(min_height="24px")),('lock','delp', 'theme')]
-        self.relayout(
+        self.set_layout(
             left_sidebar=['head','file',btns, 'info', 'sm','out-kpt','kpt', 'out-lab', 'lab'],
             center=['fig'],  footer = [c for c in self.groups.outputs if not c in ('out-lab','out-kpt')],
             pane_widths=['25em',1,0], pane_heights=[0,1,0], # footer only has uselessoutputs
