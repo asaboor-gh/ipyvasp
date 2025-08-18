@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2025.07.19 -->
-        <title>ipyvasp.core.plot_toolkit - ipyvasp 1.0.1 documentation</title>
+        <title>ipyvasp.core.plot_toolkit - ipyvasp 1.0.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=25af2a20" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -165,7 +165,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">ipyvasp 1.0.1 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">ipyvasp 1.0.4 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
-  <span class="sidebar-brand-text">ipyvasp 1.0.1 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 1.0.4 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -284,7 +284,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">cycler</span><span class="w"> </span><span class="kn">import</span> <span class="n">cycler</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">IPython</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_ipython</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTML</span><span class="p">,</span> <span class="n">set_matplotlib_formats</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTML</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">PIL</span>  <span class="c1"># For text image.</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
@@ -297,14 +297,11 @@
 
 <div class="viewcode-block" id="global_matplotlib_settings">
 <a class="viewcode-back" href="../../../modules.html#ipyvasp.global_matplotlib_settings">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">global_matplotlib_settings</span><span class="p">(</span><span class="n">rcParams</span><span class="o">=</span><span class="p">{},</span> <span class="n">display_format</span><span class="o">=</span><span class="s2">&quot;svg&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">global_matplotlib_settings</span><span class="p">(</span><span class="n">rcParams</span><span class="o">=</span><span class="p">{},</span> <span class="n">display_format</span><span class="o">=</span><span class="s2">&quot;svg&quot;</span><span class="p">):</span> 
     <span class="s2">&quot;Set global matplotlib settings for notebook.&quot;</span>
-    <span class="c1"># show SVG in notebook</span>
-    <span class="k">if</span> <span class="n">shell</span> <span class="o">:=</span> <span class="n">get_ipython</span><span class="p">():</span>
-        <span class="n">shell_name</span> <span class="o">=</span> <span class="n">shell</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-        <span class="k">if</span> <span class="n">shell_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;ZMQInteractiveShell&quot;</span><span class="p">,</span> <span class="s2">&quot;Shell&quot;</span><span class="p">):</span>  <span class="c1"># Shell for colab.</span>
-            <span class="n">set_matplotlib_formats</span><span class="p">(</span><span class="n">display_format</span><span class="p">)</span>
-
+    <span class="k">if</span> <span class="n">ip</span> <span class="o">:=</span> <span class="n">get_ipython</span><span class="p">():</span>
+        <span class="n">ip</span><span class="o">.</span><span class="n">run_line_magic</span><span class="p">(</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;InlineBackend.figure_formats = [&#39;</span><span class="si">{</span><span class="n">display_format</span><span class="si">}</span><span class="s2">&#39;, &#39;svg&#39;, &#39;retina&#39;,&#39;png&#39;,&#39;jpeg&#39;]&quot;</span><span class="p">)</span>
+        
     <span class="c1"># Gloabal settings matplotlib with some defaults</span>
     <span class="n">rcParams</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;axes.linewidth&quot;</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span>
@@ -507,7 +504,6 @@
         <span class="k">pass</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="o">**</span><span class="n">subplots_adjust_kwargs</span><span class="p">)</span>
-
     <span class="k">return</span> <span class="n">axs</span></div>
 
 
@@ -1201,7 +1197,7 @@
     <span class="k">if</span> <span class="n">plt_fig</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plt_fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
     <span class="n">plot_bytes</span> <span class="o">=</span> <span class="n">BytesIO</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_bytes</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+    <span class="n">plt_fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_bytes</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
     <span class="n">img</span> <span class="o">=</span> <span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">plot_bytes</span><span class="p">)</span>
     <span class="c1"># crop</span>
     <span class="k">if</span> <span class="n">crop</span><span class="p">:</span>
@@ -1265,9 +1261,9 @@
     <span class="k">if</span> <span class="n">plt_fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">plt_fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
     <span class="n">plot_bytes</span> <span class="o">=</span> <span class="n">BytesIO</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_bytes</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;svg&quot;</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="n">transparent</span><span class="p">)</span>
+    <span class="n">plt_fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_bytes</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;svg&quot;</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="n">transparent</span><span class="p">)</span>
 
-    <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>  <span class="c1"># Clear other display</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">plt_fig</span><span class="p">)</span>  <span class="c1"># Close to avoid auto display in notebook</span>
     <span class="k">return</span> <span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&lt;svg&quot;</span> <span class="o">+</span> <span class="n">plot_bytes</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&lt;svg&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span></div>
 
 
@@ -1424,7 +1420,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=292eb321"></script>
+</div><script src="../../../_static/documentation_options.js?v=71272d9f"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

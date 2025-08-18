@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2025.07.19 -->
-        <title>ipyvasp._lattice - ipyvasp 1.0.1 documentation</title>
+        <title>ipyvasp._lattice - ipyvasp 1.0.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=25af2a20" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -165,7 +165,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">ipyvasp 1.0.1 documentation</div></a>
+      <a href="../../index.html"><div class="brand">ipyvasp 1.0.4 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">ipyvasp 1.0.1 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 1.0.4 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -504,7 +504,7 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">write_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selective_dynamics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selective_dynamics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Writes POSCAR data to a file or returns string</span>
 
 <span class="sd">    Parameters</span>
@@ -520,13 +520,15 @@
 <span class="sd">        Add comment, previous comment will be there too.</span>
 <span class="sd">    scale: float</span>
 <span class="sd">        Scale factor for the basis vectors. Default is provided by loaded data.</span>
+<span class="sd">    system: str</span>
+<span class="sd">        System name to be used in POSCAR file instead of the one in `poscar_data.SYSTEM`.</span>
 
 
 <span class="sd">    .. note::</span>
 <span class="sd">        POSCAR is only written in direct format even if it was loaded from cartesian format.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_comment</span> <span class="o">=</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">comment</span> <span class="o">+</span> <span class="n">comment</span>
-    <span class="n">out_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">poscar_data</span><span class="o">.</span><span class="n">SYSTEM</span><span class="si">}</span><span class="s2">  # &quot;</span> <span class="o">+</span> <span class="p">(</span><span class="n">_comment</span> <span class="ow">or</span> <span class="s2">&quot;Created by ipyvasp&quot;</span><span class="p">)</span>
+    <span class="n">out_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">system</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">poscar_data</span><span class="o">.</span><span class="n">SYSTEM</span><span class="si">}</span><span class="s2">  # &quot;</span> <span class="o">+</span> <span class="p">(</span><span class="n">_comment</span> <span class="ow">or</span> <span class="s2">&quot;Created by ipyvasp&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">scale</span> <span class="o">=</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">scale</span>
@@ -2580,10 +2582,6 @@
     <span class="k">del</span> <span class="n">upos</span>
     <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">PoscarData</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-    
-
-
-
 
 <span class="k">def</span><span class="w"> </span><span class="nf">rotate_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">angle_deg</span><span class="p">,</span> <span class="n">axis_vec</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rotate a given POSCAR.</span>
@@ -2664,7 +2662,7 @@
 
 
 <span class="sd">    .. note::</span>
-<span class="sd">        This can be used to strain basis vectors uniformly only. For non-uniform strain, use :func:`ipyvasp.POSCAR.strain`.</span>
+<span class="sd">        This can be used to strain basis vectors uniformly only. For non-uniform strain, use :func:`ipyvasp.POSCAR.deform`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">poscar_data</span> <span class="o">=</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>  <span class="c1"># Avoid modifying original</span>
     <span class="n">poscar_data</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
@@ -2696,7 +2694,7 @@
                 <span class="nb">type</span><span class="p">(</span><span class="n">basis_factor</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="p">)</span>
-
+    <span class="n">poscar_data</span><span class="p">[</span><span class="s2">&quot;SYSTEM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>  <span class="c1"># Update system name</span>
     <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">PoscarData</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">)</span>  <span class="c1"># Return new POSCAR</span>
 
 
@@ -2715,7 +2713,7 @@
 
 
 <span class="sd">    .. note::</span>
-<span class="sd">        This function keeps underlying lattice same.</span>
+<span class="sd">        This function keeps underlying lattice same. To apply strain, use `deform` function instead.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">transformation</span><span class="p">):</span>
         <span class="n">new_basis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">transformation</span><span class="p">(</span><span class="o">*</span><span class="n">poscar_data</span><span class="o">.</span><span class="n">basis</span><span class="p">))</span>  <span class="c1"># mostly a tuple</span>
@@ -2830,11 +2828,11 @@
     <span class="n">data</span> <span class="o">=</span> <span class="n">poscar_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>  <span class="c1"># Copy data to avoid modifying original</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unique</span>  <span class="c1"># Update unique dictionary</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_pos</span>  <span class="c1"># Update positions</span>
-    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;SYSTEM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;SYSTEM&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">+</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>  <span class="c1"># Update SYSTEM</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span>
         <span class="s2">&quot;comment&quot;</span>
     <span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> + Added </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">&#39;</span>  <span class="c1"># Update comment</span>
 
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;SYSTEM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>  <span class="c1"># Update system name</span>
     <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">PoscarData</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># Return new POSCAR</span>
 
 
@@ -2858,6 +2856,7 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_types</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_types</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span>
     <span class="p">}</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;SYSTEM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>  <span class="c1"># Update system name</span>
     <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">PoscarData</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># Return new POSCAR</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">sort_poscar</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">new_order</span><span class="p">):</span>
@@ -2877,7 +2876,7 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">][</span><span class="n">k</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span>
     <span class="p">}</span>
-
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;SYSTEM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>  <span class="c1"># Update system name</span>
     <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">PoscarData</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">remove_atoms</span><span class="p">(</span><span class="n">poscar_data</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">fillby</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -2934,7 +2933,7 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_types</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_types</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span>
     <span class="p">}</span>
-
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;SYSTEM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>  <span class="c1"># Update system name</span>
     <span class="k">return</span> <span class="n">serializer</span><span class="o">.</span><span class="n">PoscarData</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># Return new POSCAR</span>
 
 
@@ -3020,7 +3019,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=292eb321"></script>
+</div><script src="../../_static/documentation_options.js?v=71272d9f"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

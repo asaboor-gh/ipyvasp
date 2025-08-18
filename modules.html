@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="API" href="apidoc.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2025.07.19 -->
-        <title>IPyVASP - ipyvasp 1.0.1 documentation</title>
+        <title>IPyVASP - ipyvasp 1.0.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">ipyvasp 1.0.1 documentation</div></a>
+      <a href="index.html"><div class="brand">ipyvasp 1.0.4 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
-  <span class="sidebar-brand-text">ipyvasp 1.0.1 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 1.0.4 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -366,7 +366,7 @@ Useful to add multiple globbed files into a single chained call.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.Files.interactive">
-<span class="sig-name descname"><span class="pre">interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_css</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.interactive" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.interactive" title="Link to this definition">¶</a></dt>
 <dd><p>Enhanced interactive widget with multiple callbacks, grid layout and fullscreen support.</p>
 <p>This function is used for quick dashboards. Subclass <cite>InteractBase</cite> for complex applications.</p>
 <p><strong>Features</strong>:</p>
@@ -419,16 +419,8 @@ Useful to add multiple globbed files into a single chained call.</p>
 <ul class="simple">
 <li><p><cite>*funcs</cite>: One or more callback functions</p></li>
 <li><p>auto_update: Update automatically on widget changes</p></li>
-<li><p>app_layout: Initial layout configuration, see <cite>relayout()</cite> method for details</p></li>
-<li><dl class="simple">
-<dt>grid_css: CSS Grid properties for layout</dt><dd><ul>
-<li><p>Use <cite>:fullscreen</cite> at root level of dict to apply styles in fullscreen mode</p></li>
-<li><p>Use <cite>[Button, ToggleButton, ToggleButtons].add_class(‘content-width-button’)</cite> to fix button widths easily.</p></li>
-<li><p>See [CSS Grid Layout Guide](<a class="reference external" href="https://css-tricks.com/snippets/css/complete-guide-grid/">https://css-tricks.com/snippets/css/complete-guide-grid/</a>).</p></li>
-</ul>
-</dd>
-</dl>
-</li>
+<li><p>post_init: Optional function to run after all widgets are created as lambda self: (self.set_css(), self.set_layout(),…).
+You can annotate the type in function argument with <cite>InteractBase</cite> to enable IDE hints and auto-completion e.g. <cite>def post_init(self:InteractBase): …</cite></p></li>
 <li><p><cite>**kwargs</cite>: Widget parameters</p></li>
 </ul>
 <p><strong>Widget Parameters</strong>:</p>
@@ -439,6 +431,7 @@ Useful to add multiple globbed files into a single chained call.</p>
 <li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
 <li><p>You can use <cite>changed = ‘.changed’</cite> to detect which parameters of a callback changed by checking <cite>changed(‘param’) -&gt; Bool</cite> in a callback.</p></li>
 <li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
+<li><p>Wrap any object in <cite>param = var(obj, match)</cite> to use it as a parameter with custom equality check like <cite>match(a, b) -&gt; bool</cite> for dataframes or other objects. Assigning <cite>param.value = new_value</cite> will update the widget and trigger callbacks</p></li>
 <li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
 <li><dl class="simple">
 <dt><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</dt><dd><ul>
@@ -474,22 +467,22 @@ Useful to add multiple globbed files into a single chained call.</p>
 <li><p>Avoid modifying global slide state</p></li>
 <li><p>Use widget descriptions to prevent name clashes</p></li>
 <li><p>See set_css() method for styling options</p></li>
-<li><p>interactive(no_args_func_which_may_fetch_data_on_click,) is perfectly valid and run on button click.</p></li>
+<li><p>interactive(no_args_func,) is perfectly valid and run on button click to do something like fetch latest data from somewhere.</p></li>
 </ul>
 <p><strong>Python dictionary to CSS</strong></p>
 <p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.
 There are few special rules in <cite>props</cite>:</p>
 <ul class="simple">
-<li><p>All nested selectors are joined with space, so hl`’.A’: {‘.B’: … }` becomes hl[‘css’]`.A .B {…}` in CSS.</p></li>
-<li><p>A ‘^’ in start of a selector joins to parent selector without space, so hl`’.A’: {‘^:hover’: …}` becomes hl[‘css’]`.A:hover {…}` in CSS. You can also use hl`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
-<li><p>A list/tuple of values for a key in dict generates CSS fallback, so hl`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes hl[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
+<li><p>All nested selectors are joined with space, so code`’.A’: {‘.B’: … }` becomes code[‘css’]`.A .B {…}` in CSS.</p></li>
+<li><p>A ‘^’ in start of a selector joins to parent selector without space, so code`’.A’: {‘^:hover’: …}` becomes code[‘css’]`.A:hover {…}` in CSS. You can also use code`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
+<li><p>A list/tuple of values for a key in dict generates CSS fallback, so code`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes code[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
 </ul>
 <p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.Files.interact">
-<span class="sig-name descname"><span class="pre">interact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_css</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.interact" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.interact" title="Link to this definition">¶</a></dt>
 <dd><p>Enhanced interactive widget with multiple callbacks, grid layout and fullscreen support.</p>
 <p>This function is used for quick dashboards. Subclass <cite>InteractBase</cite> for complex applications.</p>
 <p><strong>Features</strong>:</p>
@@ -542,16 +535,8 @@ There are few special rules in <cite>props</cite>:</p>
 <ul class="simple">
 <li><p><cite>*funcs</cite>: One or more callback functions</p></li>
 <li><p>auto_update: Update automatically on widget changes</p></li>
-<li><p>app_layout: Initial layout configuration, see <cite>relayout()</cite> method for details</p></li>
-<li><dl class="simple">
-<dt>grid_css: CSS Grid properties for layout</dt><dd><ul>
-<li><p>Use <cite>:fullscreen</cite> at root level of dict to apply styles in fullscreen mode</p></li>
-<li><p>Use <cite>[Button, ToggleButton, ToggleButtons].add_class(‘content-width-button’)</cite> to fix button widths easily.</p></li>
-<li><p>See [CSS Grid Layout Guide](<a class="reference external" href="https://css-tricks.com/snippets/css/complete-guide-grid/">https://css-tricks.com/snippets/css/complete-guide-grid/</a>).</p></li>
-</ul>
-</dd>
-</dl>
-</li>
+<li><p>post_init: Optional function to run after all widgets are created as lambda self: (self.set_css(), self.set_layout(),…).
+You can annotate the type in function argument with <cite>InteractBase</cite> to enable IDE hints and auto-completion e.g. <cite>def post_init(self:InteractBase): …</cite></p></li>
 <li><p><cite>**kwargs</cite>: Widget parameters</p></li>
 </ul>
 <p><strong>Widget Parameters</strong>:</p>
@@ -562,6 +547,7 @@ There are few special rules in <cite>props</cite>:</p>
 <li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
 <li><p>You can use <cite>changed = ‘.changed’</cite> to detect which parameters of a callback changed by checking <cite>changed(‘param’) -&gt; Bool</cite> in a callback.</p></li>
 <li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
+<li><p>Wrap any object in <cite>param = var(obj, match)</cite> to use it as a parameter with custom equality check like <cite>match(a, b) -&gt; bool</cite> for dataframes or other objects. Assigning <cite>param.value = new_value</cite> will update the widget and trigger callbacks</p></li>
 <li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
 <li><dl class="simple">
 <dt><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</dt><dd><ul>
@@ -597,20 +583,20 @@ There are few special rules in <cite>props</cite>:</p>
 <li><p>Avoid modifying global slide state</p></li>
 <li><p>Use widget descriptions to prevent name clashes</p></li>
 <li><p>See set_css() method for styling options</p></li>
-<li><p>interactive(no_args_func_which_may_fetch_data_on_click,) is perfectly valid and run on button click.</p></li>
+<li><p>interactive(no_args_func,) is perfectly valid and run on button click to do something like fetch latest data from somewhere.</p></li>
 </ul>
 <p><strong>Python dictionary to CSS</strong></p>
 <p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.
 There are few special rules in <cite>props</cite>:</p>
 <ul class="simple">
-<li><p>All nested selectors are joined with space, so hl`’.A’: {‘.B’: … }` becomes hl[‘css’]`.A .B {…}` in CSS.</p></li>
-<li><p>A ‘^’ in start of a selector joins to parent selector without space, so hl`’.A’: {‘^:hover’: …}` becomes hl[‘css’]`.A:hover {…}` in CSS. You can also use hl`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
-<li><p>A list/tuple of values for a key in dict generates CSS fallback, so hl`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes hl[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
+<li><p>All nested selectors are joined with space, so code`’.A’: {‘.B’: … }` becomes code[‘css’]`.A .B {…}` in CSS.</p></li>
+<li><p>A ‘^’ in start of a selector joins to parent selector without space, so code`’.A’: {‘^:hover’: …}` becomes code[‘css’]`.A:hover {…}` in CSS. You can also use code`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
+<li><p>A list/tuple of values for a key in dict generates CSS fallback, so code`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes code[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
 </ul>
 <p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
 <p><strong>Tips</strong>:</p>
 <ul class="simple">
-<li><p>You can use this inside columns using delayed display trick, like hl`write(‘First column’, C2)` where hl`C2 = Slides.hold(Slides.ei.interact, f, x = 5) or Slides.ei.interactive(f, x = 5)`.</p></li>
+<li><p>You can use this inside columns using delayed display trick, like code`write(‘First column’, C2)` where code`C2 = Slides.hold(Slides.ei.interact, f, x = 5) or Slides.ei.interactive(f, x = 5)`.</p></li>
 <li><p>You can also use this under <cite>Slides.capture_content</cite> to display later in a specific place.</p></li>
 </ul>
 </dd></dl>
@@ -3331,7 +3317,7 @@ If you want to customize, use <cite>POSCAR.iplot_cell(fig = &lt;return of iplot_
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.lattice.POSCAR.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selective_dynamics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/lattice.html#POSCAR.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.lattice.POSCAR.write" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selective_dynamics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/lattice.html#POSCAR.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.lattice.POSCAR.write" title="Link to this definition">¶</a></dt>
 <dd><p>Writes POSCAR data to a file or returns string</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3343,6 +3329,7 @@ See <cite>ipyvasp.POSCAR.data.get_selective_dynamics</cite> for more info.</p></
 <li><p><strong>overwrite</strong> (<em>bool</em>) – If file already exists, overwrite=True changes it.</p></li>
 <li><p><strong>comment</strong> (<em>str</em>) – Add comment, previous comment will be there too.</p></li>
 <li><p><strong>scale</strong> (<em>float</em>) – Scale factor for the basis vectors. Default is provided by loaded data.</p></li>
+<li><p><strong>system</strong> (<em>str</em>) – System name to be used in POSCAR file instead of the one in <cite>poscar_data.SYSTEM</cite>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -3495,7 +3482,7 @@ An example of transformation function is <cite>lambda a,b,c: a + b, a-b, c</cite
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This function keeps underlying lattice same.</p>
+<p>This function keeps underlying lattice same. To apply strain, use <cite>deform</cite> function instead.</p>
 </div>
 </dd></dl>
 
@@ -3563,7 +3550,7 @@ or list of three values to scale along (a,b,c) vectors (useful for strained stru
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This can be used to strain basis vectors uniformly only. For non-uniform strain, use <code class="xref py py-func docutils literal notranslate"><span class="pre">ipyvasp.POSCAR.strain()</span></code>.</p>
+<p>This can be used to strain basis vectors uniformly only. For non-uniform strain, use <code class="xref py py-func docutils literal notranslate"><span class="pre">ipyvasp.POSCAR.deform()</span></code>.</p>
 </div>
 </dd></dl>
 
@@ -3903,7 +3890,7 @@ Useful to add multiple globbed files into a single chained call.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.widgets.Files.interactive">
-<span class="sig-name descname"><span class="pre">interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_css</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.interactive" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.interactive" title="Link to this definition">¶</a></dt>
 <dd><p>Enhanced interactive widget with multiple callbacks, grid layout and fullscreen support.</p>
 <p>This function is used for quick dashboards. Subclass <cite>InteractBase</cite> for complex applications.</p>
 <p><strong>Features</strong>:</p>
@@ -3956,16 +3943,8 @@ Useful to add multiple globbed files into a single chained call.</p>
 <ul class="simple">
 <li><p><cite>*funcs</cite>: One or more callback functions</p></li>
 <li><p>auto_update: Update automatically on widget changes</p></li>
-<li><p>app_layout: Initial layout configuration, see <cite>relayout()</cite> method for details</p></li>
-<li><dl class="simple">
-<dt>grid_css: CSS Grid properties for layout</dt><dd><ul>
-<li><p>Use <cite>:fullscreen</cite> at root level of dict to apply styles in fullscreen mode</p></li>
-<li><p>Use <cite>[Button, ToggleButton, ToggleButtons].add_class(‘content-width-button’)</cite> to fix button widths easily.</p></li>
-<li><p>See [CSS Grid Layout Guide](<a class="reference external" href="https://css-tricks.com/snippets/css/complete-guide-grid/">https://css-tricks.com/snippets/css/complete-guide-grid/</a>).</p></li>
-</ul>
-</dd>
-</dl>
-</li>
+<li><p>post_init: Optional function to run after all widgets are created as lambda self: (self.set_css(), self.set_layout(),…).
+You can annotate the type in function argument with <cite>InteractBase</cite> to enable IDE hints and auto-completion e.g. <cite>def post_init(self:InteractBase): …</cite></p></li>
 <li><p><cite>**kwargs</cite>: Widget parameters</p></li>
 </ul>
 <p><strong>Widget Parameters</strong>:</p>
@@ -3976,6 +3955,7 @@ Useful to add multiple globbed files into a single chained call.</p>
 <li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
 <li><p>You can use <cite>changed = ‘.changed’</cite> to detect which parameters of a callback changed by checking <cite>changed(‘param’) -&gt; Bool</cite> in a callback.</p></li>
 <li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
+<li><p>Wrap any object in <cite>param = var(obj, match)</cite> to use it as a parameter with custom equality check like <cite>match(a, b) -&gt; bool</cite> for dataframes or other objects. Assigning <cite>param.value = new_value</cite> will update the widget and trigger callbacks</p></li>
 <li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
 <li><dl class="simple">
 <dt><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</dt><dd><ul>
@@ -4011,22 +3991,22 @@ Useful to add multiple globbed files into a single chained call.</p>
 <li><p>Avoid modifying global slide state</p></li>
 <li><p>Use widget descriptions to prevent name clashes</p></li>
 <li><p>See set_css() method for styling options</p></li>
-<li><p>interactive(no_args_func_which_may_fetch_data_on_click,) is perfectly valid and run on button click.</p></li>
+<li><p>interactive(no_args_func,) is perfectly valid and run on button click to do something like fetch latest data from somewhere.</p></li>
 </ul>
 <p><strong>Python dictionary to CSS</strong></p>
 <p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.
 There are few special rules in <cite>props</cite>:</p>
 <ul class="simple">
-<li><p>All nested selectors are joined with space, so hl`’.A’: {‘.B’: … }` becomes hl[‘css’]`.A .B {…}` in CSS.</p></li>
-<li><p>A ‘^’ in start of a selector joins to parent selector without space, so hl`’.A’: {‘^:hover’: …}` becomes hl[‘css’]`.A:hover {…}` in CSS. You can also use hl`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
-<li><p>A list/tuple of values for a key in dict generates CSS fallback, so hl`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes hl[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
+<li><p>All nested selectors are joined with space, so code`’.A’: {‘.B’: … }` becomes code[‘css’]`.A .B {…}` in CSS.</p></li>
+<li><p>A ‘^’ in start of a selector joins to parent selector without space, so code`’.A’: {‘^:hover’: …}` becomes code[‘css’]`.A:hover {…}` in CSS. You can also use code`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
+<li><p>A list/tuple of values for a key in dict generates CSS fallback, so code`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes code[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
 </ul>
 <p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.widgets.Files.interact">
-<span class="sig-name descname"><span class="pre">interact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_css</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.interact" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.interact" title="Link to this definition">¶</a></dt>
 <dd><p>Enhanced interactive widget with multiple callbacks, grid layout and fullscreen support.</p>
 <p>This function is used for quick dashboards. Subclass <cite>InteractBase</cite> for complex applications.</p>
 <p><strong>Features</strong>:</p>
@@ -4079,16 +4059,8 @@ There are few special rules in <cite>props</cite>:</p>
 <ul class="simple">
 <li><p><cite>*funcs</cite>: One or more callback functions</p></li>
 <li><p>auto_update: Update automatically on widget changes</p></li>
-<li><p>app_layout: Initial layout configuration, see <cite>relayout()</cite> method for details</p></li>
-<li><dl class="simple">
-<dt>grid_css: CSS Grid properties for layout</dt><dd><ul>
-<li><p>Use <cite>:fullscreen</cite> at root level of dict to apply styles in fullscreen mode</p></li>
-<li><p>Use <cite>[Button, ToggleButton, ToggleButtons].add_class(‘content-width-button’)</cite> to fix button widths easily.</p></li>
-<li><p>See [CSS Grid Layout Guide](<a class="reference external" href="https://css-tricks.com/snippets/css/complete-guide-grid/">https://css-tricks.com/snippets/css/complete-guide-grid/</a>).</p></li>
-</ul>
-</dd>
-</dl>
-</li>
+<li><p>post_init: Optional function to run after all widgets are created as lambda self: (self.set_css(), self.set_layout(),…).
+You can annotate the type in function argument with <cite>InteractBase</cite> to enable IDE hints and auto-completion e.g. <cite>def post_init(self:InteractBase): …</cite></p></li>
 <li><p><cite>**kwargs</cite>: Widget parameters</p></li>
 </ul>
 <p><strong>Widget Parameters</strong>:</p>
@@ -4099,6 +4071,7 @@ There are few special rules in <cite>props</cite>:</p>
 <li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
 <li><p>You can use <cite>changed = ‘.changed’</cite> to detect which parameters of a callback changed by checking <cite>changed(‘param’) -&gt; Bool</cite> in a callback.</p></li>
 <li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
+<li><p>Wrap any object in <cite>param = var(obj, match)</cite> to use it as a parameter with custom equality check like <cite>match(a, b) -&gt; bool</cite> for dataframes or other objects. Assigning <cite>param.value = new_value</cite> will update the widget and trigger callbacks</p></li>
 <li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
 <li><dl class="simple">
 <dt><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</dt><dd><ul>
@@ -4134,20 +4107,20 @@ There are few special rules in <cite>props</cite>:</p>
 <li><p>Avoid modifying global slide state</p></li>
 <li><p>Use widget descriptions to prevent name clashes</p></li>
 <li><p>See set_css() method for styling options</p></li>
-<li><p>interactive(no_args_func_which_may_fetch_data_on_click,) is perfectly valid and run on button click.</p></li>
+<li><p>interactive(no_args_func,) is perfectly valid and run on button click to do something like fetch latest data from somewhere.</p></li>
 </ul>
 <p><strong>Python dictionary to CSS</strong></p>
 <p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.
 There are few special rules in <cite>props</cite>:</p>
 <ul class="simple">
-<li><p>All nested selectors are joined with space, so hl`’.A’: {‘.B’: … }` becomes hl[‘css’]`.A .B {…}` in CSS.</p></li>
-<li><p>A ‘^’ in start of a selector joins to parent selector without space, so hl`’.A’: {‘^:hover’: …}` becomes hl[‘css’]`.A:hover {…}` in CSS. You can also use hl`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
-<li><p>A list/tuple of values for a key in dict generates CSS fallback, so hl`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes hl[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
+<li><p>All nested selectors are joined with space, so code`’.A’: {‘.B’: … }` becomes code[‘css’]`.A .B {…}` in CSS.</p></li>
+<li><p>A ‘^’ in start of a selector joins to parent selector without space, so code`’.A’: {‘^:hover’: …}` becomes code[‘css’]`.A:hover {…}` in CSS. You can also use code`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
+<li><p>A list/tuple of values for a key in dict generates CSS fallback, so code`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes code[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
 </ul>
 <p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
 <p><strong>Tips</strong>:</p>
 <ul class="simple">
-<li><p>You can use this inside columns using delayed display trick, like hl`write(‘First column’, C2)` where hl`C2 = Slides.hold(Slides.ei.interact, f, x = 5) or Slides.ei.interactive(f, x = 5)`.</p></li>
+<li><p>You can use this inside columns using delayed display trick, like code`write(‘First column’, C2)` where code`C2 = Slides.hold(Slides.ei.interact, f, x = 5) or Slides.ei.interactive(f, x = 5)`.</p></li>
 <li><p>You can also use this under <cite>Slides.capture_content</cite> to display later in a specific place.</p></li>
 </ul>
 </dd></dl>
@@ -5089,7 +5062,7 @@ Last item is considered to be columns.</p></li>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=292eb321"></script>
+</div><script src="_static/documentation_options.js?v=71272d9f"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
