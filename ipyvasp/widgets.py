@@ -33,7 +33,7 @@ import pandas as pd
 import ipywidgets as ipw
 import traitlets
 import plotly.graph_objects as go
-import einteract as ei 
+import dashlab as dl
 
 # Internal imports
 from . import utils as gu
@@ -241,7 +241,7 @@ class Files:
     def _unique(self, *files_tuples):
         return tuple(np.unique(np.hstack(files_tuples)))
     
-    @_sub_doc(ei.interactive,{"ipyslides.interaction":"einteract"})
+    @_sub_doc(dl.interactive)
     def interactive(self, *funcs, auto_update=True, post_init:callable=None,**kwargs):
         if 'file' in kwargs:
             raise KeyError("file is a reserved keyword argument to select path to file!")
@@ -259,9 +259,9 @@ class Files:
         if funcs and not has_file_param: # may be no func yet, that is test below
             raise KeyError("At least one of funcs should take 'file' as parameter, none got it!")
         
-        return ei.interactive(*funcs,auto_update=auto_update, post_init=post_init, file = self.to_dropdown(), **kwargs)
+        return dl.interactive(*funcs,auto_update=auto_update, post_init=post_init, file = self.to_dropdown(), **kwargs)
     
-    @_sub_doc(ei.interact,{"ipyslides.interaction":"einteract"})
+    @_sub_doc(dl.interact)
     def interact(self, *funcs, auto_update=True, post_init:callable=None,**kwargs):
         def inner(func):
             display(self.interactive(func, *funcs,
@@ -583,10 +583,10 @@ def _get_css(mode):
         },
     }
 
-class _ThemedFigureInteract(ei.InteractBase):
+class _ThemedFigureInteract(dl.DashboardBase):
     "Keeps self._fig anf self._theme button attributes for subclasses to use."
     def __init__(self, *args, **kwargs):
-        self._fig = ei.patched_plotly(go.FigureWidget())
+        self._fig = dl.patched_plotly(go.FigureWidget())
         self._theme = Button(icon='sun', description=' ', tooltip="Toggle Theme")
         super().__init__(*args, **kwargs)
         
@@ -611,7 +611,7 @@ class _ThemedFigureInteract(ei.InteractBase):
                 "which should only call super()._update_theme(fig, theme) in its body.")
         super().__init_subclass__()
     
-    @ei.callback
+    @dl.callback
     def _update_theme(self, fig, theme):
         require_dark = (theme.icon == 'sun')
         theme.icon = 'moon' if require_dark else 'sun' # we are not observing icon, so we can do this
@@ -710,7 +710,7 @@ class BandsWidget(_ThemedFigureInteract):
         return _data # since we know customdata, we can flatten dict
 
 
-    @ei.callback
+    @dl.callback
     def _update_theme(self, fig, theme):
         super()._update_theme(fig, theme)
         self._kb_fig.layout.template = fig.layout.template
@@ -736,7 +736,7 @@ class BandsWidget(_ThemedFigureInteract):
             hdata  = ipw.HTML(), # to show data in one place
         )
     
-    @ei.callback('out-selected')
+    @dl.callback('out-selected')
     def _plot_data(self, kb_fig, sdata):
         kb_fig.data = [] # clear in any case to avoid confusion
         if not sdata: return # no change
@@ -761,7 +761,7 @@ class BandsWidget(_ThemedFigureInteract):
             margin=dict(l=40, r=0, b=40, t=40, pad=0),font=dict(family="stix, serif", size=14)
         )
     
-    @ei.callback('out-data')
+    @dl.callback('out-data')
     def _load_data(self, file):
         if not file: return  # First time not available
         self._bands = (
@@ -795,19 +795,19 @@ class BandsWidget(_ThemedFigureInteract):
         )
         self._show_data(self._result)  # Load into view
     
-    @ei.callback
+    @dl.callback
     def _toggle_footer(self, showft):
         self.pane_heights = [0,100 - showft, showft]
     
-    @ei.callback
+    @dl.callback
     def _set_krange(self, krange):
         self._kws["kpairs"] = [krange,]
 
-    @ei.callback
+    @dl.callback
     def _warn_update(self, file, kticks, brange, krange, projs):
         self.params.button.description = "🔴 Update Graph"
 
-    @ei.callback('out-graph')
+    @dl.callback('out-graph')
     def _update_graph(self, fig, button):
         if not self.bands: return  # First time not available
         fig.layout.autosize = True # must
@@ -850,7 +850,7 @@ class BandsWidget(_ThemedFigureInteract):
         fig.selected = {}  # avoid data from previous figure
         button.description = "Update Graph" # clear trigger
 
-    @ei.callback('out-click')
+    @dl.callback('out-click')
     def _click_save_data(self, cdata):
         if self.params.cpoint.value is None: return # at reset-
         data_dict = self._result.copy()  # Copy old data
@@ -984,7 +984,7 @@ class KPathWidget(_ThemedFigureInteract):
             info = ipw.HTML(), # consise information in one place
         )
 
-    @ei.callback('out-fig')
+    @dl.callback('out-fig')
     def _update_fig(self, file, fig):
         if not file: return # empty one
 
@@ -1007,7 +1007,7 @@ class KPathWidget(_ThemedFigureInteract):
             )  # add path that will be updated later
         self._show_info("Click points on plot to store for kpath.")
 
-    @ei.callback('out-click')
+    @dl.callback('out-click')
     def _click(self, click):
         # We are setting value on select multiple to get it done in one click conveniently
         # But that triggers infinite loop, so we need to check if click is different next time
@@ -1024,21 +1024,21 @@ class KPathWidget(_ThemedFigureInteract):
                 elif self.params.lock.icon == "unlock":  # only add when open
                     self._add_point(kp)
                     
-    @ei.callback('out-kpt')
+    @dl.callback('out-kpt')
     def _take_kpt(self, kpt):
         print("Add kpoint e.g. 0,1,3 at selection(s)")
         self._set_kpt(kpt)
 
-    @ei.callback('out-lab')
+    @dl.callback('out-lab')
     def _set_lab(self, lab):
         print("Add label[:number] e.g. X:5,Y,L:9")
         self._add_label(lab)
 
-    @ei.callback
+    @dl.callback
     def _update_theme(self, fig, theme):
         return super()._update_theme(fig, theme)
 
-    @ei.callback
+    @dl.callback
     def _respond_click(self, lock, delp):
         if lock.clicked:
             self.params.lock.icon = 'lock' if self.params.lock.icon == 'unlock' else 'unlock'

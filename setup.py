@@ -28,7 +28,7 @@ REQUIRED = [
     "plotly>=6.2.0",
     "requests>=2.28.1",
     "typer>=0.9.0",
-    "einteract", # any latest version of einteract 
+    "dashlab", # any latest version of dashlab
     "sympy",
 ]
 

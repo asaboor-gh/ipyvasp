@@ -20,7 +20,7 @@ import PIL  # For text image.
 
 import plotly.graph_objects as go
 from plotly.io._base_renderers import open_html_in_browser
-from einteract import patched_plotly
+from dashlab import patched_plotly
 
 from .spatial_toolkit import to_R3, rotation
 from ..utils import _sig_kwargs
