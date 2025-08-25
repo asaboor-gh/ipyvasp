@@ -242,7 +242,7 @@ class Files:
         return tuple(np.unique(np.hstack(files_tuples)))
     
     @_sub_doc(dl.interactive)
-    def interactive(self, *funcs, auto_update=True, post_init:callable=None,**kwargs):
+    def interactive(self, *funcs, post_init:callable=None,**kwargs):
         if 'file' in kwargs:
             raise KeyError("file is a reserved keyword argument to select path to file!")
         
@@ -259,13 +259,13 @@ class Files:
         if funcs and not has_file_param: # may be no func yet, that is test below
             raise KeyError("At least one of funcs should take 'file' as parameter, none got it!")
         
-        return dl.interactive(*funcs,auto_update=auto_update, post_init=post_init, file = self.to_dropdown(), **kwargs)
+        return dl.interactive(*funcs, post_init=post_init, file = self.to_dropdown(), **kwargs)
     
     @_sub_doc(dl.interact)
-    def interact(self, *funcs, auto_update=True, post_init:callable=None,**kwargs):
+    def interact(self, *funcs, post_init:callable=None,**kwargs):
         def inner(func):
             display(self.interactive(func, *funcs,
-                auto_update=auto_update, post_init=post_init, 
+                post_init=post_init, 
                 **kwargs)
             )
             return func
