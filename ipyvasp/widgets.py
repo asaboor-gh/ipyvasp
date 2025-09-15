@@ -962,7 +962,7 @@ class KPathWidget(_ThemedFigureInteract):
         btns = HBox(children=self.gather('lock','delp', 'theme'), layout=Layout(min_height="24px"))
         self.set_layout(
             left_sidebar=['head','file',btns, 'info', 'sm','out-kpt','kpt', 'out-lab', 'lab'],
-            center=['fig'],  footer = ['*out', '!out-lab','!out-kpt'], # all outputs except prefixed with !
+            center=['fig'],  footer = ['*out!out-(lab|kpt)'], # all outputs except prefixed with !
             pane_widths=['25em',1,0], pane_heights=[0,1,0], # footer only has uselessoutputs
             height=height
         )
