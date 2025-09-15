@@ -689,9 +689,9 @@ class BandsWidget(_ThemedFigureInteract):
         self.set_layout(
             left_sidebar=[
                 'head','file','krange','kticks','brange', 'ppicks',
-                [HBox(),('theme','button')], 'kb_fig',
+                HBox(children=self.gather('theme','button')), 'kb_fig',
             ],
-            center=['hdata','fig','cpoint'],  footer = self.groups.outputs,
+            center=['hdata','fig','cpoint'],  footer = ['*out'], # all outputs
             right_sidebar = ['showft'],
             pane_widths=['25em',1,'2em'], pane_heights=[0,1,0], # footer only has uselessoutputs
             height=height
@@ -959,10 +959,10 @@ class KPathWidget(_ThemedFigureInteract):
         super().__init__()
         traitlets.dlink((self.params.file,'value'),(self, 'file')) # update file trait
 
-        btns = [HBox(layout=Layout(min_height="24px")),('lock','delp', 'theme')]
+        btns = HBox(children=self.gather('lock','delp', 'theme'), layout=Layout(min_height="24px"))
         self.set_layout(
             left_sidebar=['head','file',btns, 'info', 'sm','out-kpt','kpt', 'out-lab', 'lab'],
-            center=['fig'],  footer = [c for c in self.groups.outputs if not c in ('out-lab','out-kpt')],
+            center=['fig'],  footer = ['*out', '!out-lab','!out-kpt'], # all outputs except prefixed with !
             pane_widths=['25em',1,0], pane_heights=[0,1,0], # footer only has uselessoutputs
             height=height
         )
