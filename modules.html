@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="API" href="apidoc.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2025.07.19 -->
-        <title>IPyVASP - ipyvasp 1.0.4 documentation</title>
+        <title>IPyVASP - ipyvasp 1.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">ipyvasp 1.0.4 documentation</div></a>
+      <a href="index.html"><div class="brand">ipyvasp 1.0.7 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
-  <span class="sidebar-brand-text">ipyvasp 1.0.4 documentation</span>
+  <span class="sidebar-brand-text">ipyvasp 1.0.7 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -366,9 +366,9 @@ Useful to add multiple globbed files into a single chained call.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.Files.interactive">
-<span class="sig-name descname"><span class="pre">interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.interactive" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.interactive" title="Link to this definition">¶</a></dt>
 <dd><p>Enhanced interactive widget with multiple callbacks, grid layout and fullscreen support.</p>
-<p>This function is used for quick dashboards. Subclass <cite>InteractBase</cite> for complex applications.</p>
+<p>This function is used for quick dashboards. Subclass <cite>DashboardBase</cite> for complex applications.</p>
 <p><strong>Features</strong>:</p>
 <ul class="simple">
 <li><p>Multiple function support with selective updates</p></li>
@@ -378,7 +378,7 @@ Useful to add multiple globbed files into a single chained call.</p>
 <li><p>Built-in fullscreen support</p></li>
 </ul>
 <p><strong>Basic Usage</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">einteract</span><span class="w"> </span><span class="kn">import</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">monitor</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dashlab</span><span class="w"> </span><span class="kn">import</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">monitor</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ipw</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
 
@@ -418,49 +418,64 @@ Useful to add multiple globbed files into a single chained call.</p>
 <p><strong>Parameters</strong>:</p>
 <ul class="simple">
 <li><p><cite>*funcs</cite>: One or more callback functions</p></li>
-<li><p>auto_update: Update automatically on widget changes</p></li>
 <li><p>post_init: Optional function to run after all widgets are created as lambda self: (self.set_css(), self.set_layout(),…).
-You can annotate the type in function argument with <cite>InteractBase</cite> to enable IDE hints and auto-completion e.g. <cite>def post_init(self:InteractBase): …</cite></p></li>
+You can annotate the type in function argument with <cite>DashboardBase</cite> to enable IDE hints and auto-completion e.g. <cite>def post_init(self:DashboardBase): …</cite></p></li>
 <li><p><cite>**kwargs</cite>: Widget parameters</p></li>
 </ul>
 <p><strong>Widget Parameters</strong>:</p>
 <ul class="simple">
-<li><p>Regular ipywidgets</p></li>
-<li><p>Fixed widgets via ipw.fixed()</p></li>
-<li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or ‘.trait’ to observe traits on this instance.</p></li>
+<li><p>Regular ipywidgets with value trait</p></li>
+<li><p>Fixed widgets using ipw.fixed(widget)</p></li>
+<li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or e.g. ‘.trait’ to observe traits on this instance.</p></li>
+<li><p>Tuple pattern (widget, ‘trait’) for trait observation where widget is accessible via params and trait value goes to callback.
+This is useful to have widget and trait in a single parameter, such as <cite>x = (fig, ‘selected’)</cite> for plotly FigureWidget. Other traits of same widget can be observed by separate parameters with <cite>y = ‘x.trait’</cite> pattern.</p></li>
 <li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
-<li><p>You can use <cite>changed = ‘.changed’</cite> to detect which parameters of a callback changed by checking <cite>changed(‘param’) -&gt; Bool</cite> in a callback.</p></li>
+<li><p>Use <cite>P = ‘.params’</cite> to access all parameters in a callback, e.g. <cite>P.x.value = 10</cite> will set x’s value to 10 and trigger dependent callbacks.</p></li>
 <li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
 <li><p>Wrap any object in <cite>param = var(obj, match)</cite> to use it as a parameter with custom equality check like <cite>match(a, b) -&gt; bool</cite> for dataframes or other objects. Assigning <cite>param.value = new_value</cite> will update the widget and trigger callbacks</p></li>
 <li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
 <li><dl class="simple">
-<dt><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</dt><dd><ul>
+<dt><cite>dashlab.button</cite>/<cite>ipywidgets.Button</cite> for manual updates on heavy callbacks besides. Add tooltip for info on button when not synced.</dt><dd><ul>
 <li><p>You can have multiple buttons in a single callback and check <cite>btn.clicked</cite> attribute to run code based on which button was clicked.</p></li>
+<li><p>The manual button offered by ipywidgets.interactive is not suitable to hold a GUI with multiple callbacks, so that functionality is replaced by more flexible dashlab.button.</p></li>
 </ul>
 </dd>
 </dl>
 </li>
+<li><p>Plotly FigureWidgets (use patched_plotly for selection support)</p></li>
 </ul>
-<p><strong>Widget Updates</strong>:</p>
+<p><strong>Callbacks</strong>:</p>
 <ul class="simple">
-<li><p>Functions can modify widget traits (e.g. options, min/max)</p></li>
-<li><p>Order matters for dependent updates</p></li>
-<li><p>Parameter-less functions run with any interaction</p></li>
-<li><p>Animation widgets work even with manual updates</p></li>
+<li><p>Methods decorated with <cite>&#64;callback</cite>. Run in the order of definition.</p></li>
+<li><p>Optional CSS class via <cite>&#64;callback(‘out-myclass’)</cite></p></li>
+<li><p>Decorate with &#64;monitor to check execution time, kwargs etc.</p></li>
+<li><p>CSS class must start with ‘out-’ excpet reserved ‘out-main’</p></li>
+<li><p>Each callback gets only needed parameters and updates happen only when relevant parameters change</p></li>
+<li><p>Callbacks cannot call themselves recursively to prevent infinite loops</p></li>
 <li><dl class="simple">
 <dt><strong>Output Widget Behavior</strong>:</dt><dd><ul>
-<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite>.</p></li>
-<li><p>If no CSS class is provided, the callback will use the main output widget labeled as ‘out-main’.</p></li>
+<li><p>An output widget is created only if a CSS class is provided via <cite>&#64;callback</cite>.</p></li>
+<li><p>If no CSS class is provided, the callback will use the main output widget, labeled as ‘out-main’.</p></li>
 </ul>
 </dd>
 </dl>
 </li>
 </ul>
-<p><strong>CSS Classes</strong>:</p>
+<p><strong>Attributes and Traits</strong>:</p>
 <ul class="simple">
-<li><p>Parameter names from kwargs</p></li>
-<li><p>Custom ‘out-<a href="#id1"><span class="problematic" id="id2">*</span></a>’ classes from <cite>&#64;callback</cite>, and ‘out-main’ class.</p></li>
-<li><p>‘btn-main’ for manual update button</p></li>
+<li><dl class="simple">
+<dt>changed: Read-only trait to detect which parameters of a callback changed:</dt><dd><ul>
+<li><p>By providing <cite>changed = ‘.changed’</cite> in parameters and later in callback by checking <cite>changed(‘param’) -&gt; Bool</cite>.</p></li>
+<li><p>Directly access <cite>self.changed</cite> in a subclass and use <cite>changed(‘param’) -&gt; Bool</cite> / <cite>‘param’ in self.changed</cite>. Useful to merge callback.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>isfullscreen: Read-only trait to detect fullscreen change on python side. Can be observed as ‘.isfullscreen’ in params.</p></li>
+<li><p>params: Read-only trait for all parameters used in this interact in widget form. Can be accessed inside callbacks by observing as <cite>P = ‘.params’</cite>
+alongwith some <cite>x = True</cite> -&gt; Checkbox, and then inside a callback <cite>P.x.value = False</cite> will uncheck the Checkbox and trigger depnendent callbacks.</p></li>
+<li><p>groups: NamedTuple(controls, outputs, others) - Widget names by type</p></li>
+<li><p>outputs: tuple[Output] - Output widgets from callbacks</p></li>
 </ul>
 <p><strong>Notes</strong>:</p>
 <ul class="simple">
@@ -470,21 +485,21 @@ You can annotate the type in function argument with <cite>InteractBase</cite> to
 <li><p>interactive(no_args_func,) is perfectly valid and run on button click to do something like fetch latest data from somewhere.</p></li>
 </ul>
 <p><strong>Python dictionary to CSS</strong></p>
-<p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.
-There are few special rules in <cite>props</cite>:</p>
+<p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.</p>
+<p>There are few special rules in <cite>props</cite>:</p>
 <ul class="simple">
-<li><p>All nested selectors are joined with space, so code`’.A’: {‘.B’: … }` becomes code[‘css’]`.A .B {…}` in CSS.</p></li>
-<li><p>A ‘^’ in start of a selector joins to parent selector without space, so code`’.A’: {‘^:hover’: …}` becomes code[‘css’]`.A:hover {…}` in CSS. You can also use code`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
-<li><p>A list/tuple of values for a key in dict generates CSS fallback, so code`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes code[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
+<li><p>All nested selectors are joined with space, so <cite>‘.A’: {‘.B’: … }</cite> becomes <cite>.A .B {…}</cite> in CSS.</p></li>
+<li><p>A ‘^’ in start of a selector joins to parent selector without space, so <cite>‘.A’: {‘^:hover’: …}</cite> becomes <cite>.A:hover {…}</cite> in CSS. You can also use <cite>‘.A:hover’</cite> directly but it will restrict other nested keys to hover only.</p></li>
+<li><p>A list/tuple of values for a key in dict generates CSS fallback, so <cite>‘.A’: {‘font-size’: (‘20px’,’2em’)}</cite> becomes <cite>.A {font-size: 20px; font-size: 2em;}</cite> in CSS.</p></li>
 </ul>
 <p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.Files.interact">
-<span class="sig-name descname"><span class="pre">interact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.interact" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.Files.interact" title="Link to this definition">¶</a></dt>
 <dd><p>Enhanced interactive widget with multiple callbacks, grid layout and fullscreen support.</p>
-<p>This function is used for quick dashboards. Subclass <cite>InteractBase</cite> for complex applications.</p>
+<p>This function is used for quick dashboards. Subclass <cite>DashboardBase</cite> for complex applications.</p>
 <p><strong>Features</strong>:</p>
 <ul class="simple">
 <li><p>Multiple function support with selective updates</p></li>
@@ -494,7 +509,7 @@ There are few special rules in <cite>props</cite>:</p>
 <li><p>Built-in fullscreen support</p></li>
 </ul>
 <p><strong>Basic Usage</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">einteract</span><span class="w"> </span><span class="kn">import</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">monitor</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dashlab</span><span class="w"> </span><span class="kn">import</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">monitor</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ipw</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
 
@@ -534,49 +549,64 @@ There are few special rules in <cite>props</cite>:</p>
 <p><strong>Parameters</strong>:</p>
 <ul class="simple">
 <li><p><cite>*funcs</cite>: One or more callback functions</p></li>
-<li><p>auto_update: Update automatically on widget changes</p></li>
 <li><p>post_init: Optional function to run after all widgets are created as lambda self: (self.set_css(), self.set_layout(),…).
-You can annotate the type in function argument with <cite>InteractBase</cite> to enable IDE hints and auto-completion e.g. <cite>def post_init(self:InteractBase): …</cite></p></li>
+You can annotate the type in function argument with <cite>DashboardBase</cite> to enable IDE hints and auto-completion e.g. <cite>def post_init(self:DashboardBase): …</cite></p></li>
 <li><p><cite>**kwargs</cite>: Widget parameters</p></li>
 </ul>
 <p><strong>Widget Parameters</strong>:</p>
 <ul class="simple">
-<li><p>Regular ipywidgets</p></li>
-<li><p>Fixed widgets via ipw.fixed()</p></li>
-<li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or ‘.trait’ to observe traits on this instance.</p></li>
+<li><p>Regular ipywidgets with value trait</p></li>
+<li><p>Fixed widgets using ipw.fixed(widget)</p></li>
+<li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or e.g. ‘.trait’ to observe traits on this instance.</p></li>
+<li><p>Tuple pattern (widget, ‘trait’) for trait observation where widget is accessible via params and trait value goes to callback.
+This is useful to have widget and trait in a single parameter, such as <cite>x = (fig, ‘selected’)</cite> for plotly FigureWidget. Other traits of same widget can be observed by separate parameters with <cite>y = ‘x.trait’</cite> pattern.</p></li>
 <li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
-<li><p>You can use <cite>changed = ‘.changed’</cite> to detect which parameters of a callback changed by checking <cite>changed(‘param’) -&gt; Bool</cite> in a callback.</p></li>
+<li><p>Use <cite>P = ‘.params’</cite> to access all parameters in a callback, e.g. <cite>P.x.value = 10</cite> will set x’s value to 10 and trigger dependent callbacks.</p></li>
 <li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
 <li><p>Wrap any object in <cite>param = var(obj, match)</cite> to use it as a parameter with custom equality check like <cite>match(a, b) -&gt; bool</cite> for dataframes or other objects. Assigning <cite>param.value = new_value</cite> will update the widget and trigger callbacks</p></li>
 <li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
 <li><dl class="simple">
-<dt><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</dt><dd><ul>
+<dt><cite>dashlab.button</cite>/<cite>ipywidgets.Button</cite> for manual updates on heavy callbacks besides. Add tooltip for info on button when not synced.</dt><dd><ul>
 <li><p>You can have multiple buttons in a single callback and check <cite>btn.clicked</cite> attribute to run code based on which button was clicked.</p></li>
+<li><p>The manual button offered by ipywidgets.interactive is not suitable to hold a GUI with multiple callbacks, so that functionality is replaced by more flexible dashlab.button.</p></li>
 </ul>
 </dd>
 </dl>
 </li>
+<li><p>Plotly FigureWidgets (use patched_plotly for selection support)</p></li>
 </ul>
-<p><strong>Widget Updates</strong>:</p>
+<p><strong>Callbacks</strong>:</p>
 <ul class="simple">
-<li><p>Functions can modify widget traits (e.g. options, min/max)</p></li>
-<li><p>Order matters for dependent updates</p></li>
-<li><p>Parameter-less functions run with any interaction</p></li>
-<li><p>Animation widgets work even with manual updates</p></li>
+<li><p>Methods decorated with <cite>&#64;callback</cite>. Run in the order of definition.</p></li>
+<li><p>Optional CSS class via <cite>&#64;callback(‘out-myclass’)</cite></p></li>
+<li><p>Decorate with &#64;monitor to check execution time, kwargs etc.</p></li>
+<li><p>CSS class must start with ‘out-’ excpet reserved ‘out-main’</p></li>
+<li><p>Each callback gets only needed parameters and updates happen only when relevant parameters change</p></li>
+<li><p>Callbacks cannot call themselves recursively to prevent infinite loops</p></li>
 <li><dl class="simple">
 <dt><strong>Output Widget Behavior</strong>:</dt><dd><ul>
-<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite>.</p></li>
-<li><p>If no CSS class is provided, the callback will use the main output widget labeled as ‘out-main’.</p></li>
+<li><p>An output widget is created only if a CSS class is provided via <cite>&#64;callback</cite>.</p></li>
+<li><p>If no CSS class is provided, the callback will use the main output widget, labeled as ‘out-main’.</p></li>
 </ul>
 </dd>
 </dl>
 </li>
 </ul>
-<p><strong>CSS Classes</strong>:</p>
+<p><strong>Attributes and Traits</strong>:</p>
 <ul class="simple">
-<li><p>Parameter names from kwargs</p></li>
-<li><p>Custom ‘out-<a href="#id3"><span class="problematic" id="id4">*</span></a>’ classes from <cite>&#64;callback</cite>, and ‘out-main’ class.</p></li>
-<li><p>‘btn-main’ for manual update button</p></li>
+<li><dl class="simple">
+<dt>changed: Read-only trait to detect which parameters of a callback changed:</dt><dd><ul>
+<li><p>By providing <cite>changed = ‘.changed’</cite> in parameters and later in callback by checking <cite>changed(‘param’) -&gt; Bool</cite>.</p></li>
+<li><p>Directly access <cite>self.changed</cite> in a subclass and use <cite>changed(‘param’) -&gt; Bool</cite> / <cite>‘param’ in self.changed</cite>. Useful to merge callback.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>isfullscreen: Read-only trait to detect fullscreen change on python side. Can be observed as ‘.isfullscreen’ in params.</p></li>
+<li><p>params: Read-only trait for all parameters used in this interact in widget form. Can be accessed inside callbacks by observing as <cite>P = ‘.params’</cite>
+alongwith some <cite>x = True</cite> -&gt; Checkbox, and then inside a callback <cite>P.x.value = False</cite> will uncheck the Checkbox and trigger depnendent callbacks.</p></li>
+<li><p>groups: NamedTuple(controls, outputs, others) - Widget names by type</p></li>
+<li><p>outputs: tuple[Output] - Output widgets from callbacks</p></li>
 </ul>
 <p><strong>Notes</strong>:</p>
 <ul class="simple">
@@ -586,12 +616,12 @@ You can annotate the type in function argument with <cite>InteractBase</cite> to
 <li><p>interactive(no_args_func,) is perfectly valid and run on button click to do something like fetch latest data from somewhere.</p></li>
 </ul>
 <p><strong>Python dictionary to CSS</strong></p>
-<p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.
-There are few special rules in <cite>props</cite>:</p>
+<p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.</p>
+<p>There are few special rules in <cite>props</cite>:</p>
 <ul class="simple">
-<li><p>All nested selectors are joined with space, so code`’.A’: {‘.B’: … }` becomes code[‘css’]`.A .B {…}` in CSS.</p></li>
-<li><p>A ‘^’ in start of a selector joins to parent selector without space, so code`’.A’: {‘^:hover’: …}` becomes code[‘css’]`.A:hover {…}` in CSS. You can also use code`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
-<li><p>A list/tuple of values for a key in dict generates CSS fallback, so code`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes code[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
+<li><p>All nested selectors are joined with space, so <cite>‘.A’: {‘.B’: … }</cite> becomes <cite>.A .B {…}</cite> in CSS.</p></li>
+<li><p>A ‘^’ in start of a selector joins to parent selector without space, so <cite>‘.A’: {‘^:hover’: …}</cite> becomes <cite>.A:hover {…}</cite> in CSS. You can also use <cite>‘.A:hover’</cite> directly but it will restrict other nested keys to hover only.</p></li>
+<li><p>A list/tuple of values for a key in dict generates CSS fallback, so <cite>‘.A’: {‘font-size’: (‘20px’,’2em’)}</cite> becomes <cite>.A {font-size: 20px; font-size: 2em;}</cite> in CSS.</p></li>
 </ul>
 <p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
 <p><strong>Tips</strong>:</p>
@@ -3890,9 +3920,9 @@ Useful to add multiple globbed files into a single chained call.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.widgets.Files.interactive">
-<span class="sig-name descname"><span class="pre">interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.interactive" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.interactive" title="Link to this definition">¶</a></dt>
 <dd><p>Enhanced interactive widget with multiple callbacks, grid layout and fullscreen support.</p>
-<p>This function is used for quick dashboards. Subclass <cite>InteractBase</cite> for complex applications.</p>
+<p>This function is used for quick dashboards. Subclass <cite>DashboardBase</cite> for complex applications.</p>
 <p><strong>Features</strong>:</p>
 <ul class="simple">
 <li><p>Multiple function support with selective updates</p></li>
@@ -3902,7 +3932,7 @@ Useful to add multiple globbed files into a single chained call.</p>
 <li><p>Built-in fullscreen support</p></li>
 </ul>
 <p><strong>Basic Usage</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">einteract</span><span class="w"> </span><span class="kn">import</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">monitor</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dashlab</span><span class="w"> </span><span class="kn">import</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">monitor</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ipw</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
 
@@ -3942,49 +3972,64 @@ Useful to add multiple globbed files into a single chained call.</p>
 <p><strong>Parameters</strong>:</p>
 <ul class="simple">
 <li><p><cite>*funcs</cite>: One or more callback functions</p></li>
-<li><p>auto_update: Update automatically on widget changes</p></li>
 <li><p>post_init: Optional function to run after all widgets are created as lambda self: (self.set_css(), self.set_layout(),…).
-You can annotate the type in function argument with <cite>InteractBase</cite> to enable IDE hints and auto-completion e.g. <cite>def post_init(self:InteractBase): …</cite></p></li>
+You can annotate the type in function argument with <cite>DashboardBase</cite> to enable IDE hints and auto-completion e.g. <cite>def post_init(self:DashboardBase): …</cite></p></li>
 <li><p><cite>**kwargs</cite>: Widget parameters</p></li>
 </ul>
 <p><strong>Widget Parameters</strong>:</p>
 <ul class="simple">
-<li><p>Regular ipywidgets</p></li>
-<li><p>Fixed widgets via ipw.fixed()</p></li>
-<li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or ‘.trait’ to observe traits on this instance.</p></li>
+<li><p>Regular ipywidgets with value trait</p></li>
+<li><p>Fixed widgets using ipw.fixed(widget)</p></li>
+<li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or e.g. ‘.trait’ to observe traits on this instance.</p></li>
+<li><p>Tuple pattern (widget, ‘trait’) for trait observation where widget is accessible via params and trait value goes to callback.
+This is useful to have widget and trait in a single parameter, such as <cite>x = (fig, ‘selected’)</cite> for plotly FigureWidget. Other traits of same widget can be observed by separate parameters with <cite>y = ‘x.trait’</cite> pattern.</p></li>
 <li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
-<li><p>You can use <cite>changed = ‘.changed’</cite> to detect which parameters of a callback changed by checking <cite>changed(‘param’) -&gt; Bool</cite> in a callback.</p></li>
+<li><p>Use <cite>P = ‘.params’</cite> to access all parameters in a callback, e.g. <cite>P.x.value = 10</cite> will set x’s value to 10 and trigger dependent callbacks.</p></li>
 <li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
 <li><p>Wrap any object in <cite>param = var(obj, match)</cite> to use it as a parameter with custom equality check like <cite>match(a, b) -&gt; bool</cite> for dataframes or other objects. Assigning <cite>param.value = new_value</cite> will update the widget and trigger callbacks</p></li>
 <li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
 <li><dl class="simple">
-<dt><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</dt><dd><ul>
+<dt><cite>dashlab.button</cite>/<cite>ipywidgets.Button</cite> for manual updates on heavy callbacks besides. Add tooltip for info on button when not synced.</dt><dd><ul>
 <li><p>You can have multiple buttons in a single callback and check <cite>btn.clicked</cite> attribute to run code based on which button was clicked.</p></li>
+<li><p>The manual button offered by ipywidgets.interactive is not suitable to hold a GUI with multiple callbacks, so that functionality is replaced by more flexible dashlab.button.</p></li>
 </ul>
 </dd>
 </dl>
 </li>
+<li><p>Plotly FigureWidgets (use patched_plotly for selection support)</p></li>
 </ul>
-<p><strong>Widget Updates</strong>:</p>
+<p><strong>Callbacks</strong>:</p>
 <ul class="simple">
-<li><p>Functions can modify widget traits (e.g. options, min/max)</p></li>
-<li><p>Order matters for dependent updates</p></li>
-<li><p>Parameter-less functions run with any interaction</p></li>
-<li><p>Animation widgets work even with manual updates</p></li>
+<li><p>Methods decorated with <cite>&#64;callback</cite>. Run in the order of definition.</p></li>
+<li><p>Optional CSS class via <cite>&#64;callback(‘out-myclass’)</cite></p></li>
+<li><p>Decorate with &#64;monitor to check execution time, kwargs etc.</p></li>
+<li><p>CSS class must start with ‘out-’ excpet reserved ‘out-main’</p></li>
+<li><p>Each callback gets only needed parameters and updates happen only when relevant parameters change</p></li>
+<li><p>Callbacks cannot call themselves recursively to prevent infinite loops</p></li>
 <li><dl class="simple">
 <dt><strong>Output Widget Behavior</strong>:</dt><dd><ul>
-<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite>.</p></li>
-<li><p>If no CSS class is provided, the callback will use the main output widget labeled as ‘out-main’.</p></li>
+<li><p>An output widget is created only if a CSS class is provided via <cite>&#64;callback</cite>.</p></li>
+<li><p>If no CSS class is provided, the callback will use the main output widget, labeled as ‘out-main’.</p></li>
 </ul>
 </dd>
 </dl>
 </li>
 </ul>
-<p><strong>CSS Classes</strong>:</p>
+<p><strong>Attributes and Traits</strong>:</p>
 <ul class="simple">
-<li><p>Parameter names from kwargs</p></li>
-<li><p>Custom ‘out-<a href="#id6"><span class="problematic" id="id7">*</span></a>’ classes from <cite>&#64;callback</cite>, and ‘out-main’ class.</p></li>
-<li><p>‘btn-main’ for manual update button</p></li>
+<li><dl class="simple">
+<dt>changed: Read-only trait to detect which parameters of a callback changed:</dt><dd><ul>
+<li><p>By providing <cite>changed = ‘.changed’</cite> in parameters and later in callback by checking <cite>changed(‘param’) -&gt; Bool</cite>.</p></li>
+<li><p>Directly access <cite>self.changed</cite> in a subclass and use <cite>changed(‘param’) -&gt; Bool</cite> / <cite>‘param’ in self.changed</cite>. Useful to merge callback.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>isfullscreen: Read-only trait to detect fullscreen change on python side. Can be observed as ‘.isfullscreen’ in params.</p></li>
+<li><p>params: Read-only trait for all parameters used in this interact in widget form. Can be accessed inside callbacks by observing as <cite>P = ‘.params’</cite>
+alongwith some <cite>x = True</cite> -&gt; Checkbox, and then inside a callback <cite>P.x.value = False</cite> will uncheck the Checkbox and trigger depnendent callbacks.</p></li>
+<li><p>groups: NamedTuple(controls, outputs, others) - Widget names by type</p></li>
+<li><p>outputs: tuple[Output] - Output widgets from callbacks</p></li>
 </ul>
 <p><strong>Notes</strong>:</p>
 <ul class="simple">
@@ -3994,21 +4039,21 @@ You can annotate the type in function argument with <cite>InteractBase</cite> to
 <li><p>interactive(no_args_func,) is perfectly valid and run on button click to do something like fetch latest data from somewhere.</p></li>
 </ul>
 <p><strong>Python dictionary to CSS</strong></p>
-<p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.
-There are few special rules in <cite>props</cite>:</p>
+<p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.</p>
+<p>There are few special rules in <cite>props</cite>:</p>
 <ul class="simple">
-<li><p>All nested selectors are joined with space, so code`’.A’: {‘.B’: … }` becomes code[‘css’]`.A .B {…}` in CSS.</p></li>
-<li><p>A ‘^’ in start of a selector joins to parent selector without space, so code`’.A’: {‘^:hover’: …}` becomes code[‘css’]`.A:hover {…}` in CSS. You can also use code`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
-<li><p>A list/tuple of values for a key in dict generates CSS fallback, so code`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes code[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
+<li><p>All nested selectors are joined with space, so <cite>‘.A’: {‘.B’: … }</cite> becomes <cite>.A .B {…}</cite> in CSS.</p></li>
+<li><p>A ‘^’ in start of a selector joins to parent selector without space, so <cite>‘.A’: {‘^:hover’: …}</cite> becomes <cite>.A:hover {…}</cite> in CSS. You can also use <cite>‘.A:hover’</cite> directly but it will restrict other nested keys to hover only.</p></li>
+<li><p>A list/tuple of values for a key in dict generates CSS fallback, so <cite>‘.A’: {‘font-size’: (‘20px’,’2em’)}</cite> becomes <cite>.A {font-size: 20px; font-size: 2em;}</cite> in CSS.</p></li>
 </ul>
 <p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ipyvasp.widgets.Files.interact">
-<span class="sig-name descname"><span class="pre">interact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.interact" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">funcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ipyvasp/widgets.html#Files.interact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ipyvasp.widgets.Files.interact" title="Link to this definition">¶</a></dt>
 <dd><p>Enhanced interactive widget with multiple callbacks, grid layout and fullscreen support.</p>
-<p>This function is used for quick dashboards. Subclass <cite>InteractBase</cite> for complex applications.</p>
+<p>This function is used for quick dashboards. Subclass <cite>DashboardBase</cite> for complex applications.</p>
 <p><strong>Features</strong>:</p>
 <ul class="simple">
 <li><p>Multiple function support with selective updates</p></li>
@@ -4018,7 +4063,7 @@ There are few special rules in <cite>props</cite>:</p>
 <li><p>Built-in fullscreen support</p></li>
 </ul>
 <p><strong>Basic Usage</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">einteract</span><span class="w"> </span><span class="kn">import</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">monitor</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dashlab</span><span class="w"> </span><span class="kn">import</span> <span class="n">interactive</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">monitor</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ipw</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
 
@@ -4058,49 +4103,64 @@ There are few special rules in <cite>props</cite>:</p>
 <p><strong>Parameters</strong>:</p>
 <ul class="simple">
 <li><p><cite>*funcs</cite>: One or more callback functions</p></li>
-<li><p>auto_update: Update automatically on widget changes</p></li>
 <li><p>post_init: Optional function to run after all widgets are created as lambda self: (self.set_css(), self.set_layout(),…).
-You can annotate the type in function argument with <cite>InteractBase</cite> to enable IDE hints and auto-completion e.g. <cite>def post_init(self:InteractBase): …</cite></p></li>
+You can annotate the type in function argument with <cite>DashboardBase</cite> to enable IDE hints and auto-completion e.g. <cite>def post_init(self:DashboardBase): …</cite></p></li>
 <li><p><cite>**kwargs</cite>: Widget parameters</p></li>
 </ul>
 <p><strong>Widget Parameters</strong>:</p>
 <ul class="simple">
-<li><p>Regular ipywidgets</p></li>
-<li><p>Fixed widgets via ipw.fixed()</p></li>
-<li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or ‘.trait’ to observe traits on this instance.</p></li>
+<li><p>Regular ipywidgets with value trait</p></li>
+<li><p>Fixed widgets using ipw.fixed(widget)</p></li>
+<li><p>String pattern ‘widget.trait’ for trait observation, ‘widget’ must be in kwargs or e.g. ‘.trait’ to observe traits on this instance.</p></li>
+<li><p>Tuple pattern (widget, ‘trait’) for trait observation where widget is accessible via params and trait value goes to callback.
+This is useful to have widget and trait in a single parameter, such as <cite>x = (fig, ‘selected’)</cite> for plotly FigureWidget. Other traits of same widget can be observed by separate parameters with <cite>y = ‘x.trait’</cite> pattern.</p></li>
 <li><p>You can use ‘.fullscreen’ to detect fullscreen change and do actions based on that.</p></li>
-<li><p>You can use <cite>changed = ‘.changed’</cite> to detect which parameters of a callback changed by checking <cite>changed(‘param’) -&gt; Bool</cite> in a callback.</p></li>
+<li><p>Use <cite>P = ‘.params’</cite> to access all parameters in a callback, e.g. <cite>P.x.value = 10</cite> will set x’s value to 10 and trigger dependent callbacks.</p></li>
 <li><p>Any DOM widget that needs display (inside fixed too). A widget and its observed trait in a single function are not allowed, such as <cite>f(fig, v)</cite> where <cite>v=’fig.selected’</cite>.</p></li>
 <li><p>Wrap any object in <cite>param = var(obj, match)</cite> to use it as a parameter with custom equality check like <cite>match(a, b) -&gt; bool</cite> for dataframes or other objects. Assigning <cite>param.value = new_value</cite> will update the widget and trigger callbacks</p></li>
 <li><p>Plotly FigureWidgets (use patched_plotly)</p></li>
 <li><dl class="simple">
-<dt><cite>ipywidgets.Button</cite> for manual updates on callbacks besides global <cite>auto_update</cite>. Add tooltip for info on button when not synced.</dt><dd><ul>
+<dt><cite>dashlab.button</cite>/<cite>ipywidgets.Button</cite> for manual updates on heavy callbacks besides. Add tooltip for info on button when not synced.</dt><dd><ul>
 <li><p>You can have multiple buttons in a single callback and check <cite>btn.clicked</cite> attribute to run code based on which button was clicked.</p></li>
+<li><p>The manual button offered by ipywidgets.interactive is not suitable to hold a GUI with multiple callbacks, so that functionality is replaced by more flexible dashlab.button.</p></li>
 </ul>
 </dd>
 </dl>
 </li>
+<li><p>Plotly FigureWidgets (use patched_plotly for selection support)</p></li>
 </ul>
-<p><strong>Widget Updates</strong>:</p>
+<p><strong>Callbacks</strong>:</p>
 <ul class="simple">
-<li><p>Functions can modify widget traits (e.g. options, min/max)</p></li>
-<li><p>Order matters for dependent updates</p></li>
-<li><p>Parameter-less functions run with any interaction</p></li>
-<li><p>Animation widgets work even with manual updates</p></li>
+<li><p>Methods decorated with <cite>&#64;callback</cite>. Run in the order of definition.</p></li>
+<li><p>Optional CSS class via <cite>&#64;callback(‘out-myclass’)</cite></p></li>
+<li><p>Decorate with &#64;monitor to check execution time, kwargs etc.</p></li>
+<li><p>CSS class must start with ‘out-’ excpet reserved ‘out-main’</p></li>
+<li><p>Each callback gets only needed parameters and updates happen only when relevant parameters change</p></li>
+<li><p>Callbacks cannot call themselves recursively to prevent infinite loops</p></li>
 <li><dl class="simple">
 <dt><strong>Output Widget Behavior</strong>:</dt><dd><ul>
-<li><p>Output widgets are created only if a CSS class is provided via <cite>&#64;callback</cite>.</p></li>
-<li><p>If no CSS class is provided, the callback will use the main output widget labeled as ‘out-main’.</p></li>
+<li><p>An output widget is created only if a CSS class is provided via <cite>&#64;callback</cite>.</p></li>
+<li><p>If no CSS class is provided, the callback will use the main output widget, labeled as ‘out-main’.</p></li>
 </ul>
 </dd>
 </dl>
 </li>
 </ul>
-<p><strong>CSS Classes</strong>:</p>
+<p><strong>Attributes and Traits</strong>:</p>
 <ul class="simple">
-<li><p>Parameter names from kwargs</p></li>
-<li><p>Custom ‘out-<a href="#id8"><span class="problematic" id="id9">*</span></a>’ classes from <cite>&#64;callback</cite>, and ‘out-main’ class.</p></li>
-<li><p>‘btn-main’ for manual update button</p></li>
+<li><dl class="simple">
+<dt>changed: Read-only trait to detect which parameters of a callback changed:</dt><dd><ul>
+<li><p>By providing <cite>changed = ‘.changed’</cite> in parameters and later in callback by checking <cite>changed(‘param’) -&gt; Bool</cite>.</p></li>
+<li><p>Directly access <cite>self.changed</cite> in a subclass and use <cite>changed(‘param’) -&gt; Bool</cite> / <cite>‘param’ in self.changed</cite>. Useful to merge callback.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>isfullscreen: Read-only trait to detect fullscreen change on python side. Can be observed as ‘.isfullscreen’ in params.</p></li>
+<li><p>params: Read-only trait for all parameters used in this interact in widget form. Can be accessed inside callbacks by observing as <cite>P = ‘.params’</cite>
+alongwith some <cite>x = True</cite> -&gt; Checkbox, and then inside a callback <cite>P.x.value = False</cite> will uncheck the Checkbox and trigger depnendent callbacks.</p></li>
+<li><p>groups: NamedTuple(controls, outputs, others) - Widget names by type</p></li>
+<li><p>outputs: tuple[Output] - Output widgets from callbacks</p></li>
 </ul>
 <p><strong>Notes</strong>:</p>
 <ul class="simple">
@@ -4110,12 +4170,12 @@ You can annotate the type in function argument with <cite>InteractBase</cite> to
 <li><p>interactive(no_args_func,) is perfectly valid and run on button click to do something like fetch latest data from somewhere.</p></li>
 </ul>
 <p><strong>Python dictionary to CSS</strong></p>
-<p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.
-There are few special rules in <cite>props</cite>:</p>
+<p>CSS is formatted using a <cite>props</cite> nested dictionary to simplify the process.</p>
+<p>There are few special rules in <cite>props</cite>:</p>
 <ul class="simple">
-<li><p>All nested selectors are joined with space, so code`’.A’: {‘.B’: … }` becomes code[‘css’]`.A .B {…}` in CSS.</p></li>
-<li><p>A ‘^’ in start of a selector joins to parent selector without space, so code`’.A’: {‘^:hover’: …}` becomes code[‘css’]`.A:hover {…}` in CSS. You can also use code`’.A:hover’` directly but it will restrict other nested keys to hover only.</p></li>
-<li><p>A list/tuple of values for a key in dict generates CSS fallback, so code`’.A’: {‘font-size’: (‘20px’,’2em’)}` becomes code[‘css’]`.A {font-size: 20px; font-size: 2em;}` in CSS.</p></li>
+<li><p>All nested selectors are joined with space, so <cite>‘.A’: {‘.B’: … }</cite> becomes <cite>.A .B {…}</cite> in CSS.</p></li>
+<li><p>A ‘^’ in start of a selector joins to parent selector without space, so <cite>‘.A’: {‘^:hover’: …}</cite> becomes <cite>.A:hover {…}</cite> in CSS. You can also use <cite>‘.A:hover’</cite> directly but it will restrict other nested keys to hover only.</p></li>
+<li><p>A list/tuple of values for a key in dict generates CSS fallback, so <cite>‘.A’: {‘font-size’: (‘20px’,’2em’)}</cite> becomes <cite>.A {font-size: 20px; font-size: 2em;}</cite> in CSS.</p></li>
 </ul>
 <p>Read about specificity of CSS selectors [here](<a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity</a>).</p>
 <p><strong>Tips</strong>:</p>
@@ -4475,7 +4535,7 @@ Number of points in each interval is at least 2 even if <cite>n</cite> is less t
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You can use return value to retrieve information, like output.f(<a href="#id10"><span class="problematic" id="id11">*</span></a>output.args, <a href="#id12"><span class="problematic" id="id13">**</span></a>output.kwargs) in a cell to plot the current state and save it.</p>
+<p>You can use return value to retrieve information, like output.f(<a href="#id2"><span class="problematic" id="id3">*</span></a>output.args, <a href="#id4"><span class="problematic" id="id5">**</span></a>output.kwargs) in a cell to plot the current state and save it.</p>
 </div>
 </dd></dl>
 
@@ -5062,11 +5122,10 @@ Last item is considered to be columns.</p></li>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=71272d9f"></script>
+</div><script src="_static/documentation_options.js?v=46dfa7f5"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     </body>
 </html>
