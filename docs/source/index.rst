@@ -23,11 +23,17 @@ Development Installation
    cd ipyvasp
    pip install -e .
 
+.. toctree::
+   :maxdepth: 2
+
+   notebooks/quickstart
+
 
 .. toctree::
    :maxdepth: 2
 
-   examples
+   auto_examples/index
+
 
 .. toctree::
    :maxdepth: 2

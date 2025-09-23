@@ -937,7 +937,7 @@ def plt2text(
             print(out_str)
 
 
-def plt2html(plt_fig=None, transparent=True):
+def plt2html(plt_fig=None, transparent=False):
     """Returns ``ipython.display.HTML(<svg of figure>)``. It clears figure after use. So ``plt.show()`` will not work after this.
 
     Parameters

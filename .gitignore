@@ -156,3 +156,6 @@ checklink/cookies.txt
 .quarto
 
 /.quarto/
+
+# docs
+auto_examples

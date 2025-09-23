@@ -1,6 +1,7 @@
 ipyvasp>=0.9.95
 furo
 nbsphinx
+sphinx-gallery
 ipywidgets>=8.0.4
 matplotlib>=3.7.5
 numpy>=1.23.2
