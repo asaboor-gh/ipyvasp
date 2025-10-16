@@ -20,6 +20,5 @@
    .. autosummary::
    
       DataSource
-      Vaspout
       Vasprun
    

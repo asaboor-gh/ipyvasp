@@ -1,4 +1,4 @@
-__all__ = ["Vasprun", "Vaspout", "minify_vasprun", "xml2dict","read"]
+__all__ = ["Vasprun", "minify_vasprun", "xml2dict","read"]
 
 import re
 from io import StringIO
@@ -14,7 +14,8 @@ from . import serializer
 
 class DataSource:
     """Base class for all data sources. It provides a common interface to access data from different sources.
-    Subclass it to get data from a source and implement the abstract methods."""
+    Subclass it to get data from a source such as newly generated vaspout.h5 file and implement the required 
+    methods with same output as done in Vasprun class."""
 
     def __init__(self, path, skipk=None):
         self._path = Path(path).absolute()
@@ -121,18 +122,6 @@ class DataSource:
             "`get_scsteps` should be implemented in a subclass. See Vasprun.get_scsteps as example."
         )
 
-
-class Vaspout(DataSource):
-    "Read data from vaspout.h5 file on demand."
-    # These methods are accessible from parent class, but need here for including in sphinx documentation
-    get_evals_dataframe = DataSource.get_evals_dataframe
-    poscar = DataSource.poscar
-    dos = DataSource.dos
-    bands = DataSource.bands
-
-    def __init__(self, path, skipk=None):
-        # super().__init__(path, skipk)
-        raise NotImplementedError("Vaspout is not implemented yet.")
 
 def read(file, start_match, stop_match=r'\n', nth_match=1, skip_last=False,apply=None):
     """Reads a part of the file between start_match and stop_match and returns a generator. It is lazy and fast.

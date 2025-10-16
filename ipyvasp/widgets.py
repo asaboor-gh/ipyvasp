@@ -438,7 +438,7 @@ class PropsPicker(VBox): # NOTE: remove New Later
 
     Parameters
     ----------
-    system_summary : (Vasprun,Vaspout).summary
+    system_summary : DataSource.summary such as impelemented in Vasprun.
     N : int, default is 3, number of projections to pick.
     
     You can observe `projections` trait.
@@ -764,9 +764,7 @@ class BandsWidget(_ThemedFigureInteract):
     @dl.callback('out-data')
     def _load_data(self, file):
         if not file: return  # First time not available
-        self._bands = (
-            vp.Vasprun(file) if file.parts[-1].endswith('xml') else vp.Vaspout(file)
-        ).bands
+        self._bands = vp.Vasprun(file).bands
         self.params.ppicks.update(self.bands.source.summary)
         self.params.krange.max = self.bands.source.summary.NKPTS - 1
         self.params.krange.tooltip = f"Includes {self.bands.source.get_skipk()} non-zero weight kpoints"
@@ -912,7 +910,7 @@ class BandsWidget(_ThemedFigureInteract):
     
     @property
     def source(self):
-        "Returns data source object such as Vasprun or Vaspout."
+        "Returns data source object such as Vasprun or user defined subclass of DataSource."
         return self.bands.source
 
     @property
