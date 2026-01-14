@@ -231,6 +231,21 @@ def periodic_table(selection=None):
     ax.set(xlim=[-0.6,17.6],ylim=[9.6,-0.6]) # to show borders correctly
     return ax
 
+def _write_text(dest, text: str, *, encoding: str = "utf-8") -> None:
+    "Write unicode text either to a path-like destination or to a writable text stream."
+    # Treat file-like objects (streams) first (avoid Path("CON") / weird Windows devices, etc.)
+    if hasattr(dest, "write") and callable(getattr(dest, "write")):
+        dest.write(text)
+        # Best-effort flush (sys.stdout has it, StringIO doesn't need it)
+        flush = getattr(dest, "flush", None)
+        if callable(flush):
+            flush()
+        return
+
+    # Otherwise treat as a filesystem path
+    path = Path(dest)
+    with path.open("w", encoding=encoding) as f:
+        f.write(text)
 
 def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=False, comment="", scale=None, system=None):
     """Writes POSCAR data to a file or returns string
@@ -285,19 +300,18 @@ def write_poscar(poscar_data, outfile=None, selective_dynamics=None, overwrite=F
         pos_list = [f"{p}   {s}" for p, s in zip(pos_list, sd)]
 
     out_str += "\n".join(pos_list)
-    if outfile:
-        path = Path(outfile)
-        if not path.is_file():
-            with path.open("w", encoding="utf-8") as f:
-                f.write(out_str)
-
-        elif overwrite and path.is_file():
-            with path.open("w", encoding="utf-8") as f:
-                f.write(out_str)
+    if outfile is not None:
+        # If it's a writable stream (sys.stdout, StringIO, open file handle), write directly.
+        if hasattr(outfile, "write") and callable(getattr(outfile, "write")):
+            _write_text(outfile, out_str)
         else:
-            raise FileExistsError(
-                f"{outfile!r} exists, can not overwrite, \nuse overwrite=True if you want to change."
-            )
+            # Otherwise treat as path-like with overwrite protection.
+            path = Path(outfile)
+            if path.exists() and not overwrite:
+                raise FileExistsError(
+                    f"{str(path)!r} exists, can not overwrite; use overwrite=True."
+                )
+            _write_text(path, out_str)
     else:
         print(out_str)
 
@@ -555,9 +569,8 @@ class InvokeMaterialsProject:
                 return f"Structure(unit={self.unit},mp_id={self.mp_id!r},symbol={self.symbol!r},crystal={self.crystal!r},cif='{self._cif[:10]}...')"
 
             def write_cif(self, outfile=None):
-                if isinstance(outfile, str):
-                    with open(outfile, "w") as f:
-                        f.write(self._cif)
+                if outfile is not None:
+                    _write_text(outfile, self._cif)
                 else:
                     print(self._cif)
 
@@ -640,12 +653,12 @@ def get_kpath(
     ibzkpt : PathLike
         Path to ibzkpt file, required for HSE calculations.
     outfile : PathLike
-        Path/to/file to write kpoints.
+        Path/to/file to write kpoints. Use sys.stdout to print to console.
     rec_basis : array_like
         Reciprocal basis 3x3 array to use for calculating uniform points.
 
 
-    If `outfile = None`, a tuple of header and kpoints array (Nx3) is returned.
+    If `outfile = None`, kpoints array (Nx3) is returned.
     """
     if isinstance(kpoints, str):
         kpoints = _str2kpoints(kpoints)
@@ -766,10 +779,9 @@ def get_kpath(
     )
     out_str = "{}\n{}".format(top_str, out_str)
     if outfile != None:
-        with open(outfile, "w", encoding="utf-8") as f:  # allow unicode
-            f.write(out_str)
+        _write_text(outfile, out_str)
     else:
-        return top_str, points  # return points as well for any processing by user.
+        return points  # return points for any processing by user.
 
 
 # Cell
@@ -799,12 +811,12 @@ def get_kmesh(
     ibzkpt : PathLike
         Path to ibzkpt file, required for HSE calculations.
     outfile : PathLike
-        Path/to/file to write kpoints.
+        Path/to/file to write kpoints. Use sys.stdout to print to console.
     endpoint : bool
         Default True, include endpoints in mesh at edges away from origin.
 
 
-    If `outfile = None`, a tuple of header and kpoints array (Nx3) is returned.
+    If `outfile = None`, kpoints array (Nx3) is returned.
 
     """
     if len(args) not in [1, 3]:
@@ -879,10 +891,9 @@ def get_kmesh(
     )
     out_str = "{}\n{}".format(top_str, out_str)
     if outfile != None:
-        with open(outfile, "w", encoding="utf-8") as f:
-            f.write(out_str)
+        _write_text(outfile, out_str)
     else:
-        return top_str, points # return points as well for any processing by user.
+        return points # return points for any processing by user.
 
 
 # Cell
