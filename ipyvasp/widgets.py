@@ -275,9 +275,9 @@ class Files:
         "Get KPathWidget instance with these files."
         return KPathWidget(files = self.with_name('POSCAR'), height = height)
 
-    def bands_widget(self, height='450px'):
+    def bands_widget(self, height='450px',store_clicks=None):
         "Get BandsWidget instance with these files."
-        return BandsWidget(files=self._files, height=height)
+        return BandsWidget(files=self._files, height=height, store_clicks=store_clicks)
     
     def map(self,func, to_df=False):
         """Map files to a function that takes path as argument. 

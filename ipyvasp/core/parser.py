@@ -14,7 +14,7 @@ from . import serializer
 
 class DataSource:
     """Base class for all data sources. It provides a common interface to access data from different sources.
-    Subclass it to get data from a source such as newly generated vaspout.h5 file and implement the required 
+    Subclass it to get data from a source such as recently implemented `vaspout.h5` file and implement the required 
     methods with same output as done in Vasprun class."""
 
     def __init__(self, path, skipk=None):

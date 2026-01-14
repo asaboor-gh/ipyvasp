@@ -645,7 +645,7 @@ def get_kpath(
         Reciprocal basis 3x3 array to use for calculating uniform points.
 
 
-    If `outfile = None`, KPONITS file content is printed.
+    If `outfile = None`, a tuple of header and kpoints array (Nx3) is returned.
     """
     if isinstance(kpoints, str):
         kpoints = _str2kpoints(kpoints)
@@ -769,7 +769,7 @@ def get_kpath(
         with open(outfile, "w", encoding="utf-8") as f:  # allow unicode
             f.write(out_str)
     else:
-        print(out_str)
+        return top_str, points  # return points as well for any processing by user.
 
 
 # Cell
@@ -804,7 +804,7 @@ def get_kmesh(
         Default True, include endpoints in mesh at edges away from origin.
 
 
-    If `outfile = None`, KPOINTS file content is printed.
+    If `outfile = None`, a tuple of header and kpoints array (Nx3) is returned.
 
     """
     if len(args) not in [1, 3]:
@@ -882,7 +882,7 @@ def get_kmesh(
         with open(outfile, "w", encoding="utf-8") as f:
             f.write(out_str)
     else:
-        print(out_str)
+        return top_str, points # return points as well for any processing by user.
 
 
 # Cell
