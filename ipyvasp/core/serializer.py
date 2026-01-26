@@ -765,10 +765,51 @@ class BrZoneData(Dict2Data):
         d = self.copy().to_dict()
         d.update({"faces": faces, "vertices": vertices, "_specials": specials})
         return self.__class__(d)
+    
+    def tile(self, nxyz, filter=None):
+        """Create a tiled array of BZ centers for visualization.
+    
+        Parameters
+        ----------
+        nxyz : list or tuple of 3 ints
+            Number of tiles along each cartesian direction [nx, ny, nz].
+            Must be 3 positive integers.
+        filter : callable, optional
+            Function filter(x,y,z) that takes cartesian coordinates and returns bool.
+            
+        Returns
+        -------
+        numpy.ndarray
+            Array of shape (N, 3) containing BZ center positions in fractional coordinates.
+            
+        Examples
+        --------
+        >>> centers = bz_data.tile([3, 3, 3])
+        >>> centers = bz_data.tile([5, 5, 1], filter=lambda x,y,z: x**2 + y**2 <= 2**2)
+        """
+        if not isinstance(nxyz, (list, tuple, np.ndarray)) or len(nxyz) != 3:
+            raise ValueError("nxyz must be a list/tuple/array of 3 integers")
+        
+        for i, n in enumerate(nxyz):
+            if not isinstance(n, int) or n < 1:
+                raise ValueError(f"nxyz[{i}] must be a positive integer")
+        
+        xyz = self.to_cartesian(np.indices(np.ceil(nxyz).astype(int)).reshape((3,-1)).T) 
+        # Apply filter if provided
+        if filter is not None:
+            if not callable(filter):
+                raise TypeError("filter must be callable")
+            
+            mask = np.array([filter(x, y, z) for x, y, z in xyz])
+            xyz = xyz[mask]
+        
+        # Convert to fractional coordinates and return
+        return self.to_fractional(xyz)
 
 
 class CellData(Dict2Data):
     splot, iplot = _methods_imported()
+    tile = BrZoneData.tile
     _req_keys = ("basis", "faces", "vertices")
 
     def __init__(self, d):

@@ -909,6 +909,7 @@ def splot_bz(
     shade=True,
     alpha=0.4,
     zoffset=0,
+    center=(0,0,0),
     **kwargs,
 ):
     """Plots matplotlib's static figure of BZ/Cell. You can also plot in 2D on a 3D axes.
@@ -937,8 +938,9 @@ def splot_bz(
     alpha : float
         Opacity of filling in range [0,1]. Increase for clear viewpoint.
     zoffset : float
-        Only used if plotting in 2D over a 3D axis. Default is 0. Any plane 'xy','yz' etc.
-
+        Only used if plotting in 2D over a 3D axis. Default is 0. Any plane 'xy','yz' etc can be offset to it's own normal.
+    center : (3,) array_like
+        Translation of origin in *basis coordinates* (fractional along the plotted basis). Use this to tile BZ with help of ``BrZoneData.tile`` fuction.
 
     kwargs are passed to `plt.plot` or `Poly3DCollection` if `fill=True`.
 
@@ -962,6 +964,17 @@ def splot_bz(
         if v not in [0, 1, 2]:
             raise ValueError(f"`vectors` expects values in [0,1,2], got {vectors!r}")
 
+    if not isinstance(center, (tuple, list, np.ndarray)) or len(center) != 3:
+        raise ValueError("`center` must be a 3-sequence like (0,0,0) in basis coordinates.")
+    try:
+        center = np.array(center, dtype=float).reshape(3)
+    except Exception as e:
+        raise ValueError(f"`center` must be numeric, got {center!r}") from e
+    
+    origin = to_R3(bz_data.basis, [center])[0]  # (3,) cartesian shift
+    bz_data = bz_data.copy()
+    bz_data.vertices[:,:] += origin # apply on view, assignment is restricted
+    
     name = kwargs.pop("label", None)  # will set only on single line
     kwargs.pop("zdir", None)  # remove , no need
     is_subzone = hasattr(bz_data, "_specials")  # For subzone
@@ -1031,13 +1044,14 @@ def splot_bz(
 
         if vectors and not is_subzone:
             s_basis = to_plane(normals[plane], bz_data.basis[(vectors,)])
+            s_origin = to_plane(normals[plane], [origin]*len(vectors))
 
             for k, b in zip(vectors, s_basis):
                 x, y = b[idxs[plane]]
                 l = r" ${}_{} $".format(_label, k + 1)
                 l = l + "\n" if y < 0 else "\n" + l
                 ha = "right" if x < 0 else "left"
-                xyz = 0.8 * b + z0 if is3d else np.array([0.8 * x, 0.8 * y])
+                xyz = 0.8 * b + z0 + s_origin[0] if is3d else np.array([0.8 * x, 0.8 * y]) + s_origin[0, idxs[plane]]
                 ax.text(
                     *xyz, l, va="center", ha=ha, clip_on=True
                 )  # must clip to have limits of axes working.
@@ -1045,7 +1059,7 @@ def splot_bz(
                     *(xyz / 0.8), color="w", s=0.0005
                 )  # Must be to scale below arrow.
             if is3d:
-                XYZ, UVW = (np.ones_like(s_basis) * z0).T, s_basis.T
+                XYZ, UVW = (np.ones_like(s_basis) * z0 + s_origin).T, s_basis.T
                 quiver3d(
                     *XYZ,
                     *UVW,
@@ -1056,10 +1070,8 @@ def splot_bz(
                     mutation_scale=7,
                 )
             else:
-                s_zero = [0 for _ in s_basis]  # either 3 or 2.
                 ax.quiver(
-                    s_zero,
-                    s_zero,
+                    *s_origin[:, idxs[plane]].T,
                     *s_basis[:, idxs[plane]].T,
                     lw=0.7,
                     color=color,
@@ -1126,9 +1138,9 @@ def splot_bz(
 
         if vectors and not is_subzone:
             for k, v in enumerate(0.35 * bz_data.basis):
-                ax.text(*v, r"${}_{}$".format(_label, k + 1), va="center", ha="center")
+                ax.text(*(v + origin), r"${}_{}$".format(_label, k + 1), va="center", ha="center")
 
-            XYZ, UVW = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], 0.3 * bz_data.basis.T
+            XYZ, UVW = np.array([origin] * 3).T, 0.3 * bz_data.basis.T
             quiver3d(
                 *XYZ, *UVW, C="k", L=0.7, ax=ax, arrowstyle="-|>", mutation_scale=7
             )
@@ -1147,7 +1159,7 @@ def splot_bz(
         ax.set_zlabel(label.format("z"))
 
     if vname == "b":  # These needed for splot_kpath internally
-        type(bz_data)._splot_kws = dict(plane=plane, zoffset=zoffset, ax=ax)
+        type(bz_data)._splot_kws = dict(plane=plane, zoffset=zoffset, ax=ax, shift=origin)
 
     return ax
 
@@ -1155,7 +1167,7 @@ def splot_bz(
 def splot_kpath(
     bz_data, kpoints, labels=None, fmt_label=lambda x: (x, {"color": "blue"}), **kwargs
 ):
-    """Plot k-path over existing BZ. It will take ``ax``, ``plane`` and ``zoffset`` internally from most recent call to ``splot_bz``/``bz.splot``.
+    """Plot k-path over last plotted BZ. It will take ``ax``, ``plane`` and ``zoffset`` internally from most recent call to ``splot_bz``/``bz.splot``.
 
     Parameters
     ----------
@@ -1181,9 +1193,9 @@ def splot_kpath(
     if not np.ndim(kpoints) == 2 and np.shape(kpoints)[-1] == 3:
         raise ValueError("kpoints must be 2D array of shape (N,3)")
 
-    plane, ax, zoffset = [
+    plane, ax, zoffset, shift = [
         bz_data._splot_kws.get(attr, default)  # class level attributes
-        for attr, default in zip(["plane", "ax", "zoffset"], [None, None, 0])
+        for attr, default in zip(["plane", "ax", "zoffset", "shift"], [None, None, 0,np.array([0.0, 0.0, 0.0])])
     ]
 
     ijk = [0, 1, 2]
@@ -1219,9 +1231,9 @@ def splot_kpath(
     if fmt_label is None:
         fmt_label = lambda x: (x, {"color": "blue"})
 
-    _validate_label_func(fmt_label,labels[0])
+    _validate_label_func(fmt_label,labels[0]) 
 
-    coords = bz_data.to_cartesian(kpoints)
+    coords = bz_data.to_cartesian(kpoints) + shift
     if _zoffset and plane:
         normal = (
             [0, 0, 1] if plane in "xyx" else [0, 1, 0] if plane in "xzx" else [1, 0, 0]
