@@ -218,7 +218,7 @@ def periodic_table(selection=None):
     names = np.array(names)[fidx]
     
     # We are adding patches, because imshow does not properly appear in PDF of latex
-    ax = ptk.get_axes((7, 3.9),left=0.01,right=0.99,top=0.99,bottom=0.01)
+    ax = ptk.get_axes(1, (7, 3.9),left=0.01,right=0.99,top=0.99,bottom=0.01)
     patches = np.array([Rectangle(offset,0.9 if i in [92,110] else 1,1) for i, offset in zip(fidx,offsets)])
     pc = PatchCollection(patches, facecolors=fc, edgecolors=ec,linewidths=(0.7,))
     ax.add_collection(pc)

@@ -21,7 +21,7 @@ poscar = ipv.POSCAR.new(
 poscar.write("POSCAR",overwrite=True) # need it later
 
 site_kws = dict(alpha=1)
-ax1, ax2, ax3 = ipv.get_axes((8,3),ncols=3, axes_3d=[0,1,2])
+ax1, ax2, ax3 = ipv.get_axes(3, (8,3), axes_3d=[0,1,2])
 
 poscar.splot_lattice( ax = ax1, fill = False,label='original',
     site_kws=site_kws)
