@@ -1,6 +1,7 @@
 from uuid import uuid1
 from io import BytesIO
 
+import types
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -124,111 +125,192 @@ def quiver3d(X, Y, Z, U, V, W, ax=None, C="r", L=0.7, mutation_scale=10, **kwarg
 
 
 def get_axes(
-    figsize=(3.4, 2.6),
-    nrows=1,
-    ncols=1,
-    widths=[],
-    heights=[],
-    axes_off=[],
-    axes_3d=[],
-    sharex=False,
-    sharey=False,
-    azim=45,
-    elev=15,
-    ortho3d=True,
-    **subplots_adjust_kwargs,
-):
-    """Returns axes of initialized figure, based on plt.subplots().
-    If you want to access parent figure, use ax.get_figure() or current figure as plt.gcf().
-
+    shape=None, figsize=(3.4, 2.6), 
+    widths=None, heights=None, 
+    sharex=False, sharey=False, 
+    layout='constrained',
+    axes_3d=None, axes_off=None,
+    axes_kws=None, fig_kws=None,
+    ortho3d=True, azim=45, elev=15, 
+    **grid_spec_kws):
+    r"""Returns axes of initialized figure, based on given shape.
+    
     Parameters
     ----------
-    figsize : tuple
-        Tuple (width, height). Default is (3.4,2.6).
-    nrows : int
-        Default 1.
-    ncols : int
-        Default 1.
-    widths : list
-        List with len(widths)==nrows, to set width ratios of subplots.
-    heights : list
-        List with len(heights)==ncols, to set height ratios of subplots.
-    sharex : bool
-        Share x-axis between plots, this removes shared ticks automatically.
-    sharey : bool
-        Share y-axis between plots, this removes shared ticks automatically.
-    axes_off : bool or list
-        Turn off axes visibility, If `nrows = ncols = 1, set True/False`.
-        If anyone of `nrows or ncols > 1`, provide list of axes indices to turn off.
-        If both `nrows and ncols > 1`, provide list of tuples (x_index,y_index) of axes.
-    axes_3d : bool or list
-        Change axes to 3D. If `nrows = ncols = 1, set True/False`.
-        If anyone of `nrows or ncols > 1`, provide list of axes indices to turn off.
-        If both `nrows and ncols > 1`, provide list of tuples (x_index,y_index) of axes.
-    ortho3d : bool
-        Only works for 3D axes. If True, x,y,z are orthogonal, otherwise perspective.
-
-
-    `azim, elev` are passed to `ax.view_init`. Defualt values are 45,15 respectively.
-
-    `subplots_adjust_kwargs` are passed to `plt.subplots_adjust`.
-
+    shape : int, tuple, list, or str, optional
+        - int: Number of columns in a 1xN grid.
+        - tuple (R, C): Number of rows and columns.
+        - str: Mosaic layout (e.g., "AA;BC" or "A\\nB"). Supports ';' and '\\n' as row separators.
+        - list: Mosaic layout as a list of lists.
+    figsize : tuple, optional
+        Width and height of the figure in inches. Defaults to (3.4, 2.6).
+    widths, heights : list, optional
+        Width and height ratios for the grid or mosaic.
+    sharex, sharey : bool, optional
+        If True, axes will share the x or y axis. Defaults to False.
+    layout : str, optional
+        The layout engine to use ('constrained', 'tight', or None). 
+        Set to None if using manual hspace/wspace inside grid_spec_kws.
+    axes_3d : bool or list/tuple of keys, optional
+        - True: All created axes will be 3D projections.
+        - list/tuple: Only specified keys/indices will be 3D.
+    axes_off : int, str, or list of keys, optional
+        Keys or indices of axes to turn off (hide spines, ticks, and labels).
+    axes_kws : dict, optional
+        A dictionary of keywords for specific axes. 
+        - Key -1: Applied to all axes (global style).
+        - Key [int/str]: Applied to specific axis index or mosaic label.
+    fig_kws : dict, optional
+        Additional keywords passed to plt.figure().
+    ortho3d : bool, optional
+        If True, uses orthographic projection for 3D axes. Defaults to True.
+    azim, elev : int, optional
+        Initial viewing angles for 3D axes.
+    **grid_spec_kws : dict
+        Keywords passed to GridSpec (e.g., hspace, wspace, left, right).
+        
+    Returns
+    -------
+    matplotlib.axes.Axes, numpy.ndarray, or dict
+        - A single Axes object if 1x1.
+        - An array of Axes if grid mode.
+        - A dictionary of Axes mapping labels to objects if mosaic mode.
+        
+    
     .. note::
         There are extra methods added to each axes (only 2D) object.
         ``add_text``, ``add_legend``, ``add_colorbar``, ``color_wheel``,
-        ``break_spines``, ``adjust_axes``, ``append_axes``, ``join_axes``.
+        ``break_spines``, ``adjust_axes``, ``append_axes``, ``join_axes`` and ``stitch_axes``.
     """
-    if figsize[0] <= 2.38:
-        mpl.rc("font", size=8)
-    gs_kw = dict({})  # Define Empty Dictionary.
-    if widths != [] and len(widths) == ncols:
-        gs_kw = dict({**gs_kw, "width_ratios": widths})
-    if heights != [] and len(heights) == nrows:
-        gs_kw = dict({**gs_kw, "height_ratios": heights})
-    fig, axs = plt.subplots(
-        nrows, ncols, figsize=figsize, gridspec_kw=gs_kw, sharex=sharex, sharey=sharey
-    )
-    proj = {"proj_type": "ortho"} if ortho3d else {}  # For 3D only
-    if nrows * ncols == 1:
-        adjust_axes(ax=axs)
-        if axes_off == True:
-            axs.set_axis_off()
-        if axes_3d == True:
-            pos = axs.get_position()
-            axs.remove()
-            axs = fig.add_axes(pos, projection="3d", azim=azim, elev=elev, **proj)
-            setattr(axs, add_legend.__name__, add_legend.__get__(axs, type(axs)))
+    if axes_kws is not None and not isinstance(axes_kws, dict):
+        raise TypeError("axes_kws must be None or a dictionary.")
 
+    if fig_kws is not None and not isinstance(fig_kws, dict):
+        raise TypeError("fig_kws must be None or a dictionary.")
+    
+    if axes_3d is not None and not isinstance(axes_3d, (bool, list, tuple)):
+         raise TypeError("axes_3d must be None, True, or a list/tuple of int/str.")
+        
+    # Validate keys and values
+    axes_kws = axes_kws or {}
+    for key, value in axes_kws.items():
+        if not isinstance(key, (str, int)):
+            raise TypeError(f"axes_kws keys must be str or int, got {type(key).__name__} at key {key}")
+        if not isinstance(value, dict):
+            raise TypeError(f"axes_kws values must be dicts, got {type(value).__name__} for key '{key}'")
+            
+    global_kw = axes_kws.pop(-1, {}) # The 'all-axes' style
+    p3d = {"projection": "3d", "proj_type": "ortho" if ortho3d else "persp"}
+    if axes_3d is True:
+        global_kw.update(p3d) # if user wants it
+
+    if axes_3d in (None, True, False):
+        axes_3d = () # done for it above
+    elif not isinstance(axes_3d, (list, tuple)): # If it's not None/True/False/list/tuple, it's an invalid type
+        raise TypeError(f"axes_3d must be None, True, or a list/tuple of keys. Got {type(axes_3d).__name__}")
+        
+    if shape is None:
+        nr, nc, mode = 1, 1, 'grid'
+    elif isinstance(shape, int):
+        nr, nc = 1, shape
+        mode = 'grid'
+    elif isinstance(shape, (tuple, list)):
+        if len(shape) == 2 and all(isinstance(i, int) for i in shape):
+            nr, nc = shape; mode = 'grid'
+        elif all(isinstance(s, (str, list)) for s in shape):
+            mode = 'mosaic'
+        else: raise ValueError("shape must be (rows, cols) or a mosaic design.")
+    else: mode = 'mosaic'
+
+    if figsize[0] <= 2.38: mpl.rc("font", size=8)
+
+    if widths: grid_spec_kws['width_ratios'] = widths
+    if heights: grid_spec_kws['height_ratios'] = heights
+    
+    f_kws = fig_kws or {}
+    f_kws.update({'figsize': figsize, 'layout': layout})
+    if any(k in grid_spec_kws for k in ['hspace', 'wspace']):
+        f_kws['layout'] = None
+    
+    fig = plt.figure(**f_kws)
+
+    def is_match(target, key):
+        if target is True and (key in [0, "ax"]): return True
+        search = target if isinstance(target, (list, tuple)) else [target]
+        return key in search if target is not None else False
+
+    axs_dict = {}
+    if mode == 'mosaic':
+        pkws = axes_kws.copy()
+        for a3d in axes_3d:
+            pkws[a3d] = {**p3d, **pkws.get(a3d, {})}
+        axs_dict = fig.subplot_mosaic(shape, sharex=sharex, sharey=sharey, 
+            subplot_kw=global_kw, gridspec_kw=grid_spec_kws, per_subplot_kw=pkws)
     else:
-        _ = [adjust_axes(ax=ax) for ax in axs.ravel()]
-        _ = [axs[inds].set_axis_off() for inds in axes_off if axes_off != []]
-        if axes_3d != []:
-            for inds in axes_3d:
-                pos = axs[inds].get_position()
-                axs[inds].remove()
-                axs[inds] = fig.add_axes(
-                    pos, projection="3d", azim=azim, elev=elev, **proj
-                )
-    try:
-        for ax in np.array([axs]).flatten():
-            for f in [
-                add_text,
-                add_legend,
-                add_colorbar,
-                color_wheel,
-                color_cube,
-                break_spines,
-                adjust_axes,
-                append_axes,
-            ]:
-                if ax.name != "3d":
-                    setattr(ax, f.__name__, f.__get__(ax, type(ax)))
-    except:
-        pass
+        gs = fig.add_gridspec(nr, nc, **grid_spec_kws)
+        main_ax = None
+        for i in range(nr * nc):
+            kw = {**global_kw, **axes_kws.get(i, {})}
+            if is_match(axes_3d, i): kw.update(p3d)
+            if main_ax and not kw.get("projection") == "3d":
+                if sharex: kw.setdefault('sharex', main_ax)
+                if sharey: kw.setdefault('sharey', main_ax)
+            ax = fig.add_subplot(gs[i // nc, i % nc], **kw)
+            if i == 0: main_ax = ax
+            axs_dict[i] = ax
 
-    plt.subplots_adjust(**subplots_adjust_kwargs)
-    return axs
+    for key, ax in axs_dict.items():
+        if is_match(axes_off, key): ax.set_axis_off()
+        if ax.name == "3d": ax.view_init(elev=elev, azim=azim)
+        _monkey_patch(ax)
 
+    if len(axs_dict) == 1: return list(axs_dict.values())[0]
+    return axs_dict if mode == 'mosaic' else np.array([axs_dict[k] for k in sorted(axs_dict.keys())], dtype=object)
+
+def _monkey_patch(ax):
+    if ax.name != "3d": 
+        for f in (
+            add_text, add_legend, add_colorbar, 
+            color_wheel, color_cube, break_spines, 
+            adjust_axes, append_axes, join_axes, stitch_axes
+        ):
+            adjust_axes(ax)
+            if not hasattr(ax, f.__name__): # avoid resetting
+                setattr(ax, f.__name__, types.MethodType(f, ax))
+            
+def stitch_axes(ax1, ax2, symbol="\u2571", **kwargs):
+    """Simulates broken axes by stitching ax1 and ax2 together. Need to fix heights/widths according
+    to given data for real aspect. Also plot the same data on each axes and set axes limits.
+
+    Parameters
+    ----------
+    symbol: str
+        Defult is u'\u2571'. Its at 60 degrees. so you can apply rotation to make it any angle.
+
+
+    kwargs are passed to plt.text.
+    """
+    p1 = ax1.get_position().get_points().mean(axis=0)
+    p2 = ax2.get_position().get_points().mean(axis=0)
+    is_vertical = abs(p1[1] - p2[1]) > abs(p1[0] - p2[0])
+    if is_vertical:
+        top, bot = (ax1, ax2) if p1[1] > p2[1] else (ax2, ax1)
+        top.spines['bottom'].set_visible(False)
+        top.tick_params(bottom=False, labelbottom=False)
+        bot.spines['top'].set_visible(False)
+        bot.tick_params(top=False, labeltop=False)
+        for ax, y in [(top, 0), (bot, 1)]:
+            kw = {**kwargs, 'transform': ax.transAxes, 'ha': 'center', 'va': 'center', 'clip_on': False}
+            [ax.text(x, y, symbol, **kw) for x in [0, 1]]
+    else:
+        left, right = (ax1, ax2) if p1[0] < p2[0] else (ax2, ax1)
+        left.spines['right'].set_visible(False)
+        left.tick_params(right=False, labelright=False)
+        right.spines['left'].set_visible(False)
+        right.tick_params(left=False, labelleft=False)
+        for ax, x in [(left, 1), (right, 0)]:
+            kw = {**kwargs, 'transform': ax.transAxes, 'ha': 'center', 'va': 'center', 'clip_on': False}
+            [ax.text(x, y, symbol, **kw) for y in [0, 1]]
 
 def adjust_axes(
     ax=None,
@@ -332,18 +414,7 @@ def join_axes(ax1, ax2, **kwargs):
     ax1.remove()
     ax2.remove()
     new_ax = fig.add_axes(new_bbox, **kwargs)
-    _ = adjust_axes(new_ax)
-    for f in [
-        add_text,
-        add_legend,
-        add_colorbar,
-        color_wheel,
-        break_spines,
-        adjust_axes,
-        append_axes,
-    ]:
-        if new_ax.name != "3d":
-            setattr(new_ax, f.__name__, f.__get__(new_ax, type(new_ax)))
+    _monkey_patch(new_ax)
     return new_ax
 
 
@@ -362,6 +433,9 @@ def break_spines(ax, spines, symbol="\u2571", **kwargs):
 
 
     kwargs are passed to plt.text.
+    
+    .. note::
+        Use ``stitch_axes` for better and automatically hiding spines.
     """
     kwargs.update(transform=ax.transAxes, ha="center", va="center")
     _spines = [spines] if isinstance(spines, str) else spines
@@ -523,18 +597,12 @@ def add_colorbar(
     if cax is None:
         position = "right" if vertical == True else "top"
         cax = append_axes(ax, position=position, size="5%", pad=0.05)
-    if cmap_or_clist is None:
-        colors = np.array(
-            [
-                [1, 0, 1],
-                [1, 0, 0],
-                [1, 1, 0],
-                [0, 1, 0],
-                [0, 1, 1],
-                [0, 0, 1],
-                [1, 0, 1],
-            ]
-        )
+    
+    mappable = ax.images[-1] if ax.images else ax.collections[-1] if ax.collections else None
+    if cmap_or_clist is None and mappable is not None:
+        _hsv_ = mappable.get_cmap()
+    elif cmap_or_clist is None:
+        colors = np.array([[1,0,1], [1,0,0], [1,1,0], [0,1,0], [0,1,1], [0,0,1], [1,0,1]])
         _hsv_ = LSC.from_list("_hsv_", colors, N=N)
     elif isinstance(cmap_or_clist, (list, np.ndarray)):
         try:
@@ -542,16 +610,26 @@ def add_colorbar(
         except Exception as e:
             print(e, "\nFalling back to default color map!")
             _hsv_ = None  # fallback
-    elif isinstance(cmap_or_clist, str):
-        _hsv_ = cmap_or_clist  # colormap name
     else:
-        _hsv_ = None  # default fallback
+        _hsv_ = cmap_or_clist 
+
+    # Extract vmin/vmax if not provided
+    if mappable is not None:
+        d_min, d_max = mappable.get_clim()
+        vmin = vmin if vmin is not None else d_min
+        vmax = vmax if vmax is not None else d_max
+    
+    # Fallback if no mappable exists and user didn't provide limits
+    vmin = 0 if vmin is None else vmin
+    vmax = 1 if vmax is None else vmax
 
     if ticks != []:
         if ticks is None:  # should be before labels
-            ticks = np.linspace(1 / 6, 5 / 6, 3, endpoint=True)
+            ticks = np.linspace(vmin, vmax, 3, endpoint=True)
             if ticklabels is None:
                 ticklabels = ticks.round(digits).astype(str)
+            # Renormalize ticks after assigning ticklabels
+            ticks = (ticks - vmin) / (vmax - vmin)
 
         elif isinstance(ticks, (list, tuple, np.ndarray)):
             ticks = np.array(ticks)
@@ -562,6 +640,7 @@ def add_colorbar(
 
             if ticklabels is None:
                 ticklabels = ticks.round(digits).astype(str)
+        
             # Renormalize ticks after assigning ticklabels
             ticks = (ticks - _vmin) / (_vmax - _vmin)
     else:
@@ -580,7 +659,7 @@ def add_colorbar(
         grid_color=(1, 1, 1, 0),
         grid_alpha=0,
     )
-    ticks_param.update({tickloc: True})  # Only show on given side
+    ticks_param.update({tickloc: True,"labelsize":fontsize})  # Only show on given side
     cax.tick_params(**ticks_param)
     if vertical == False:
         cax.imshow(
@@ -607,8 +686,6 @@ def add_colorbar(
         cax.set_yticklabels(ticklabels, rotation=90, va="center")
         cax.set_ylim([0, 1])  # enforce limit
 
-    for tick in cax.xaxis.get_major_ticks():
-        tick.label.set_fontsize(fontsize)
     for child in cax.get_children():
         if isinstance(child, mpl.spines.Spine):
             child.set_color((1, 1, 1, 0.4))
@@ -644,10 +721,9 @@ def color_wheel(
     if ax is None:
         ax = get_axes()
     if colormap is None:
-        try:
-            colormap = plt.cm.get_cmap("hsv")
-        except:
-            colormap = "viridis"
+        mappable = ax.images[-1] if ax.images else ax.collections[-1] if ax.collections else None
+        colormap = mappable.get_cmap() if mappable is not None else "hsv"
+    
     pos = ax.get_position()
     ratio = pos.height / pos.width
     cpos = [

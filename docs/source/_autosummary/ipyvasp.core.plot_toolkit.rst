@@ -25,5 +25,6 @@
       plt2html
       plt2text
       quiver3d
+      stitch_axes
       webshow
    
