@@ -810,14 +810,14 @@ class BrZoneData(Dict2Data):
                 pts = pts[mask]
             return pts
         
-        # Orthogonal/Cartesian-aligned case
-        target_span = np.linalg.norm(self.basis.sum(axis=0)) * (np.array(nxyz) - 1)
+        # Orthogonal/Cartesian-aligned case, span of cell must be considered in cartesian space
+        target_span = (np.array(nxyz) - 1) * np.ptp(self.basis, axis=0) # total span in cartesian space
         
-        # 2. Map Cartesian box corners to Lattice Space
+        # Map Cartesian box corners to Lattice Space
         corners_cart = np.array([[i, j, k] for i in [0, 1] for j in [0, 1] for k in [0, 1]]) * target_span
         corners_frac = self.to_fractional(corners_cart)
         
-        # 3. Find integer bounds (Must use +1 for inclusive arange)
+        # Find integer bounds (Must use +1 later for inclusive arange)
         n_min = np.floor(corners_frac.min(axis=0)).astype(int)
         n_max = np.ceil(corners_frac.max(axis=0)).astype(int)
         
@@ -825,18 +825,13 @@ class BrZoneData(Dict2Data):
         grid_n = np.array(np.meshgrid(*ranges, indexing='ij')).T.reshape(-1, 3)
         
         all_pts = self.to_cartesian(grid_n)
-        
-        # 4. Clipping with a slightly more generous epsilon to prevent missing bridge points
-        eps = 1e-9
+         
+        eps = 1e-9 # Clip points to target span in cartesian space
         mask = (all_pts >= -eps).all(axis=1) & (all_pts <= target_span + eps).all(axis=1)
         pts = all_pts[mask]
-        
-        N = np.cumprod(nxyz)[-1]
-        if len(pts) > N: # box becomes too much inclusive at larger points, restrict that
-            dist = np.linalg.norm(pts - pts.mean(axis=0), axis=1)
-            pts = pts[np.argsort(dist)[:N]]
+        pts = pts - pts.min(axis=0) # shift to zero, in case of cell, they don't start at zero
 
-        # 5. Apply Global Normalized filter (preserves geometry)
+        # Apply Global Normalized filter (preserves geometry)
         if filter and len(pts) > 0:
             p_min, p_max = pts.min(axis=0), pts.max(axis=0)
             global_range = np.max(p_max - p_min) or 1.0
