@@ -766,16 +766,19 @@ class BrZoneData(Dict2Data):
         d.update({"faces": faces, "vertices": vertices, "_specials": specials})
         return self.__class__(d)
     
-    def tile(self, nxyz, filter=None):
-        """Create a tiled array of BZ centers for visualization.
+    def tile(self, nxyz, filter=None, primitive=False):
+        """Create a tiled rectangular array of BZ centers for visualization. Use in `center` parameter for BZ plotting.
     
         Parameters
         ----------
         nxyz : list or tuple of 3 ints
             Number of tiles along each cartesian direction [nx, ny, nz].
             Must be 3 positive integers.
+            If primitive = False, result is not guaranteed to be same size as ``nx * ny * nz`` due to shape distortion.
         filter : callable, optional
-            Function filter(x,y,z) that takes cartesian coordinates and returns bool.
+            Function filter(x,y,z) that takes normalized (to 1) cartesian coordinates and returns bool.
+        primitive : bool
+            If True, tile points in basis rather than orthogonal geometry. Default is False.
             
         Returns
         -------
@@ -794,17 +797,56 @@ class BrZoneData(Dict2Data):
             if not isinstance(n, int) or n < 1:
                 raise ValueError(f"nxyz[{i}] must be a positive integer")
         
-        xyz = self.to_cartesian(np.indices(np.ceil(nxyz).astype(int)).reshape((3,-1)).T) 
-        # Apply filter if provided
-        if filter is not None:
-            if not callable(filter):
-                raise TypeError("filter must be callable")
-            
-            mask = np.array([filter(x, y, z) for x, y, z in xyz])
-            xyz = xyz[mask]
+        if filter is not None and not callable(filter):
+            raise ValueError("filter must be callable")
         
-        # Convert to fractional coordinates and return
-        return self.to_fractional(xyz)
+        # Tile in shape of cell if primitive
+        if primitive:
+            pts = np.indices(nxyz).reshape((3,-1)).T
+            if filter and len(pts) > 0:
+                # Per-dimension normalization for primitive
+                norms = np.array([max(1, n - 1) for n in nxyz])
+                mask = np.array([filter(*(p/norms)) for p in pts]) 
+                pts = pts[mask]
+            return pts
+        
+        # Orthogonal/Cartesian-aligned case
+        target_span = np.linalg.norm(self.basis.sum(axis=0)) * (np.array(nxyz) - 1)
+        
+        # 2. Map Cartesian box corners to Lattice Space
+        corners_cart = np.array([[i, j, k] for i in [0, 1] for j in [0, 1] for k in [0, 1]]) * target_span
+        corners_frac = self.to_fractional(corners_cart)
+        
+        # 3. Find integer bounds (Must use +1 for inclusive arange)
+        n_min = np.floor(corners_frac.min(axis=0)).astype(int)
+        n_max = np.ceil(corners_frac.max(axis=0)).astype(int)
+        
+        ranges = [np.arange(n_min[i], n_max[i] + 1) for i in range(3)]
+        grid_n = np.array(np.meshgrid(*ranges, indexing='ij')).T.reshape(-1, 3)
+        
+        all_pts = self.to_cartesian(grid_n)
+        
+        # 4. Clipping with a slightly more generous epsilon to prevent missing bridge points
+        eps = 1e-9
+        mask = (all_pts >= -eps).all(axis=1) & (all_pts <= target_span + eps).all(axis=1)
+        pts = all_pts[mask]
+        
+        N = np.cumprod(nxyz)[-1]
+        if len(pts) > N: # box becomes too much inclusive at larger points, restrict that
+            dist = np.linalg.norm(pts - pts.mean(axis=0), axis=1)
+            pts = pts[np.argsort(dist)[:N]]
+
+        # 5. Apply Global Normalized filter (preserves geometry)
+        if filter and len(pts) > 0:
+            p_min, p_max = pts.min(axis=0), pts.max(axis=0)
+            global_range = np.max(p_max - p_min) or 1.0
+            norm_pts = (pts - p_min) / global_range
+            
+            f_mask = np.array([filter(*p) for p in norm_pts])
+            pts = pts[f_mask]
+            
+        pts = pts[np.lexsort((pts[:, 0], pts[:, 1], pts[:, 2]))] # reorder for easy reading of points
+        return self.to_fractional(pts).round(12) # no need to ceil or int here, that makes empty areas, just remove values like E-17
 
 
 class CellData(Dict2Data):
