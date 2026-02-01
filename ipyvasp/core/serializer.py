@@ -774,7 +774,7 @@ class BrZoneData(Dict2Data):
         nxyz : list or tuple of 3 ints
             Number of tiles along each cartesian direction [nx, ny, nz].
             Must be 3 positive integers.
-            If primitive = False, result is not guaranteed to be same size as ``nx * ny * nz`` due to shape distortion.
+            If primitive = False, result is not guaranteed to be same size as ``nx * ny * nz`` due to lack of basis alignment with orthogonal axes.
         filter : callable, optional
             Function filter(x,y,z) that takes normalized (to 1) cartesian coordinates and returns bool.
         primitive : bool
@@ -811,7 +811,8 @@ class BrZoneData(Dict2Data):
             return pts
         
         # Orthogonal/Cartesian-aligned case, span of cell must be considered in cartesian space
-        target_span = (np.array(nxyz) - 1) * np.ptp(self.basis, axis=0) # total span in cartesian space
+        scale = np.ptp(self.normals[:3],axis=1) # X,Y,Z, shape (3, N) are face centers
+        target_span = (np.array(nxyz) - 1) * scale # total span in cartesian space
         
         # Map Cartesian box corners to Lattice Space
         corners_cart = np.array([[i, j, k] for i in [0, 1] for j in [0, 1] for k in [0, 1]]) * target_span
@@ -850,7 +851,7 @@ class CellData(Dict2Data):
     _req_keys = ("basis", "faces", "vertices")
 
     def __init__(self, d):
-        super().__init__({k: v for k, v in d.items() if k != "primitive"})
+        super().__init__({**d, "primitive": True})  # to use BZ methods properly, but only in primitive mode
 
     @property
     def faces_coords(self):
