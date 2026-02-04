@@ -260,7 +260,7 @@ def get_axes(
             axs_dict[i] = ax
 
     for key, ax in axs_dict.items():
-        if is_match(axes_off, key): ax.set_axis_off()
+        if axes_off is True or is_match(axes_off, key): ax.set_axis_off()
         if ax.name == "3d": ax.view_init(elev=elev, azim=azim)
         _monkey_patch(ax)
 

@@ -832,7 +832,7 @@ _hover_temp = { # keep order same
 
 @gu._fmt_doc(_docs)
 def iplot_bands(
-    K, E, occs = None, fig=None, elim=None, kticks=None, interp=None, title=None, **kwargs
+    K, E, occs = None, kpoints=None, fig=None, elim=None, kticks=None, interp=None, title=None, **kwargs
 ):
     """Plot band structure using plotly.
     {params}\n    {K}\n    {E}
@@ -857,7 +857,7 @@ def iplot_bands(
         ["X"],
         interp,
         E if occs is None else occs,
-        np.array([K, K, K]).reshape((-1, 3)),
+        np.array([K, K, K]).T if kpoints is None else kpoints, # for hover, use correct points
         maxwidth=1,
         indices=indices,
     )  # moking other arrays, we need only

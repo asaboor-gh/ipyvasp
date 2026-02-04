@@ -606,6 +606,7 @@ class Bands(_BandsDosBase):
             {"K": data.kpath, "indices": data.bands},
             data.evals[spin] - data.ezero,
             occs = data.occs[spin],
+            kpoints = data.kpoints,
             **kwargs,
         )
 
