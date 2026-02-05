@@ -290,7 +290,10 @@ class Vasprun(DataSource):
         )
 
     def get_kpoints(self):
-        "Returns k-points data including kpoints, coords, weights and rec_basis in which coords are calculated."
+        """Returns k-points data including kpoints, coords, weights and rec_basis in which coords are calculated.
+        Note that ``kpath`` is normalized to 1 for easy plotting of band structures of different materials in same scale.
+        Use ``rel_dist`` to get actual kpath distance values which include 2*pi factor for conversion to 1/Angstrom.
+        """
         kpoints = np.array(
             [
                 [float(i) for i in v.text.split()]
@@ -320,14 +323,14 @@ class Vasprun(DataSource):
         ]  # could be selective dynamics there
         coords = kpoints.dot(rec_basis)  # cartesian coordinates
         kpath = np.cumsum([0, *np.linalg.norm(coords[1:] - coords[:-1], axis=1)])
-        kpath = (
-            kpath / kpath[-1]
-        )  # normalized kpath to see the band structure of all materials in same scale
+        kpath_scale = kpath[-1]
+        kpath = kpath / kpath_scale # normalized kpath to see the band structure of all materials in same scale
         return serializer.Dict2Data(
             {
                 "kpoints": kpoints,
                 "coords": coords,
                 "kpath": kpath,
+                "rel_dist": kpath * kpath_scale * 2 * np.pi,  # in 1/Angstrom
                 "weights": weights,
                 "rec_basis": rec_basis,
             }

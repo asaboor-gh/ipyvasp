@@ -278,7 +278,7 @@ def _monkey_patch(ax):
             if not hasattr(ax, f.__name__): # avoid resetting
                 setattr(ax, f.__name__, types.MethodType(f, ax))
             
-def stitch_axes(ax1, ax2, symbol="\u2571", **kwargs):
+def stitch_axes(ax1, ax2, symbol="\u2571", skip=None, **kwargs):
     """Simulates broken axes by stitching ax1 and ax2 together. Need to fix heights/widths according
     to given data for real aspect. Also plot the same data on each axes and set axes limits.
 
@@ -286,10 +286,15 @@ def stitch_axes(ax1, ax2, symbol="\u2571", **kwargs):
     ----------
     symbol: str
         Defult is u'\u2571'. Its at 60 degrees. so you can apply rotation to make it any angle.
-
+    skip : str or None
+        Position to skip the break symbol at 'start', 'end', or 'both'. Default is None. 
+        Useful if you have to join a grid of axes and discard central useless symbols.
 
     kwargs are passed to plt.text.
     """
+    if skip not in (None, 'start', 'end', 'both'): # better error message
+        raise ValueError("skip must be None, 'start', 'end', or 'both'.")
+    
     p1 = ax1.get_position().get_points().mean(axis=0)
     p2 = ax2.get_position().get_points().mean(axis=0)
     is_vertical = abs(p1[1] - p2[1]) > abs(p1[0] - p2[0])
@@ -299,18 +304,30 @@ def stitch_axes(ax1, ax2, symbol="\u2571", **kwargs):
         top.tick_params(bottom=False, labelbottom=False)
         bot.spines['top'].set_visible(False)
         bot.tick_params(top=False, labeltop=False)
-        for ax, y in [(top, 0), (bot, 1)]:
+        
+        positions = [0, 1] if skip != 'both' else []
+        if skip == 'start': positions = [1]  # only end (right)
+        if skip == 'end': positions = [0]    # only start (left)
+        
+        for ax, y_pos in [(top, 0), (bot, 1)]:
             kw = {**kwargs, 'transform': ax.transAxes, 'ha': 'center', 'va': 'center', 'clip_on': False}
-            [ax.text(x, y, symbol, **kw) for x in [0, 1]]
+            for x_pos in positions:
+                ax.text(x_pos, y_pos, symbol, **kw)
     else:
         left, right = (ax1, ax2) if p1[0] < p2[0] else (ax2, ax1)
         left.spines['right'].set_visible(False)
         left.tick_params(right=False, labelright=False)
         right.spines['left'].set_visible(False)
         right.tick_params(left=False, labelleft=False)
-        for ax, x in [(left, 1), (right, 0)]:
+        
+        positions = [0, 1] if skip != 'both' else []
+        if skip == 'start': positions = [1]  # only end (bottom)  
+        if skip == 'end': positions = [0]    # only start (top)
+        
+        for ax, x_pos in [(left, 1), (right, 0)]:
             kw = {**kwargs, 'transform': ax.transAxes, 'ha': 'center', 'va': 'center', 'clip_on': False}
-            [ax.text(x, y, symbol, **kw) for y in [0, 1]]
+            for y_pos in positions:
+                ax.text(x_pos, y_pos, symbol, **kw)
 
 def adjust_axes(
     ax=None,

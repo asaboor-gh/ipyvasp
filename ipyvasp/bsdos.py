@@ -362,8 +362,8 @@ class Bands(_BandsDosBase):
                     "vbm": vbm,
                     "cbm": cbm,
                     "value": cbm - vbm,
-                    "kvbm": tuple(kvbm),
-                    "kcbm": tuple(kcbm),
+                    "kvbm": kvbm,
+                    "kcbm": kcbm,
                 }
             )
 
