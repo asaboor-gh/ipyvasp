@@ -439,6 +439,7 @@ class Bands(_BandsDosBase):
             
         output = {
             "kpath": kpts.kpath,
+            "kdist": kpts.kdist, # physical distance between kpoints
             "kpoints": kpts.kpoints,
             "coords": kpts.coords,
             **data.to_dict(),
@@ -446,8 +447,9 @@ class Bands(_BandsDosBase):
 
         if kinds:
             coords = output["coords"][kinds]
-            kpath = np.cumsum([0, *np.linalg.norm(coords[1:] - coords[:-1], axis=1)])
-            output["kpath"] = kpath / np.max(kpath)  # normalize to 1
+            kdist = np.cumsum([0, *np.linalg.norm(coords[1:] - coords[:-1], axis=1)])
+            output["kdist"] = kdist*2*np.pi  # true physical distance
+            output["kpath"] = kdist / max(kdist)  # normalize to 1 for plotting
             output["kpoints"] = output["kpoints"][kinds]
             output["coords"] = coords
             output["evals"] = output["evals"][:, kinds, :]

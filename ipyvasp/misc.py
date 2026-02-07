@@ -14,7 +14,7 @@ from .utils import _sig_kwargs, _sub_doc
     vp.gen2numpy,
     {"gen :.*shape :": "path : Path to file containing data.\nshape :"},
 )
-def parse_text(path, shape, slice, **kwargs):
+def parse_text(path, shape, slices, **kwargs):
     p = Path(path)
     if not p.is_file():
         raise FileNotFoundError(f"File {path!r} does not exists")
@@ -22,7 +22,7 @@ def parse_text(path, shape, slice, **kwargs):
     with p.open("r", encoding="utf-8") as f:
         gen = islice(f, 0, None)
         data = vp.gen2numpy(
-            gen, shape, slice, **kwargs
+            gen, shape, slices, **kwargs
         )  # should be under open file context
     return data
 

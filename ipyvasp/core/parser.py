@@ -495,15 +495,25 @@ class Vasprun(DataSource):
         Returns
         -------
         Dict2Data object which includes `evals` and `occs` as attributes, and `pros` if atoms and orbs specified. Shape arrays is (spin, [atoms, orbitals], kpts, bands)
+        
+        .. note::
+            If PROCAR exists in same folder as vasprun.xml, high precision energy values (8 digits) are read from it if possible. You should use higher EDIFF ~ 1E-8 in INCAR to ensure accuracy at that level.
         """
         info = self.summary
         bands_range = range(info.NBANDS)
-
-        ev = (
-            r.split()[1:3]
-            for r in self.read(f"<eigenvalues>", f"</eigenvalues>")
-            if "<r>" in r
-        )
+        
+        # If PROCAR exists, read high precision energy values
+        if (procar := self.path.with_name("PROCAR")).is_file():
+            from ..misc import parse_text
+            size = info.NBANDS * info.NKPTS * info.ISPIN
+            try:
+                ev = parse_text(procar,(size,8),(-1,[4,7]), raw=False,include='energy')
+            except Exception as e:
+                print(f"Failed to parse PROCAR file: {e}, falling back to vasprun.xml for eigenvalues")
+                ev = (r.split()[1:3] for r in self.read(f"<eigenvalues>", f"</eigenvalues>") if "<r>" in r)
+        else:
+            ev = (r.split()[1:3] for r in self.read(f"<eigenvalues>", f"</eigenvalues>") if "<r>" in r)
+        
         ev = (e for es in ev for e in es)  # flatten
         ev = np.fromiter(ev, float)
         if ev.size:  # if not empty
@@ -759,7 +769,7 @@ def gen2numpy(
     dtype=float,
     delimiter="\s+",
     include: str = None,
-    exclude: str = "#",
+    exclude: str = "^\s*#",
     fix_format: bool = True,
 ):
     """Convert a generator of text lines to numpy array while excluding comments, given matches and empty lines.
