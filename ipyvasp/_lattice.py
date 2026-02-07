@@ -628,7 +628,7 @@ def _str2kpoints(kpts_str):
 
 def get_kpath(
     kpoints,
-    n: int = 5,
+    n: int = 10,
     weight: float = None,
     ibzkpt: str = None,
     outfile: str = None,
@@ -640,14 +640,19 @@ def get_kpath(
     Parameters
     ----------
     kpoints : list or str
-        Any number points as [(x,y,z,[label],[N]), ...]. N adds as many points in current interval.
-        To disconnect path at a point, provide it as (x,y,z,[label], 0), next point will be start of other patch.
-        If `kpoints` is a multiline string, it is converted to list of points. Each line should be in format "x y z [label] [N]".
-        A file path can be provided to read kpoints from file with same format as multiline string.
+        Any number points as [(x,y,z,[label],[N]), ...]. ``N`` is interpreted as
+        **points per Angstrom** for the interval starting at that point whenever
+        ``rec_basis`` is supplied (except when ``N=0`` to break the path). If `kpoints`
+        is a multiline string, it is converted to list of points. Each line should be
+        in format "x y z [label] [N]".
     n : int
-        Number of point per averge length of `rec_basis`, this makes uniform steps based on distance between points.
-        If (x,y,z,[label], N) is provided, this is ignored for that specific interval. If `rec_basis` is not provided, each interval has exactly `n` points.
-        Number of points in each interval is at least 2 even if `n` is less than 2 to keep end points anyway.
+        Number of points **per Angstrom** along each interval when ``rec_basis`` is
+        provided. If (x,y,z,[label], N) is provided, this is ignored for that specific
+        interval. If ``rec_basis`` is not provided, each interval has exactly ``n``
+        points. Number of points in each interval is at least 2 even if ``n`` is less
+        than 2 to keep end points anyway. You can use ``n = int(1/distance)`` based on known distance resolution.
+        Both ``n`` and ``N`` do not guarantee exact distance between points beacause an interval can only be divided 
+        into integer number of points and almost no interval length is an exact multiple of the distance between points.
     weight : float
         None by default to auto generates weights.
     ibzkpt : PathLike
@@ -714,25 +719,25 @@ def get_kpath(
 
     def add_points(p1, p2, npts, rec_basis):
         lab = p2[3]  # end point label
-        if len(p1) == 5:
-            m = p1[4]  # number of points given explicitly.
-            lab = (
-                f"<={p1[3]}|{lab}" if m == 0 else lab
-            )  # merge labels in case user wants to break path
-        elif rec_basis is not None and np.size(rec_basis) == 9:
-            basis = np.array(rec_basis)
+        segment_len = None
+        if rec_basis is not None and np.size(rec_basis) == 9:
+            basis = np.array(rec_basis)*2*np.pi # convert to 2pi factor for physical distance
             coords = to_R3(basis, [p1[:3], p2[:3]])
-            _mean = np.mean(
-                np.linalg.norm(basis, axis=1)
-            )  # average length of basis vectors
-            m = np.rint(npts * np.linalg.norm(coords[0] - coords[1]) / _mean).astype(
-                int
-            )  # number of points in interval
+            segment_len = np.linalg.norm(coords[0] - coords[1])
+        
+        if len(p1) == 5:
+            density = p1[4]
+            if density > 0 and segment_len is not None:
+                m = int(np.rint(density * segment_len))
+            else:
+                m = density
+            lab = f"<={p1[3]}|{lab.replace('<=','')}" if density == 0 else lab  # merge labels in case user wants to break path
+        elif segment_len is not None:
+            m = int(np.rint(npts * segment_len))  # points per Angstrom based on rec_basis
         else:
             m = npts  # equal number of points in each interval, given by n.
 
-        # Doing m - 1 in an interval, so along with last point, total n points are generated per interval.
-        Np = max(m - 1, 1)  # At least 2 points. one is given by end point of interval.
+        Np = max(m, 1)  # At least 2 points. one is given by end point of interval.
         X = np.linspace(p1[0], p2[0], Np, endpoint=False)
         Y = np.linspace(p1[1], p2[1], Np, endpoint=False)
         Z = np.linspace(p1[2], p2[2], Np, endpoint=False)
@@ -781,7 +786,7 @@ def get_kpath(
     if outfile != None:
         _write_text(outfile, out_str)
     else:
-        return points  # return points for any processing by user.
+        return np.array(points, dtype=float)  # return points for any processing by user.
 
 
 # Cell
@@ -893,7 +898,7 @@ def get_kmesh(
     if outfile != None:
         _write_text(outfile, out_str)
     else:
-        return points # return points for any processing by user.
+        return np.array(points, dtype=float) # return points for any processing by user.
 
 
 # Cell

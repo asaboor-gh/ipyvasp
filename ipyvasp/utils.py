@@ -199,55 +199,71 @@ def set_dir(path: str):
 
 def interpolate_data(x: np.ndarray, y: np.ndarray, n: int = 10, k: int = 3) -> tuple:
     """
-    Returns interpolated xnew,ynew. If two points are same, it will add 0.1*min(dx>0) to compensate it.
+    Returns interpolated xnew,ynew while preserving flat segments in x.
 
     Parameters
     ----------
-    x : ndarry, 1D array of size p,
-    y : ndarray, ndarray of size p*q*r,....
-    n : int, Number of points to add between two given points.
+    x : ndarray, 1D array of size p.
+    y : ndarray, array of size p*q*r, ...
+    n : int, Number of points to sample between two given points (including endpoints).
     k : int, Polynomial order to interpolate.
-
 
     Example
     -------
-    For ``K(p),E(p,q)`` input from bandstructure, do ``Knew, Enew = interpolate_data(K,E,n=10,k=3)`` for cubic interploation.
+    For ``K(p),E(p,q)`` input from bandstructure, do ``Knew, Enew = interpolate_data(K,E,n=10,k=3)`` for cubic interpolation.
 
     Returns
     -------
     tuple: (xnew, ynew) after interpolation.
 
-
     .. note::
-        Only axis 0 will be interpolated. If you want general interploation, use ``from scipy.interpolate import make_interp_spline, BSpline``.
+        Only axis 0 will be interpolated. Adjacent duplicate values of ``x`` are copied
+        back without interpolation, and intervals shorter than ``k + 1`` samples are
+        returned unchanged.
     """
-    # Avoid adding points between same points, like in kpath patches
-    inds = [i for i in range(0, len(x)) if x[i - 1] == x[i]]  # Duplicate indices
-    if inds:
-        inds = [0, *inds, len(x)]  # Indices to split x
-        ranges = list(zip(inds[:-1], inds[1:]))  # we are using this twice,so make list
-        for p, q in ranges:
-            if q - p == 1:  # means three consecutive points have same value
-                raise ValueError(
-                    f"Three or more duplicate values found at index {p} in array `x`, at most two allowed for broken kpath like scenario."
-                )
-        arrays = [[x[i:j], y[i:j]] for i, j in ranges]  # Split x,y into arrays
-    else:
-        arrays = [(x, y)]
+    x = np.asarray(x)
+    y = np.asarray(y)
 
-    new_as, new_bs = [], []
-    for a, b in arrays:
-        anew = [np.linspace(a[i], a[i + 1], n) for i in range(len(a) - 1)]
-        anew = np.reshape(anew, (-1))
-        spl = make_interp_spline(a, b, k=k)  # BSpline object
-        bnew = spl(anew)
-        new_as.append(anew)
-        new_bs.append(bnew)
+    if x.ndim != 1:
+        raise ValueError("x must be a 1D array.")
+    if x.shape[0] != y.shape[0]:
+        raise ValueError("Length of x must match first dimension of y.")
+    if len(x) == 0:
+        return x, y
 
-    if len(new_as) == 1:
-        return new_as[0], new_bs[0]
+    dup_indices = np.flatnonzero(np.diff(x) == 0) + 1
+    x_segments = np.split(x, dup_indices)
+    y_segments = np.split(y, dup_indices, axis=0)
 
-    return np.concatenate(new_as, axis=0), np.concatenate(new_bs, axis=0)
+    x_parts, y_parts = [], []
+    for seg_x, seg_y in zip(x_segments, y_segments):
+        if seg_x.size == 0:
+            continue
+
+        if seg_x.size < 2 or seg_x.size < (k + 1):
+            x_parts.append(seg_x)
+            y_parts.append(seg_y)
+            continue
+
+        try:
+            dense_x = np.concatenate(
+                [np.linspace(seg_x[i], seg_x[i + 1], n) for i in range(seg_x.size - 1)]
+            )
+            spline = make_interp_spline(seg_x, seg_y, k=k)
+            dense_y = spline(dense_x)
+        except ValueError:
+            x_parts.append(seg_x)
+            y_parts.append(seg_y)
+        else:
+            x_parts.append(dense_x)
+            y_parts.append(dense_y)
+
+    if not x_parts:
+        return x, y
+    if len(x_parts) == 1:
+        return x_parts[0], y_parts[0]
+
+    return np.concatenate(x_parts, axis=0), np.concatenate(y_parts, axis=0)
 
 
 def rolling_mean(

@@ -66,7 +66,9 @@ def _validate_data(K, E, elim, kticks, interp):
             raise ValueError("First item of pairs in kticks must be int")
         if not isinstance(v, str):
             raise ValueError("Second item of pairs in kticks must be str.")
-
+    
+    # Filter out invalid kticks gracefully 
+    kticks = [(k, v) for k, v in kticks if -len(K) <= k < len(K)]  
     pairs = [
         (k - 1, k) for k, v in kticks if v.startswith("<=")
     ]  # Join broken path at these indices

@@ -847,5 +847,5 @@ class POSCAR:
 
     @_sub_doc(get_kpath, {"rec_basis :.*\n\n": "\n\n"})
     @_sig_kwargs(get_kpath, ("rec_basis",))
-    def get_kpath(self, kpoints, n: int = 5, **kwargs):
+    def get_kpath(self, kpoints, n: int = 10, **kwargs):
         return get_kpath(kpoints, n=n, **kwargs, rec_basis=self.data.rec_basis)

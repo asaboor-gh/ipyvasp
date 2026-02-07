@@ -1145,7 +1145,7 @@ class KPathWidget(_ThemedFigureInteract):
 
     @_sub_doc(lat.get_kpath, {"kpoints :.*n :": "n :", "rec_basis :.*\n\n": "\n\n"})
     @_sig_kwargs(lat.get_kpath, ("kpoints", "rec_basis"))
-    def get_kpath(self, n=5, **kwargs):
+    def get_kpath(self, n=10, **kwargs):
         return self.poscar.get_kpath(self.get_kpoints(), n=n, **kwargs)
 
     def iplot(self):

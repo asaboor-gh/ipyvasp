@@ -106,6 +106,11 @@ class DataSource:
         raise NotImplementedError(
             "`get_evals` should be implemented in a subclass. See Vasprun.get_evals as example."
         )
+    
+    def get_band_edges(self, *args, **kwargs):
+        raise NotImplementedError(
+            "`get_band_edges` should be implemented in a subclass. See Vasprun.get_band_edges as example."
+        )
 
     def get_dos(self, *args, **kwargs):
         raise NotImplementedError(
@@ -292,7 +297,7 @@ class Vasprun(DataSource):
     def get_kpoints(self):
         """Returns k-points data including kpoints, coords, weights and rec_basis in which coords are calculated.
         Note that ``kpath`` is normalized to 1 for easy plotting of band structures of different materials in same scale.
-        Use ``rel_dist`` to get actual kpath distance values which include 2*pi factor for conversion to 1/Angstrom.
+        Use ``kdist`` to get actual kpath distance values which include 2*pi factor for conversion to 1/Angstrom and calculations like effective mass etc.
         """
         kpoints = np.array(
             [
@@ -330,7 +335,7 @@ class Vasprun(DataSource):
                 "kpoints": kpoints,
                 "coords": coords,
                 "kpath": kpath,
-                "rel_dist": kpath * kpath_scale * 2 * np.pi,  # in 1/Angstrom
+                "kdist": kpath * kpath_scale * 2 * np.pi,  # in 1/Angstrom
                 "weights": weights,
                 "rec_basis": rec_basis,
             }
@@ -596,6 +601,94 @@ class Vasprun(DataSource):
             raise ValueError("atoms and orbs should be passed together")
         out["shape"] = "(spins, [atoms, orbitals], kpoints, bands)"
         return serializer.Dict2Data(out)
+    
+    def get_band_edges(self, band, spin=0, N=5, quad_fit=False):
+        """Returns the band edge data for given band and spin.
+
+        Output arrays can be read as ``[[kx,ky,kz,en]``. The k values include 2pi factor
+        to give physical cartesian coordinates in 1/Angstrom. Energy values are in eV.
+
+        N is the number of points to keep around band edges for better visualization.
+        If ``quad_fit`` is True, a quadratic fit centered on each extremum (using the
+        same ``N`` window) refines the reported coordinates/energies when possible.
+        """
+        if not isinstance(N, (int, np.integer)) or N < 0:
+            raise ValueError("N must be a non-negative integer.")
+
+        en = self.get_evals(bands=[band], spins=[spin]).evals[0, :, 0]
+        kpts = self.get_kpoints()
+        coords = kpts.coords * 2 * np.pi  # physical units
+        X = kpts.kdist  # already physical units
+
+        imin, imax = np.argmin(en), np.argmax(en)
+
+        unique_x, uniq_idx = np.unique(X, return_index=True)
+        order = np.argsort(unique_x)
+        unique_x = unique_x[order]
+        coord_unique = coords[uniq_idx[order]]
+
+        def _window(idx):
+            start = max(idx - N, 0)
+            stop = min(idx + N + 1, len(X))
+            return slice(start, stop)
+
+        def _quad_edge(idx):
+            seg = _window(idx)
+            seg_x = X[seg]
+            seg_y = en[seg]
+            if seg_x.size < 3 or np.ptp(seg_x) == 0:
+                return coords[idx], en[idx], None
+            try:
+                coeffs = np.polyfit(seg_x, seg_y, 2)
+            except np.linalg.LinAlgError:
+                return coords[idx], en[idx], None
+            a, b, c = coeffs
+            if np.isclose(a, 0):
+                return coords[idx], en[idx], None
+            x_vertex = -b / (2 * a)
+            if not (seg_x.min() <= x_vertex <= seg_x.max()):
+                return coords[idx], en[idx], None
+            y_vertex = a * x_vertex**2 + b * x_vertex + c
+            interp_coords = np.array(
+                [
+                    np.interp(x_vertex, unique_x, coord_unique[:, axis])
+                    for axis in range(coord_unique.shape[1])
+                ]
+            )
+            return interp_coords, y_vertex, coeffs
+
+        def _ke_segment(idx):
+            seg = _window(idx)
+            return np.column_stack((X[seg], en[seg])).round(12)
+
+        def _format_fit(coeffs):
+            if coeffs is None:
+                return None
+
+            def fit_eq(x):
+                a, b, c = coeffs
+                return a * x**2 + b * x + c
+            return fit_eq
+
+        if quad_fit:
+            min_coords, min_energy, min_coeffs = _quad_edge(imin)
+            max_coords, max_energy, max_coeffs = _quad_edge(imax)
+        else:
+            min_coords, min_energy, min_coeffs = coords[imin], en[imin], None
+            max_coords, max_energy, max_coeffs = coords[imax], en[imax], None
+
+        return serializer.Dict2Data(
+            {
+                "note": "Read as [kx,ky,kz,en], k values are in 1/Angstrom including 2pi factor, energy in eV and occupation in number of electrons.",
+                "min": np.array([*min_coords, min_energy]).round(12),
+                "max": np.array([*max_coords, max_energy]).round(12),
+                "ke_min": _ke_segment(imin),
+                "ke_max": _ke_segment(imax),
+                "fit_min": _format_fit(min_coeffs),
+                "fit_max": _format_fit(max_coeffs),
+            }
+        )
+
 
     def get_forces(self):
         "Reads force on each ion from vasprun.xml"
