@@ -159,14 +159,17 @@ def read(file, start_match, stop_match=r'\n', nth_match=1, skip_last=False,apply
                 yield apply(line) if callable(apply) else line
 
 class Vasprun(DataSource):
-    "Reads vasprun.xml file lazily. It reads only the required data from the file when a plot or data access is requested."
+    """Reads vasprun.xml file lazily. It reads only the required data from the file when a plot or data access is requested.
+    Eigenvalues are read from EIGENVAL file if available for higher precision. Use read_eigenval=False to disable this behavior.
+    """
     # These methods are accessible from parent class, but need here for including in sphinx documentation
     get_evals_dataframe = DataSource.get_evals_dataframe
     poscar = DataSource.poscar
     dos = DataSource.dos
     bands = DataSource.bands
 
-    def __init__(self, path="./vasprun.xml", skipk=None):
+    def __init__(self, path="./vasprun.xml", skipk=None, read_eigenval=True):
+        self._read_eig = read_eigenval
         super().__init__(path, skipk)
 
     def read(self, start_match, stop_match=r'\n', nth_match=1, skip_last=False,apply=None):
@@ -497,25 +500,30 @@ class Vasprun(DataSource):
         Dict2Data object which includes `evals` and `occs` as attributes, and `pros` if atoms and orbs specified. Shape arrays is (spin, [atoms, orbitals], kpts, bands)
         
         .. note::
-            If PROCAR exists in same folder as vasprun.xml, high precision energy values (8 digits) are read from it if possible. You should use higher EDIFF ~ 1E-8 in INCAR to ensure accuracy at that level.
+            If EIGENVAL file exists in same folder as vasprun.xml, high precision energy values (6 digits) are read from it if possible. You should use higher EDIFF ~ 1E-6 in INCAR to ensure accuracy at that level.
         """
         info = self.summary
         bands_range = range(info.NBANDS)
+        ev = None # this to avoid duplicating code below
         
-        # If PROCAR exists, read high precision energy values
-        if (procar := self.path.with_name("PROCAR")).is_file():
-            from ..misc import parse_text
-            size = info.NBANDS * info.NKPTS * info.ISPIN
-            try:
-                ev = parse_text(procar,(size,8),(-1,[4,7]), raw=False,include='energy')
+        # If EIGENVAL exists and opted in, read high precision energy values (6 digits)
+        if self._read_eig and (eigval := self.path.with_name("EIGENVAL")).is_file():
+            size , ncol = info.NBANDS * info.NKPTS,  2*info.ISPIN + 1
+            try: # Test if EIGENVAL file matches expected NELEC, NKPTS, NBANDS values
+                header = ''.join(read(eigval,'',r'^\s*$')) # 6 lines header until first empty line
+                if not re.search(rf'{info.NELECTS}\s*{info.NKPTS}\s*{info.NBANDS}', header):
+                    print("EIGENVAL file is mismatched, falling back to vasprun.xml for eigenvalues")
+                    raise ValueError("EIGENVAL file mismatched!") # just to trigger fallback
+                
+                from ..misc import parse_text
+                ev = parse_text(eigval,(size,ncol),(-1,-1), raw=False,include=r'^\s*\d+\s*.*\.',exclude='E')[:,1:] # discard numerical indices
             except Exception as e:
-                print(f"Failed to parse PROCAR file: {e}, falling back to vasprun.xml for eigenvalues")
-                ev = (r.split()[1:3] for r in self.read(f"<eigenvalues>", f"</eigenvalues>") if "<r>" in r)
-        else:
-            ev = (r.split()[1:3] for r in self.read(f"<eigenvalues>", f"</eigenvalues>") if "<r>" in r)
+                print(f"Failed to parse EIGENVAL file: {e}, falling back to vasprun.xml for eigenvalues")
         
-        ev = (e for es in ev for e in es)  # flatten
-        ev = np.fromiter(ev, float)
+        if ev is None:
+            ev = (r.split()[1:3] for r in self.read(f"<eigenvalues>", f"</eigenvalues>") if "<r>" in r)
+            ev = np.fromiter((e for es in ev for e in es), float) # flatten for iter
+        
         if ev.size:  # if not empty
             ev = ev.reshape((-1, info.NKPTS, info.NBANDS, 2))[
                 :, self._skipk :, :, :
