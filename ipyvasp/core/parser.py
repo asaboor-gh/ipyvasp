@@ -330,15 +330,14 @@ class Vasprun(DataSource):
             3:6
         ]  # could be selective dynamics there
         coords = kpoints.dot(rec_basis)  # cartesian coordinates
-        kpath = np.cumsum([0, *np.linalg.norm(coords[1:] - coords[:-1], axis=1)])
-        kpath_scale = kpath[-1]
-        kpath = kpath / kpath_scale # normalized kpath to see the band structure of all materials in same scale
+        kdist = np.cumsum([np.linalg.norm(coords[0])] + list(np.linalg.norm(coords[1:] - coords[:-1], axis=1))) # relative to Gamma
+        kpath = (kdist - kdist[0]) / np.ptp(kdist) # normalized kpath to see the band structure of all materials in same scale
         return serializer.Dict2Data(
             {
                 "kpoints": kpoints,
                 "coords": coords,
                 "kpath": kpath,
-                "kdist": kpath * kpath_scale * 2 * np.pi,  # in 1/Angstrom
+                "kdist": kdist * 2 * np.pi,  # in 1/Angstrom
                 "weights": weights,
                 "rec_basis": rec_basis,
             }
@@ -677,7 +676,7 @@ class Vasprun(DataSource):
 
         def _ke_segment(idx):
             seg = _window(idx)
-            return np.column_stack((X[seg], en[seg])).round(12)
+            return np.column_stack((X[seg].T, en[seg])).round(12)
 
         def _format_fit(coeffs):
             if coeffs is None:
@@ -698,12 +697,18 @@ class Vasprun(DataSource):
         return serializer.Dict2Data(
             {
                 "note": "Read as [kx,ky,kz,en], k values are in 1/Angstrom including 2pi factor, energy in eV and occupation in number of electrons.",
-                "min": np.array([*min_coords, min_energy]).round(12),
-                "max": np.array([*max_coords, max_energy]).round(12),
-                "ke_min": _ke_segment(imin),
-                "ke_max": _ke_segment(imax),
-                "fit_min": _format_fit(min_coeffs),
-                "fit_max": _format_fit(max_coeffs),
+                "bottom": {
+                    "loc": np.array([*min_coords, min_energy]).round(12),
+                    "ke": _ke_segment(imin),
+                    "fit": _format_fit(min_coeffs),
+                    "coeffs": min_coeffs,
+                },
+                "top": {
+                    "loc": np.array([*max_coords, max_energy]).round(12),
+                    "ke": _ke_segment(imax),
+                    "fit": _format_fit(max_coeffs),
+                    "coeffs": max_coeffs,
+                }
             }
         )
 
