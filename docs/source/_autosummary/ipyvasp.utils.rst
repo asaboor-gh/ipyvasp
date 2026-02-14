@@ -10,6 +10,9 @@
    
       create_colormap
       get_file_size
+      imextent
+      interp
+      interp1d
       interpolate_data
       prevent_overwrite
       rolling_mean
@@ -21,5 +24,6 @@
 
    .. autosummary::
    
+      SigmoidNorm
       color
    

@@ -2,11 +2,14 @@ __all__ = [
     "get_file_size",
     "take",
     "set_dir",
-    "interpolate_data",
+    "interp1d",
+    "interp",
+    "imextent",
     "rolling_mean",
     "color",
     "transform_color",
     "create_colormap",
+    "SigmoidNorm",
 ]
 
 import re
@@ -22,7 +25,7 @@ import numpy as np
 from scipy.interpolate import make_interp_spline
 from scipy.ndimage.filters import convolve1d
 
-from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import LinearSegmentedColormap, Normalize
 import matplotlib.pyplot as plt
 
 
@@ -197,7 +200,7 @@ def set_dir(path: str):
         os.chdir(current)
 
 
-def interpolate_data(x: np.ndarray, y: np.ndarray, n: int = 10, k: int = 3) -> tuple:
+def interp1d(x: np.ndarray, y: np.ndarray, n: int = 10, k: int = 3) -> tuple:
     """
     Returns interpolated xnew,ynew while preserving flat segments in x.
 
@@ -210,15 +213,15 @@ def interpolate_data(x: np.ndarray, y: np.ndarray, n: int = 10, k: int = 3) -> t
 
     Example
     -------
-    For ``K(p),E(p,q)`` input from bandstructure, do ``Knew, Enew = interpolate_data(K,E,n=10,k=3)`` for cubic interpolation.
+    For ``K(p),E(p,q)`` input from bandstructure, do ``Knew, Enew = interp1d(K,E,n=10,k=3)`` for cubic interpolation.
 
     Returns
     -------
     tuple: (xnew, ynew) after interpolation.
 
     .. note::
-        Only axis 0 will be interpolated. Adjacent duplicate values of ``x`` are copied
-        back without interpolation, and intervals shorter than ``k + 1`` samples are
+        Only axis 0 will be interpolated. Use ``ipyvasp.interp`` for general N-dimensional interpolation.
+        Adjacent duplicate values of ``x`` are copied back without interpolation, and intervals shorter than ``k + 1`` samples are
         returned unchanged.
     """
     x = np.asarray(x)
@@ -263,8 +266,165 @@ def interpolate_data(x: np.ndarray, y: np.ndarray, n: int = 10, k: int = 3) -> t
     if len(x_parts) == 1:
         return x_parts[0], y_parts[0]
 
-    return np.concatenate(x_parts, axis=0), np.concatenate(y_parts, axis=0)
+    xout, yout = np.concatenate(x_parts, axis=0), np.concatenate(y_parts, axis=0)
+    _, ux = np.unique(xout, return_index=True)
+    return xout[ux], yout[ux] # Remove duplicates that may arise from interpolation at segment boundaries
 
+def interpolate_data(*args, **kwargs):
+    """Deprecated alias for `interp1d`."""
+    print("Warning: `interpolate_data` is deprecated. Use `interp1d` instead.")
+    return interp1d(*args, **kwargs)
+
+def interp(Z:np.ndarray, n=5, k=3, axes:tuple = None):
+    """Interpolate an N-dimensional array along specified or all axes.
+    
+    Parameters
+    ----------
+    Z : ndarray
+        Input array of any dimension (1D, 2D, 3D, etc.)
+    n : int or sequence of ints
+        Number of points to sample between two given points (including endpoints).
+        If int, same value used for all axes.
+        If sequence, must match length of `axes` or number of dimensions in Z.
+    k : int or sequence of ints
+        Polynomial order to interpolate.
+        If int, same value used for all axes.
+        If sequence, must match length of `axes` or number of dimensions in Z.
+    axes : None or sequence of ints
+        Axes along which to interpolate. If None, interpolate along all axes.
+        
+    Returns
+    -------
+    ndarray : Interpolated array
+    
+    Examples
+    --------
+    >>> # 1D interpolation
+    >>> Z_1d = np.array([1, 2, 3, 4])
+    >>> interp(Z_1d, n=10, k=3)
+    
+    >>> # 2D interpolation (equivalent to interp2d)
+    >>> Z_2d = np.random.rand(10, 20)
+    >>> interp(Z_2d, n=5, k=3)
+    
+    >>> # 3D interpolation, only along axes 0 and 2
+    >>> Z_3d = np.random.rand(10, 20, 30)
+    >>> interp(Z_3d, n=[10, 5], k=3, axes=[0, 2])
+    """
+    Z = np.asarray(Z)
+    ndim = Z.ndim
+    
+    if ndim == 0:
+        raise ValueError("Z must be at least 1D array!")
+    
+    # Determine which axes to interpolate
+    if axes is None:
+        axes = list(range(ndim))
+    else:
+        axes = list(axes) if isinstance(axes, (list, tuple)) else [axes]
+        if not all(isinstance(ax, int) and -ndim <= ax < ndim for ax in axes):
+            raise ValueError(f"Invalid axes {axes} for {ndim}D array")
+        # Normalize negative indices
+        axes = [ax if ax >= 0 else ndim + ax for ax in axes]
+    
+    num_axes = len(axes)
+    
+    # Parse n parameter
+    if isinstance(n, int):
+        n_vals = [n] * num_axes
+    elif isinstance(n, (list, tuple)):
+        if len(n) != num_axes:
+            raise ValueError(f"Length of n ({len(n)}) must match number of axes ({num_axes})")
+        n_vals = list(n)
+    else:
+        raise TypeError("n must be int or sequence of ints")
+    
+    # Parse k parameter
+    if isinstance(k, int):
+        k_vals = [k] * num_axes
+    elif isinstance(k, (list, tuple)):
+        if len(k) != num_axes:
+            raise ValueError(f"Length of k ({len(k)}) must match number of axes ({num_axes})")
+        k_vals = list(k)
+    else:
+        raise TypeError("k must be int or sequence of ints")
+    
+    # Interpolate along each specified axis
+    for axis_idx, axis in enumerate(axes):
+        n_points = n_vals[axis_idx]
+        k_order = k_vals[axis_idx]
+        
+        # Only interpolate if n > 2 and axis has more than 1 element
+        if n_points > 2 and Z.shape[axis] > 1:
+            # Move the axis to interpolate to position 0
+            Z = np.moveaxis(Z, axis, 0)
+            
+            # Interpolate along axis 0
+            x, Z_interp = interp1d(range(Z.shape[0]), Z, n=n_points, k=k_order)
+            
+            # Remove duplicates that may have been introduced
+            Z = Z_interp[np.unique(x, return_index=True)[1]]
+            
+            # Move axis back to original position
+            Z = np.moveaxis(Z, 0, axis)
+    
+    return Z
+
+def imextent(Z, xlim=None, ylim=None):
+    """Calculate extent for matplotlib's imshow to properly align pixel centers.
+    
+    Parameters
+    ----------
+    Z : ndarray
+        2D image array that you use for ``imshow``.
+    xlim : tuple or list, optional
+        (xmin, xmax) coordinate limits. If None, uses [0, nx-1].
+    ylim : tuple or list, optional
+        (ymin, ymax) coordinate limits. If None, uses [0, ny-1].
+    
+    Returns
+    -------
+    list : [xmin, xmax, ymin, ymax] suitable for imshow's extent parameter,
+           adjusted to center pixels properly.
+    
+    Examples
+    --------
+    >>> Z = np.random.rand(100, 200)
+    >>> # Default: use array indices
+    >>> plt.imshow(Z, extent=imshow_extent(Z))
+    >>> 
+    >>> # With coordinate limits
+    >>> plt.imshow(Z, extent=imshow_extent(Z, xlim=(0, 10), ylim=(0, 5)))
+    >>> 
+    >>> # From coordinate arrays
+    >>> x = np.linspace(0, 10, 200)
+    >>> y = np.linspace(0, 5, 100)
+    >>> plt.imshow(Z, extent=imshow_extent(Z, xlim=(x[0], x[-1]), ylim=(y[0], y[-1])))
+    """
+    Z = np.asarray(Z)
+    if Z.ndim < 2:
+        raise ValueError("Z must be at least 2D array")
+    
+    ny, nx = Z.shape[:2]
+    
+    # Default to array indices
+    if xlim is None:
+        xlim = (0, nx - 1)
+    if ylim is None:
+        ylim = (0, ny - 1)
+    
+    if len(xlim) != 2 or len(ylim) != 2:
+        raise ValueError("xlim and ylim must be tuples/lists of length 2")
+    
+    xmin, xmax = xlim
+    ymin, ymax = ylim
+    
+    # Calculate pixel size
+    dx = (xmax - xmin) / (nx - 1) if nx > 1 else 0
+    dy = (ymax - ymin) / (ny - 1) if ny > 1 else 0
+    
+    # Extend by half pixel to center
+    return [xmin - dx/2, xmax + dx/2, ymin - dy/2, ymax + dy/2]
 
 def rolling_mean(
     X: np.ndarray,
@@ -495,3 +655,43 @@ def create_colormap(name="RB", colors=[(0.9, 0, 0), (0, 0, 0.9)]):
     RB = LinearSegmentedColormap.from_list(name, colors)
     plt.colormaps.register(RB, name=name, force=True)
     return RB
+
+
+class SigmoidNorm(Normalize):
+    """Normalize data with a sigmoid function to enhance contrast around a center value.
+    
+    Parameters
+    ----------
+    vmin: float, minimum data value
+    vmax: float, maximum data value
+    center: float (0 to 1), where the highest color gradient occurs.
+            Lower (< 0.5) favors minima; Higher (> 0.5) favors maxima.
+    steepness: How rapidly the colors change at the center.
+    clip: bool, whether to clip data outside vmin/vmax to 0/1.
+    
+    Example
+    -------
+    >>> data = np.random.rand(100, 100)
+    >>> norm = SigmoidNorm(vmin=0, vmax=1, center=0.5, steepness=10)
+    >>> plt.imshow(data, norm=norm)
+    """
+    
+    def __init__(self, vmin=None, vmax=None, center=0.5, steepness=10, clip=False):
+        super().__init__(vmin, vmax, clip)
+        self.center = center
+        self.steepness = steepness
+
+    def __call__(self, value, clip=None):
+        # 1. Normalize data to 0-1 range
+        v_scaled = np.ma.masked_array((value - self.vmin) / (self.vmax - self.vmin))
+        
+        # 2. Apply Sigmoid: 1 / (1 + exp(-k * (x - x0)))
+        # We use a steepness 'k' and a center 'x0'
+        result = 1 / (1 + np.exp(-self.steepness * (v_scaled - self.center)))
+        
+        # 3. Rescale the sigmoid output to hit 0 and 1 exactly at vmin/vmax
+        sig_min = 1 / (1 + np.exp(-self.steepness * (0 - self.center)))
+        sig_max = 1 / (1 + np.exp(-self.steepness * (1 - self.center)))
+        result = (result - sig_min) / (sig_max - sig_min)
+        
+        return np.ma.filled(result, fill_value=0)

@@ -144,7 +144,7 @@ def splot_bands(K, E, ax=None, elim=None, kticks=None, interp=None, **kwargs):
 
     if interp:
         nk = interp if isinstance(interp, (list, tuple)) else (interp, 3)
-        K, E = gu.interpolate_data(K, E, *nk)
+        K, E = gu.interp1d(K, E, *nk)
 
     # handle broken paths
     breaks = [i for i in range(0, len(K)) if K[i - 1] == K[i]]
@@ -293,11 +293,11 @@ def _fix_data(K, E, pros, labels, interp, rgb=False, **others):
     if interp:
         nk = interp if isinstance(interp, (list, tuple)) else (interp, 3)
         min_d, max_d = np.min(pros), np.max(pros)  # For cliping
-        _K, E = gu.interpolate_data(K, E, *nk)
-        pros = gu.interpolate_data(K, pros, *nk)[1].clip(min=min_d, max=max_d)
+        _K, E = gu.interp1d(K, E, *nk)
+        pros = gu.interp1d(K, pros, *nk)[1].clip(min=min_d, max=max_d)
         data.update({"kpath": _K, "evals": E, "pros": pros})
         for k, v in others.items():
-            data[k] = gu.interpolate_data(K, v, *nk)[1]
+            data[k] = gu.interp1d(K, v, *nk)[1]
 
     # Handle kpath discontinuities
     X = data["kpath"]
@@ -630,10 +630,10 @@ def _fix_dos_data(energy, dos_arrays, labels, colors, interp):
         nk = (
             interp if isinstance(interp, (list, tuple)) else (interp, 3)
         )  # default spline order is 3.
-        en, arr1 = gu.interpolate_data(energy, dos_arrays[0], nk)
+        en, arr1 = gu.interp1d(energy, dos_arrays[0], *nk)
         arrays = [arr1]
         for a in dos_arrays[1:]:
-            arrays.append(gu.interpolate_data(energy, a, nk)[1])
+            arrays.append(gu.interp1d(energy, a, *nk)[1])
 
         return en, arrays, labels, colors
 
