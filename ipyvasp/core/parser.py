@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import numpy as np
+from scipy.signal import find_peaks
 
 from . import serializer
 
@@ -107,9 +108,9 @@ class DataSource:
             "`get_evals` should be implemented in a subclass. See Vasprun.get_evals as example."
         )
     
-    def get_band_edges(self, *args, **kwargs):
+    def get_band_extrema(self, *args, **kwargs):
         raise NotImplementedError(
-            "`get_band_edges` should be implemented in a subclass. See Vasprun.get_band_edges as example."
+            "`get_band_extrema` should be implemented in a subclass. See Vasprun.get_band_extrema as example."
         )
 
     def get_dos(self, *args, **kwargs):
@@ -619,15 +620,51 @@ class Vasprun(DataSource):
         out["shape"] = "(spins, [atoms, orbitals], kpoints, bands)"
         return serializer.Dict2Data(out)
     
-    def get_band_edges(self, band, spin=0, N=5, quad_fit=False):
-        """Returns the band edge data for given band and spin.
+    def get_band_extrema(self, band, maxima=False, spin=0, N=5, quad_fit=False, prominence=None):
+        """Returns local band extrema for a given band and spin.
 
-        Output arrays can be read as ``[[kx,ky,kz,en]``. The k values include 2pi factor
-        to give physical cartesian coordinates in 1/Angstrom. Energy values are in eV.
+        Automatically detects all local extrema along the k-path using
+        ``scipy.signal.find_peaks``. The global extremum is always included
+        even when it falls on a k-path edge (where find_peaks cannot detect it).
 
-        N is the number of points to keep around band edges for better visualization.
-        If ``quad_fit`` is True, a quadratic fit centered on each extremum (using the
-        same ``N`` window) refines the reported coordinates/energies when possible.
+        All k values use physical distance in 1/Å (including 2π factor).
+        The root-level ``ke`` contains the full band as ``[[kdist, en], ...]``
+        and can be used directly for plotting. Each peak carries its own ``ke``
+        window and ``kpt`` on the same physical scale, so ``fit`` callables
+        accept and return values in the same units.
+
+        Parameters
+        ----------
+        band : int
+            Band index to analyze.
+        maxima : bool, optional
+            If False (default) return local minima — suitable for conduction
+            bands / CBM. If True return local maxima — suitable for valence
+            bands / VBM. Peaks are always sorted low→high by energy.
+        spin : int, optional
+            Spin channel (0 = spin-up, 1 = spin-down). Default 0.
+        N : int, optional
+            Half-window of kpoints kept around each extremum for visualization
+            and quadratic fitting. Default 5.
+        quad_fit : bool, optional
+            If True, refine each extremum position with a local quadratic fit.
+            Default False.
+        prominence : float, optional
+            Minimum prominence (in eV) a peak must have to be reported.
+            Passed directly to ``scipy.signal.find_peaks``. ``None`` (default)
+            returns every strict local extremum.
+
+        Returns
+        -------
+        Dict2Data
+            Attributes:
+              - ``ke``    — full band as ``[[kdist, en], ...]`` in 1/Å and eV
+              - ``peaks`` — tuple of Dict2Data, one per extremum, each with:
+                  - ``kpt``    — physical kdist of this peak in 1/Å
+                  - ``loc``    — ``[kx, ky, kz, en]`` in 1/Å and eV
+                  - ``ke``     — ``[[kdist, en], ...]`` window around peak
+                  - ``fit``    — callable quadratic fit (takes/returns physical kdist), or None
+                  - ``coeffs`` — ``(a, b, c)`` coefficients, or None
         """
         if not isinstance(N, (int, np.integer)) or N < 0:
             raise ValueError("N must be a non-negative integer.")
@@ -635,9 +672,16 @@ class Vasprun(DataSource):
         en = self.get_evals(bands=[band], spins=[spin]).evals[0, :, 0]
         kpts = self.get_kpoints()
         coords = kpts.coords * 2 * np.pi  # physical units
-        X = kpts.kdist  # already physical units
+        X = kpts.kdist  # already physical units (1/Å, includes 2π)
 
-        imin, imax = np.argmin(en), np.argmax(en)
+        fp_kw = {} if prominence is None else {"prominence": prominence}
+        if maxima:
+            idx_set = set(find_peaks(en, **fp_kw)[0])
+            idx_set.add(int(np.argmax(en)))
+        else:
+            idx_set = set(find_peaks(-en, **fp_kw)[0])
+            idx_set.add(int(np.argmin(en)))
+        peak_idx = sorted(idx_set, key=lambda i: en[i])  # always low→high
 
         unique_x, uniq_idx = np.unique(X, return_index=True)
         order = np.argsort(unique_x)
@@ -681,36 +725,29 @@ class Vasprun(DataSource):
         def _format_fit(coeffs):
             if coeffs is None:
                 return None
-
             def fit_eq(x):
                 a, b, c = coeffs
                 return a * x**2 + b * x + c
             return fit_eq
 
-        if quad_fit:
-            min_coords, min_energy, min_coeffs = _quad_edge(imin)
-            max_coords, max_energy, max_coeffs = _quad_edge(imax)
-        else:
-            min_coords, min_energy, min_coeffs = coords[imin], en[imin], None
-            max_coords, max_energy, max_coeffs = coords[imax], en[imax], None
-
-        return serializer.Dict2Data(
-            {
-                "note": "Read as [kx,ky,kz,en], k values are in 1/Angstrom including 2pi factor, energy in eV and occupation in number of electrons.",
-                "bottom": {
-                    "loc": np.array([*min_coords, min_energy]).round(12),
-                    "ke": _ke_segment(imin),
-                    "fit": _format_fit(min_coeffs),
-                    "coeffs": min_coeffs,
-                },
-                "top": {
-                    "loc": np.array([*max_coords, max_energy]).round(12),
-                    "ke": _ke_segment(imax),
-                    "fit": _format_fit(max_coeffs),
-                    "coeffs": max_coeffs,
-                }
+        def _build_peak(idx):
+            if quad_fit:
+                pk_coords, pk_energy, pk_coeffs = _quad_edge(idx)
+            else:
+                pk_coords, pk_energy, pk_coeffs = coords[idx], en[idx], None
+            return {
+                "kpt": round(float(X[idx]), 12),
+                "loc": np.array([*pk_coords, pk_energy]).round(12),
+                "ke": _ke_segment(idx),
+                "fit": _format_fit(pk_coeffs),
+                "coeffs": pk_coeffs,
             }
-        )
+
+        return serializer.Dict2Data({
+            "note": "Read as [kx,ky,kz,en], k values are in 1/Angstrom including 2pi factor, energy in eV.",
+            "ke": np.column_stack((X, en)).round(12),
+            "peaks": [_build_peak(i) for i in peak_idx],
+        })
 
 
     def get_forces(self):

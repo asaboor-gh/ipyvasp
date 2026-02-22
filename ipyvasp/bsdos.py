@@ -334,7 +334,7 @@ class Bands(_BandsDosBase):
         These attributes will be None if band gap cannot be found. coords will be empty array of size (0,2) in that case.
         
         .. note::
-            Use ``Vasprun.get_band_edges`` method to get physical coordinates along k-direction of band gap, useful to get actual distance in 1/Angstrom between VBM and CBM.
+            Use ``Vasprun.get_band_extrema`` method to get physical coordinates along k-direction of band gap, useful to get actual distance in 1/Angstrom between VBM and CBM.
         """
         if not self.data:
             self.get_data()  # This assigns back to self._data

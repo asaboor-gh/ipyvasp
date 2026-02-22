@@ -639,12 +639,16 @@ def get_kpath(
 
     Parameters
     ----------
-    kpoints : list or str
-        Any number points as [(x,y,z,[label],[N]), ...]. ``N`` is interpreted as
-        **points per Angstrom** for the interval starting at that point whenever
-        ``rec_basis`` is supplied (except when ``N=0`` to break the path). If `kpoints`
-        is a multiline string, it is converted to list of points. Each line should be
-        in format "x y z [label] [N]".
+    kpoints : list, tuple, np.ndarray, iterable, or str
+        Any number of points as ``[(x,y,z,[label],[N]), ...]``, or any iterable
+        (including ``zip`` objects or generators) that yields such tuples. Each
+        point may also use a nested-array form ``(array_xyz, [label], [N])`` where
+        ``array_xyz`` is any array-like of length ≥ 3 — it will be flattened
+        automatically to ``(x, y, z)``. ``N`` is a numeric (int or float) density
+        interpreted as **points per Angstrom** for the interval starting at that
+        point whenever ``rec_basis`` is supplied (except when ``N=0`` to break
+        the path). If `kpoints` is a multiline string, it is converted to a list
+        of points; each line should be in format ``"x y z [label] [N]"``.
     n : int
         Number of points **per Angstrom** along each interval when ``rec_basis`` is
         provided. If (x,y,z,[label], N) is provided, this is ignored for that specific
@@ -668,9 +672,7 @@ def get_kpath(
     if isinstance(kpoints, str):
         kpoints = _str2kpoints(kpoints)
     elif not isinstance(kpoints, (list, tuple, np.ndarray)):
-        raise TypeError(
-            f"kpoints must be a sequence as [(x,y,z,[label],[N]), ...], or multiline string got {kpoints}"
-        )
+        kpoints = list(kpoints)  # consume zip/generator
 
     if len(kpoints) < 2:
         raise ValueError("At least two points are required.")
@@ -678,6 +680,11 @@ def get_kpath(
     fixed_patches = []
     where_zero = []
     for idx, point in enumerate(kpoints):
+        # flatten nested coords: (array, label, n) → [x, y, z, label, n]
+        if isinstance(point, (list, tuple, np.ndarray)) and len(point) > 0:
+            if isinstance(point[0], (list, tuple, np.ndarray)):
+                point = [*np.asarray(point[0]).ravel()[:3], *point[1:]]
+
         if not isinstance(point, (list, tuple)):
             raise TypeError(
                 f"kpoint must be a list or tuple as (x,y,z,[label],[N]),  got {point}"
@@ -688,20 +695,20 @@ def get_kpath(
         if len(point) == 3:
             cpt = [*point, ""]  # make (x,y,z,label)
         elif len(point) == 4:
-            if isinstance(point[3], (int, np.integer)):
-                cpt = [*point[:3], "", point[-1]]  # add full point as (x,y,z,label, N)
+            if isinstance(point[3], (int, float, np.integer, np.floating)):
+                cpt = [*point[:3], "", point[3]]
             elif not isinstance(point[3], str):
                 raise TypeError(
-                    f"4th entry in kpoint should be string label or int number of points for next interval if label is skipped, got {point}"
+                    f"4th entry in kpoint should be string label or numeric density, got {point}"
                 )
         elif len(point) == 5:
             if not isinstance(point[3], str):
                 raise TypeError(
                     f"4th entry in kpoint should be string label when 5 entries are given, got {point}"
                 )
-            if not isinstance(point[4], (int, np.integer)):
+            if not isinstance(point[4], (int, float, np.integer, np.floating)):
                 raise TypeError(
-                    f"5th entry in kpoint should be an integer to add that many points in interval, got {point}"
+                    f"5th entry in kpoint should be numeric density, got {point}"
                 )
         else:
             raise ValueError(f"Expects kpoint as (x,y,z,[label],[N]), got {point}")
