@@ -101,7 +101,9 @@ _docs = dict(
     kticks="""kticks : list
         List of pairs [(int, str),...] for indices of high symmetry k-points. 
         To join a broken path, use '<=' before symbol, e.g.  [(0, 'G'),(40, '<=K|M'), ...] 
-        will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').""",
+        will join 40 back to 39. You can also use shortcut like zip([0,10,20],'GMK').
+        If you want to change formatting of labels, use ``Bands.get_kticks(mapping)` to map to new labels, e.g. `mapping = {'G': r'$\Gamma$'}`.
+        """,
     interp="""interp : int or list/tuple
         If int, n is number of points to interpolate. If list/tuple, n is number of points and k is the order of spline.""",
     return_ax="""

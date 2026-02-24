@@ -661,9 +661,12 @@ class Vasprun(DataSource):
               - ``ke``    — full band as ``[[kdist, en], ...]`` in 1/Å and eV
               - ``peaks`` — tuple of Dict2Data, one per extremum, each with:
                   - ``kpt``    — physical kdist of this peak in 1/Å
-                  - ``loc``    — ``[kx, ky, kz, en]`` in 1/Å and eV
+                  - ``loc``    — raw grid point ``[kx, ky, kz, en]`` in 1/Å and eV
                   - ``ke``     — ``[[kdist, en], ...]`` window around peak
-                  - ``fit``    — callable quadratic fit (takes/returns physical kdist), or None
+                  - ``fit``    — ``fit(xmin, xmax, N=30)`` returning a ``Dict2Data``
+                               with ``ke`` (``Nx2`` smooth curve) and ``loc``
+                               (fitted vertex ``[kx, ky, kz, en]``); defaults to
+                               the ``ke`` window range. ``None`` if ``quad_fit=False``.
                   - ``coeffs`` — ``(a, b, c)`` coefficients, or None
         """
         if not isinstance(N, (int, np.integer)) or N < 0:
@@ -707,8 +710,6 @@ class Vasprun(DataSource):
             if np.isclose(a, 0):
                 return coords[idx], en[idx], None
             x_vertex = -b / (2 * a)
-            if not (seg_x.min() <= x_vertex <= seg_x.max()):
-                return coords[idx], en[idx], None
             y_vertex = a * x_vertex**2 + b * x_vertex + c
             interp_coords = np.array(
                 [
@@ -722,24 +723,30 @@ class Vasprun(DataSource):
             seg = _window(idx)
             return np.column_stack((X[seg].T, en[seg])).round(12)
 
-        def _format_fit(coeffs):
+        def _format_fit(coeffs, ke_arr, vertex_loc):
             if coeffs is None:
                 return None
-            def fit_eq(x):
-                a, b, c = coeffs
-                return a * x**2 + b * x + c
-            return fit_eq
+            x0, x1 = ke_arr[0, 0], ke_arr[-1, 0]
+            a, b, c = coeffs
+            def fit_func(xmin=x0, xmax=x1, N=30):
+                x = np.linspace(xmin, xmax, N)
+                ke = np.column_stack((x, a * x**2 + b * x + c)).round(12)
+                return serializer.Dict2Data({"ke": ke, "loc": vertex_loc})
+            return fit_func
 
         def _build_peak(idx):
             if quad_fit:
-                pk_coords, pk_energy, pk_coeffs = _quad_edge(idx)
+                vertex_coords, vertex_energy, pk_coeffs = _quad_edge(idx)
+                vertex_loc = np.array([*vertex_coords, vertex_energy]).round(12)
             else:
-                pk_coords, pk_energy, pk_coeffs = coords[idx], en[idx], None
+                pk_coeffs = None
+                vertex_loc = None
+            ke_arr = _ke_segment(idx)
             return {
                 "kpt": round(float(X[idx]), 12),
-                "loc": np.array([*pk_coords, pk_energy]).round(12),
-                "ke": _ke_segment(idx),
-                "fit": _format_fit(pk_coeffs),
+                "loc": np.array([*coords[idx], en[idx]]).round(12),  # raw grid point
+                "ke": ke_arr,
+                "fit": _format_fit(pk_coeffs, ke_arr, vertex_loc),
                 "coeffs": pk_coeffs,
             }
 

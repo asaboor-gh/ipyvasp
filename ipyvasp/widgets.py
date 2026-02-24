@@ -696,6 +696,17 @@ class BandsWidget(_ThemedFigureInteract):
             pane_widths=['25em',1,'2em'], pane_heights=[0,1,0], # footer only has uselessoutputs
             height=height
         )
+    
+    def set_interp(self, n=None, k=None):
+        "Set interpolation parameters for self.iplot. n is number of points, k is order of spline. Default None"
+        if n is not None and k is not None:
+            if not isinstance(n, int) or n <= 0:
+                raise ValueError(f"n should be a positive integer, got {n}")
+            if not isinstance(k, int) or k < 0:
+                raise ValueError(f"k should be a non-negative integer, got {k}")
+            self._kws['interp'] = (n,k)
+        elif any([n is None, k is None]):
+            raise ValueError("Both n and k should be provided together to set interpolation, got n={} and k={}".format(n,k))
 
     @traitlets.validate('selected_data','clicked_data')
     def _flatten_dict(self, proposal):

@@ -278,12 +278,23 @@ class Bands(_BandsDosBase):
         super().__init__(source)
         self._data_args = ()  # will be updated on demand
 
-    def get_kticks(self, rel_path="KPOINTS"):
-        "Reads associated KPOINTS file form a relative path of calculations and returns kticks. If KPOINTS file does not exist or was not created by this module, returns empty dict."
+    def get_kticks(self, rel_path="KPOINTS", mapping=None):
+        """Reads associated KPOINTS file from a relative path and returns kticks.
+        If the KPOINTS file does not exist or was not created by this module, returns empty list.
+
+        Parameters
+        ----------
+        rel_path : str, optional
+            Relative path to the KPOINTS file from the calculation directory. Default ``"KPOINTS"``.
+        mapping : dict, optional
+            Dictionary to rename tick labels, e.g. ``{'G': '$\\Gamma$', 'G2': '$\\Gamma$'}``.
+            Labels not present in the mapping are kept as-is.
+        """
         path = Path(self.source.path).parent / rel_path
-        if path.is_file():
-            return _read_kticks(path)
-        return []
+        ticks = _read_kticks(path) if path.is_file() else []
+        if mapping:
+            ticks = [(k, mapping.get(v, v)) for k, v in ticks]
+        return ticks
 
     def get_plot_coords(self, kindices, eindices):
         """Returns coordinates of shape (len(zip(kindices, eindices)), 2) from most recent bandstructure plot.
