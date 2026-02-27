@@ -170,20 +170,22 @@ def _format_input(projections, sys_info):
 _spin_doc = """spin : int
     0 (spin-up) by default. For spin-polarized (ISPIN=2) calculations use 0 or 1
     to select which eigenvalue set to plot. For non-collinear / SOC calculations
-    there is only one eigenvalue set so ``spin`` has no effect on eigenvalues.
-    To select a projection component in SOC calculations (0=total, 1=Sx, 2=Sy,
-    3=Sz), use a 3-tuple ``(component, atoms, orbs)`` as the projection value
-    instead of a 2-tuple — e.g. ``{'Sz-d': (3, 'Mo', 'd')}``."""
+    there is only one eigenvalue set so ``spin`` has no effect on eigenvalues. See
+    projections parameter for per component spin selection."""
 _kind_doc = """kpairs : list/tuple
     List of pair of indices to rearrange a computed path. For example, if you computed
     0:L, 15:G, 25:X, 34:M path and want to plot it as X-G|M-X, use [(25,15), (34,25)] as kpairs.  
 bands : list/tuple
     List of indices of bands. If given, this ovverides elim."""
 _proj_doc = """projections : dict
-    Mapping from str -> [atoms, orbs]. Use dict to select specific projections, 
+    Mapping from str -> (atoms, orbs)/(spin, atoms, orbs). Use dict to select specific projections, 
     e.g. {'Ga-s':(0,[0]),'Ga-px+py':(0,[2,3]),'Ga-all':(0,'all')} or {'Ga-s':('Ga','s'),'Ga-px+py':(0,'px+py'),'all-d':('all','d')}. 
+    To select a projection component in SOC calculations (0=total, 1=Sx, 2=Sy,
+    3=Sz), use a 3-tuple ``(component, atoms, orbs)`` as the projection value
+    instead of a 2-tuple — e.g. ``{'Sz-Ga-d': (3, 'Ga', 'd')}``.
     If values of the dict are callable, they must accept two arguments evals/tdos, occs/idos of from data and 
-    should return array of shape[1:] (all but spin dimension)."""
+    should return array of shape[1:] (all but spin dimension).
+    """
 
 
 class _BandsDosBase:
