@@ -743,6 +743,7 @@ class Vasprun(DataSource):
                 vertex_loc = None
             ke_arr = _ke_segment(idx)
             return {
+                "index": idx,
                 "kpt": round(float(X[idx]), 12),
                 "loc": np.array([*coords[idx], en[idx]]).round(12),  # raw grid point
                 "ke": ke_arr,

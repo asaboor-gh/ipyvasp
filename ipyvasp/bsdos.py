@@ -168,9 +168,12 @@ def _format_input(projections, sys_info):
 
 
 _spin_doc = """spin : int
-    0 by default. Use 0 for spin up and 1 for spin down for spin polarized calculations. 
-    Data for both channel is loaded by default, so when you plot one spin channel, 
-    plotting other with same parameters will use the same data."""
+    0 (spin-up) by default. For spin-polarized (ISPIN=2) calculations use 0 or 1
+    to select which eigenvalue set to plot. For non-collinear / SOC calculations
+    there is only one eigenvalue set so ``spin`` has no effect on eigenvalues.
+    To select a projection component in SOC calculations (0=total, 1=Sx, 2=Sy,
+    3=Sz), use a 3-tuple ``(component, atoms, orbs)`` as the projection value
+    instead of a 2-tuple — e.g. ``{'Sz-d': (3, 'Mo', 'd')}``."""
 _kind_doc = """kpairs : list/tuple
     List of pair of indices to rearrange a computed path. For example, if you computed
     0:L, 15:G, 25:X, 34:M path and want to plot it as X-G|M-X, use [(25,15), (34,25)] as kpairs.  
@@ -325,7 +328,7 @@ class Bands(_BandsDosBase):
             kpath[k] for k, e in zip(kindices, eindices)
         ]  # need same size as eindices
         evs = [
-            self.data.evals[self._spin][k, e] - self.data.ezero
+            self.data.evals[min(self._spin, self.data.evals.shape[0] - 1)][k, e] - self.data.ezero
             for k, e in zip(kindices, eindices)
         ]
         return np.array([kvs, evs]).T  # shape (len(kindices), 2)
@@ -426,7 +429,7 @@ class Bands(_BandsDosBase):
                 kpairs[-1][-1],
             ]  # flatten and add last index
 
-        self._data_args = (elim, ezero, projections, bands)
+        self._data_args = (elim, ezero, projections, kpairs, bands)
 
         (
             (spins, uspins),
@@ -441,9 +444,9 @@ class Bands(_BandsDosBase):
             ezero=ezero,
             atoms=uatoms,
             orbs=uorbs,
-            spins=uspins or None,
+            spins=uspins or None,  # 3-tuple projections carry explicit spin; 2-tuple uses default
             bands=bands,
-        )  # picks available spins if uspins is None
+        )
 
         if not spins:
             spins = [data.spins[0] for _ in labels]
@@ -531,8 +534,9 @@ class Bands(_BandsDosBase):
 
     def _handle_kwargs(self, **kwargs):
         "Returns fixed kwargs and new elim relative to fermi energy for gettig data."
-        if kwargs.get("spin", None) not in [0, 1]:
-            raise ValueError("spin must be 0 or 1")
+        spin = kwargs.get("spin", None)
+        if spin not in [0, 1]:
+            raise ValueError("spin must be 0 or 1 (selects eigenvalue set for ISPIN=2), use component spin in projections!")
 
         self._spin = kwargs.pop(
             "spin", None
@@ -562,7 +566,8 @@ class Bands(_BandsDosBase):
     def splot_bands(self, spin=0, kpairs=None, ezero=None, bands=None, **kwargs):
         kwargs, elim = self._handle_kwargs(spin=spin, **kwargs)
         data = self.get_data(elim=elim, ezero=ezero, kpairs=kpairs, bands=bands)
-        return splot_bands(data.kpath, data.evals[spin] - data.ezero, **kwargs)
+        evals_spin = min(spin, data.evals.shape[0] - 1)
+        return splot_bands(data.kpath, data.evals[evals_spin] - data.ezero, **kwargs)
 
     @_sub_doc(
         splot_rgb_lines,
@@ -572,8 +577,9 @@ class Bands(_BandsDosBase):
     def splot_rgb_lines(self, projections, spin=0, kpairs=None, ezero=None, bands=None, **kwargs):
         kwargs, elim = self._handle_kwargs(spin=spin, **kwargs)
         data = self.get_data(elim, ezero, projections, kpairs=kpairs, bands=bands)
+        evals_spin = min(spin, data.evals.shape[0] - 1)
         return splot_rgb_lines(
-            data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **kwargs
+            data.kpath, data.evals[evals_spin] - data.ezero, data.pros, data.labels, **kwargs
         )
 
     @_sub_doc(
@@ -583,11 +589,10 @@ class Bands(_BandsDosBase):
     @_sig_kwargs(splot_color_lines, ("K", "E", "pros", "labels"))
     def splot_color_lines(self, projections, spin=0, kpairs=None, ezero=None, bands=None, **kwargs):
         kwargs, elim = self._handle_kwargs(spin=spin, **kwargs)
-        data = self.get_data(
-            elim, ezero, projections, kpairs=kpairs, bands=bands
-        )  # picked relative limit
+        data = self.get_data(elim, ezero, projections, kpairs=kpairs, bands=bands)
+        evals_spin = min(spin, data.evals.shape[0] - 1)
         return splot_color_lines(
-            data.kpath, data.evals[spin] - data.ezero, data.pros, data.labels, **kwargs
+            data.kpath, data.evals[evals_spin] - data.ezero, data.pros, data.labels, **kwargs
         )
 
     @_sub_doc(
@@ -598,13 +603,14 @@ class Bands(_BandsDosBase):
     def iplot_rgb_lines(self, projections, spin=0, kpairs=None, ezero=None, bands=None, **kwargs):
         kwargs, elim = self._handle_kwargs(spin=spin, **kwargs)
         data = self.get_data(elim, ezero, projections, kpairs=kpairs, bands=bands)
+        evals_spin = min(spin, data.evals.shape[0] - 1)
         # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number
         return iplot_rgb_lines(
             {"K": data.kpath, "indices": data.bands},
-            data.evals[spin] - data.ezero,
+            data.evals[evals_spin] - data.ezero,
             data.pros,
             data.labels,
-            data.occs[spin],
+            data.occs[evals_spin],
             data.kpoints,
             **kwargs,
         )
@@ -617,11 +623,12 @@ class Bands(_BandsDosBase):
     def iplot_bands(self, spin=0, kpairs=None, ezero=None, bands=None, **kwargs):
         kwargs, elim = self._handle_kwargs(spin=spin, **kwargs)
         data = self.get_data(elim, ezero, kpairs=kpairs, bands=bands)
+        evals_spin = min(spin, data.evals.shape[0] - 1)
         # Send K and bands in place of K for use in iplot_rgb_lines to depict correct band number
         return iplot_bands(
             {"K": data.kpath, "indices": data.bands},
-            data.evals[spin] - data.ezero,
-            occs = data.occs[spin],
+            data.evals[evals_spin] - data.ezero,
+            occs = data.occs[evals_spin],
             kpoints = data.kpoints,
             **kwargs,
         )

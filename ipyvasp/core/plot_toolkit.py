@@ -640,7 +640,7 @@ def add_colorbar(
     vmin = 0 if vmin is None else vmin
     vmax = 1 if vmax is None else vmax
 
-    if ticks != []:
+    if not (isinstance(ticks, (list, tuple, np.ndarray)) and len(ticks) == 0):
         if ticks is None:  # should be before labels
             ticks = np.linspace(vmin, vmax, 3, endpoint=True)
             if ticklabels is None:

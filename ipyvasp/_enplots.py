@@ -204,6 +204,8 @@ def _make_line_collection(
         if not np.any(a):
             raise ValueError("Missing {!r} from output of `_fix_data()`".format(t))
 
+    width_weights = pros_data.pop("width_weights", None)
+
     # Average pros on two consecutive KPOINTS to get that patch color.
     colors = pros[1:, :, :] / 2 + pros[:-1, :, :] / 2  # Near kpoints avearge
     colors = colors.transpose((1, 0, 2)).reshape(
@@ -211,7 +213,12 @@ def _make_line_collection(
     )  # Must before lws
 
     if rgb:  # Single channel line widths
-        lws = np.sum(colors, axis=1)  # Sum over RGB
+        if width_weights is not None:
+            # Use explicit magnitude weights (e.g. |Sz|) instead of color sum.
+            ww = (width_weights[1:, :] + width_weights[:-1, :]) / 2  # (nk-1, nb)
+            lws = ww.T.reshape(-1)
+        else:
+            lws = np.sum(colors, axis=1)  # Sum over RGB
     else:  # For separate lines
         lws = colors.T  # .T to access in for loop.
 
@@ -286,10 +293,19 @@ def _fix_data(K, E, pros, labels, interp, rgb=False, **others):
     pros = np.transpose(pros, (1, 2, 0))  # [nk,nb,m] now
 
     # Normalize overall data because colors are normalized to 0-1
-    min_max_pros = (np.min(pros), np.max(pros))  # For data scales to use later
-    c_max = np.ptp(pros)
-    if c_max > 0.0000001:  # Avoid division error
-        pros = (pros - np.min(pros)) / c_max
+    _raw_min, _raw_max = np.min(pros), np.max(pros)
+    if _raw_min < 0:
+        # Signed data (e.g. Sz): normalize symmetrically so physical 0 maps to 0.5.
+        # ptp is set to (-abs_max, abs_max) so the colorbar is symmetric around zero.
+        abs_max = max(abs(_raw_min), _raw_max)
+        if abs_max > 1e-7:
+            pros = (pros + abs_max) / (2 * abs_max)
+        min_max_pros = (-abs_max, abs_max)
+    else:
+        c_max = _raw_max - _raw_min
+        if c_max > 1e-7:
+            pros = (pros - _raw_min) / c_max
+        min_max_pros = (_raw_min, _raw_max)
 
     data = {"kpath": K, "evals": E, "pros": pros, **others, "ptp": min_max_pros}
     if interp:
@@ -366,13 +382,23 @@ def splot_rgb_lines(
     )  # (nk,), (nk, nb), (nk, nb, m) at this point
     colors = pros_data["pros"]
     how_many = np.shape(colors)[-1]
+    _signed = how_many == 1 and pros_data["ptp"][0] < 0  # e.g. Sz has negative values
 
     if how_many == 1:
         percent_colors = colors[:, :, 0]
-        percent_colors = percent_colors / np.max(percent_colors)
-        pros_data["pros"] = plt.cm.get_cmap(colormap or "copper", N)(percent_colors)[
-            :, :, :3
-        ]  # Get colors in RGB space.
+        if _signed:
+            # percent_colors is in [0,1] where 0.5 = original zero.
+            # Multiply by magnitude: zero-Sz → near-black (visible thin line on bg),
+            # high-|Sz| → bright red/blue. width_weights drives lws independently.
+            magnitude = np.abs(percent_colors - 0.5) * 2  # [0,1], 0 at neutral
+            cmap_rgb = plt.cm.get_cmap(colormap or "coolwarm", N)(percent_colors)[:, :, :3]
+            pros_data["pros"] = cmap_rgb * magnitude[:, :, np.newaxis]  # dark at zero
+            pros_data["width_weights"] = magnitude  # linewidth ∝ |Sz|, not color sum
+        else:
+            percent_colors = percent_colors / (np.max(percent_colors) or 1)
+            pros_data["pros"] = plt.cm.get_cmap(colormap or "copper", N)(percent_colors)[
+                :, :, :3
+            ]  # Get colors in RGB space.
 
     elif how_many == 2:
         _sum = np.sum(colors, axis=2)
@@ -438,7 +464,7 @@ def splot_rgb_lines(
 
     # Add colorbar/legend etc.
     cmap = colormap or (
-        "copper" if how_many == 1 else "brg" if how_many == 3 else "coolwarm"
+        ("coolwarm" if _signed else "copper") if how_many == 1 else "brg" if how_many == 3 else "coolwarm"
     )
     ticks = (
         np.linspace(*pros_data["ptp"], 5, endpoint=True)
@@ -449,8 +475,11 @@ def splot_rgb_lines(
     )
     ticklabels = [f"{t:4.2f}" for t in ticks] if how_many == 1 else labels
 
+    _ptp = pros_data["ptp"]  # capture for closures below
     if colorbar:
         if how_many < 3:
+            _cb_vmin = _ptp[0] if how_many == 1 else None
+            _cb_vmax = _ptp[1] if how_many == 1 else None
             cax = add_colorbar(
                 ax,
                 N=N,
@@ -458,6 +487,8 @@ def splot_rgb_lines(
                 ticklabels=ticklabels,
                 ticks=ticks,
                 cmap_or_clist=cmap,
+                vmin=_cb_vmin,
+                vmax=_cb_vmax,
             )
             if how_many == 1:
                 cax.set_title(labels[0])
@@ -468,6 +499,8 @@ def splot_rgb_lines(
         def recent_colorbar(
             cax=None, tickloc="right", vertical=True, digits=2, fontsize=8
         ):
+            _cb_vmin = _ptp[0] if how_many == 1 else None
+            _cb_vmax = _ptp[1] if how_many == 1 else None
             return add_colorbar(
                 ax=ax,
                 cax=cax,
@@ -475,6 +508,8 @@ def splot_rgb_lines(
                 N=N,
                 ticks=ticks,
                 ticklabels=ticklabels,
+                vmin=_cb_vmin,
+                vmax=_cb_vmax,
                 tickloc=tickloc,
                 vertical=vertical,
                 digits=digits,
@@ -761,18 +796,29 @@ def _format_rgb_data(
     elif data["pros"].shape[2] == 1:
         data["norms"][:, :, 1:] = np.nan
 
-    lws = np.sum(rgb, axis=2)  # Sum of all colors
+    _signed_iplot = data["ptp"][0] < 0 and data["pros"].shape[2] == 1
+    if _signed_iplot:
+        # Signed single projection (e.g. Sz): physical 0 is at normalized 0.5.
+        # Width ∝ |value|; color: positive → red channel, negative → blue channel.
+        mag = np.abs(rgb[:, :, 0] - 0.5) * 2  # [0,1], 0 at neutral
+        lws = mag
+        pos = np.maximum(rgb[:, :, 0] - 0.5, 0) * 2   # [0,1] for positive half
+        neg = np.maximum(0.5 - rgb[:, :, 0], 0) * 2   # [0,1] for negative half
+        rgb_out = np.zeros(rgb.shape)
+        rgb_out[:, :, 0] = pos  # R = positive
+        rgb_out[:, :, 2] = neg  # B = negative
+        data["pros"] = (rgb_out * 255).astype(int)
+    else:
+        lws = np.sum(rgb, axis=2)  # Sum of all colors
+        # Now scale colors to 1 at each point.
+        cl_max = np.max(data["pros"], axis=2)
+        cl_max[cl_max == 0.0] = 1  # avoid divide by zero
+        data["pros"] = (rgb / cl_max[:, :, np.newaxis] * 255).astype(int)
+
     lws = maxwidth * lws / (float(np.max(lws)) or 1)  # Normalize to maxwidth
     data["widths"] = (
         0.0001 + lws
     )  # should be before scale colors, almost zero size of a data point with no contribution.
-
-    # Now scale colors to 1 at each point.
-    cl_max = np.max(data["pros"], axis=2)
-    cl_max[cl_max == 0.0] = 1  # avoid divide by zero. Contributions are 4 digits only.
-    data["pros"] = (rgb / cl_max[:, :, np.newaxis] * 255).astype(
-        int
-    )  # Normalized per point and set rgb data back to data.
 
     if indices is None:  # make sure indices are in range
         indices = range(np.shape(data["evals"])[1])
